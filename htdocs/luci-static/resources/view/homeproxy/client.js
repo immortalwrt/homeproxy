@@ -89,7 +89,7 @@ return view.extend({
 
 		o = s.taboption('general', form.ListValue, 'main_udp_server', _('Main UDP server'));
 		o.value('nil', _('disabled'));
-		o.value('same', _('Same as main server'))
+		o.value('same', _('Same as main server'));
 		for (var i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
 		o.default = 'nil';
@@ -100,7 +100,7 @@ return view.extend({
 		o.value('1', _('GFWList'));
 		o.value('2', _('Bypass mainland China'));
 		o.value('3', _('Only proxy mainland China'));
-		o.value('4', _('Custom routing'))
+		o.value('4', _('Custom routing'));
 		o.value('5', _('Global'));
 		o.default = '2';
 		o.rmempty = false;
@@ -141,7 +141,7 @@ return view.extend({
 		o.value('1.1.1.1:53', _('CloudFlare Public DNS (1.1.1.1:53)'));
 		o.value('208.67.222.222:53', _('Cisco Public DNS (208.67.222.222:53)'));
 		o.value('8.8.8.8:53', _('Google Public DNS (8.8.8.8:53)'));
-		o.value('', _('---'))
+		o.value('', _('---'));
 		o.value('223.5.5.5:53', _('Aliyun Public DNS (223.5.5.5:53)'));
 		o.value('119.29.29.29:53', _('Tencent Public DNS (119.29.29.29:53)'));
 		o.value('114.114.114.114:53', _('Xinfeng Public DNS (114.114.114.114:53)'));
@@ -179,7 +179,7 @@ return view.extend({
 		ss.modaltitle = function(section_id) {
 			var tag = uci.get(data[0], section_id, 'tag');
 			return tag ? _('Outbound') + ' » ' + tag : _('Add an outbound');
-		};
+		}
 
 		o = ss.option(form.Value, 'tag', _('Tag'));
 		o.rmempty = false;
@@ -204,7 +204,7 @@ return view.extend({
 		o.value('udp', _('UDP'));
 		o.value('both', _('Both'));
 		o.default = 'both';
-		o.depends({'server': 'urltest', '!reverse': true})
+		o.depends({'server': 'urltest', '!reverse': true});
 
 		/* TODO: use MultiValue */
 		o = ss.option(form.DynamicList, 'outbounds', _('Outbounds'),
@@ -238,7 +238,7 @@ return view.extend({
 		ss.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('Routing rule') + ' » ' + label : _('Add routing rule');
-		};
+		}
 
 		o = ss.option(form.Value, 'label', _('Label'));
 		o.rmempty = false;
@@ -320,11 +320,11 @@ return view.extend({
 			var end_port = parseInt(value.split(':')[1]);
 			if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
 				return false;
-			if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+			else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
 				return false;
-			if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
+			else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
 				return false;
-			if (start_port > end_port)
+			else if (start_port > end_port)
 				return false;
 
 			return true;
@@ -346,11 +346,11 @@ return view.extend({
 			var end_port = parseInt(value.split(':')[1]);
 			if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
 				return false;
-			if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+			else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
 				return false;
-			if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
+			else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
 				return false;
-			if (start_port > end_port)
+			else if (start_port > end_port)
 				return false;
 
 			return true;
@@ -378,7 +378,7 @@ return view.extend({
 		ss.modaltitle = function(section_id) {
 			var tag = uci.get(data[0], section_id, 'tag');
 			return tag ? _('DNS server') + ' » ' + tag : _('Add a DNS server');
-		};
+		}
 
 		o = ss.option(form.Value, 'tag', _('Tag'));
 		o.rmempty = false;
@@ -423,7 +423,7 @@ return view.extend({
 		ss.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('DNS rule') + ' » ' + label : _('Add a DNS rule');
-		};
+		}
 
 		o = ss.option(form.Value, 'label', _('Label'));
 		o.rmempty = false;
@@ -505,11 +505,11 @@ return view.extend({
 			var end_port = parseInt(value.split(':')[1]);
 			if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
 				return false;
-			if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+			else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
 				return false;
-			if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
+			else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
 				return false;
-			if (start_port > end_port)
+			else if (start_port > end_port)
 				return false;
 
 			return true;
@@ -531,11 +531,11 @@ return view.extend({
 			var end_port = parseInt(value.split(':')[1]);
 			if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
 				return false;
-			if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+			else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
 				return false;
-			if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
+			else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
 				return false;
-			if (start_port > end_port)
+			else if (start_port > end_port)
 				return false;
 
 			return true;

@@ -80,7 +80,7 @@ return view.extend({
 		s.modaltitle = function(section_id) {
 			var alias = uci.get(data[0], section_id, 'alias') || uci.get(data[0], section_id, 'address');
 			return alias ? _('Node') + ' » ' + alias : _('Add a node');
-		};
+		}
 
 		o = s.option(form.Value, 'alias', _('Alias'));
 		o.rmempty = false;
@@ -154,9 +154,9 @@ return view.extend({
 
 		/* Hysteria config start */
 		o = s.option(form.ListValue, 'hysteria_protocol', _('Protocol'));
-		o.value('udp')
-		o.value('wechat-video')
-		o.value('faketcp')
+		o.value('udp');
+		o.value('wechat-video');
+		o.value('faketcp');
 		o.depends('type', 'hysteria');
 		o.modalonly = true;
 
@@ -175,7 +175,7 @@ return view.extend({
 				return false;
 
 			return true;
-		};
+		}
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'hysteria_password', _('Obfuscate password'));
@@ -230,14 +230,14 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
 		o.modalonly = true;
 
-		o = s.option(form.Flag, 'shadowsocks_ivcheck', _('Bloom filter'))
+		o = s.option(form.Flag, 'shadowsocks_ivcheck', _('Bloom filter'));
 		o.default = o.disabled;
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'shadowsocks_plugin', _('Obfs'));
-		o.value('obfs-local')
-		o.value('v2ray-plugin')
+		o.value('obfs-local');
+		o.value('v2ray-plugin');
 		o.depends('type', 'shadowsocks');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
 		o.modalonly = true;
@@ -316,9 +316,9 @@ return view.extend({
 
 		/* Socks config start */
 		o = s.option(form.ListValue, 'socks_ver', _('Socks version'));
-		o.value('4', _('Socks4'))
-		o.value('4a', _('Socks4A'))
-		o.value('5', _('Socks5'))
+		o.value('4', _('Socks4'));
+		o.value('4a', _('Socks4A'));
+		o.value('5', _('Socks5'));
 		o.depends('type', 'socks');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks'});
 		o.modalonly = true;
@@ -335,7 +335,7 @@ return view.extend({
 				return false;
 
 			return true;
-		};
+		}
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'v2ray_vless_encrypt', _('Encrypt method'));
@@ -346,7 +346,7 @@ return view.extend({
 				return false;
 
 			return true;
-		};
+		}
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'v2ray_vmess_encrypt', _('Encrypt method'));
