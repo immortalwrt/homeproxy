@@ -172,7 +172,7 @@ return view.extend({
 		o.depends({'type': 'hysteria', 'auth_type': '2'});
 		o.validate = function(section_id, value) {
 			if (section_id && (value == null || value == ''))
-				return false;
+				return _('Expecting: non-empty value');
 
 			return true;
 		}
@@ -330,9 +330,9 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vmess'});
 		o.validate = function(section_id, value) {
 			if (section_id && (value == null || value == ''))
-				return false;
+				return _('Expecting: non-empty value');
 			else if (value.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
-				return false;
+				return _(String.format(_('Expecting: %s'), _('valid uuid string')));
 
 			return true;
 		}
@@ -343,7 +343,7 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless'});
 		o.validate = function(section_id, value) {
 			if (section_id && (value == null || value == ''))
-				return false;
+				return _('Expecting: non-empty value');
 
 			return true;
 		}
@@ -364,7 +364,7 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'wireguard'});
 		o.validate = function(section_id, value) {
 			if (section_id && value == null || value == [])
-				return false;
+				return _('Expecting: non-empty value');
 		}
 		o.modalonly = true;
 
@@ -373,7 +373,7 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'wireguard'});
 		o.validate = function(section_id, value) {
 			if (section_id && value == null || value == '')
-				return false;
+				return _('Expecting: non-empty value');
 		}
 		o.modalonly = true;
 
@@ -381,7 +381,7 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'wireguard'});
 		o.validate = function(section_id, value) {
 			if (section_id && value == null || value == '')
-				return false;
+				return _('Expecting: non-empty value');
 		}
 		o.modalonly = true;
 
@@ -390,7 +390,7 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'wireguard'});
 		o.validate = function(section_id, value) {
 			if (section_id && value == null || value == '')
-				return false;
+				return _('Expecting: non-empty value');
 		}
 		o.modalonly = true;
 		/* Wireguard config end */

@@ -114,13 +114,15 @@ return view.extend({
 		o.validate = function(section_id, value) {
 			if (section_id && value !== 'all' && value !== 'common') {
 				if (value == null || value == '')
-					return false;
+					return String.format(_('Expecting: %s'), _('valid port value'));
 
 				var ports = [];
 				for (var i of value.split(',')) {
 					var port = parseInt(i);
-					if (ports.includes(i) || port.toString() == 'NaN' || port.toString() !== i || port < 1 || port > 65535)
-						return false;
+					if (port.toString() == 'NaN' || port.toString() !== i || port < 1 || port > 65535)
+						return String.format(_('Expecting: %s'), _('valid port value'));
+					if (ports.includes(i))
+					return String.format(_('Port %s alrealy exists, please enter other ones.'), port);
 					ports = ports.concat(i);
 				}
 			}
@@ -151,7 +153,7 @@ return view.extend({
 		o.validate = function(section_id, value) {
 			/* TODO: find a proper way to validate DNS server */
 			if (section_id && (value == null || value == ''))
-				return false;
+				return _('Expecting: non-empty value');
 
 			return true;
 		}
@@ -313,20 +315,17 @@ return view.extend({
 		o = ss.option(form.DynamicList, 'source_port_range', _('Source port range'),
 			_('Match source port range. Format as START:END.'));
 		o.validate = function(section_id, value) {
-			if (section_id && value == null || value == '')
-				return false;
-
-			var start_port = parseInt(value.split(':')[0]);
-			var end_port = parseInt(value.split(':')[1]);
-			if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
-				return false;
-			else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
-				return false;
-			else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
-				return false;
-			else if (start_port > end_port)
-				return false;
-
+			if (section_id && value) {
+				var start_port = parseInt(value.split(':')[0]);
+				var end_port = parseInt(value.split(':')[1]);
+				var error_message = String.format(_('Expecting: %s'), _('valid port range (port1:port2)'));
+				if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
+					return error_message;
+				else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+					return error_message;
+				else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535 || start_port > end_port)
+					return error_message;
+			}
 			return true;
 		}
 		o.modalonly = true;
@@ -339,20 +338,17 @@ return view.extend({
 		o = ss.option(form.DynamicList, 'port_range', _('Port range'),
 			_('Match port range. Format as START:END.'));
 		o.validate = function(section_id, value) {
-			if (section_id && value == null || value == '')
-				return false;
-
-			var start_port = parseInt(value.split(':')[0]);
-			var end_port = parseInt(value.split(':')[1]);
-			if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
-				return false;
-			else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
-				return false;
-			else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
-				return false;
-			else if (start_port > end_port)
-				return false;
-
+			if (section_id && value) {
+				var start_port = parseInt(value.split(':')[0]);
+				var end_port = parseInt(value.split(':')[1]);
+				var error_message = String.format(_('Expecting: %s'), _('valid port range (port1:port2)'));
+				if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
+					return error_message;
+				else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+					return error_message;
+				else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535 || start_port > end_port)
+					return error_message;
+			}
 			return true;
 		}
 		o.modalonly = true;
@@ -498,20 +494,17 @@ return view.extend({
 		o = ss.option(form.DynamicList, 'source_port_range', _('Source port range'),
 			_('Match source port range. Format as START:END.'));
 		o.validate = function(section_id, value) {
-			if (section_id && value == null || value == '')
-				return false;
-
-			var start_port = parseInt(value.split(':')[0]);
-			var end_port = parseInt(value.split(':')[1]);
-			if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
-				return false;
-			else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
-				return false;
-			else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
-				return false;
-			else if (start_port > end_port)
-				return false;
-
+			if (section_id && value) {
+				var start_port = parseInt(value.split(':')[0]);
+				var end_port = parseInt(value.split(':')[1]);
+				var error_message = String.format(_('Expecting: %s'), _('valid port range (port1:port2)'));
+				if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
+					return error_message;
+				else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+					return error_message;
+				else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535 || start_port > end_port)
+					return error_message;
+			}
 			return true;
 		}
 		o.modalonly = true;
@@ -524,20 +517,17 @@ return view.extend({
 		o = ss.option(form.DynamicList, 'port_range', _('Port range'),
 			_('Match port range. Format as START:END.'));
 		o.validate = function(section_id, value) {
-			if (section_id && value == null || value == '')
-				return false;
-
-			var start_port = parseInt(value.split(':')[0]);
-			var end_port = parseInt(value.split(':')[1]);
-			if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
-				return false;
-			else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
-				return false;
-			else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
-				return false;
-			else if (start_port > end_port)
-				return false;
-
+			if (section_id && value) {
+				var start_port = parseInt(value.split(':')[0]);
+				var end_port = parseInt(value.split(':')[1]);
+				var error_message = String.format(_('Expecting: %s'), _('valid port range (port1:port2)'));
+				if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
+					return error_message;
+				else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+					return error_message;
+				else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535 || start_port > end_port)
+					return error_message;
+			}
 			return true;
 		}
 		o.modalonly = true;
