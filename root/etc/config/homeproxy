@@ -1,0 +1,7 @@
+
+config homeproxy 'config'
+	option main_server 'nil'
+
+config homeproxy 'subscription'
+	option auto_update '0'
+

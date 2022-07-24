@@ -122,7 +122,7 @@ return view.extend({
 					if (port.toString() == 'NaN' || port.toString() !== i || port < 1 || port > 65535)
 						return String.format(_('Expecting: %s'), _('valid port value'));
 					if (ports.includes(i))
-					return String.format(_('Port %s alrealy exists, please enter other ones.'), port);
+						return String.format(_('Port %s alrealy exists, please enter other ones.'), port);
 					ports = ports.concat(i);
 				}
 			}
