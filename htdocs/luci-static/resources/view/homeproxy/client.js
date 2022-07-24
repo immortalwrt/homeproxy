@@ -256,6 +256,10 @@ return view.extend({
 		o.default = 'or';
 		o.rmempty = false;
 
+		o = ss.option(form.Flag, 'invert', _('Invert'));
+		o.default = o.disabled;
+		o.modalonly = true;
+
 		o = ss.option(form.ListValue, 'network', _('Network'));
 		o.value('tcp', _('TCP'));
 		o.value('udp', _('UDP'));
@@ -351,10 +355,6 @@ return view.extend({
 			}
 			return true;
 		}
-		o.modalonly = true;
-
-		o = ss.option(form.Flag, 'invert', _('Invert'));
-		o.default = o.disabled;
 		o.modalonly = true;
 
 		o = ss.option(form.Value, 'outbound', _('Outbound'),
@@ -435,6 +435,10 @@ return view.extend({
 		o.default = 'or';
 		o.rmempty = false;
 
+		o = ss.option(form.Flag, 'invert', _('Invert'));
+		o.default = o.disabled;
+		o.modalonly = true;
+
 		o = ss.option(form.ListValue, 'network', _('Network'));
 		o.value('tcp', _('TCP'));
 		o.value('udp', _('UDP'));
@@ -530,10 +534,6 @@ return view.extend({
 			}
 			return true;
 		}
-		o.modalonly = true;
-
-		o = ss.option(form.Flag, 'invert', _('Invert'));
-		o.default = o.disabled;
 		o.modalonly = true;
 
 		/* TODO: use MultiValue */
