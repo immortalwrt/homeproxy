@@ -95,23 +95,23 @@ return view.extend({
 		for (var i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
 		o.default = 'nil';
-		o.rmempty = false;
+		o.depends({'routing': '4', '!reverse': true});
 
-		var routing_mode = s.taboption('general', form.ListValue, 'routing', _('Routing settings'));
-		routing_mode.value('0', _('Disabled'));
-		routing_mode.value('1', _('GFWList'));
-		routing_mode.value('2', _('Bypass mainland China'));
-		routing_mode.value('3', _('Only proxy mainland China'));
-		routing_mode.value('4', _('Custom routing'))
-		routing_mode.value('5', _('Global'));
-		routing_mode.default = '2';
-		routing_mode.rmempty = false;
+		o = s.taboption('general', form.ListValue, 'routing', _('Routing settings'));
+		o.value('0', _('Disabled'));
+		o.value('1', _('GFWList'));
+		o.value('2', _('Bypass mainland China'));
+		o.value('3', _('Only proxy mainland China'));
+		o.value('4', _('Custom routing'))
+		o.value('5', _('Global'));
+		o.default = '2';
+		o.rmempty = false;
 
 		o = s.taboption('general', form.Value, 'routing_port', _('Routing ports'),
 			_('Specify target port(s) that get proxied. Multiple ports must be separated by commas.'));
 		o.value('all', _('All ports'));
 		o.value('common', _('Common ports only (bypass P2P traffic)'));
-		o.default = '1';
+		o.default = 'common';
 		o.depends({'routing': '4', '!reverse': true});
 		o.validate = function(section_id, value) {
 			if (section_id && value !== 'all' && value !== 'common') {
@@ -157,6 +157,16 @@ return view.extend({
 
 			return true;
 		};
+
+		o = s.taboption('general', form.ListValue, 'dns_strategy', _('DNS strategy'),
+			_('The DNS strategy for resolving the domain name in the address.'));
+		o.value('prefer_ipv4', _('Prefer IPv4'));
+		o.value('prefer_ipv6', _('Prefer IPv6'));
+		o.value('ipv4_only', _('IPv4 only'));
+		o.value('ipv6_only', _('IPv6 only'));
+		o.default = 'prefer_ipv4';
+		o.depends('dns_mode', '1');
+		o.depends('dns_mode', '3');
 
 		/* FIXME: only show up with "Custom routing" enabled */
 		s.tab('routing', _('Custom routing'),
