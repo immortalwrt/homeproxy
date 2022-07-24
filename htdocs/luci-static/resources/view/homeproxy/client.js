@@ -9,7 +9,6 @@
 'require uci';
 'require rpc';
 'require form';
-'require fs';
 
 var callServiceList = rpc.declare({
 	object: 'service',
@@ -29,13 +28,12 @@ function getServiceStatus() {
 }
 
 function renderStatus(isRunning) {
-	var renderHTML = "";
 	var spanTemp = '<em><span style="color:%s;font-weight:bold"><strong>%s %s</strong></span></em>';
-
+	var renderHTML;
 	if (isRunning) {
-		renderHTML += String.format(spanTemp, 'green', _("HomeProxy"), _("RUNNING"));
+		renderHTML = String.format(spanTemp, 'green', _("HomeProxy"), _("RUNNING"));
 	} else {
-		renderHTML += String.format(spanTemp, 'red', _("HomeProxy"), _("NOT RUNNING"));
+		renderHTML = String.format(spanTemp, 'red', _("HomeProxy"), _("NOT RUNNING"));
 	}
 
 	return renderHTML;
@@ -83,14 +81,14 @@ return view.extend({
 		s.tab('general', _('General Settings'));
 
 		o = s.taboption('general', form.ListValue, 'main_server', _('Main server'));
-		o.value('nil', _('Disabled'));
+		o.value('nil', _('disabled'));
 		for (var i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
 		o.default = 'nil';
 		o.rmempty = false;
-		
+
 		o = s.taboption('general', form.ListValue, 'main_udp_server', _('Main UDP server'));
-		o.value('nil', _('Disabled'));
+		o.value('nil', _('disabled'));
 		o.value('same', _('Same as main server'))
 		for (var i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
@@ -98,7 +96,7 @@ return view.extend({
 		o.depends({'routing': '4', '!reverse': true});
 
 		o = s.taboption('general', form.ListValue, 'routing', _('Routing settings'));
-		o.value('0', _('Disabled'));
+		o.value('0', _('disabled'));
 		o.value('1', _('GFWList'));
 		o.value('2', _('Bypass mainland China'));
 		o.value('3', _('Only proxy mainland China'));
@@ -121,13 +119,13 @@ return view.extend({
 				var ports = [];
 				for (var i of value.split(',')) {
 					var port = parseInt(i);
-					if (ports.includes(i) || port.toString() == 'NaN' || port.toString() !== i || port <= 0 || port > 65535)
+					if (ports.includes(i) || port.toString() == 'NaN' || port.toString() !== i || port < 1 || port > 65535)
 						return false;
 					ports = ports.concat(i);
 				}
 			}
 			return true;
-		};
+		}
 
 		o = s.taboption('general', form.ListValue, 'dns_mode', _('DNS resolve mode'));
 		o.value('0', _('Follow system settings'));
@@ -156,7 +154,7 @@ return view.extend({
 				return false;
 
 			return true;
-		};
+		}
 
 		o = s.taboption('general', form.ListValue, 'dns_strategy', _('DNS strategy'),
 			_('The DNS strategy for resolving the domain name in the address.'));
@@ -200,6 +198,13 @@ return view.extend({
 			o.value(i, proxy_nodes[i]);
 		o.default = 'direct';
 		o.rmempty = false;
+
+		o = ss.option(form.ListValue, 'network', _('Network'));
+		o.value('tcp', _('TCP'));
+		o.value('udp', _('UDP'));
+		o.value('both', _('Both'));
+		o.default = 'both';
+		o.depends({'server': 'urltest', '!reverse': true})
 
 		/* TODO: use MultiValue */
 		o = ss.option(form.DynamicList, 'outbounds', _('Outbounds'),
@@ -302,12 +307,58 @@ return view.extend({
 
 		o = ss.option(form.DynamicList, 'source_port', _('Source port'),
 			_('Match source port.'));
-		o.datatype = 'portrange';
+		o.datatype = 'port';
+		o.modalonly = true;
+
+		o = ss.option(form.DynamicList, 'source_port_range', _('Source port range'),
+			_('Match source port range. Format as START:END.'));
+		o.validate = function(section_id, value) {
+			if (section_id && value == null || value == '')
+				return false;
+
+			var start_port = parseInt(value.split(':')[0]);
+			var end_port = parseInt(value.split(':')[1]);
+			if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
+				return false;
+			if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+				return false;
+			if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
+				return false;
+			if (start_port > end_port)
+				return false;
+
+			return true;
+		}
 		o.modalonly = true;
 
 		o = ss.option(form.DynamicList, 'port', _('Port'),
 			_('Match port.'));
-		o.datatype = 'portrange';
+		o.datatype = 'port';
+		o.modalonly = true;
+
+		o = ss.option(form.DynamicList, 'port_range', _('Port range'),
+			_('Match port range. Format as START:END.'));
+		o.validate = function(section_id, value) {
+			if (section_id && value == null || value == '')
+				return false;
+
+			var start_port = parseInt(value.split(':')[0]);
+			var end_port = parseInt(value.split(':')[1]);
+			if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
+				return false;
+			if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+				return false;
+			if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
+				return false;
+			if (start_port > end_port)
+				return false;
+
+			return true;
+		}
+		o.modalonly = true;
+
+		o = ss.option(form.Flag, 'invert', _('Invert'));
+		o.default = o.disabled;
 		o.modalonly = true;
 
 		o = ss.option(form.Value, 'outbound', _('Outbound'),
@@ -441,12 +492,58 @@ return view.extend({
 
 		o = ss.option(form.DynamicList, 'source_port', _('Source port'),
 			_('Match source port.'));
-		o.datatype = 'portrange';
+		o.datatype = 'port';
+		o.modalonly = true;
+
+		o = ss.option(form.DynamicList, 'source_port_range', _('Source port range'),
+			_('Match source port range. Format as START:END.'));
+		o.validate = function(section_id, value) {
+			if (section_id && value == null || value == '')
+				return false;
+
+			var start_port = parseInt(value.split(':')[0]);
+			var end_port = parseInt(value.split(':')[1]);
+			if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
+				return false;
+			if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+				return false;
+			if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
+				return false;
+			if (start_port > end_port)
+				return false;
+
+			return true;
+		}
 		o.modalonly = true;
 
 		o = ss.option(form.DynamicList, 'port', _('Port'),
 			_('Match port.'));
-		o.datatype = 'portrange';
+		o.datatype = 'port';
+		o.modalonly = true;
+
+		o = ss.option(form.DynamicList, 'port_range', _('Port range'),
+			_('Match port range. Format as START:END.'));
+		o.validate = function(section_id, value) {
+			if (section_id && value == null || value == '')
+				return false;
+
+			var start_port = parseInt(value.split(':')[0]);
+			var end_port = parseInt(value.split(':')[1]);
+			if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
+				return false;
+			if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+				return false;
+			if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535)
+				return false;
+			if (start_port > end_port)
+				return false;
+
+			return true;
+		}
+		o.modalonly = true;
+
+		o = ss.option(form.Flag, 'invert', _('Invert'));
+		o.default = o.disabled;
 		o.modalonly = true;
 
 		/* TODO: use MultiValue */

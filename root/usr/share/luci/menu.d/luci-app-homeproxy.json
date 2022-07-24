@@ -12,11 +12,19 @@
 		}
 	},
 	"admin/services/homeproxy/client": {
-		"title": "Client Settings",
+		"title": "Client settings",
 		"order": 10,
 		"action": {
 			"type": "view",
 			"path": "homeproxy/client"
+		}
+	},
+	"admin/services/homeproxy/node": {
+		"title": "Node settings",
+		"order": 15,
+		"action": {
+			"type": "view",
+			"path":"homeproxy/node"
 		}
 	}
 }

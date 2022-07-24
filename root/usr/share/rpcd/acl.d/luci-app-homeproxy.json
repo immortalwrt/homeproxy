@@ -2,9 +2,19 @@
 	"luci-app-homeproxy": {
 		"description": "Grant access to homeproxy configuration",
 		"read": {
+			"file": {
+				"/etc/homeproxy/*": [ "read" ],
+				"/bin/ash": [ "exec" ]
+			},
+			"ubus": {
+				"service": [ "list" ]
+			},
 			"uci": [ "homeproxy" ]
 		},
 		"write": {
+			"file": {
+				"/etc/homeproxy/*": [ "write" ]
+			},
 			"uci": [ "homeproxy" ]
 		}
 	}
