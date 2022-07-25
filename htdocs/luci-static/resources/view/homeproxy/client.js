@@ -21,12 +21,12 @@ var CBIStatus = form.DummyValue.extend({
 	renderWidget: function() {
 		poll.add(function () {
 			return L.resolveDefault(getServiceStatus()).then(function (res) {
-				var view = document.getElementById("service_status");
+				var view = document.getElementById('service_status');
 				view.innerHTML = renderStatus(res);
 			});
 		});
 
-		return E('div', {}, E('em', { id:"service_status" }, _('Collecting data...')));
+		return E('div', {}, E('em', { id: 'service_status' }, _('Collecting data...')));
 	}
 });
 
@@ -44,9 +44,9 @@ function renderStatus(isRunning) {
 	var spanTemp = '<em><span style="color:%s"><strong>%s %s</strong></span></em>';
 	var renderHTML;
 	if (isRunning) {
-		renderHTML = String.format(spanTemp, 'green', _("HomeProxy"), _("RUNNING"));
+		renderHTML = String.format(spanTemp, 'green', _('HomeProxy'), _('RUNNING'));
 	} else {
-		renderHTML = String.format(spanTemp, 'red', _("HomeProxy"), _("NOT RUNNING"));
+		renderHTML = String.format(spanTemp, 'red', _('HomeProxy'), _('NOT RUNNING'));
 	}
 
 	return renderHTML;
@@ -67,7 +67,7 @@ return view.extend({
 
 		s = m.section(form.TypedSection);
 		s.anonymous = true;
-		s.cfgsections = function() { return [ 'status' ] };
+		s.cfgsections = function() { return [ 'status' ] }
 
 		o = s.option(CBIStatus);
 
