@@ -17,6 +17,19 @@ var callServiceList = rpc.declare({
 	expect: { '': {} }
 });
 
+var CBIStatus = form.DummyValue.extend({
+	renderWidget: function() {
+		poll.add(function () {
+			return L.resolveDefault(getServiceStatus()).then(function (res) {
+				var view = document.getElementById("service_status");
+				view.innerHTML = renderStatus(res);
+			});
+		});
+
+		return E('div', {}, E('em', { id:"service_status" }, _('Collecting data...')));
+	}
+});
+
 function getServiceStatus() {
 	return L.resolveDefault(callServiceList('homeproxy'), {}).then(function (res) {
 		var isRunning = false;
@@ -28,7 +41,7 @@ function getServiceStatus() {
 }
 
 function renderStatus(isRunning) {
-	var spanTemp = '<em><span style="color:%s;font-weight:bold"><strong>%s %s</strong></span></em>';
+	var spanTemp = '<em><span style="color:%s"><strong>%s %s</strong></span></em>';
 	var renderHTML;
 	if (isRunning) {
 		renderHTML = String.format(spanTemp, 'green', _("HomeProxy"), _("RUNNING"));
@@ -52,23 +65,11 @@ return view.extend({
 		m = new form.Map('homeproxy', _('HomeProxy'),
 			_('The modern ImmortalWrt proxy platform for ARM64/AMD64.'));
 
-		s = m.section(form.NamedSection, '_status');
+		s = m.section(form.TypedSection);
 		s.anonymous = true;
-		s.render = function (section_id) {
-			poll.add(function () {
-				return L.resolveDefault(getServiceStatus()).then(function (res) {
-					var view = document.getElementById("service_status");
-					view.innerHTML = renderStatus(res);
-				});
-			});
+		s.cfgsections = function() { return [ 'status' ] };
 
-			return E('div', { class: 'cbi-map' },
-				E('div', { class: 'cbi-section' }, [
-					E('p', { id: 'service_status' },
-						_('Collecting data ...'))
-				])
-			);
-		}
+		o = s.option(CBIStatus);
 
 		/* Cache all configured proxy nodes, they will be called multiple times. */
 		var proxy_nodes = {}
