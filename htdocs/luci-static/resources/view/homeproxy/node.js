@@ -127,6 +127,7 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'password', _('Password'));
+		o.password = true;
 		o.depends('type', 'http');
 		o.depends('type', 'naiveproxy');
 		o.depends('type', 'shadowsocks');
@@ -214,6 +215,7 @@ return view.extend({
 		o.value('2022-blake3-aes-128-gcm');
 		o.value('2022-blake3-aes-256-gcm');
 		o.value('2022-blake3-chacha20-poly1305');
+		o.default = 'aes-128-gcm';
 		o.depends('type', 'shadowsocks');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
 		o.modalonly = true;
@@ -317,6 +319,7 @@ return view.extend({
 		o.value('4', _('Socks4'));
 		o.value('4a', _('Socks4A'));
 		o.value('5', _('Socks5'));
+		o.default = '5';
 		o.depends('type', 'socks');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks'});
 		o.modalonly = true;
