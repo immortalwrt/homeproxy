@@ -17,19 +17,6 @@ var callServiceList = rpc.declare({
 	expect: { '': {} }
 });
 
-var CBIStatus = form.DummyValue.extend({
-	renderWidget: function() {
-		poll.add(function () {
-			return L.resolveDefault(getServiceStatus()).then(function (res) {
-				var view = document.getElementById('service_status');
-				view.innerHTML = renderStatus(res);
-			});
-		});
-
-		return E('div', {}, E('em', { id: 'service_status' }, _('Collecting data...')));
-	}
-});
-
 function getServiceStatus() {
 	return L.resolveDefault(callServiceList('homeproxy'), {}).then(function (res) {
 		var isRunning = false;
@@ -67,9 +54,18 @@ return view.extend({
 
 		s = m.section(form.TypedSection);
 		s.anonymous = true;
-		s.cfgsections = function() { return [ 'status' ] }
+		s.render = function () {
+			poll.add(function () {
+				return L.resolveDefault(getServiceStatus()).then(function (res) {
+					var view = document.getElementById("service_status");
+					view.innerHTML = renderStatus(res);
+				});
+			});
 
-		o = s.option(CBIStatus);
+			return E('div', { class: 'cbi-section', id: 'status_bar' }, [
+					E('p', { id: 'service_status' }, _('Collecting data ...'))
+			]);
+		}
 
 		/* Cache all configured proxy nodes, they will be called multiple times. */
 		var proxy_nodes = {}
@@ -563,7 +559,7 @@ return view.extend({
 		o = s.taboption('routing', form.Flag, 'disable_cache', _('Disable dns cache'));
 		o.default = o.disabled;
 		o.rmempty = false;
-	
+
 		o = s.taboption('routing', form.Flag, 'disable_expire', _('Disable dns cache expire'));
 		o.default = o.disabled;
 		o.rmempty = false;
