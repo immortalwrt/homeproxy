@@ -93,14 +93,15 @@ return view.extend({
 
 		o = s.option(form.Button, '_save_subscriptions', _('Save subscriptions settings'),
 			_('Save settings before updating subscriptions.'));
-		o.inputtitle = _('Save current settings');
 		o.inputstyle = 'apply';
+		o.inputtitle = _('Save current settings');
 		o.onclick = function() {
 			ui.changes.apply(true);
 			return this.map.save(null, true);
 		}
 
 		o = s.option(form.Button, '_update_subscriptions', _('Update nodes from subscriptions'));
+		o.inputstyle = 'apply';
 		o.inputtitle = function(section_id) {
 			var sublist = uci.get(data[0],section_id, 'subscription_url') || [];
 			if (sublist.length > 0)
@@ -110,12 +111,12 @@ return view.extend({
 				return _('No subscription available')
 			}
 		}
-		o.inputstyle = 'apply';
 		o.onclick = function() {
 			/* TODO: add corresponding script. */
 		}
 
 		o = s.option(form.Button, '_remove_subscriptions', _('Remove all nodes from subscriptions'));
+		o.inputstyle = 'reset';
 		o.inputtitle = function() {
 			if (subnodes.length > 0) {
 				return _('Remove %s node(s)').format(subnodes.length);
@@ -124,7 +125,6 @@ return view.extend({
 				return _('No subscription node');
 			}
 		}
-		o.inputstyle = 'reset';
 		o.onclick = function() {
 			for (var i in subnodes)
 				uci.remove(data[0], subnodes[i]);
@@ -154,15 +154,16 @@ return view.extend({
 		o = s.option(form.Button, '_apply', _('Apply'));
 		o.editable = true;
 		o.modalonly = false;
+		o.inputstyle = 'apply';
 		o.inputtitle = function(section_id) {
 			var main_server = uci.get(data[0], 'config', 'main_server');
 			if (main_server == section_id) {
-				this.inputstyle = 'reset';
-				return _('Reapply');
+				this.readonly = true;
+				return _('Applied');
+			} else {
+				this.readonly = false;
+				return _('Apply');
 			}
-
-			this.inputstyle = 'apply';
-			return _('Apply');
 		}
 		o.onclick = function(_, section_id) {
 			uci.set(data[0], 'config', 'main_server', section_id);
