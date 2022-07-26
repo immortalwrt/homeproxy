@@ -66,6 +66,18 @@ return view.extend({
 
 		o = s.option(form.DynamicList, 'subscribe_url', _('Subscription URL'),
 			_('Support Shadowsocks(R), Trojan(-Go), and V2RayN(G) online configuration delivery standard.'));
+		o.validate = function(section_id, value) {
+			if (section_id && value !== null && value !== '') {
+				try {
+					new URL(value);
+				}
+				catch(e) {
+					return _('Expecting: %s').format('vaild URL');
+				}
+			}
+
+			return true;
+		}
 
 		o = s.option(form.ListValue, 'filter_nodes', _('Filter nodes'),
 			_('Drop/keep specific node(s) from subscriptions.'));
@@ -78,6 +90,15 @@ return view.extend({
 		o = s.option(form.DynamicList, 'filter_words', _('Filter keyword'),
 			_('Drop/keep node(s) that contain the specific keyword.'));
 		o.depends({'filter_nodes': '0', '!reverse': true});
+
+		o = s.option(form.Button, '_save_subscriptions', _('Save subscriptions settings'),
+			_('Save settings before updating subscriptions.'));
+		o.inputtitle = _('Save current settings');
+		o.inputstyle = 'apply';
+		o.onclick = function() {
+			ui.changes.apply(true);
+			return this.map.save(null, true);
+		}
 
 		o = s.option(form.Button, '_remove_subscriptions', _('Remove all nodes from subscriptions'));
 		o.inputtitle = function() {

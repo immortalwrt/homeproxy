@@ -110,7 +110,7 @@ return view.extend({
 		o.depends({'routing': '4', '!reverse': true});
 		o.validate = function(section_id, value) {
 			if (section_id && value !== 'all' && value !== 'common') {
-				if (value == null || value == '')
+				if (value === null || value === '')
 					return String.format(_('Expecting: %s'), _('valid port value'));
 
 				var ports = [];
