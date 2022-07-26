@@ -93,6 +93,12 @@ return view.extend({
 			for (var i in subnodes)
 				uci.remove(data[0], subnodes[i]);
 
+			if (subnodes.includes(uci.get(data[0], 'config', 'main_server')))
+				uci.set(data[0], 'config', 'main_server', 'nil');
+
+			if (subnodes.includes(uci.get(data[0], 'config', 'main_udp_server')))
+				uci.set(data[0], 'config', 'main_udp_server', 'nil');
+
 			this.inputtitle = _('%s node(s) removed').format(subnodes.length);
 			this.readonly = true;
 
