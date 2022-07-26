@@ -42,10 +42,10 @@ function parse_subscription_link(uri) {
 
 				var userinfo;
 				if (url.username && url.password)
-					/* User info encoded with URIComponent */
+					/* User info encoded with URIComponent, mostly for ss2022 */
 					userinfo = [url.username, decodeURIComponent(url.password)];
 				else
-					/* User info encoded with base64, mostly for ss2022 */
+					/* User info encoded with base64 */
 					userinfo = b64decode(url.username).split(':');
 
 				var plugin, plugin_opts;
