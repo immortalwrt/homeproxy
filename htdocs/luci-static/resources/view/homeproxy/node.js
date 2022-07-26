@@ -98,6 +98,23 @@ return view.extend({
 		o.value('v2ray', _('V2ray'));
 		o.rmempty = false;
 
+		o = s.option(form.Button, '_apply', _('Apply'));
+		o.editable = true;
+		o.modalonly = false;
+		o.inputtitle = function(section_id) {
+			var main_server = uci.get(data[0], 'config', 'main_server');
+			if (main_server == section_id) {
+				this.inputstyle = 'reset';
+				return _('Reapply');
+			}
+			this.inputstyle = 'apply';
+			return _('Apply');
+		}
+		o.onclick = function(_, section_id) {
+			uci.set(data[0], 'config', 'main_server', section_id);
+			return this.map.save(null, true);
+		}
+
 		o = s.option(form.ListValue, 'v2ray_protocol', _('V2ray protocol'));
 		o.value('http', _('HTTP'));
 		o.value('shadowsocks', _('Shadowsocks'));
