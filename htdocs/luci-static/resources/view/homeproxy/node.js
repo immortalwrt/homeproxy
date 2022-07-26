@@ -64,7 +64,7 @@ return view.extend({
 		o.default = o.disabled;
 		o.rmempty = false;
 
-		o = s.option(form.DynamicList, 'subscribe_url', _('Subscription URL'),
+		o = s.option(form.DynamicList, 'subscription_url', _('Subscription URL'),
 			_('Support Shadowsocks(R), Trojan(-Go), and V2RayN(G) online configuration delivery standard.'));
 		o.validate = function(section_id, value) {
 			if (section_id && value !== null && value !== '') {
@@ -98,6 +98,21 @@ return view.extend({
 		o.onclick = function() {
 			ui.changes.apply(true);
 			return this.map.save(null, true);
+		}
+
+		o = s.option(form.Button, '_update_subscriptions', _('Update nodes from subscriptions'));
+		o.inputtitle = function(section_id) {
+			var sublist = uci.get(data[0],section_id, 'subscription_url') || [];
+			if (sublist.length > 0)
+				return _('Update %s subscription(s)').format(sublist.length);
+			else {
+				this.readonly = true;
+				return _('No subscription available')
+			}
+		}
+		o.inputstyle = 'apply';
+		o.onclick = function() {
+			/* TODO: add corresponding script. */
 		}
 
 		o = s.option(form.Button, '_remove_subscriptions', _('Remove all nodes from subscriptions'));
