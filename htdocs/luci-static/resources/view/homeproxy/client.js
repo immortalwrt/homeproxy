@@ -4,11 +4,11 @@
  */
 
 'use strict';
-'require view';
-'require poll';
-'require uci';
-'require rpc';
 'require form';
+'require poll';
+'require rpc';
+'require uci';
+'require view';
 
 var callServiceList = rpc.declare({
 	object: 'service',
@@ -57,7 +57,7 @@ return view.extend({
 		s.render = function () {
 			poll.add(function () {
 				return L.resolveDefault(getServiceStatus()).then(function (res) {
-					var view = document.getElementById('service_status');
+					var view = document.getElementById("service_status");
 					view.innerHTML = renderStatus(res);
 				});
 			});

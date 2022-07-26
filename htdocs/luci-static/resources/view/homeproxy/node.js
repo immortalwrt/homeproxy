@@ -4,12 +4,13 @@
  */
 
 'use strict';
-'require view';
-'require poll';
-'require uci';
-'require rpc';
 'require form';
 'require fs';
+'require poll';
+'require rpc';
+'require uci';
+'require ui';
+'require view';
 
 function fs_installed(binray) {
 	return fs.exec('/bin/ash', ['-c', 'type -t -p ' + binray]).then(function (res) {
@@ -112,6 +113,7 @@ return view.extend({
 		}
 		o.onclick = function(_, section_id) {
 			uci.set(data[0], 'config', 'main_server', section_id);
+			ui.changes.apply(true);
 			return this.map.save(null, true);
 		}
 
