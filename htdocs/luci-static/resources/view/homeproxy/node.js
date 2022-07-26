@@ -21,6 +21,81 @@ function fs_installed(binray) {
 	});
 }
 
+function parse_subscription_link(uri) {
+	var url = uri.split('://');
+	if (url[0] && url[1]) {
+		function b64decode(str) {
+			str = str.replace(/-/g, '+').replace(/_/g, '/');
+			var padding = (4 - str.length % 4) % 4;
+			if (padding)
+				str = str + Array(padding + 1).join('=');
+
+			return atob(str);
+		}
+
+		switch (url[0]) {
+		case 'ss':
+			try {
+				/* SIP002 format https://shadowsocks.org/en/spec/SIP002-URI-Scheme.html */
+				url = new URL('http://' + url[1]);
+				var alias = url.hash ? decodeURIComponent(url.hash.slice(1)) : null;
+
+				var userinfo;
+				if (url.username && url.password)
+					/* User info encoded with URIComponent */
+					userinfo = [url.username, decodeURIComponent(url.password)];
+				else
+					/* User info encoded with base64, mostly for ss2022 */
+					userinfo = b64decode(url.username).split(':');
+
+				var plugin, plugin_opts;
+				if (url.search) {
+					var plugin_info = decodeURIComponent(url.search).split(';');
+					plugin = plugin_info[0].slice(1);
+					plugin_opts = plugin_info.slice(1).join(';');
+				}
+
+				if (!url.hostname || !url.port || !userinfo || userinfo.length !== 2)
+					return null;
+
+				var config = {
+					alias: alias,
+					type: plugin ? 'v2ray' : 'shadowsocks',
+					v2ray_protocol: plugin ? 'shadowsocks' : null,
+					address: url.hostname,
+					port: url.port,
+					method: userinfo[0],
+					password: userinfo[1]
+				};
+				if (plugin)
+					config['shadowsocks_plugin'] = plugin;
+				if (plugin_opts)
+					config['shadowsocks_plugin_opts'] = plugin_opts;
+			} catch(e) {
+				/* Legacy format https://shadowsocks.org/en/config/quick-guide.html */
+				var url = url[1].split('@');
+				if (url.length < 2)
+					return null;
+				else if (url.length > 2)
+					url = [url.slice(0, -1).join('@'), url.slice(-1).toString()];
+
+				var method = url[0].split(':')[0];
+				var password = url[0].split(':').slice(1).join(':');
+
+				var config = {
+					address: url[1].split(':')[0],
+					port: url[1].split(':')[1],
+					method: method,
+					password: password
+				};
+			}
+			return config;
+		}
+	}
+
+	return null;
+}
+
 return view.extend({
 	load: function() {
 		return Promise.all([
@@ -146,6 +221,54 @@ return view.extend({
 		s.anonymous = true;
 		s.sortable = true;
 
+		/* Import subscription links start */
+		/* Thanks to luci-app-shadowsocks-libev
+		 * Yousong Zhou <yszhou4tech@gmail.com>
+		 */
+		s.handleLinkImport = function() {
+			var textarea = new ui.Textarea();
+			ui.showModal(_('Import share link(s)'), [
+				E('p', _('Support Shadowsocks(R), Trojan(-Go), and V2RayN(G) online configuration delivery standard.')),
+				textarea.render(),
+				E('div', { class: 'right' }, [
+					E('button', {
+						class: 'btn',
+						click: ui.hideModal
+					}, [ _('Cancel') ]),
+					'',
+					E('button', {
+						class: 'btn cbi-button-action',
+						click: ui.createHandlerFn(this, function() {
+							textarea.getValue().split('\n').forEach(function(s) {
+								var config = parse_subscription_link(s);
+								if (config) {
+									var sid = uci.add(data[0], 'node');
+									Object.keys(config).forEach(function(k) {
+										uci.set(data[0], sid, k, config[k]);
+									});
+								}
+							});
+							return uci.save()
+								.then(L.bind(this.map.load, this.map))
+								.then(L.bind(this.map.reset, this.map))
+								.then(L.ui.hideModal)
+								.catch(function() {});
+						})
+					}, [ _('Import') ])
+				])
+			])
+		}
+		s.renderSectionAdd = function(extra_class) {
+			var el = form.GridSection.prototype.renderSectionAdd.apply(this, arguments);
+			el.appendChild(E('button', {
+				'class': 'cbi-button cbi-button-add',
+				'title': _('Import share links'),
+				'click': ui.createHandlerFn(this, 'handleLinkImport')
+			}, [ _('Import share link(s)') ]));
+			return el;
+		};
+		/* Import subscription links end */
+
 		s.modaltitle = function(section_id) {
 			var alias = uci.get(data[0], section_id, 'alias') || uci.get(data[0], section_id, 'address');
 			return alias ? _('Node') + ' » ' + alias : _('Add a node');
@@ -173,7 +296,7 @@ return view.extend({
 		}
 
 		o = s.option(form.Value, 'alias', _('Alias'));
-		o.rmempty = false;
+		/* o.rmempty = false; */
 
 		o = s.option(form.ListValue, 'type', _('Type'));
 		o.value('http', _('HTTP'));
