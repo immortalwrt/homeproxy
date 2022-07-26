@@ -88,12 +88,14 @@ return view.extend({
 				return _('No subscription node');
 			}
 		}
-		o.inputstyle = 'reset';		
+		o.inputstyle = 'reset';
 		o.onclick = function() {
-			for (var i in subnodes) 
+			for (var i in subnodes)
 				uci.remove(data[0], subnodes[i]);
 
+			this.inputtitle = _('%s node(s) removed').format(subnodes.length);
 			this.readonly = true;
+
 			return this.map.save(null, true);
 		}
 
@@ -105,6 +107,26 @@ return view.extend({
 		s.modaltitle = function(section_id) {
 			var alias = uci.get(data[0], section_id, 'alias') || uci.get(data[0], section_id, 'address');
 			return alias ? _('Node') + ' » ' + alias : _('Add a node');
+		}
+
+		o = s.option(form.Button, '_apply', _('Apply'));
+		o.editable = true;
+		o.modalonly = false;
+		o.inputtitle = function(section_id) {
+			var main_server = uci.get(data[0], 'config', 'main_server');
+			if (main_server == section_id) {
+				this.inputstyle = 'reset';
+				return _('Reapply');
+			}
+
+			this.inputstyle = 'apply';
+			return _('Apply');
+		}
+		o.onclick = function(_, section_id) {
+			uci.set(data[0], 'config', 'main_server', section_id);
+			ui.changes.apply(true);
+
+			return this.map.save(null, true);
 		}
 
 		o = s.option(form.Value, 'alias', _('Alias'));
@@ -122,24 +144,6 @@ return view.extend({
 		o.value('socks', _('Socks'));
 		o.value('v2ray', _('V2ray'));
 		o.rmempty = false;
-
-		o = s.option(form.Button, '_apply', _('Apply'));
-		o.editable = true;
-		o.modalonly = false;
-		o.inputtitle = function(section_id) {
-			var main_server = uci.get(data[0], 'config', 'main_server');
-			if (main_server == section_id) {
-				this.inputstyle = 'reset';
-				return _('Reapply');
-			}
-			this.inputstyle = 'apply';
-			return _('Apply');
-		}
-		o.onclick = function(_, section_id) {
-			uci.set(data[0], 'config', 'main_server', section_id);
-			ui.changes.apply(true);
-			return this.map.save(null, true);
-		}
 
 		o = s.option(form.ListValue, 'v2ray_protocol', _('V2ray protocol'));
 		o.value('http', _('HTTP'));
