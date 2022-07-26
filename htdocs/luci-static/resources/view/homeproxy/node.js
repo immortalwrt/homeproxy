@@ -224,9 +224,20 @@ return view.extend({
 		o.depends({'type': 'socks', 'socks_ver': '5'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'http'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
-		o.depends({'type': 'v2ray', 'v2ray_protoocl': 'shadowsocksr'});
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocksr'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks', 'socks_ver': '5'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'trojan'});
+		o.validate = function(section_id, value) {
+			if (section_id && (value === null || value === '')) {
+				var required_type = ['naiveproxy', 'shadowsocks', 'shadowsocksr', 'trojan'];
+				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
+				var v2ray_protocol = this.map.lookupOption('v2ray_protocol', section_id)[0].formvalue(section_id) || '';
+				if (required_type.includes(type) || required_type.includes(v2ray_protocol))
+					return _('Expecting: non-empty value');
+			}
+
+			return true;
+		}
 		o.modalonly = true;
 
 		/* NaïveProxy config start */
