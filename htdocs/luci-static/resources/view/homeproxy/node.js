@@ -36,6 +36,14 @@ function parse_subscription_link(uri) {
 		switch (url[0]) {
 		case 'ss':
 			try {
+				/* "Lovely" Shadowrocket format */
+				try {
+					var salias = '';
+					if (url[1].split('#').length === 2)
+						salias = '#' + url[1].split('#')[1];
+					url = [null, b64decode(url[1].split('#')[0]) + salias];
+				} catch(e) { }
+
 				/* SIP002 format https://shadowsocks.org/en/spec/SIP002-URI-Scheme.html */
 				url = new URL('http://' + url[1]);
 				var alias = url.hash ? decodeURIComponent(url.hash.slice(1)) : null;
@@ -55,32 +63,24 @@ function parse_subscription_link(uri) {
 					plugin_opts = plugin_info.slice(1).join(';');
 				}
 
-				if (!url.hostname || !url.port || !userinfo || userinfo.length !== 2)
+				if (!url.hostname || !userinfo || userinfo.length !== 2)
 					return null;
 
 				var config = {
-					alias: alias,
 					type: plugin ? 'v2ray' : 'shadowsocks',
 					v2ray_protocol: plugin ? 'shadowsocks' : null,
 					address: url.hostname,
-					port: url.port,
+					port: url.port || '80',
 					method: userinfo[0],
 					password: userinfo[1]
 				};
+				if (alias)
+					config['alias'] = alias;
 				if (plugin)
 					config['shadowsocks_plugin'] = plugin;
 				if (plugin_opts)
 					config['shadowsocks_plugin_opts'] = plugin_opts;
 			} catch(e) {
-				var alias;
-				/* "Lovely" Shadowrocket format */
-				try {
-					var surl = url[1].split('#')
-					if (surl.length === 2)
-						alias = surl[1];
-					url = [null, b64decode(surl[0])];
-				} catch(e) { }
-
 				/* Legacy format https://shadowsocks.org/en/config/quick-guide.html */
 				url = url[1].split('@');
 				if (url.length < 2)
@@ -92,6 +92,7 @@ function parse_subscription_link(uri) {
 				var password = url[0].split(':').slice(1).join(':');
 
 				var config = {
+					type : 'shadowsocks',
 					address: url[1].split(':')[0],
 					port: url[1].split(':')[1],
 					method: method,
