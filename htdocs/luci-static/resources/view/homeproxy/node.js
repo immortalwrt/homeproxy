@@ -72,8 +72,17 @@ function parse_subscription_link(uri) {
 				if (plugin_opts)
 					config['shadowsocks_plugin_opts'] = plugin_opts;
 			} catch(e) {
+				var alias;
+				/* "Lovely" Shadowrocket format */
+				try {
+					var surl = url[1].split('#')
+					if (surl.length === 2)
+						alias = surl[1];
+					url = [null, b64decode(surl[0])];
+				} catch(e) { }
+
 				/* Legacy format https://shadowsocks.org/en/config/quick-guide.html */
-				var url = url[1].split('@');
+				url = url[1].split('@');
 				if (url.length < 2)
 					return null;
 				else if (url.length > 2)
@@ -88,6 +97,8 @@ function parse_subscription_link(uri) {
 					method: method,
 					password: password
 				};
+				if (alias)
+					config['alias'] = alias;
 			}
 			return config;
 		}
