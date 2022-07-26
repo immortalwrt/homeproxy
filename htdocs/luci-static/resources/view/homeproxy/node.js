@@ -38,6 +38,12 @@ return view.extend({
 		var have_naiveproxy = data[2];
 		var have_shadowsocksr = data[3];
 
+		var subnodes = [];
+		for (var i of uci.sections(data[0], 'node')) {
+			if (i.from_subscription === '1')
+				subnodes = subnodes.concat(i['.name'])
+		}
+
 		m = new form.Map('homeproxy', _('Edit nodes'));
 
 		s = m.section(form.NamedSection, 'subscription', 'homeproxy');
@@ -72,6 +78,24 @@ return view.extend({
 		o = s.option(form.DynamicList, 'filter_words', _('Filter keyword'),
 			_('Drop/keep node(s) that contain the specific keyword.'));
 		o.depends({'filter_nodes': '0', '!reverse': true});
+
+		o = s.option(form.Button, '_remove_subscriptions', _('Remove all nodes from subscriptions'));
+		o.inputtitle = function() {
+			if (subnodes.length > 0) {
+				return _('Remove %s node(s)').format(subnodes.length);
+			} else {
+				this.readonly = true;
+				return _('No subscription node');
+			}
+		}
+		o.inputstyle = 'reset';		
+		o.onclick = function() {
+			for (var i in subnodes) 
+				uci.remove(data[0], subnodes[i]);
+
+			this.readonly = true;
+			return this.map.save(null, true);
+		}
 
 		s = m.section(form.GridSection, 'node');
 		s.addremove = true;

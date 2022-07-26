@@ -68,7 +68,7 @@ return view.extend({
 		}
 
 		/* Cache all configured proxy nodes, they will be called multiple times. */
-		var proxy_nodes = {}
+		var proxy_nodes = {};
 		for (var i of uci.sections(data[0], 'node')) {
 			proxy_nodes[i['.name']] = String.format('[%s] %s', i.type, i.alias || i.server + ':' + i.server_port);
 		}
