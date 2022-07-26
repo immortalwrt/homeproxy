@@ -72,7 +72,7 @@ return view.extend({
 					new URL(value);
 				}
 				catch(e) {
-					return _('Expecting: %s').format('vaild URL');
+					return _('Expecting: %s').format(_('vaild URL'));
 				}
 			}
 
@@ -434,7 +434,7 @@ return view.extend({
 			if (section_id && (value == null || value == ''))
 				return _('Expecting: non-empty value');
 			else if (value.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
-				return String.format(_('Expecting: %s'), _('valid uuid string'));
+				return _('Expecting: %s').format(_('valid uuid string'));
 
 			return true;
 		}

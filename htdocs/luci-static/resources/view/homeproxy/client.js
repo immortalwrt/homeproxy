@@ -111,15 +111,15 @@ return view.extend({
 		o.validate = function(section_id, value) {
 			if (section_id && value !== 'all' && value !== 'common') {
 				if (value === null || value === '')
-					return String.format(_('Expecting: %s'), _('valid port value'));
+					return _('Expecting: %s').format(_('valid port value'));
 
 				var ports = [];
 				for (var i of value.split(',')) {
 					var port = parseInt(i);
 					if (port.toString() == 'NaN' || port.toString() !== i || port < 1 || port > 65535)
-						return String.format(_('Expecting: %s'), _('valid port value'));
+						return _('Expecting: %s').format(_('valid port value'));
 					if (ports.includes(i))
-						return String.format(_('Port %s alrealy exists, please enter other ones.'), port);
+						return _('Port %s alrealy exists, please enter other ones.').format(port);
 					ports = ports.concat(i);
 				}
 			}
@@ -319,7 +319,7 @@ return view.extend({
 			if (section_id && value) {
 				var start_port = parseInt(value.split(':')[0]);
 				var end_port = parseInt(value.split(':')[1]);
-				var error_message = String.format(_('Expecting: %s'), _('valid port range (port1:port2)'));
+				var error_message = _('Expecting: %s').format(_('valid port range (port1:port2)'));
 				if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
 					return error_message;
 				else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
@@ -342,7 +342,7 @@ return view.extend({
 			if (section_id && value) {
 				var start_port = parseInt(value.split(':')[0]);
 				var end_port = parseInt(value.split(':')[1]);
-				var error_message = String.format(_('Expecting: %s'), _('valid port range (port1:port2)'));
+				var error_message = _('Expecting: %s').format(_('valid port range (port1:port2)'));
 				if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
 					return error_message;
 				else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
@@ -498,7 +498,7 @@ return view.extend({
 			if (section_id && value) {
 				var start_port = parseInt(value.split(':')[0]);
 				var end_port = parseInt(value.split(':')[1]);
-				var error_message = String.format(_('Expecting: %s'), _('valid port range (port1:port2)'));
+				var error_message = _('Expecting: %s').format(_('valid port range (port1:port2)'));
 				if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
 					return error_message;
 				else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
@@ -521,7 +521,7 @@ return view.extend({
 			if (section_id && value) {
 				var start_port = parseInt(value.split(':')[0]);
 				var end_port = parseInt(value.split(':')[1]);
-				var error_message = String.format(_('Expecting: %s'), _('valid port range (port1:port2)'));
+				var error_message = _('Expecting: %s').format(_('valid port range (port1:port2)'));
 				if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
 					return error_message;
 				else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
