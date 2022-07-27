@@ -1037,6 +1037,32 @@ return view.extend({
 		o.default = '/etc/ssl/private/ca.pem';
 		o.depends('tls_self_sign', '1');
 		o.modalonly = true;
+		
+		o = s.option(form.Button, '_upload_cert', _('Upload certificate'),
+			_('Your certificate will be saved to "/etc/ssl/private/ca.pem".'));
+		o.inputstyle = 'action';
+		o.inputtitle = _('Upload...');
+		o.depends('tls_self_sign', '1');
+		o.onclick = function(ev) {
+			return ui.uploadFile('/etc/ssl/private/ca.pem', ev.target)
+			.then(L.bind(function(btn, res) {
+				btn.firstChild.data = _('Checking certificate...');
+				return fs.stat('/etc/ssl/private/ca.pem');
+			}, this, ev.target))
+			.then(L.bind(function(btn, res) {
+				if (res.size <= 0) {
+					ui.addNotification(null, E('p', _('The uploaded certificate is empty.')));
+					return fs.remove('/etc/ssl/private/ca.pem');
+				}
+
+				ui.addNotification(null, E('p', _('Your certificate was successfully uploaded. Size: %s.').format(res.size)));
+			}, this, ev.target))
+			.catch(function(e) { ui.addNotification(null, E('p', e.message)) })
+			.finally(L.bind(function(btn, input) {
+				btn.firstChild.data = _('Upload...');
+			}, this, ev.target));
+		}
+		o.modalonly = true;
 		/* TLS config end */
 
 		return m.render();
