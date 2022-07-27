@@ -397,7 +397,7 @@ return view.extend({
 		 */
 		s.handleLinkImport = function() {
 			var textarea = new ui.Textarea();
-			ui.showModal(_('Import share link(s)'), [
+			ui.showModal(_('Import share links'), [
 				E('p', _('Support Shadowsocks(R), Trojan, V2RayN(G), and VLESS online configuration delivery standard.')),
 				textarea.render(),
 				E('div', { class: 'right' }, [
@@ -450,7 +450,7 @@ return view.extend({
 				'class': 'cbi-button cbi-button-add',
 				'title': _('Import share links'),
 				'click': ui.createHandlerFn(this, 'handleLinkImport')
-			}, [ _('Import share link(s)') ]));
+			}, [ _('Import share links') ]));
 			return el;
 		};
 		/* Import subscription links end */

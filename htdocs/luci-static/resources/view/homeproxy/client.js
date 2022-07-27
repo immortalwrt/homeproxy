@@ -169,6 +169,29 @@ return view.extend({
 		s.tab('routing', _('Custom routing'),
 			_('Advanced routing settings. Only apply when "Custom rouing" is enabled.'));
 
+		function validatePortRange (section_id, value) {
+			if (section_id && value) {
+				var start_port = parseInt(value.split(':')[0]);
+				var end_port = parseInt(value.split(':')[1]);
+				var error_message = _('Expecting: %s').format(_('valid port range'));
+
+				if (value.split(':').length !== 2 || (!start_port && !end_port))
+					return error_message;
+				else if (value.split(':')[0] && (start_port.toString() === 'NaN' || start_port.toString() !== value.split(':')[0]))
+					return error_message;
+				else if (value.split(':')[1] && (end_port.toString() === 'NaN' || end_port.toString() !== value.split(':')[1]))
+					return error_message;
+				else if (start_port && (start_port < 1 || start_port > 65535))
+					return error_message;
+				else if (end_port && (end_port < 1 || end_port > 65535))
+					return error_message;
+				else if (start_port && end_port && start_port >= end_port)
+					return error_message;
+			}
+
+			return true;
+		}
+
 		o = s.taboption('routing', form.SectionValue, '_outbound', form.GridSection, 'outbound', _('Outbound settings'));
 		var ss = o.subsection;
 		ss.addremove = true;
@@ -314,28 +337,7 @@ return view.extend({
 
 		o = ss.option(form.DynamicList, 'source_port_range', _('Source port range'),
 			_('Match source port range. Format as START:/:END/START:END.'));
-		o.validate = function(section_id, value) {
-			if (section_id && value) {
-				var start_port = parseInt(value.split(':')[0]);
-				var end_port = parseInt(value.split(':')[1]);
-				var error_message = _('Expecting: %s').format(_('valid port range'));
-
-				if (value.split(':').length !== 2 || (!start_port && !end_port))
-					return error_message;
-				else if (value.split(':')[0] && (start_port.toString() === 'NaN' || start_port.toString() !== value.split(':')[0]))
-					return error_message;
-				else if (value.split(':')[1] && (end_port.toString() === 'NaN' || end_port.toString() !== value.split(':')[1]))
-					return error_message;
-				else if (start_port && (start_port < 1 || start_port > 65535))
-					return error_message;
-				else if (end_port && (end_port < 1 || end_port > 65535))
-					return error_message;
-				else if (start_port && end_port && start_port >= end_port)
-					return error_message;
-			}
-
-			return true;
-		}
+		o.validate = validatePortRange;
 		o.modalonly = true;
 
 		o = ss.option(form.DynamicList, 'port', _('Port'),
@@ -345,28 +347,7 @@ return view.extend({
 
 		o = ss.option(form.DynamicList, 'port_range', _('Port range'),
 			_('Match port range. Format as START:/:END/START:END.'));
-		o.validate = function(section_id, value) {
-			if (section_id && value) {
-				var start_port = parseInt(value.split(':')[0]);
-				var end_port = parseInt(value.split(':')[1]);
-				var error_message = _('Expecting: %s').format(_('valid port range'));
-
-				if (value.split(':').length !== 2 || (!start_port && !end_port))
-					return error_message;
-				else if (value.split(':')[0] && (start_port.toString() === 'NaN' || start_port.toString() !== value.split(':')[0]))
-					return error_message;
-				else if (value.split(':')[1] && (end_port.toString() === 'NaN' || end_port.toString() !== value.split(':')[1]))
-					return error_message;
-				else if (start_port && (start_port < 1 || start_port > 65535))
-					return error_message;
-				else if (end_port && (end_port < 1 || end_port > 65535))
-					return error_message;
-				else if (start_port && end_port && start_port >= end_port)
-					return error_message;
-			}
-
-			return true;
-		}
+		o.validate = validatePortRange;
 		o.modalonly = true;
 
 		o = ss.option(form.DynamicList, 'process_name', _('Process name'),
@@ -512,28 +493,7 @@ return view.extend({
 
 		o = ss.option(form.DynamicList, 'source_port_range', _('Source port range'),
 			_('Match source port range. Format as START:/:END/START:END.'));
-		o.validate = function(section_id, value) {
-			if (section_id && value) {
-				var start_port = parseInt(value.split(':')[0]);
-				var end_port = parseInt(value.split(':')[1]);
-				var error_message = _('Expecting: %s').format(_('valid port range'));
-
-				if (value.split(':').length !== 2 || (!start_port && !end_port))
-					return error_message;
-				else if (value.split(':')[0] && (start_port.toString() === 'NaN' || start_port.toString() !== value.split(':')[0]))
-					return error_message;
-				else if (value.split(':')[1] && (end_port.toString() === 'NaN' || end_port.toString() !== value.split(':')[1]))
-					return error_message;
-				else if (start_port && (start_port < 1 || start_port > 65535))
-					return error_message;
-				else if (end_port && (end_port < 1 || end_port > 65535))
-					return error_message;
-				else if (start_port && end_port && start_port >= end_port)
-					return error_message;
-			}
-
-			return true;
-		}
+		o.validate = validatePortRange;
 		o.modalonly = true;
 
 		o = ss.option(form.DynamicList, 'port', _('Port'),
@@ -543,28 +503,7 @@ return view.extend({
 
 		o = ss.option(form.DynamicList, 'port_range', _('Port range'),
 			_('Match port range. Format as START:/:END/START:END.'));
-		o.validate = function(section_id, value) {
-			if (section_id && value) {
-				var start_port = parseInt(value.split(':')[0]);
-				var end_port = parseInt(value.split(':')[1]);
-				var error_message = _('Expecting: %s').format(_('valid port range'));
-
-				if (value.split(':').length !== 2 || (!start_port && !end_port))
-					return error_message;
-				else if (value.split(':')[0] && (start_port.toString() === 'NaN' || start_port.toString() !== value.split(':')[0]))
-					return error_message;
-				else if (value.split(':')[1] && (end_port.toString() === 'NaN' || end_port.toString() !== value.split(':')[1]))
-					return error_message;
-				else if (start_port && (start_port < 1 || start_port > 65535))
-					return error_message;
-				else if (end_port && (end_port < 1 || end_port > 65535))
-					return error_message;
-				else if (start_port && end_port && start_port >= end_port)
-					return error_message;
-			}
-
-			return true;
-		}
+		o.validate = validatePortRange;
 		o.modalonly = true;
 
 		o = ss.option(form.DynamicList, 'process_name', _('Process name'),
