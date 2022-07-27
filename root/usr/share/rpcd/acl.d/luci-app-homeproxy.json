@@ -4,8 +4,10 @@
 		"read": {
 			"file": {
 				"/etc/homeproxy/*": [ "read" ],
-				"/etc/ssl/private/ca.pem": ["read"],
-				"/bin/ash": [ "exec" ]
+				"/etc/ssl/private/ca.pem": [ "read" ],
+				"/etc/ssl/private/ca.pem.tmp": [ "read" ],
+				"/bin/ash": [ "exec" ],
+				"/bin/mv": [ "exec" ]
 			},
 			"ubus": {
 				"service": [ "list" ]
@@ -15,7 +17,8 @@
 		"write": {
 			"file": {
 				"/etc/homeproxy/*": [ "write" ],
-				"/etc/ssl/private/ca.pem": ["write"]
+				"/etc/ssl/private/ca.pem": [ "write" ],
+				"/etc/ssl/private/ca.pem.tmp": [ "write" ]
 			},
 			"uci": [ "homeproxy" ]
 		}

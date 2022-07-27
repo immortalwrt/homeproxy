@@ -1044,17 +1044,18 @@ return view.extend({
 		o.inputtitle = _('Upload...');
 		o.depends('tls_self_sign', '1');
 		o.onclick = function(ev) {
-			return ui.uploadFile('/etc/ssl/private/ca.pem', ev.target)
+			return ui.uploadFile('/etc/ssl/private/ca.pem.tmp', ev.target)
 			.then(L.bind(function(btn, res) {
 				btn.firstChild.data = _('Checking certificate...');
-				return fs.stat('/etc/ssl/private/ca.pem');
+				return fs.stat('/etc/ssl/private/ca.pem.tmp');
 			}, this, ev.target))
 			.then(L.bind(function(btn, res) {
 				if (res.size <= 0) {
 					ui.addNotification(null, E('p', _('The uploaded certificate is empty.')));
-					return fs.remove('/etc/ssl/private/ca.pem');
+					return fs.remove('/etc/ssl/private/ca.pem.tmp');
 				}
 
+				fs.exec('/bin/mv', [ '/etc/ssl/private/ca.pem.tmp', '/etc/ssl/private/ca.pem' ]);
 				ui.addNotification(null, E('p', _('Your certificate was successfully uploaded. Size: %s.').format(res.size)));
 			}, this, ev.target))
 			.catch(function(e) { ui.addNotification(null, E('p', e.message)) })
