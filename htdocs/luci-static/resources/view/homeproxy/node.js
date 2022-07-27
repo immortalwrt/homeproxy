@@ -40,10 +40,12 @@ function parse_subscription_link(uri) {
 			try {
 				/* "Lovely" Shadowrocket format */
 				try {
+					var suri = uri[1].split('#');
 					var salias = '';
-					if (uri[1].split('#').length === 2)
-						salias = '#' + uri[1].split('#')[1];
-					uri = [null, b64decode(uri[1].split('#')[0]) + salias];
+					if (suri.length <= 2)
+						if (suri.length === 2)
+							salias = '#' + suri[1];
+						uri = [null, b64decode(suri[0]) + salias];
 				} catch(e) { }
 
 				/* SIP002 format https://shadowsocks.org/en/spec/SIP002-URI-Scheme.html */
@@ -74,7 +76,7 @@ function parse_subscription_link(uri) {
 					v2ray_protocol: plugin ? 'shadowsocks' : null,
 					address: url.hostname,
 					port: url.port || '80',
-					method: userinfo[0],
+					shadowsocks_encrypt_method: userinfo[0],
 					password: userinfo[1],
 					shadowsocks_plugin: plugin,
 					shadowsocks_plugin_opts: plugin_opts
@@ -93,15 +95,42 @@ function parse_subscription_link(uri) {
 				var password = uri[0].split(':').slice(1).join(':');
 
 				config = {
-					type : 'shadowsocks',
+					type: 'shadowsocks',
 					address: uri[1].split(':')[0],
 					port: uri[1].split(':')[1],
-					method: method,
+					shadowsocks_encrypt_method: method,
 					password: password
 				};
 
 				break;
 			}
+		case 'ssr':
+			uri = b64decode(uri[1]).split('/');
+
+			/* Check if address, port and password exist */
+			if (!uri[0].split(':')[0] || !uri[0].split(':')[1] || !uri[0].split(':')[5])
+				return null;
+
+			var params = new URLSearchParams(uri[1]);
+			var protoparam = params.get('protoparam') ? b64decode(params.get('protoparam')) : null;
+			var obfsparam = params.get('obfsparam') ? b64decode(params.get('obfsparam')) : null;
+			var remarks = params.get('remarks') ? b64decode(params.get('remarks')) : null;
+			
+			config = {
+				alias: remarks,
+				type: 'v2ray',
+				v2ray_protocol: 'shadowsocksr',
+				address: uri[0].split(':')[0],
+				port: uri[0].split(':')[1],
+				shadowsocksr_encrypt_method: uri[0].split(':')[3],
+				password: b64decode(uri[0].split(':')[5]),
+				shadowsocksr_protocol: uri[0].split(':')[2],
+				shadowsocksr_protocol_param: protoparam,
+				shadowsocksr_obfs: uri[0].split(':')[4],
+				shadowsocksr_obfs_param: obfsparam
+			};
+
+			break;
 		}
 	}
 
@@ -544,7 +573,7 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocksr'});
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'shadowsocskr_protocol_param', _('Protocol param'));
+		o = s.option(form.Value, 'shadowsocksr_protocol_param', _('Protocol param'));
 		o.depends('type', 'shadowsocksr');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocksr'});
 		o.modalonly = true;
