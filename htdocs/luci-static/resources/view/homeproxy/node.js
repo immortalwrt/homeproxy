@@ -22,8 +22,8 @@ function fs_installed(binray) {
 }
 
 function parse_subscription_link(uri) {
-	var url = uri.split('://');
-	if (url[0] && url[1]) {
+	uri = uri.split('://');
+	if (uri[0] && uri[1]) {
 		function b64decode(str) {
 			str = str.replace(/-/g, '+').replace(/_/g, '/');
 			var padding = (4 - str.length % 4) % 4;
@@ -33,19 +33,19 @@ function parse_subscription_link(uri) {
 			return atob(str);
 		}
 
-		switch (url[0]) {
+		switch (uri[0]) {
 		case 'ss':
 			try {
 				/* "Lovely" Shadowrocket format */
 				try {
 					var salias = '';
-					if (url[1].split('#').length === 2)
-						salias = '#' + url[1].split('#')[1];
-					url = [null, b64decode(url[1].split('#')[0]) + salias];
+					if (uri[1].split('#').length === 2)
+						salias = '#' + uri[1].split('#')[1];
+					uri = [null, b64decode(uri[1].split('#')[0]) + salias];
 				} catch(e) { }
 
 				/* SIP002 format https://shadowsocks.org/en/spec/SIP002-URI-Scheme.html */
-				url = new URL('http://' + url[1]);
+				var url = new URL('http://' + uri[1]);
 				var alias = url.hash ? decodeURIComponent(url.hash.slice(1)) : null;
 
 				var userinfo;
@@ -58,8 +58,8 @@ function parse_subscription_link(uri) {
 
 				var plugin, plugin_opts;
 				if (url.search) {
-					var plugin_info = decodeURIComponent(url.search).split(';');
-					plugin = plugin_info[0].slice(1);
+					var plugin_info = url.searchParams.get('plugin').split(';');
+					plugin = plugin_info[0];
 					plugin_opts = plugin_info.slice(1).join(';');
 				}
 
@@ -67,39 +67,34 @@ function parse_subscription_link(uri) {
 					return null;
 
 				var config = {
+					alias: alias,
 					type: plugin ? 'v2ray' : 'shadowsocks',
 					v2ray_protocol: plugin ? 'shadowsocks' : null,
 					address: url.hostname,
 					port: url.port || '80',
 					method: userinfo[0],
-					password: userinfo[1]
+					password: userinfo[1],
+					shadowsocks_plugin: plugin,
+					shadowsocks_plugin_opts: plugin_opts
 				};
-				if (alias)
-					config['alias'] = alias;
-				if (plugin)
-					config['shadowsocks_plugin'] = plugin;
-				if (plugin_opts)
-					config['shadowsocks_plugin_opts'] = plugin_opts;
 			} catch(e) {
 				/* Legacy format https://shadowsocks.org/en/config/quick-guide.html */
-				url = url[1].split('@');
-				if (url.length < 2)
+				uri = uri[1].split('@');
+				if (uri.length < 2)
 					return null;
-				else if (url.length > 2)
-					url = [url.slice(0, -1).join('@'), url.slice(-1).toString()];
+				else if (uri.length > 2)
+					uri = [uri.slice(0, -1).join('@'), uri.slice(-1).toString()];
 
-				var method = url[0].split(':')[0];
-				var password = url[0].split(':').slice(1).join(':');
+				var method = uri[0].split(':')[0];
+				var password = uri[0].split(':').slice(1).join(':');
 
 				var config = {
 					type : 'shadowsocks',
-					address: url[1].split(':')[0],
-					port: url[1].split(':')[1],
+					address: uri[1].split(':')[0],
+					port: uri[1].split(':')[1],
 					method: method,
 					password: password
 				};
-				if (alias)
-					config['alias'] = alias;
 			}
 			return config;
 		}
@@ -232,6 +227,10 @@ return view.extend({
 		s.addremove = true;
 		s.anonymous = true;
 		s.sortable = true;
+		s.modaltitle = function(section_id) {
+			var alias = uci.get(data[0], section_id, 'alias') || uci.get(data[0], section_id, 'address');
+			return alias ? _('Node') + ' » ' + alias : _('Add a node');
+		}
 
 		/* Import subscription links start */
 		/* Thanks to luci-app-shadowsocks-libev
@@ -251,7 +250,11 @@ return view.extend({
 					E('button', {
 						class: 'btn cbi-button-action',
 						click: ui.createHandlerFn(this, function() {
-							textarea.getValue().split('\n').forEach(function(s) {
+							var input_links = textarea.getValue().trim().split('\n');
+							/* Remove duplicate lines */
+							input_links = input_links.reduce((pre, cur) =>
+								(!pre.includes(cur) && pre.push(cur), pre), []);
+							input_links.forEach(function(s) {
 								var config = parse_subscription_link(s);
 								if (config) {
 									var sid = uci.add(data[0], 'node');
@@ -280,11 +283,6 @@ return view.extend({
 			return el;
 		};
 		/* Import subscription links end */
-
-		s.modaltitle = function(section_id) {
-			var alias = uci.get(data[0], section_id, 'alias') || uci.get(data[0], section_id, 'address');
-			return alias ? _('Node') + ' » ' + alias : _('Add a node');
-		}
 
 		o = s.option(form.Button, '_apply', _('Apply'));
 		o.editable = true;

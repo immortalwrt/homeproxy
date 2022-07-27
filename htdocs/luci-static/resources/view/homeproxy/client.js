@@ -174,7 +174,6 @@ return view.extend({
 		ss.addremove = true;
 		ss.anonymous = true;
 		ss.sortable = true;
-
 		ss.modaltitle = function(section_id) {
 			var tag = uci.get(data[0], section_id, 'tag');
 			return tag ? _('Outbound') + ' » ' + tag : _('Add an outbound');
@@ -233,7 +232,6 @@ return view.extend({
 		ss.addremove = true;
 		ss.anonymous = true;
 		ss.sortable = true;
-
 		ss.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('Routing rule') + ' » ' + label : _('Add routing rule');
@@ -367,7 +365,6 @@ return view.extend({
 		ss.addremove = true;
 		ss.anonymous = true;
 		ss.sortable = true;
-
 		ss.modaltitle = function(section_id) {
 			var tag = uci.get(data[0], section_id, 'tag');
 			return tag ? _('DNS server') + ' » ' + tag : _('Add a DNS server');
@@ -412,7 +409,6 @@ return view.extend({
 		ss.addremove = true;
 		ss.anonymous = true;
 		ss.sortable = true;
-
 		ss.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('DNS rule') + ' » ' + label : _('Add a DNS rule');
