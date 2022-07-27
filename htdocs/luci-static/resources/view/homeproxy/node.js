@@ -22,6 +22,8 @@ function fs_installed(binray) {
 }
 
 function parse_subscription_link(uri) {
+	var config;
+
 	uri = uri.split('://');
 	if (uri[0] && uri[1]) {
 		function b64decode(str) {
@@ -66,7 +68,7 @@ function parse_subscription_link(uri) {
 				if (!url.hostname || !userinfo || userinfo.length !== 2)
 					return null;
 
-				var config = {
+				config = {
 					alias: alias,
 					type: plugin ? 'v2ray' : 'shadowsocks',
 					v2ray_protocol: plugin ? 'shadowsocks' : null,
@@ -77,6 +79,8 @@ function parse_subscription_link(uri) {
 					shadowsocks_plugin: plugin,
 					shadowsocks_plugin_opts: plugin_opts
 				};
+
+				break;
 			} catch(e) {
 				/* Legacy format https://shadowsocks.org/en/config/quick-guide.html */
 				uri = uri[1].split('@');
@@ -88,19 +92,20 @@ function parse_subscription_link(uri) {
 				var method = uri[0].split(':')[0];
 				var password = uri[0].split(':').slice(1).join(':');
 
-				var config = {
+				config = {
 					type : 'shadowsocks',
 					address: uri[1].split(':')[0],
 					port: uri[1].split(':')[1],
 					method: method,
 					password: password
 				};
+
+				break;
 			}
-			return config;
 		}
 	}
 
-	return null;
+	return config;
 }
 
 return view.extend({
@@ -147,14 +152,14 @@ return view.extend({
 		o.rmempty = false;
 
 		o = s.option(form.DynamicList, 'subscription_url', _('Subscription URL'),
-			_('Support Shadowsocks(R), Trojan(-Go), and V2RayN(G) online configuration delivery standard.'));
+			_('Support Shadowsocks(R), Trojan(-Go), V2RayN(G), and VLESS online configuration delivery standard.'));
 		o.validate = function(section_id, value) {
 			if (section_id && value !== null && value !== '') {
 				try {
 					new URL(value);
 				}
 				catch(e) {
-					return _('Expecting: %s').format(_('vaild URL'));
+					return _('Expecting: %s').format(_('valid URL'));
 				}
 			}
 
@@ -239,7 +244,7 @@ return view.extend({
 		s.handleLinkImport = function() {
 			var textarea = new ui.Textarea();
 			ui.showModal(_('Import share link(s)'), [
-				E('p', _('Support Shadowsocks(R), Trojan(-Go), and V2RayN(G) online configuration delivery standard.')),
+				E('p', _('Support Shadowsocks(R), Trojan(-Go), V2RayN(G), and VLESS online configuration delivery standard.')),
 				textarea.render(),
 				E('div', { class: 'right' }, [
 					E('button', {
@@ -251,23 +256,35 @@ return view.extend({
 						class: 'btn cbi-button-action',
 						click: ui.createHandlerFn(this, function() {
 							var input_links = textarea.getValue().trim().split('\n');
-							/* Remove duplicate lines */
-							input_links = input_links.reduce((pre, cur) =>
-								(!pre.includes(cur) && pre.push(cur), pre), []);
-							input_links.forEach(function(s) {
-								var config = parse_subscription_link(s);
-								if (config) {
-									var sid = uci.add(data[0], 'node');
-									Object.keys(config).forEach(function(k) {
-										uci.set(data[0], sid, k, config[k]);
-									});
-								}
-							});
-							return uci.save()
-								.then(L.bind(this.map.load, this.map))
-								.then(L.bind(this.map.reset, this.map))
-								.then(L.ui.hideModal)
-								.catch(function() {});
+							if (input_links && input_links[0]) {
+								/* Remove duplicate lines */
+								input_links = input_links.reduce((pre, cur) =>
+									(!pre.includes(cur) && pre.push(cur), pre), []);
+
+								var imported_node = 0;
+								input_links.forEach(function(s) {
+									var config = parse_subscription_link(s);
+									if (config) {
+										var sid = uci.add(data[0], 'node');
+										Object.keys(config).forEach(function(k) {
+											uci.set(data[0], sid, k, config[k]);
+										});
+										imported_node++;
+									}
+								});
+
+								if (imported_node === 0)
+									ui.addNotification(null, E('p', _('No valid share link found.')));
+								else
+									ui.addNotification(null, E('p', _('Successfully imported %s node(s) of total %s.').format(imported_node, input_links.length)));
+
+								return uci.save()
+									.then(L.bind(this.map.load, this.map))
+									.then(L.bind(this.map.reset, this.map))
+									.then(L.ui.hideModal)
+									.catch(function() {});
+							} else
+								return ui.hideModal();
 						})
 					}, [ _('Import') ])
 				])
