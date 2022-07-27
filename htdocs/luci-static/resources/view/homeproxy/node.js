@@ -131,6 +131,25 @@ function parse_subscription_link(uri) {
 			};
 
 			break;
+		case 'trojan':
+			var url = new URL('http:' + uri[1]);
+
+			/* Check if address and password exist */
+			if (!url.hostname || !url.username)
+				return null;
+
+			config = {
+				alias: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
+				type: 'v2ray',
+				v2ray_protocol: 'trojan',
+				address: url.hostname,
+				port: url.port || '80',
+				password: url.username,
+				tls: '1',
+				tls_sni: url.searchParams.get('sni') || null
+			};
+
+			break;
 		}
 	}
 
