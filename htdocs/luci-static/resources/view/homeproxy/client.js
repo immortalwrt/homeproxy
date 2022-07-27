@@ -251,7 +251,8 @@ return view.extend({
 		o.default = 'or';
 		o.rmempty = false;
 
-		o = ss.option(form.Flag, 'invert', _('Invert'));
+		o = ss.option(form.Flag, 'invert', _('Invert'),
+			_('Invert match result.'));
 		o.default = o.disabled;
 		o.modalonly = true;
 
@@ -312,19 +313,27 @@ return view.extend({
 		o.modalonly = true;
 
 		o = ss.option(form.DynamicList, 'source_port_range', _('Source port range'),
-			_('Match source port range. Format as START:END.'));
+			_('Match source port range. Format as START:/:END/START:END.'));
 		o.validate = function(section_id, value) {
 			if (section_id && value) {
 				var start_port = parseInt(value.split(':')[0]);
 				var end_port = parseInt(value.split(':')[1]);
-				var error_message = _('Expecting: %s').format(_('valid port range (port1:port2)'));
-				if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
+				var error_message = _('Expecting: %s').format(_('valid port range'));
+
+				if (value.split(':').length !== 2 || (!start_port && !end_port))
 					return error_message;
-				else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+				else if (value.split(':')[0] && (start_port.toString() === 'NaN' || start_port.toString() !== value.split(':')[0]))
 					return error_message;
-				else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535 || start_port > end_port)
+				else if (value.split(':')[1] && (end_port.toString() === 'NaN' || end_port.toString() !== value.split(':')[1]))
+					return error_message;
+				else if (start_port && (start_port < 1 || start_port > 65535))
+					return error_message;
+				else if (end_port && (end_port < 1 || end_port > 65535))
+					return error_message;
+				else if (start_port && end_port && start_port >= end_port)
 					return error_message;
 			}
+
 			return true;
 		}
 		o.modalonly = true;
@@ -335,21 +344,33 @@ return view.extend({
 		o.modalonly = true;
 
 		o = ss.option(form.DynamicList, 'port_range', _('Port range'),
-			_('Match port range. Format as START:END.'));
+			_('Match port range. Format as START:/:END/START:END.'));
 		o.validate = function(section_id, value) {
 			if (section_id && value) {
 				var start_port = parseInt(value.split(':')[0]);
 				var end_port = parseInt(value.split(':')[1]);
-				var error_message = _('Expecting: %s').format(_('valid port range (port1:port2)'));
-				if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
+				var error_message = _('Expecting: %s').format(_('valid port range'));
+
+				if (value.split(':').length !== 2 || (!start_port && !end_port))
 					return error_message;
-				else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+				else if (value.split(':')[0] && (start_port.toString() === 'NaN' || start_port.toString() !== value.split(':')[0]))
 					return error_message;
-				else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535 || start_port > end_port)
+				else if (value.split(':')[1] && (end_port.toString() === 'NaN' || end_port.toString() !== value.split(':')[1]))
+					return error_message;
+				else if (start_port && (start_port < 1 || start_port > 65535))
+					return error_message;
+				else if (end_port && (end_port < 1 || end_port > 65535))
+					return error_message;
+				else if (start_port && end_port && start_port >= end_port)
 					return error_message;
 			}
+
 			return true;
 		}
+		o.modalonly = true;
+
+		o = ss.option(form.DynamicList, 'process_name', _('Process name'),
+			_('Match process name.'));
 		o.modalonly = true;
 
 		o = ss.option(form.Value, 'outbound', _('Outbound'),
@@ -379,8 +400,8 @@ return view.extend({
 		o.editable = true;
 
 		o = ss.option(form.Value, 'address', _('Address'),
-			_('The address of the dns server. Support UDP, TCP, DoT and DoH.'));
-		o.value('local', _('Local'));
+			_('The address of the dns server. Support UDP, TCP, DoT, DoH and RCode.'));
+		o.value('local', _('System'));
 		o.rmempty = false;
 
 		o = ss.option(form.Value, 'address_resolver', _('Address resolver'),
@@ -428,7 +449,8 @@ return view.extend({
 		o.default = 'or';
 		o.rmempty = false;
 
-		o = ss.option(form.Flag, 'invert', _('Invert'));
+		o = ss.option(form.Flag, 'invert', _('Invert'),
+			_('Invert match result.'));
 		o.default = o.disabled;
 		o.modalonly = true;
 
@@ -489,19 +511,27 @@ return view.extend({
 		o.modalonly = true;
 
 		o = ss.option(form.DynamicList, 'source_port_range', _('Source port range'),
-			_('Match source port range. Format as START:END.'));
+			_('Match source port range. Format as START:/:END/START:END.'));
 		o.validate = function(section_id, value) {
 			if (section_id && value) {
 				var start_port = parseInt(value.split(':')[0]);
 				var end_port = parseInt(value.split(':')[1]);
-				var error_message = _('Expecting: %s').format(_('valid port range (port1:port2)'));
-				if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
+				var error_message = _('Expecting: %s').format(_('valid port range'));
+
+				if (value.split(':').length !== 2 || (!start_port && !end_port))
 					return error_message;
-				else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+				else if (value.split(':')[0] && (start_port.toString() === 'NaN' || start_port.toString() !== value.split(':')[0]))
 					return error_message;
-				else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535 || start_port > end_port)
+				else if (value.split(':')[1] && (end_port.toString() === 'NaN' || end_port.toString() !== value.split(':')[1]))
+					return error_message;
+				else if (start_port && (start_port < 1 || start_port > 65535))
+					return error_message;
+				else if (end_port && (end_port < 1 || end_port > 65535))
+					return error_message;
+				else if (start_port && end_port && start_port >= end_port)
 					return error_message;
 			}
+
 			return true;
 		}
 		o.modalonly = true;
@@ -512,21 +542,33 @@ return view.extend({
 		o.modalonly = true;
 
 		o = ss.option(form.DynamicList, 'port_range', _('Port range'),
-			_('Match port range. Format as START:END.'));
+			_('Match port range. Format as START:/:END/START:END.'));
 		o.validate = function(section_id, value) {
 			if (section_id && value) {
 				var start_port = parseInt(value.split(':')[0]);
 				var end_port = parseInt(value.split(':')[1]);
-				var error_message = _('Expecting: %s').format(_('valid port range (port1:port2)'));
-				if (start_port.toString() == 'NaN' || end_port.toString() == 'NaN')
+				var error_message = _('Expecting: %s').format(_('valid port range'));
+
+				if (value.split(':').length !== 2 || (!start_port && !end_port))
 					return error_message;
-				else if (start_port.toString() !== value.split(':')[0] || end_port.toString() !== value.split(':')[1])
+				else if (value.split(':')[0] && (start_port.toString() === 'NaN' || start_port.toString() !== value.split(':')[0]))
 					return error_message;
-				else if (start_port < 1 || start_port > 65535 || end_port < 1 || end_port > 65535 || start_port > end_port)
+				else if (value.split(':')[1] && (end_port.toString() === 'NaN' || end_port.toString() !== value.split(':')[1]))
+					return error_message;
+				else if (start_port && (start_port < 1 || start_port > 65535))
+					return error_message;
+				else if (end_port && (end_port < 1 || end_port > 65535))
+					return error_message;
+				else if (start_port && end_port && start_port >= end_port)
 					return error_message;
 			}
+
 			return true;
 		}
+		o.modalonly = true;
+
+		o = ss.option(form.DynamicList, 'process_name', _('Process name'),
+			_('Match process name.'));
 		o.modalonly = true;
 
 		/* TODO: use MultiValue */
@@ -538,6 +580,12 @@ return view.extend({
 		o = ss.option(form.Value, 'server', _('Server'),
 			_('Tag of the target dns server.'));
 		o.rmempty = false;
+
+		o = ss.option(form.Flag, 'disable_cache', _('Disable dns cache'),
+			_('Disable cache and save cache in this query.'));
+		o.default = o.disabled;
+		o.rmempty = false;
+		o.modalonly = true;
 
 		o = s.taboption('routing', form.ListValue, 'default_dns_strategy', _('Default domain strategy'),
 			_('Default domain strategy for resolving the domain names.'));
