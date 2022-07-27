@@ -67,6 +67,7 @@ function parse_subscription_link(uri) {
 					plugin_opts = plugin_info.slice(1).join(';');
 				}
 
+				/* Check if address, method and password exist */
 				if (!url.hostname || !userinfo || userinfo.length !== 2)
 					return null;
 
@@ -94,6 +95,10 @@ function parse_subscription_link(uri) {
 				var method = uri[0].split(':')[0];
 				var password = uri[0].split(':').slice(1).join(':');
 
+				/* Check if address, method and password exist */
+				if (!uri[1].split(':')[0] || !method || !password)
+					return false;
+
 				config = {
 					type: 'shadowsocks',
 					address: uri[1].split(':')[0],
@@ -107,8 +112,8 @@ function parse_subscription_link(uri) {
 		case 'ssr':
 			uri = b64decode(uri[1]).split('/');
 
-			/* Check if address, port and password exist */
-			if (!uri[0].split(':')[0] || !uri[0].split(':')[1] || !uri[0].split(':')[5])
+			/* Check if address, method and password exist */
+			if (!uri[0].split(':')[0] || !uri[0].split(':')[3] || !uri[0].split(':')[5])
 				return null;
 
 			var params = new URLSearchParams(uri[1]);
@@ -132,6 +137,7 @@ function parse_subscription_link(uri) {
 
 			break;
 		case 'trojan':
+			/* https://p4gefau1t.github.io/trojan-go/developer/url/ */
 			var url = new URL('http:' + uri[1]);
 
 			/* Check if address and password exist */
@@ -146,8 +152,54 @@ function parse_subscription_link(uri) {
 				port: url.port || '80',
 				password: url.username,
 				tls: '1',
-				tls_sni: url.searchParams.get('sni') || null
+				tls_sni: url.searchParams.get('sni')
 			};
+
+			break;
+		case 'vless':
+			/* https://github.com/XTLS/Xray-core/discussions/716 */
+			var url = new URL('http://' + uri[1]);
+			var params = url.searchParams;
+
+			/* Check if address, uuid and type exist */
+			if (!url.hostname || !url.username || !params.get('type'))
+				return null;
+
+			config = {
+				alias: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
+				type: 'v2ray',
+				v2ray_protocol: 'vless',
+				address: url.hostname,
+				port: url.port || '80',
+				v2ray_uuid: url.username,
+				v2ray_vless_encrypt: params.get('encryption') || 'none',
+				v2ray_transport: params.get('type'),
+				tls: params.get('security') === 'tls' ? 1 : 0,
+				tls_sni: params.get('sni'),
+				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')) : null,
+				v2ray_xtls: params.get('security') === 'xtls' ? 1 : 0,
+				v2ray_xtls_flow: params.get('flow')
+			};
+			if (config.v2ray_transport === 'grpc') {
+				config['grpc_servicename'] = params.get('serviceName');
+				config['grpc_mode'] = params.get('mode');
+			} else if (['h2', 'tcp', 'ws'].includes(config.v2ray_transport)) {
+				config['http_header'] = config.v2ray_transport === 'tcp' ? params.get('headerType') || 'none' : null;
+				config['h2_host'] = params.get('host') ? decodeURIComponent(params.get('host')) : null;
+				config['h2_path'] = params.get('host') ? decodeURIComponent(params.get('path')) : null;
+				if (config.h2_path && config.h2_path.includes('?ed=')) {
+					config['websocket_early_data_header'] = 'Sec-WebSocket-Protocol';
+					config['websocket_early_data'] = config.h2_path.split('?ed=')[1];
+					config['h2_path'] = config.h2_path.split('?ed=')[0];
+				}
+			} else if (config.v2ray_transport === 'mkcp') {
+				config['mkcp_seed'] = params.get('seed');
+				config['mkcp_header'] = params.get('headerType') || 'none';
+			} else if (config.v2ray_transport === 'quic') {
+				config['quic_security'] = params.get('quicSecurity') || 'none';
+				config['quic_key'] = params.get('key');
+				config['mkcp_header'] = params.get('headerType') || 'none';
+			}
 
 			break;
 		}
@@ -492,10 +544,6 @@ return view.extend({
 		o.depends('type', 'hysteria');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'hysteria_quic_alpn', _('QUIC TLS ALPN'));
-		o.depends('type', 'hysteria');
-		o.modalonly = true;
-
 		o = s.option(form.Flag, 'hysteria_disable_mtu_discovery', _('Disable Path MTU discovery'));
 		o.default = o.disabled;
 		o.depends('type', 'hysteria');
@@ -701,7 +749,7 @@ return view.extend({
 		o.value('mkcp', _('mKCP'));
 		o.value('quic', _('QUIC'));
 		o.value('tcp', _('TCP'));
-		o.value('websocket', _('WebSocket'));
+		o.value('ws', _('WebSocket'));
 		o.default = 'tcp';
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'http'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks'});
@@ -725,12 +773,12 @@ return view.extend({
 
 		o = s.option(form.Value, 'h2_host', _('Host'));
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'h2'});
-		o.depends({'type': 'v2ray', 'v2ray_transport': 'websocket'});
+		o.depends({'type': 'v2ray', 'v2ray_transport': 'ws'});
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'h2_path', _('Path'));
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'h2'});
-		o.depends({'type': 'v2ray', 'v2ray_transport': 'websocket'});
+		o.depends({'type': 'v2ray', 'v2ray_transport': 'ws'});
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'h2_health_check', _('Health check'));
@@ -852,12 +900,12 @@ return view.extend({
 		o = s.option(form.Value, 'websocket_early_data', _('Early data'));
 		o.datatype = 'uinteger';
 		o.default = '2048';
-		o.depends({'type': 'v2ray', 'v2ray_transport': 'websocket'});
+		o.depends({'type': 'v2ray', 'v2ray_transport': 'ws'});
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'websocket_early_data_header', _('Early data header name'));
 		o.default = 'Sec-WebSocket-Protocol';
-		o.depends({'type': 'v2ray', 'v2ray_transport': 'websocket'});
+		o.depends({'type': 'v2ray', 'v2ray_transport': 'ws'});
 		o.modalonly = true;
 		/* WebSocket config end */
 
@@ -906,6 +954,12 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'tls_sni', _('TLS SNI'));
+		o.depends('type', 'hysteria');
+		o.depends('tls', '1');
+		o.depends('v2ray_xtls', '1');
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'tls_alpn', _('TLS ALPN'));
 		o.depends('type', 'hysteria');
 		o.depends('tls', '1');
 		o.depends('v2ray_xtls', '1');
