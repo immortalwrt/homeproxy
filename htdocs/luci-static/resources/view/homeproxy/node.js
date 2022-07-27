@@ -26,6 +26,7 @@ function parse_subscription_link(uri) {
 
 	uri = uri.split('://');
 	if (uri[0] && uri[1]) {
+		/* Thanks to luci-app-ssr-plus */
 		function b64decode(str) {
 			str = str.replace(/-/g, '+').replace(/_/g, '/');
 			var padding = (4 - str.length % 4) % 4;
@@ -33,6 +34,12 @@ function parse_subscription_link(uri) {
 				str = str + Array(padding + 1).join('=');
 
 			return atob(str);
+		}
+
+		function b64decodeUnicode(str) {
+			return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {
+				return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+			}).join(''));
 		}
 
 		switch (uri[0]) {
@@ -182,7 +189,7 @@ function parse_subscription_link(uri) {
 			};
 			if (config.v2ray_transport === 'grpc') {
 				config['grpc_servicename'] = params.get('serviceName');
-				config['grpc_mode'] = params.get('mode');
+				config['grpc_mode'] = params.get('mode') || 'gun';
 			} else if (['h2', 'tcp', 'ws'].includes(config.v2ray_transport)) {
 				config['http_header'] = config.v2ray_transport === 'tcp' ? params.get('headerType') || 'none' : null;
 				config['h2_host'] = params.get('host') ? decodeURIComponent(params.get('host')) : null;
@@ -200,6 +207,53 @@ function parse_subscription_link(uri) {
 				config['quic_key'] = params.get('key');
 				config['mkcp_header'] = params.get('headerType') || 'none';
 			}
+
+			break;
+		case 'vmess':
+			/* https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2) */
+			uri = JSON.parse(b64decodeUnicode(uri[1]));
+
+			if (uri.v === '2') {
+				/* Check if address, uuid and type exist */
+				if (!uri.add || !uri.id || !uri.net)
+					return null;
+
+				config = {
+					alias: uri.ps,
+					type: 'v2ray',
+					v2ray_protocol: 'vmess',
+					address: uri.add,
+					port: uri.port,
+					v2ray_uuid: uri.id,
+					v2ray_vmess_encrypt: uri.scy || 'auto',
+					v2ray_transport: uri.net,
+					tls: uri.tls === 'tls' ? 1 : 0,
+					tls_sni: uri.sni || uri.host,
+					tls_alpn: uri.alpn,
+					tls_insecure: 1
+				};
+				if (config.v2ray_transport === 'grpc') {
+					config['grpc_servicename'] = uri.path;
+					config['grpc_mode'] = 'gun';
+				} else if (['h2', 'tcp', 'ws'].includes(config.v2ray_transport)) {
+					config['http_header'] = config.v2ray_transport === 'tcp' ? uri.type || 'none' : null;
+					config['h2_host'] = uri.host;
+					config['h2_path'] = uri.path;
+					if (config.h2_path && config.h2_path.includes('?ed=')) {
+						config['websocket_early_data_header'] = 'Sec-WebSocket-Protocol';
+						config['websocket_early_data'] = config.h2_path.split('?ed=')[1];
+						config['h2_path'] = config.h2_path.split('?ed=')[0];
+					}
+				} else if (config.v2ray_transport === 'mkcp') {
+					config['mkcp_seed'] = uri.path;
+					config['mkcp_header'] = uri.type || 'none';
+				} else if (config.v2ray_transport === 'quic') {
+					config['quic_security'] = uri.host || 'none';
+					config['quic_key'] = uri.path;
+					config['mkcp_header'] = uri.type || 'none';
+				}
+			} else
+				return null;
 
 			break;
 		}
