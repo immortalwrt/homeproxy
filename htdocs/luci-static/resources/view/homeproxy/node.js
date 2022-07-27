@@ -138,7 +138,7 @@ function parse_subscription_link(uri) {
 			break;
 		case 'trojan':
 			/* https://p4gefau1t.github.io/trojan-go/developer/url/ */
-			var url = new URL('http:' + uri[1]);
+			var url = new URL('http://' + uri[1]);
 
 			/* Check if address and password exist */
 			if (!url.hostname || !url.username)
@@ -252,7 +252,7 @@ return view.extend({
 		o.rmempty = false;
 
 		o = s.option(form.DynamicList, 'subscription_url', _('Subscription URL'),
-			_('Support Shadowsocks(R), Trojan(-Go), V2RayN(G), and VLESS online configuration delivery standard.'));
+			_('Support Shadowsocks(R), Trojan, V2RayN(G), and VLESS online configuration delivery standard.'));
 		o.validate = function(section_id, value) {
 			if (section_id && value !== null && value !== '') {
 				try {
@@ -344,7 +344,7 @@ return view.extend({
 		s.handleLinkImport = function() {
 			var textarea = new ui.Textarea();
 			ui.showModal(_('Import share link(s)'), [
-				E('p', _('Support Shadowsocks(R), Trojan(-Go), V2RayN(G), and VLESS online configuration delivery standard.')),
+				E('p', _('Support Shadowsocks(R), Trojan, V2RayN(G), and VLESS online configuration delivery standard.')),
 				textarea.render(),
 				E('div', { class: 'right' }, [
 					E('button', {
