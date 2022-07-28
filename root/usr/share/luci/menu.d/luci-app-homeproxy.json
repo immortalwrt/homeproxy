@@ -24,7 +24,15 @@
 		"order": 15,
 		"action": {
 			"type": "view",
-			"path":"homeproxy/node"
+			"path": "homeproxy/node"
+		}
+	},
+	"admin/services/homeproxy/server": {
+		"title": "Server settings",
+		"order": 20,
+		"action": {
+			"type": "view",
+			"path": "homeproxy/server"
 		}
 	}
 }
