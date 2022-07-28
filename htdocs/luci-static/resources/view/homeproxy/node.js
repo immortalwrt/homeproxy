@@ -214,8 +214,8 @@ function parse_subscription_link(uri) {
 			uri = JSON.parse(b64decodeUnicode(uri[1]));
 
 			if (uri.v === '2') {
-				/* Check if address, uuid and type exist */
-				if (!uri.add || !uri.id || !uri.net)
+				/* Check if address, uuid, type, and alterId exist */
+				if (!uri.add || !uri.id || !uri.net || (uri.aid && parseInt(uri.aid) !== 0))
 					return null;
 
 				config = {
@@ -267,8 +267,7 @@ return view.extend({
 		return Promise.all([
 			uci.load('homeproxy'),
 			fs_installed('hysteria'),
-			fs_installed('naive'),
-			fs_installed('ssr-local')
+			fs_installed('naive')
 		]);
 	},
 
@@ -277,7 +276,6 @@ return view.extend({
 
 		var have_hysteria = data[1];
 		var have_naiveproxy = data[2];
-		var have_shadowsocksr = data[3];
 
 		var subnodes = [];
 		for (var i of uci.sections(data[0], 'node')) {
@@ -486,8 +484,6 @@ return view.extend({
 		if (have_naiveproxy)
 			o.value('naiveproxy', _('NaïveProxy'));
 		o.value('shadowsocks', _('Shadowsocks'));
-		if (have_shadowsocksr)
-			o.value('shadowsocksr', _('ShadowsocksR'));
 		o.value('socks', _('Socks'));
 		o.value('v2ray', _('V2ray'));
 		o.rmempty = false;
@@ -525,7 +521,6 @@ return view.extend({
 		o.depends('type', 'http');
 		o.depends('type', 'naiveproxy');
 		o.depends('type', 'shadowsocks');
-		o.depends('type', 'shadowsocksr');
 		o.depends({'type': 'socks', 'socks_ver': '5'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'http'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
@@ -624,7 +619,6 @@ return view.extend({
 		o = s.option(form.Flag, 'shadowsocks_tfo', _('TCP fast open'));
 		o.default = o.disabled;
 		o.depends('type', 'shadowsocks');
-		o.depends('type', 'shadowsocksr');
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'shadowsocks_uot', _('UDP over TCP'),
@@ -674,7 +668,6 @@ return view.extend({
 		o.value('salsa20');
 		o.value('chacha20');
 		o.value('chacha20-ietf');
-		o.depends('type', 'shadowsocksr');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocksr'});
 		o.modalonly = true;
 
@@ -690,12 +683,10 @@ return view.extend({
 		o.value('auth_chain_d');
 		o.value('auth_chain_e');
 		o.value('auth_chain_f');
-		o.depends('type', 'shadowsocksr');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocksr'});
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'shadowsocksr_protocol_param', _('Protocol param'));
-		o.depends('type', 'shadowsocksr');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocksr'});
 		o.modalonly = true;
 
@@ -705,12 +696,10 @@ return view.extend({
 		o.value('http_post');
 		o.value('random_head');
 		o.value('tls1.2_ticket_auth');
-		o.depends('type', 'shadowsocksr');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocksr'});
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'shadowsocksr_obfs_param', _('Obfs param'));
-		o.depends('type', 'shadowsocksr');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocksr'});
 		o.modalonly = true;
 		/* ShadowsocksR config end */
