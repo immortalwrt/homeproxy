@@ -144,11 +144,17 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
 		o.modalonly = true;
 
-		o = s.option(form.Flag, 'sniff_override', _('Enable sniff'),
-			_('Override the connection destination address with the sniffed domain.'));
+		o = s.option(form.Flag, 'sniff', _('Enable sniffing'),
+			_('See <a target="_blank" href="https://sing-box.sagernet.org/configuration/route/sniff/">Sniff</a> for details.'));
 		o.default = o.enabled;
 		o.rmempty = false;
 		o.modalonly = true;
+
+		o = s.option(form.Flag, 'sniff_override', _('Override destination'),
+			_('Override the connection destination address with the sniffed domain.'));
+		o.default = o.enabled;
+		o.rmempty = false;
+		o.depends('sniff', '1');
 
 		o = s.option(form.ListValue, 'network', _('Network'));
 		o.value('tcp', _('TCP'));

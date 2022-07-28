@@ -510,9 +510,15 @@ return view.extend({
 		o.value('ipv6_only', _('IPv6 only'));
 		o.rmempty = false;
 
-		o = s.taboption('routing', form.Flag, 'sniff_override', _('Enable sniff'),
+		o = s.taboption('routing', form.Flag, 'sniff', _('Enable sniffing'),
+			_('See <a target="_blank" href="https://sing-box.sagernet.org/configuration/route/sniff/">Sniff</a> for details.'));
+		o.default = o.enabled;
+		o.rmempty = false;
+
+		o = s.taboption('routing', form.Flag, 'sniff_override', _('Override destination'),
 			_('Override the connection destination address with the sniffed domain.'));
 		o.default = o.enabled;
+		o.depends('sniff', '1');
 		o.rmempty = false;
 
 		o = s.taboption('routing', form.Flag, 'disable_cache', _('Disable dns cache'));
