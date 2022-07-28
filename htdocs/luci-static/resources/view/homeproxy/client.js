@@ -214,7 +214,6 @@ return view.extend({
 		o.value('direct', _('Direct'));
 		o.value('block', _('Block'));
 		o.value('dns', _('DNS'));
-		o.value('urltest', _('URLTest'));
 		for (var i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
 		o.default = 'direct';
@@ -225,30 +224,7 @@ return view.extend({
 		o.value('udp', _('UDP'));
 		o.value('both', _('Both'));
 		o.default = 'both';
-		o.depends({'server': 'urltest', '!reverse': true});
-
-		/* TODO: use MultiValue */
-		o = ss.option(form.DynamicList, 'outbounds', _('Outbounds'),
-			_('List of outbound tags to test.'));
-		o.depends('server', 'urltest');
-
-		o = ss.option(form.Value, 'url', _('URL'),
-			_('The URL to test. http://www.gstatic.com/generate_204 will be used if empty.'));
-		o.default = 'http://www.gstatic.com/generate_204';
-		o.depends('server', 'urltest');
-		o.modalonly = true;
-
-		o = ss.option(form.Value, 'interval', _('Interval'),
-			_('The test interval. 1m will be used if empty.'));
-		o.default = '1m';
-		o.depends('server', 'urltest');
-		o.modalonly = true;
-
-		o = ss.option(form.Value, 'tolerance', _('Tolerance'),
-			_('The test tolerance in milliseconds. 50 will be used if empty.'));
-		o.default = '50';
-		o.depends('server', 'urltest');
-		o.modalonly = true;
+		o.rmempty = false;
 
 		o = s.taboption('routing', form.SectionValue, '_routing', form.GridSection, 'routing', _('Routing settings'));
 		var ss = o.subsection;
