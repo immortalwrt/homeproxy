@@ -1,7 +1,25 @@
 
 config homeproxy 'config'
 	option main_server 'nil'
+	option main_udp_server 'same'
+	option routing '2'
+	option routing_port 'common'
+	option dns_mode '3'
+	option dns_server '8.8.8.8:53'
+	option dns_strategy 'prefer_ipv4'
+	option default_outbound 'main-out'
+	option default_dns 'google'
+	option default_dns_strategy 'prefer_ipv4'
+	option sniff '1'
+	option sniff_override '1'
+	option disable_cache '0'
+	option disable_expire '0'
 
 config homeproxy 'subscription'
 	option auto_update '0'
+	option update_via_proxy '0'
+	option filter_nodes '0'
+
+config homeproxy 'server'
+	option enabled '0'
 
