@@ -205,7 +205,7 @@ return view.extend({
 		o = ss.option(form.Value, 'tag', _('Tag'));
 		o.rmempty = false;
 
-		o = ss.option(form.Flag, 'enabled', _('Enabled'));
+		o = ss.option(form.Flag, 'enabled', _('Enable'));
 		o.default = o.disabled;
 		o.rmempty = false;
 		o.editable = true;
@@ -239,7 +239,7 @@ return view.extend({
 		o = ss.option(form.Value, 'label', _('Label'));
 		o.rmempty = false;
 
-		o = ss.option(form.Flag, 'enabled', _('Enabled'));
+		o = ss.option(form.Flag, 'enabled', _('Enable'));
 		o.default = o.disabled;
 		o.rmempty = false;
 		o.editable = true;
@@ -351,7 +351,7 @@ return view.extend({
 		o = ss.option(form.Value, 'tag', _('Tag'));
 		o.rmempty = false;
 
-		o = ss.option(form.Flag, 'enabled', _('Enabled'));
+		o = ss.option(form.Flag, 'enabled', _('Enable'));
 		o.default = o.disabled;
 		o.rmempty = false;
 		o.editable = true;
@@ -395,7 +395,7 @@ return view.extend({
 		o = ss.option(form.Value, 'label', _('Label'));
 		o.rmempty = false;
 
-		o = ss.option(form.Flag, 'enabled', _('Enabled'));
+		o = ss.option(form.Flag, 'enabled', _('Enable'));
 		o.default = o.disabled;
 		o.rmempty = false;
 		o.editable = true;

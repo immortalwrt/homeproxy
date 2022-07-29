@@ -24,7 +24,7 @@ return view.extend({
 
 		s = m.section(form.NamedSection, 'server', 'homeproxy', _('Global settings'));
 
-		o = s.option(form.Flag, 'enabled', _('Enabled'));
+		o = s.option(form.Flag, 'enabled', _('Enable'));
 		o.default = o.disabled;
 		o.rmempty = false;
 
@@ -40,7 +40,7 @@ return view.extend({
 		o = s.option(form.Value, 'alias', _('Alias'));
 		o.rmempty = false;
 
-		o = s.option(form.Flag, 'enabled', _('Enabled'));
+		o = s.option(form.Flag, 'enabled', _('Enable'));
 		o.default = o.disabled;
 		o.rmempty = false;
 		o.editable = true;
