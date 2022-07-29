@@ -78,14 +78,14 @@ return view.extend({
 		s.tab('general', _('General Settings'));
 
 		o = s.taboption('general', form.ListValue, 'main_server', _('Main server'));
-		o.value('nil', _('disabled'));
+		o.value('nil', _('Disable'));
 		for (var i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
 		o.default = 'nil';
 		o.rmempty = false;
 
 		o = s.taboption('general', form.ListValue, 'main_udp_server', _('Main UDP server'));
-		o.value('nil', _('disabled'));
+		o.value('nil', _('Disable'));
 		o.value('same', _('Same as main server'));
 		for (var i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
@@ -93,7 +93,7 @@ return view.extend({
 		o.depends({'routing': '4', '!reverse': true});
 
 		o = s.taboption('general', form.ListValue, 'routing', _('Routing settings'));
-		o.value('0', _('disabled'));
+		o.value('0', _('Disable'));
 		o.value('1', _('GFWList'));
 		o.value('2', _('Bypass mainland China'));
 		o.value('3', _('Only proxy mainland China'));

@@ -318,7 +318,7 @@ return view.extend({
 
 		o = s.option(form.ListValue, 'filter_nodes', _('Filter nodes'),
 			_('Drop/keep specific node(s) from subscriptions.'));
-		o.value('0', _('Disabled'));
+		o.value('0', _('Disable'));
 		o.value('1', _('Blacklist mode'));
 		o.value('2', _('Whitelist mode'));
 		o.default = '0';
@@ -340,7 +340,7 @@ return view.extend({
 		o = s.option(form.Button, '_update_subscriptions', _('Update nodes from subscriptions'));
 		o.inputstyle = 'apply';
 		o.inputtitle = function(section_id) {
-			var sublist = uci.get(data[0],section_id, 'subscription_url') || [];
+			var sublist = uci.get(data[0], section_id, 'subscription_url') || [];
 			if (sublist.length > 0)
 				return _('Update %s subscription(s)').format(sublist.length);
 			else {
@@ -560,9 +560,9 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'hysteria_auth_type', _('Authentication type'));
-		o.value('0', _('disabled'));
-		o.value('1', _('base64'));
-		o.value('2', _('string'));
+		o.value('0', _('Disable'));
+		o.value('1', _('Base64'));
+		o.value('2', _('String'));
 		o.depends('type', 'hysteria');
 		o.modalonly = true;
 
