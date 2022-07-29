@@ -37,7 +37,7 @@ function parse_subscription_link(uri) {
 		}
 
 		function b64decodeUnicode(str) {
-			return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {
+			return decodeURIComponent(Array.prototype.map.call(b64decode(str), function (c) {
 				return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
 			}).join(''));
 		}
@@ -126,7 +126,7 @@ function parse_subscription_link(uri) {
 			var params = new URLSearchParams(uri[1]);
 			var protoparam = params.get('protoparam') ? b64decode(params.get('protoparam')) : null;
 			var obfsparam = params.get('obfsparam') ? b64decode(params.get('obfsparam')) : null;
-			var remarks = params.get('remarks') ? b64decode(params.get('remarks')) : null;
+			var remarks = params.get('remarks') ? b64decodeUnicode(params.get('remarks')) : null;
 			
 			config = {
 				alias: remarks,
