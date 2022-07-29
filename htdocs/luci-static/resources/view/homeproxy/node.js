@@ -569,12 +569,7 @@ return view.extend({
 		o = s.option(form.Value, 'hysteria_auth_payload', _('Authentication payload'));
 		o.depends({'type': 'hysteria', 'auth_type': '1'});
 		o.depends({'type': 'hysteria', 'auth_type': '2'});
-		o.validate = function(section_id, value) {
-			if (section_id && (value == null || value == ''))
-				return _('Expecting: non-empty value');
-
-			return true;
-		}
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'hysteria_password', _('Obfuscate password'));
@@ -717,25 +712,13 @@ return view.extend({
 		o = s.option(form.Value, 'v2ray_uuid', _('UUID'));
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vmess'});
-		o.validate = function(section_id, value) {
-			if (section_id && (value == null || value == ''))
-				return _('Expecting: non-empty value');
-			else if (value.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
-				return _('Expecting: %s').format(_('valid uuid string'));
-
-			return true;
-		}
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'v2ray_vless_encrypt', _('Encrypt method'));
 		o.default = 'none';
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless'});
-		o.validate = function(section_id, value) {
-			if (section_id && (value == null || value == ''))
-				return _('Expecting: non-empty value');
-
-			return true;
-		}
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'v2ray_vmess_encrypt', _('Encrypt method'));
@@ -751,36 +734,24 @@ return view.extend({
 		/* Wireguard config start */
 		o = s.option(form.DynamicList, 'wireguard_local_addresses', _('Local addresses'));
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'wireguard'});
-		o.validate = function(section_id, value) {
-			if (section_id && value == null || value == [])
-				return _('Expecting: non-empty value');
-		}
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'wireguard_private_key', _('Private key'));
 		o.password = true;
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'wireguard'});
-		o.validate = function(section_id, value) {
-			if (section_id && value == null || value == '')
-				return _('Expecting: non-empty value');
-		}
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'wireguard_peer_pubkey', _('Peer pubkic key'));
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'wireguard'});
-		o.validate = function(section_id, value) {
-			if (section_id && value == null || value == '')
-				return _('Expecting: non-empty value');
-		}
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'wireguard_preshared_key', _('Pre-shared key'));
 		o.password = true;
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'wireguard'});
-		o.validate = function(section_id, value) {
-			if (section_id && value == null || value == '')
-				return _('Expecting: non-empty value');
-		}
+		o.rmempty = false;
 		o.modalonly = true;
 		/* Wireguard config end */
 
