@@ -10,35 +10,6 @@
 'require uci';
 'require view';
 
-var callServiceList = rpc.declare({
-	object: 'service',
-	method: 'list',
-	params: ['name'],
-	expect: { '': {} }
-});
-
-function getServiceStatus() {
-	return L.resolveDefault(callServiceList('homeproxy'), {}).then(function (res) {
-		var isRunning = false;
-		try {
-			isRunning = res['homeproxy']['instances']['sing_box_server']['running'];
-		} catch (e) { }
-		return isRunning;
-	});
-}
-
-function renderStatus(isRunning) {
-	var spanTemp = '<em><span style="color:%s"><strong>%s %s</strong></span></em>';
-	var renderHTML;
-	if (isRunning) {
-		renderHTML = String.format(spanTemp, 'green', _('HomeProxy Server'), _('RUNNING'));
-	} else {
-		renderHTML = String.format(spanTemp, 'red', _('HomeProxy Server'), _('NOT RUNNING'));
-	}
-
-	return renderHTML;
-}
-
 return view.extend({
 	load: function() {
 		return Promise.all([
@@ -49,23 +20,7 @@ return view.extend({
 	render: function(data) {
 		var m, s, o;
 
-		m = new form.Map('homeproxy', _('HomeProxy Server'),
-			_('The modern ImmortalWrt proxy platform for ARM64/AMD64.'));
-
-		s = m.section(form.TypedSection);
-		s.anonymous = true;
-		s.render = function () {
-			poll.add(function () {
-				return L.resolveDefault(getServiceStatus()).then(function (res) {
-					var view = document.getElementById("service_status");
-					view.innerHTML = renderStatus(res);
-				});
-			});
-
-			return E('div', { class: 'cbi-section', id: 'status_bar' }, [
-					E('p', { id: 'service_status' }, _('Collecting data ...'))
-			]);
-		}
+		m = new form.Map('homeproxy', _('Edit servers'));
 
 		s = m.section(form.NamedSection, 'server', 'homeproxy', _('Global settings'));
 
