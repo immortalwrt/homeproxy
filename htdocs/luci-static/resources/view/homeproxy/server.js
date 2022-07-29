@@ -6,7 +6,6 @@
 'use strict';
 'require form';
 'require poll';
-'require rpc';
 'require uci';
 'require view';
 
