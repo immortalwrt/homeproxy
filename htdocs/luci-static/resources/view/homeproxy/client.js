@@ -196,6 +196,7 @@ return view.extend({
 		var ss = o.subsection;
 		ss.addremove = true;
 		ss.anonymous = true;
+		ss.nodescriptions = true;
 		ss.sortable = true;
 		ss.modaltitle = function(section_id) {
 			var tag = uci.get(data[0], section_id, 'tag');
@@ -230,6 +231,7 @@ return view.extend({
 		var ss = o.subsection;
 		ss.addremove = true;
 		ss.anonymous = true;
+		ss.nodescriptions = true;
 		ss.sortable = true;
 		ss.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
@@ -342,6 +344,7 @@ return view.extend({
 		var ss = o.subsection;
 		ss.addremove = true;
 		ss.anonymous = true;
+		ss.nodescriptions = true;
 		ss.sortable = true;
 		ss.modaltitle = function(section_id) {
 			var tag = uci.get(data[0], section_id, 'tag');
@@ -386,6 +389,7 @@ return view.extend({
 		var ss = o.subsection;
 		ss.addremove = true;
 		ss.anonymous = true;
+		ss.nodescriptions = true;
 		ss.sortable = true;
 		ss.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');

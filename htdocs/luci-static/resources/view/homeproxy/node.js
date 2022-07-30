@@ -19,7 +19,7 @@ function fs_installed(binray) {
 	});
 }
 
-function parse_subscription_link(uri) {
+function parse_share_link(uri) {
 	var config;
 
 	uri = uri.split('://');
@@ -125,7 +125,7 @@ function parse_subscription_link(uri) {
 			var protoparam = params.get('protoparam') ? b64decode(params.get('protoparam')) : null;
 			var obfsparam = params.get('obfsparam') ? b64decode(params.get('obfsparam')) : null;
 			var remarks = params.get('remarks') ? b64decodeUnicode(params.get('remarks')) : null;
-			
+
 			config = {
 				alias: remarks,
 				type: 'v2ray',
@@ -227,8 +227,7 @@ function parse_subscription_link(uri) {
 					v2ray_transport: uri.net,
 					tls: uri.tls === 'tls' ? 1 : 0,
 					tls_sni: uri.sni || uri.host,
-					tls_alpn: uri.alpn,
-					tls_insecure: 1
+					tls_alpn: uri.alpn
 				};
 				if (config.v2ray_transport === 'grpc') {
 					config['grpc_servicename'] = uri.path;
@@ -381,6 +380,7 @@ return view.extend({
 		s = m.section(form.GridSection, 'node');
 		s.addremove = true;
 		s.anonymous = true;
+		s.nodescriptions = true;
 		s.sortable = true;
 		s.modaltitle = function(section_id) {
 			var alias = uci.get(data[0], section_id, 'alias') || uci.get(data[0], section_id, 'address');
@@ -413,7 +413,7 @@ return view.extend({
 
 								var imported_node = 0;
 								input_links.forEach(function(s) {
-									var config = parse_subscription_link(s);
+									var config = parse_share_link(s);
 									if (config) {
 										var sid = uci.add(data[0], 'node');
 										Object.keys(config).forEach(function(k) {
@@ -448,7 +448,7 @@ return view.extend({
 				'click': ui.createHandlerFn(this, 'handleLinkImport')
 			}, [ _('Import share links') ]));
 			return el;
-		};
+		}
 		/* Import subscription links end */
 
 		o = s.option(form.Button, '_apply', _('Apply'));

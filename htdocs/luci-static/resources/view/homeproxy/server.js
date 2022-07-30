@@ -30,6 +30,7 @@ return view.extend({
 		s = m.section(form.GridSection, 'server');
 		s.addremove = true;
 		s.anonymous = true;
+		s.nodescriptions = true;
 		s.sortable = true;
 		s.modaltitle = function(section_id) {
 			var alias = uci.get(data[0], section_id, 'alias');
