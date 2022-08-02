@@ -58,8 +58,6 @@ function validatePortRange (section_id, value) {
 		else if (start_port && end_port && start_port >= end_port)
 			return error_message;
 	}
-
-	return true;
 }
 
 return view.extend({
@@ -114,6 +112,7 @@ return view.extend({
 			o.value(i, proxy_nodes[i]);
 		o.default = 'nil';
 		o.depends({'routing': '4', '!reverse': true});
+		o.rmempty = false;
 
 		o = s.taboption('general', form.ListValue, 'routing', _('Routing settings'));
 		o.value('0', _('Disable'));
@@ -131,6 +130,7 @@ return view.extend({
 		o.value('common', _('Common ports only (bypass P2P traffic)'));
 		o.default = 'common';
 		o.depends({'routing': '4', '!reverse': true});
+		o.rmempty = false;
 		o.validate = function(section_id, value) {
 			if (section_id && value !== 'all' && value !== 'common') {
 				if (value === null || value === '')
@@ -146,7 +146,6 @@ return view.extend({
 					ports = ports.concat(i);
 				}
 			}
-			return true;
 		}
 
 		o = s.taboption('general', form.ListValue, 'dns_mode', _('DNS resolve mode'));
@@ -156,6 +155,7 @@ return view.extend({
 		o.value('3', _('Hijack DNS + Sniff'));
 		o.default = '3';
 		o.depends({'routing': '4', '!reverse': true});
+		o.rmempty = false;
 
 		o = s.taboption('general', form.Value, 'dns_server', _('DNS server'),
 			_('You can only have one server set. Custom DNS server format as IP:PORT.'));
@@ -170,12 +170,11 @@ return view.extend({
 		o.default = '8.8.8.8:53';
 		o.depends('dns_mode', '1');
 		o.depends('dns_mode', '3');
+		o.rmempty = false;
 		o.validate = function(section_id, value) {
 			/* TODO: find a proper way to validate DNS server */
 			if (section_id && (value == null || value == ''))
 				return _('Expecting: non-empty value');
-
-			return true;
 		}
 
 		o = s.taboption('general', form.ListValue, 'dns_strategy', _('DNS strategy'),
@@ -187,6 +186,7 @@ return view.extend({
 		o.default = 'prefer_ipv4';
 		o.depends('dns_mode', '1');
 		o.depends('dns_mode', '3');
+		o.rmempty = false;
 
 		/* FIXME: only show up with "Custom routing" enabled */
 		s.tab('routing', _('Custom routing'),
@@ -255,6 +255,7 @@ return view.extend({
 		o = ss.option(form.Flag, 'invert', _('Invert'),
 			_('Invert match result.'));
 		o.default = o.disabled;
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = ss.option(form.ListValue, 'network', _('Network'));
@@ -413,6 +414,7 @@ return view.extend({
 		o = ss.option(form.Flag, 'invert', _('Invert'),
 			_('Invert match result.'));
 		o.default = o.disabled;
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = ss.option(form.ListValue, 'network', _('Network'));
