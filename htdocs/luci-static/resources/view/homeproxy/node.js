@@ -311,6 +311,8 @@ return view.extend({
 					return _('Expecting: %s').format(_('valid URL'));
 				}
 			}
+
+			return true;
 		}
 
 		o = s.option(form.ListValue, 'filter_nodes', _('Filter nodes'),
@@ -499,6 +501,7 @@ return view.extend({
 
 		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
 			_('If set, the server domain name will be resolved to IP before connecting. dns.strategy will be used if empty.'));
+		o.value('', _('Default'));
 		o.value('prefer_ipv4', _('Prefer IPv4'));
 		o.value('prefer_ipv6', _('Prefer IPv6'));
 		o.value('ipv4_only', _('IPv4 only'));
@@ -507,8 +510,6 @@ return view.extend({
 		o.depends('type', 'shadowsocks');
 		o.depends('type', 'socks');
 		o.depends('type', 'vmess');
-		o.default = 'prefer_ipv4';
-		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'address', _('Address'));
@@ -546,6 +547,8 @@ return view.extend({
 				if (required_type.includes(type) || required_type.includes(v2ray_protocol))
 					return _('Expecting: non-empty value');
 			}
+
+			return true;
 		}
 		o.modalonly = true;
 
@@ -730,6 +733,8 @@ return view.extend({
 				else if (value.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
 					return _('Expecting: %s').format(_('valid uuid string'));
 			}
+
+			return true;
 		}
 		o.modalonly = true;
 
@@ -750,19 +755,19 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vmess'});
 		o.modalonly = true;
 
-		/* Sing-box specific start */
 		o = s.option(form.Flag, 'vmess_global_padding', 'Global padding',
 			_('Protocol parameter. Will waste traffic randomly if enabled (enabled by default in v2ray and cannot be disabled).'));
 		o.default = o.enabled;
+		o.depends('type', 'vmess');
 		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'vmess_authenticated_length', _('Authenticated length'),
 			_('Protocol parameter. Enable length block encryption.'));
 		o.default = o.enabled;
+		o.depends('type', 'vmess');
 		o.rmempty = false;
 		o.modalonly = true;
-		/* Sing-box specific end */
 
 		/* Wireguard config start */
 		o = s.option(form.DynamicList, 'wireguard_local_addresses', _('Local addresses'));
@@ -1000,13 +1005,15 @@ return view.extend({
 		o.depends('type', 'vmess');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'tls_sni', _('TLS SNI'));
+		o = s.option(form.Value, 'tls_sni', _('TLS SNI'),
+			_('Used to verify the hostname on the returned certificates unless insecure is given.'));
 		o.depends('type', 'hysteria');
 		o.depends('tls', '1');
 		o.depends('v2ray_xtls', '1');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'tls_alpn', _('TLS ALPN'));
+		o = s.option(form.Value, 'tls_alpn', _('TLS ALPN'),
+			_('Supported application level protocols, in order of preference. Multiple values must be separated by commas.'));
 		o.depends('type', 'hysteria');
 		o.depends('tls', '1');
 		o.depends('v2ray_xtls', '1');
@@ -1082,28 +1089,31 @@ return view.extend({
 
 		o = s.option(form.Value, 'tls_cert_path', _('Certificate path'),
 			_('The path to the server certificate, in PEM format.'));
-		o.default = '/etc/ssl/private/ca.pem';
+		o.default = '/etc/homeproxy/client_ca.pem';
 		o.depends('tls_self_sign', '1');
 		o.modalonly = true;
-		
+
 		o = s.option(form.Button, '_upload_cert', _('Upload certificate'),
-			_('Your certificate will be saved to "/etc/ssl/private/ca.pem".'));
+			_('Your %s will be saved to "/etc/homeproxy/%s.pem".<br />' +
+			'<strong>Save your configuration before uploading files!</strong>')
+			.format(_('certificate'), 'client_ca'));
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends('tls_self_sign', '1');
 		o.onclick = function(ev) {
-			return ui.uploadFile('/etc/ssl/private/ca.pem.tmp', ev.target)
+
+			return ui.uploadFile('/etc/homeproxy/client_ca.pem.tmp', ev.target)
 			.then(L.bind(function(btn, res) {
 				btn.firstChild.data = _('Checking certificate...');
-				return fs.stat('/etc/ssl/private/ca.pem.tmp');
+				return fs.stat('/etc/homeproxy/client_ca.pem.tmp');
 			}, this, ev.target))
 			.then(L.bind(function(btn, res) {
 				if (res.size <= 0) {
 					ui.addNotification(null, E('p', _('The uploaded certificate is empty.')));
-					return fs.remove('/etc/ssl/private/ca.pem.tmp');
+					return fs.remove('/etc/homeproxy/client_ca.pem.tmp');
 				}
 
-				fs.exec('/bin/mv', [ '/etc/ssl/private/ca.pem.tmp', '/etc/ssl/private/ca.pem' ]);
+				fs.exec('/bin/mv', [ '/etc/homeproxy/client_ca.pem.tmp', '/etc/homeproxy/client_ca.pem' ]);
 				ui.addNotification(null, E('p', _('Your certificate was successfully uploaded. Size: %s.').format(res.size)));
 			}, this, ev.target))
 			.catch(function(e) { ui.addNotification(null, E('p', e.message)) })
