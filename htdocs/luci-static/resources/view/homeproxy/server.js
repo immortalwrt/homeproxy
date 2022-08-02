@@ -78,6 +78,8 @@ return view.extend({
 						return _('Expecting: %s').format(_('password with %d characters')).format(32);
 				}
 			}
+
+			return true;
 		}
 		o.modalonly = true;
 

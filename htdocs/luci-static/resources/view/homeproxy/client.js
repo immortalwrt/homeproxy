@@ -58,6 +58,8 @@ function validatePortRange (section_id, value) {
 		else if (start_port && end_port && start_port >= end_port)
 			return error_message;
 	}
+
+	return true;
 }
 
 return view.extend({
@@ -146,6 +148,8 @@ return view.extend({
 					ports = ports.concat(i);
 				}
 			}
+
+			return true;
 		}
 
 		o = s.taboption('general', form.ListValue, 'dns_mode', _('DNS resolve mode'));
@@ -174,6 +178,8 @@ return view.extend({
 			/* TODO: find a proper way to validate DNS server */
 			if (section_id && (value == null || value == ''))
 				return _('Expecting: non-empty value');
+
+			return true;
 		}
 
 		o = s.taboption('general', form.ListValue, 'dns_strategy', _('DNS strategy'),
