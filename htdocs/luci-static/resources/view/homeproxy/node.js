@@ -311,8 +311,6 @@ return view.extend({
 					return _('Expecting: %s').format(_('valid URL'));
 				}
 			}
-
-			return true;
 		}
 
 		o = s.option(form.ListValue, 'filter_nodes', _('Filter nodes'),
@@ -484,6 +482,7 @@ return view.extend({
 		o.value('shadowsocks', _('Shadowsocks'));
 		o.value('socks', _('Socks'));
 		o.value('v2ray', _('V2ray'));
+		o.value('vmess', _('VMess'));
 		o.rmempty = false;
 
 		o = s.option(form.ListValue, 'v2ray_protocol', _('V2ray protocol'));
@@ -496,6 +495,20 @@ return view.extend({
 		o.value('vmess', _('VMess'));
 		o.value('wireguard', _('WireGuard'));
 		o.depends('type', 'v2ray');
+		o.modalonly = true;
+
+		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
+			_('If set, the server domain name will be resolved to IP before connecting. dns.strategy will be used if empty.'));
+		o.value('prefer_ipv4', _('Prefer IPv4'));
+		o.value('prefer_ipv6', _('Prefer IPv6'));
+		o.value('ipv4_only', _('IPv4 only'));
+		o.value('ipv6_only', _('IPv6 only'));
+		o.depends('type', 'http');
+		o.depends('type', 'shadowsocks');
+		o.depends('type', 'socks');
+		o.depends('type', 'vmess');
+		o.default = 'prefer_ipv4';
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'address', _('Address'));
@@ -533,8 +546,6 @@ return view.extend({
 				if (required_type.includes(type) || required_type.includes(v2ray_protocol))
 					return _('Expecting: non-empty value');
 			}
-
-			return true;
 		}
 		o.modalonly = true;
 
@@ -710,9 +721,17 @@ return view.extend({
 
 		/* V2ray config start */
 		o = s.option(form.Value, 'v2ray_uuid', _('UUID'));
+		o.depends('type', 'vmess');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vmess'});
-		o.rmempty = false;
+		o.validate = function(section_id, value) {
+			if (section_id) {
+				if (value == null || value == '')
+					return _('Expecting: non-empty value');
+				else if (value.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
+					return _('Expecting: %s').format(_('valid uuid string'));
+			}
+		}
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'v2ray_vless_encrypt', _('Encrypt method'));
@@ -728,8 +747,23 @@ return view.extend({
 		o.value('aes-128-gcm');
 		o.value('chacha20-poly1305');
 		o.default = 'aes-128-gcm';
+		o.depends('type', 'vmess');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vmess'});
 		o.modalonly = true;
+
+		/* Sing-box specific start */
+		o = s.option(form.Flag, 'vmess_global_padding', 'Global padding',
+			_('Protocol parameter. Will waste traffic randomly if enabled (enabled by default in v2ray and cannot be disabled).'));
+		o.default = o.enabled;
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.Flag, 'vmess_authenticated_length', _('Authenticated length'),
+			_('Protocol parameter. Enable length block encryption.'));
+		o.default = o.enabled;
+		o.rmempty = false;
+		o.modalonly = true;
+		/* Sing-box specific end */
 
 		/* Wireguard config start */
 		o = s.option(form.DynamicList, 'wireguard_local_addresses', _('Local addresses'));
@@ -957,12 +991,14 @@ return view.extend({
 		/* TLS config start */
 		o = s.option(form.Flag, 'tls', _('TLS'));
 		o.default = o.disabled;
+		o.depends('type', 'http');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'http'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'trojan'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vmess'});
+		o.depends('type', 'vmess');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'tls_sni', _('TLS SNI'));
@@ -985,8 +1021,62 @@ return view.extend({
 		o.depends('v2ray_xtls', '1');
 		o.modalonly = true;
 
+		o = s.option(form.ListValue, 'tls_min_version', _('Minimum TLS version'),
+			_('The minimum TLS version that is acceptable. Default to 1.0.'));
+		o.value('1.0');
+		o.value('1.1');
+		o.value('1.2');
+		o.value('1.3');
+		o.default = '1.0';
+		o.depends({'type': 'http', 'tls': '1'});
+		o.depends({'type': 'shadowsocks', 'tls': '1'});
+		o.depends({'type': 'socks', 'tls': '1'});
+		o.depends({'type': 'vmess', 'tls': '1'});
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.ListValue, 'tls_max_version', _('Maximum TLS version'),
+			_('The maximum TLS version that is acceptable. Default to 1.3.'));
+		o.value('1.0');
+		o.value('1.1');
+		o.value('1.2');
+		o.value('1.3');
+		o.default = '1.3';
+		o.depends({'type': 'http', 'tls': '1'});
+		o.depends({'type': 'shadowsocks', 'tls': '1'});
+		o.depends({'type': 'socks', 'tls': '1'});
+		o.depends({'type': 'vmess', 'tls': '1'});
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.MultiValue, 'tls_cipher_suites', _('Cipher suites'),
+			_('The elliptic curves that will be used in an ECDHE handshake, in preference order. If empty, the default will be used.'));
+		o.value('TLS_RSA_WITH_AES_128_CBC_SHA');
+		o.value('TLS_RSA_WITH_AES_256_CBC_SHA');
+		o.value('TLS_RSA_WITH_AES_128_GCM_SHA256');
+		o.value('TLS_RSA_WITH_AES_256_GCM_SHA384');
+		o.value('TLS_AES_128_GCM_SHA256');
+		o.value('TLS_AES_256_GCM_SHA384');
+		o.value('TLS_CHACHA20_POLY1305_SHA256');
+		o.value('TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA');
+		o.value('TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA');
+		o.value('TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA');
+		o.value('TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA');
+		o.value('TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256');
+		o.value('TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384');
+		o.value('TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256');
+		o.value('TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384');
+		o.value('TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256');
+		o.value('TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256');
+		o.depends({'type': 'http', 'tls': '1'});
+		o.depends({'type': 'shadowsocks', 'tls': '1'});
+		o.depends({'type': 'socks', 'tls': '1'});
+		o.depends({'type': 'vmess', 'tls': '1'});
+		o.optional = true;
+		o.modalonly = true;
+
 		o = s.option(form.Flag, 'tls_self_sign', _('Append self-signed certificate'),
-			_('If you have the root certificate, use this option instead of enabling insecure.'));
+			_('If you have the root certificate, use this option instead of allowing insecure.'));
 		o.default = o.disabled;
 		o.depends('tls_insecure', '0');
 		o.modalonly = true;
