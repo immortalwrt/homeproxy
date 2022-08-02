@@ -1012,15 +1012,15 @@ return view.extend({
 		o.depends('v2ray_xtls', '1');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'tls_alpn', _('TLS ALPN'),
-			_('Supported application level protocols, in order of preference. Multiple values must be separated by commas.'));
+		o = s.option(form.DynamicList, 'tls_alpn', _('TLS ALPN'),
+			_('List of supported application level protocols, in order of preference.'));
 		o.depends('type', 'hysteria');
 		o.depends('tls', '1');
 		o.depends('v2ray_xtls', '1');
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'tls_insecure', _('Allow insecure'),
-			_('Allow insecure connection at TLS client. This is <b>DANGEROUS</b>, your traffic is almost <b>PLAIN TEXT</b>! Use at your own risk!'));
+			_('Allow insecure connection at TLS client. This is <b>DANGEROUS</b>, your traffic is almost like <b>PLAIN TEXT</b>! Use at your own risk!'));
 		o.default = o.disabled;
 		o.depends('type', 'hysteria');
 		o.depends('tls', '1');
