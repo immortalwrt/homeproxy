@@ -85,7 +85,6 @@ return view.extend({
 
 		o = s.option(form.ListValue, 'shadowsocks_encrypt_method', _('Encrypt method'));
 		o.value('none');
-		o.value('plain');
 		o.value('aes-128-gcm');
 		o.value('aes-192-gcm');
 		o.value('aes-256-gcm');

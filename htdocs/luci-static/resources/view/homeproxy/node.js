@@ -311,8 +311,6 @@ return view.extend({
 					return _('Expecting: %s').format(_('valid URL'));
 				}
 			}
-
-			return true;
 		}
 
 		o = s.option(form.ListValue, 'filter_nodes', _('Filter nodes'),
@@ -548,8 +546,6 @@ return view.extend({
 				if (required_type.includes(type) || required_type.includes(v2ray_protocol))
 					return _('Expecting: non-empty value');
 			}
-
-			return true;
 		}
 		o.modalonly = true;
 
@@ -610,7 +606,6 @@ return view.extend({
 		/* Shadowsocks config start */
 		o = s.option(form.ListValue, 'shadowsocks_encrypt_method', _('Encrypt method'));
 		o.value('none');
-		o.value('plain');
 		o.value('aes-128-gcm');
 		o.value('aes-192-gcm');
 		o.value('aes-256-gcm');
@@ -735,8 +730,6 @@ return view.extend({
 				else if (value.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
 					return _('Expecting: %s').format(_('valid uuid string'));
 			}
-
-			return true;
 		}
 		o.modalonly = true;
 
