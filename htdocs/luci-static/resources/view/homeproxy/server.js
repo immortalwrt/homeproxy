@@ -96,12 +96,12 @@ return view.extend({
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
 				if (type === 'shadowsocks') {
 					var encmode = this.map.lookupOption('shadowsocks_encrypt_method', section_id)[0].formvalue(section_id);
-					if (encmode === '2022-blake3-aes-128-gcm' && value.length !== 16)
+					if (encmode === '2022-blake3-aes-128-gcm' && pass.length !== 16)
 						return _('Expecting: %s').format(_('password with %d characters')).format(16);
-					else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode) && value.length !== 32)
+					else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode) && pass.length !== 32)
 						return _('Expecting: %s').format(_('password with %d characters')).format(32);
 				} else if (type === 'vmess')
-					if (value.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
+					if (pass.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
 						return _('Expecting: %s').format(_('valid uuid string'));
 			}
 
