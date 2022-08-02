@@ -1081,7 +1081,8 @@ return view.extend({
 		o.depends('tls_insecure', '0');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'tls_cert_path', _('Path to self-signed certificate'));
+		o = s.option(form.Value, 'tls_cert_path', _('Certificate path'),
+			_('The path to the server certificate, in PEM format.'));
 		o.default = '/etc/ssl/private/ca.pem';
 		o.depends('tls_self_sign', '1');
 		o.modalonly = true;

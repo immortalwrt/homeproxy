@@ -170,7 +170,6 @@ return view.extend({
 		o.default = '8.8.8.8:53';
 		o.depends('dns_mode', '1');
 		o.depends('dns_mode', '3');
-		o.rmempty = false;
 		o.validate = function(section_id, value) {
 			/* TODO: find a proper way to validate DNS server */
 			if (section_id && (value == null || value == ''))
