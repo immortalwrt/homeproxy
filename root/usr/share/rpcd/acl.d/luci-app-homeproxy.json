@@ -4,8 +4,9 @@
 		"read": {
 			"file": {
 				"/etc/homeproxy/*": [ "read" ],
-				"/bin/ash": [ "exec" ],
-				"/bin/mv": [ "exec" ]
+				"/usr/bin/which": [ "exec" ],
+				"/bin/mv": [ "exec" ],
+				"/bin/mkdir -p /etc/homeproxy/certs/": [ "exec" ]
 			},
 			"ubus": {
 				"service": [ "list" ]

@@ -13,18 +13,20 @@
 
 return view.extend({
 	cert_upload: function(type, filename, ev) {
-		return ui.uploadFile(String.format('/etc/homeproxy/%s.pem.tmp', filename), ev.target)
+		fs.exec('/bin/mkdir', [ '-p', '/etc/homeproxy/certs/' ]);
+
+		return ui.uploadFile(String.format('/etc/homeproxy/certs/%s.pem.tmp', filename), ev.target)
 		.then(L.bind(function(btn, res) {
 			btn.firstChild.data = _('Checking %s...').format(_(type));
-			return fs.stat(String.format('/etc/homeproxy/%s.pem.tmp', filename));
+			return fs.stat(String.format('/etc/homeproxy/certs/%s.pem.tmp', filename));
 		}, this, ev.target))
 		.then(L.bind(function(btn, res) {
 			if (res.size <= 0) {
 				ui.addNotification(null, E('p', _('The uploaded %s is empty.').format(_type)));
-				return fs.remove(String.format('/etc/homeproxy/%s.pem.tmp', filename));
+				return fs.remove(String.format('/etc/homeproxy/certs/%s.pem.tmp', filename));
 			}
 
-			fs.exec('/bin/mv', [ String.format('/etc/homeproxy/%s.pem.tmp', filename), String.format('/etc/homeproxy/%s.pem', filename) ]);
+			fs.exec('/bin/mv', [ String.format('/etc/homeproxy/certs/%s.pem.tmp', filename), String.format('/etc/homeproxy/certs/%s.pem', filename) ]);
 			ui.addNotification(null, E('p', _('Your %s was successfully uploaded. Size: %s.').format(_(type), res.size)));
 		}, this, ev.target))
 		.catch(function(e) { ui.addNotification(null, E('p', e.message)) })
@@ -188,13 +190,13 @@ return view.extend({
 
 		o = s.option(form.Value, 'tls_cert_path', _('Certificate path'),
 			_('The server public key, in PEM format.'));
-		o.default = '/etc/homeproxy/server_publickey.pem';
+		o.default = '/etc/homeproxy/certs/server_publickey.pem';
 		o.depends('tls', '1');
 		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Button, '_upload_cert', _('Upload certificate'),
-			_('Your %s will be saved to "/etc/homeproxy/%s.pem".<br />' +
+			_('Your %s will be saved to "/etc/homeproxy/certs/%s.pem".<br />' +
 			'<strong>Save your configuration before uploading files!</strong>')
 			.format(_('certificate'), 'server_publickey'));
 		o.inputstyle = 'action';
@@ -205,13 +207,13 @@ return view.extend({
 
 		o = s.option(form.Value, 'tls_key_path', _('Key path'),
 			_('The server private key, in PEM format.'));
-		o.default = '/etc/homeproxy/server_privatekey.pem';
+		o.default = '/etc/homeproxy/certs/server_privatekey.pem';
 		o.depends('tls', '1');
 		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Button, '_upload_key', _('Upload key'),
-			_('Your %s will be saved to "/etc/homeproxy/%s.pem".<br />' +
+			_('Your %s will be saved to "/etc/homeproxy/certs/%s.pem".<br />' +
 			'<strong>Save your configuration before uploading files!</strong>')
 			.format(_('private key'), 'server_privatekey'));
 		o.inputstyle = 'action';

@@ -11,7 +11,7 @@
 'require view';
 
 function fs_installed(binray) {
-	return fs.exec('/bin/ash', ['-c', 'type -t -p ' + binray]).then(function (res) {
+	return fs.exec('/usr/bin/which', [ binray ]).then(function (res) {
 		if (res.stdout && res.stdout.trim() !== '')
 			return true;
 		else
@@ -227,7 +227,7 @@ function parse_share_link(uri) {
 					v2ray_transport: uri.net,
 					tls: uri.tls === 'tls' ? 1 : 0,
 					tls_sni: uri.sni || uri.host,
-					tls_alpn: uri.alpn
+					tls_alpn: uri.alpn ? uri.alpn.split(',') : null
 				};
 				if (config.v2ray_transport === 'grpc') {
 					config['grpc_servicename'] = uri.path;
@@ -1089,31 +1089,32 @@ return view.extend({
 
 		o = s.option(form.Value, 'tls_cert_path', _('Certificate path'),
 			_('The path to the server certificate, in PEM format.'));
-		o.default = '/etc/homeproxy/client_ca.pem';
+		o.default = '/etc/homeproxy/certs/client_ca.pem';
 		o.depends('tls_self_sign', '1');
 		o.modalonly = true;
 
 		o = s.option(form.Button, '_upload_cert', _('Upload certificate'),
-			_('Your %s will be saved to "/etc/homeproxy/%s.pem".<br />' +
+			_('Your %s will be saved to "/etc/homeproxy/certs/%s.pem".<br />' +
 			'<strong>Save your configuration before uploading files!</strong>')
 			.format(_('certificate'), 'client_ca'));
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends('tls_self_sign', '1');
 		o.onclick = function(ev) {
+			fs.exec('/bin/mkdir', [ '-p', '/etc/homeproxy/certs/' ]);
 
-			return ui.uploadFile('/etc/homeproxy/client_ca.pem.tmp', ev.target)
+			return ui.uploadFile('/etc/homeproxy/certs/client_ca.pem.tmp', ev.target)
 			.then(L.bind(function(btn, res) {
 				btn.firstChild.data = _('Checking certificate...');
-				return fs.stat('/etc/homeproxy/client_ca.pem.tmp');
+				return fs.stat('/etc/homeproxy/certs/client_ca.pem.tmp');
 			}, this, ev.target))
 			.then(L.bind(function(btn, res) {
 				if (res.size <= 0) {
 					ui.addNotification(null, E('p', _('The uploaded certificate is empty.')));
-					return fs.remove('/etc/homeproxy/client_ca.pem.tmp');
+					return fs.remove('/etc/homeproxy/certs/client_ca.pem.tmp');
 				}
 
-				fs.exec('/bin/mv', [ '/etc/homeproxy/client_ca.pem.tmp', '/etc/homeproxy/client_ca.pem' ]);
+				fs.exec('/bin/mv', [ '/etc/homeproxy/certs/client_ca.pem.tmp', '/etc/homeproxy/certs/client_ca.pem' ]);
 				ui.addNotification(null, E('p', _('Your certificate was successfully uploaded. Size: %s.').format(res.size)));
 			}, this, ev.target))
 			.catch(function(e) { ui.addNotification(null, E('p', e.message)) })
