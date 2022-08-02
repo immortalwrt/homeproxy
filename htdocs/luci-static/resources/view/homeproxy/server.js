@@ -56,30 +56,28 @@ return view.extend({
 		o.datatype = 'port';
 		o.rmempty = false;
 
-		o = s.option(form.DynamicList, 'username_password', _('Username / Password'),
-			_('Format as user:pass.'));
-		o.depends('type', 'http');
-		o.depends('type', 'socks');
+		o = s.option(form.DynamicList, 'username_password', _('Username / Password (UUID)'),
+			_('Format as user:pass(uuid).'));
 		o.validate = function(section_id, value) {
-			if (section_id && value !== null && value !== '') {
+			if (section_id) {
+				if (this.formvalue(section_id).length === 0)
+					return _('Expecting: non-empty value');
+				else if (!value)
+					return true;
+
 				var user = value.split(':')[0], pass = value.split(':')[1];
 				if (value.split(':').length > 2 || !user || !pass)
-					return _('Expecting: %s').format('valid user:pass pair');
+					return _('Expecting: %s').format(_('valid user:pass(uuid) pair'));
+
+				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
+				if (type === 'shadowsocks') {
+					var encmode = this.map.lookupOption('shadowsocks_encrypt_method', section_id)[0].formvalue(section_id);
+					if (encmode === '2022-blake3-aes-128-gcm' && value.length !== 16)
+						return _('Expecting: %s').format(_('password with %d characters')).format(16);
+					else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode) && value.length !== 32)
+						return _('Expecting: %s').format(_('password with %d characters')).format(32);
+				}
 			}
-
-			return true;
-		}
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'shadowsocks_password', _('Password'));
-		o.password = true;
-		o.depends('type', 'shadowsocks');
-		o.validate = function(section_id, value) {
-			if (section_id && (value === null || value === '')) {
-				return _('Expecting: non-empty value');
-			}
-
-			return true;
 		}
 		o.modalonly = true;
 
