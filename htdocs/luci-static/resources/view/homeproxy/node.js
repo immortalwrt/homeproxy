@@ -47,13 +47,14 @@ function parse_share_link(uri) {
 				try {
 					var suri = uri[1].split('#');
 					var salias = '';
-					if (suri.length <= 2)
+					if (suri.length <= 2) {
 						if (suri.length === 2)
 							salias = '#' + suri[1];
 						uri = [null, b64decode(suri[0]) + salias];
+					}
 				} catch(e) { }
 
-				/* SIP002 format https://shadowsocks.org/en/spec/SIP002-URI-Scheme.html */
+				/* SIP002 format https://shadowsocks.org/guide/sip002.html */
 				var url = new URL('http://' + uri[1]);
 				var alias = url.hash ? decodeURIComponent(url.hash.slice(1)) : null;
 
@@ -61,15 +62,15 @@ function parse_share_link(uri) {
 				if (url.username && url.password)
 					/* User info encoded with URIComponent, mostly for ss2022 */
 					userinfo = [url.username, decodeURIComponent(url.password)];
-				else
+				else if (url.username)
 					/* User info encoded with base64 */
 					userinfo = b64decode(url.username).split(':');
 
 				var plugin, plugin_opts;
-				if (url.search) {
+				if (url.search && url.searchParams.get('plugin')) {
 					var plugin_info = url.searchParams.get('plugin').split(';');
 					plugin = plugin_info[0];
-					plugin_opts = plugin_info.slice(1).join(';');
+					plugin_opts = plugin_info.slice(1) ? plugin_info.slice(1).join(';') : null;
 				}
 
 				/* Check if address, method and password exist */
@@ -90,7 +91,7 @@ function parse_share_link(uri) {
 
 				break;
 			} catch(e) {
-				/* Legacy format https://shadowsocks.org/en/config/quick-guide.html */
+				/* Legacy format https://github.com/shadowsocks/shadowsocks-org/commit/78ca46cd6859a4e9475953ed34a2d301454f579e */
 				uri = uri[1].split('@');
 				if (uri.length < 2)
 					return null;
@@ -115,10 +116,12 @@ function parse_share_link(uri) {
 				break;
 			}
 		case 'ssr':
+			/* https://coderschool.cn/2498.html */
 			uri = b64decode(uri[1]).split('/');
+			var userinfo = uri[0].split(':')
 
 			/* Check if address, method and password exist */
-			if (!uri[0].split(':')[0] || !uri[0].split(':')[3] || !uri[0].split(':')[5])
+			if (!userinfo[0] || !userinfo[3] || !userinfo[5])
 				return null;
 
 			var params = new URLSearchParams(uri[1]);
@@ -130,13 +133,13 @@ function parse_share_link(uri) {
 				alias: remarks,
 				type: 'v2ray',
 				v2ray_protocol: 'shadowsocksr',
-				address: uri[0].split(':')[0],
-				port: uri[0].split(':')[1],
-				shadowsocksr_encrypt_method: uri[0].split(':')[3],
-				password: b64decode(uri[0].split(':')[5]),
-				shadowsocksr_protocol: uri[0].split(':')[2],
+				address: userinfo[0],
+				port: userinfo[1],
+				shadowsocksr_encrypt_method: userinfo[3],
+				password: b64decode(userinfo[5]),
+				shadowsocksr_protocol: userinfo[2],
 				shadowsocksr_protocol_param: protoparam,
-				shadowsocksr_obfs: uri[0].split(':')[4],
+				shadowsocksr_obfs: userinfo[4],
 				shadowsocksr_obfs_param: obfsparam
 			};
 
@@ -155,7 +158,7 @@ function parse_share_link(uri) {
 				v2ray_protocol: 'trojan',
 				address: url.hostname,
 				port: url.port || '80',
-				password: url.username,
+				password: decodeURIComponent(url.username),
 				tls: '1',
 				tls_sni: url.searchParams.get('sni')
 			};
@@ -179,10 +182,10 @@ function parse_share_link(uri) {
 				v2ray_uuid: url.username,
 				v2ray_vless_encrypt: params.get('encryption') || 'none',
 				v2ray_transport: params.get('type'),
-				tls: params.get('security') === 'tls' ? 1 : 0,
+				tls: params.get('security') === 'tls' ? '1' : '0',
 				tls_sni: params.get('sni'),
-				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')) : null,
-				v2ray_xtls: params.get('security') === 'xtls' ? 1 : 0,
+				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')).split(',') : null,
+				v2ray_xtls: params.get('security') === 'xtls' ? '1' : '0',
 				v2ray_xtls_flow: params.get('flow')
 			};
 			if (config.v2ray_transport === 'grpc') {
@@ -200,6 +203,13 @@ function parse_share_link(uri) {
 			} else if (config.v2ray_transport === 'mkcp') {
 				config['mkcp_seed'] = params.get('seed');
 				config['mkcp_header'] = params.get('headerType') || 'none';
+				/* Default settings from v2rayN */
+				config['mkcp_downlink_capacity'] = '100';
+				config['mkcp_uplink_capacity'] = '12';
+				config['mkcp_read_buffer_size'] = '2';
+				config['mkcp_write_buffer_size'] = '2';
+				config['mkcp_mtu'] = '1350';
+				config['mkcp_tti'] = '50';
 			} else if (config.v2ray_transport === 'quic') {
 				config['quic_security'] = params.get('quicSecurity') || 'none';
 				config['quic_key'] = params.get('key');
@@ -213,6 +223,7 @@ function parse_share_link(uri) {
 
 			if (uri.v === '2') {
 				/* Check if address, uuid, type, and alterId exist */
+				/* https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6 */
 				if (!uri.add || !uri.id || !uri.net || (uri.aid && parseInt(uri.aid) !== 0))
 					return null;
 
@@ -225,7 +236,7 @@ function parse_share_link(uri) {
 					v2ray_uuid: uri.id,
 					v2ray_vmess_encrypt: uri.scy || 'auto',
 					v2ray_transport: uri.net,
-					tls: uri.tls === 'tls' ? 1 : 0,
+					tls: uri.tls === 'tls' ? '1' : '0',
 					tls_sni: uri.sni || uri.host,
 					tls_alpn: uri.alpn ? uri.alpn.split(',') : null
 				};
@@ -244,6 +255,13 @@ function parse_share_link(uri) {
 				} else if (config.v2ray_transport === 'mkcp') {
 					config['mkcp_seed'] = uri.path;
 					config['mkcp_header'] = uri.type || 'none';
+					/* Default settings from v2rayN */
+					config['mkcp_downlink_capacity'] = '100';
+					config['mkcp_uplink_capacity'] = '12';
+					config['mkcp_read_buffer_size'] = '2';
+					config['mkcp_write_buffer_size'] = '2';
+					config['mkcp_mtu'] = '1350';
+					config['mkcp_tti'] = '50';
 				} else if (config.v2ray_transport === 'quic') {
 					config['quic_security'] = uri.host || 'none';
 					config['quic_key'] = uri.path;
