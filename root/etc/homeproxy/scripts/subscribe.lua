@@ -125,16 +125,16 @@ local function parse_uri(uri)
 		local alias = urldecode(url.fragment)
 
 		local userinfo
-		if notEmpty(url.user) and notEmpty(url.password) then
+		if url.user and url.password then
 			-- User info encoded with URIComponent, mostly for ss2022
 			userinfo = { url.user, b64decode(url.password) }
-		elseif notEmpty(url.user) then
+		elseif url.user then
 			-- User info encoded with base64
 			userinfo = b64decode(url.user):split(":")
 		end
 
 		local plugin, plugin_opts
-		if url.query and notEmpty(url.query.plugin) then
+		if notEmpty(url.query) and url.query.plugin then
 			local plugin_info = url.query.plugin:split(";")
 			plugin = plugin_info[1]
 			if table.getn(plugin_info) >= 2 then
@@ -143,7 +143,7 @@ local function parse_uri(uri)
 		end
 
 		-- Check if address, method and password exist
-		if not (notEmpty(url.host) and table.getn(userinfo) == 2 and checkTabValue(shadowsocks_encrypt_method)[userinfo[1]]) then
+		if not (url.host and table.getn(userinfo) == 2 and checkTabValue(shadowsocks_encrypt_method)[userinfo[1]]) then
 			log('Skipping invalid Shadowsocks node:', b64decode(alias) or url.host)
 			return nil
 		end
@@ -189,7 +189,7 @@ local function parse_uri(uri)
 		local url = URL.parse('http://' .. uri)
 
 		-- Check if address and password exist
-		if isEmpty(url.host) or isEmpty(url.user) then
+		if not (url.host and url.user) then
 			log("Skipping invalid Trojan node:", urldecode(url.fragment) or url.host)
 			return nil
 		end
@@ -202,14 +202,14 @@ local function parse_uri(uri)
 			port = url.port,
 			password = urldecode(url.user),
 			tls = "1",
-			tls_sni = url.query and notEmpty(url.query.sni) or nil
+			tls_sni = notEmpty(url.query) and url.query.sni or nil
 		}
 	elseif uri[1] == "vless" then
 		-- https://github.com/XTLS/Xray-core/discussions/716
 		local url = URL.parse('http://' .. uri)
 
 		-- Check if address, uuid and type exist
-		if isEmpty(url.host) or isEmpty(url.user) or isEmpty(url.query) or isEmpty(url.query.type) then
+		if not (url.host and url.user and notEmpty(url.query) and url.query.type) then
 			log("Skipping invalid VLESS node:", urldecode(url.fragment) or url.host)
 			return nil
 		end
@@ -225,25 +225,25 @@ local function parse_uri(uri)
 			v2ray_transport = url.query.type,
 			tls = (url.query.security == "tls") and "1" or "0",
 			tls_sni = url.query.sni,
-			tls_alpn = notEmpty(url.query.alpn) and urldecode(url.query.alpn):split(",") or nil,
+			tls_alpn = url.query.alpn and urldecode(url.query.alpn):split(",") or nil,
 			v2ray_xtls = (url.query.security == "xtls") and "1" or "0",
 			v2ray_xtls_flow = url.query.flow
 		}
 		if config.v2ray_transport == "grpc" then
 			config["grpc_servicename"] = url.query.serviceName
-			config["grpc_mode"] = notEmpty(url.query.mode) or "gun"
+			config["grpc_mode"] = url.query.mode or "gun"
 		elseif string.match("h2,tcp,ws", config.v2ray_transport) then
-			config["http_header"] = (config.v2ray_transport == "tcp") and (notEmpty(url.query.headerType) or "none") or nil
-			config["h2_host"] = notEmpty(url.query.host) and urldecode(url.query.host) or nil
-			config["h2_path"] = notEmpty(url.query.path) and urldecode(url.query.path) or nil
-			if notEmpty(config.h2_path) and config.h2_path:match("\?ed=") then
+			config["http_header"] = (config.v2ray_transport == "tcp") and (url.query.headerType or "none") or nil
+			config["h2_host"] = url.query.host and urldecode(url.query.host) or nil
+			config["h2_path"] = url.query.path and urldecode(url.query.path) or nil
+			if config.h2_path and config.h2_path:match("\?ed=") then
 				config["websocket_early_data_header"] = "Sec-WebSocket-Protocol"
 				config["websocket_early_data"] = config.h2_path:split('?ed=')[2]
 				config["h2_path"] = config.h2_path:split("?ed=")[1]
 			end
 		elseif config.v2ray_transport == "mkcp" then
 			config["mkcp_seed"] = url.query.seed
-			config["mkcp_header"] = notEmpty(url.query.headerType) or "none"
+			config["mkcp_header"] = url.query.headerType or "none"
 			-- Default settings from v2rayN
 			config["mkcp_downlink_capacity"] = "100"
 			config["mkcp_uplink_capacity"] = "12"
@@ -252,9 +252,9 @@ local function parse_uri(uri)
 			config["mkcp_mtu"] = "1350"
 			config["mkcp_tti"] = "50"
 		elseif config.v2ray_transport == "quic" then
-			config["quic_security"] = notEmpty(url.query.quicSecurity) or "none"
+			config["quic_security"] = url.query.quicSecurity or "none"
 			config["quic_key"] = url.query.key
-			config["mkcp_header"] = notEmpty(url.query.headerType) or "none"
+			config["mkcp_header"] = url.query.headerType or "none"
 		end
 	elseif uri[1] == "vmess" then
 		-- https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2)
