@@ -28,6 +28,27 @@ local shadowsocks_encrypt_method = {
 -- Common var end
 
 -- String parser start
+string.urldecode = luci.util.urldecode
+string.urlencode = luci.util.urlencode
+
+local JSON = { parse = luci.jsonc.parse, dump = luci.jsonc.stringify }
+local URL = require "url"
+
+local function b64decode(str)
+	if not str or #str == 0 then
+		return nil
+	end
+
+	str = str:gsub("_", "/"):gsub("-", "+")
+
+	local padding = #str % 4
+	str = str .. string.sub('====', padding + 1)
+
+	return nixio.bin.b64decode(str)
+end
+-- String parser end
+
+-- String helper start
 string.split = luci.util.split
 string.trim = luci.util.trim
 
@@ -48,36 +69,6 @@ table.splice = function(tbl, start, length)
 	return spliced, remainder
 end
 
-local JSON = { parse = luci.jsonc.parse, dump = luci.jsonc.stringify }
-local URL = require "url"
-
-local function b64decode(str)
-	if not str or #str == 0 then
-		return nil
-	end
-
-	str = str:gsub("_", "/"):gsub("-", "+")
-
-	local padding = #str % 4
-	str = str .. string.sub('====', padding + 1)
-
-	return nixio.bin.b64decode(str)
-end
-
-local function urldecode(str)
-	if not str or #str == 0 then
-		return nil
-	end
-
-	str = str:gsub('+', ' '):gsub('%%(%x%x)', function(h)
-		return string.char(tonumber(h, 16))
-	end)
-
-	return str
-end
--- String parser end
-
--- String helper start
 local function isEmpty(res)
 	return res == nil or res == "" or (type(res) == "table" and next(res) == nil)
 end
@@ -98,6 +89,10 @@ local function checkTabValue(tab)
 end
 -- String helper end
 
+-- Utilities start
+local md5 = require "md5"
+-- Utilities end
+
 local function log(...)
 	-- TODO: write to log file directly
 	print(os.date("%Y-%m-%d %H:%M:%S [SUBSCRIBE UPDATE] ") .. table.concat({...}, " "))
@@ -106,143 +101,166 @@ end
 local function parse_uri(uri)
 	local config
 
-	uri = uri:split("://")
-	if uri[1] == "ss" then
-		-- "Lovely" Shadowrocket format
-		local suri = uri[2]:split("#")
-		local salias = ""
-		if table.getn(suri) <= 2 then
-			if table.getn(suri) == 2 then
-				salias = "#" .. suri[2]
+	if type(uri) == "table" then
+		if uri.type == "ss" then
+			-- SIP008 format https://shadowsocks.org/guide/sip008.html
+			if not checkTabValue(shadowsocks_encrypt_method)[uri.method] then
+				log('Skipping unsupported Shadowsocks node:', b64decode(uri.remarks) or url.server)
+				return nil
 			end
-			if b64decode(suri[1]) then
-				uri = { "ss", b64decode(suri[1]) .. salias }
+
+			config = {
+				alias = uri.remarks,
+				type = notEmpty(uri.plugin) and "v2ray" or "shadowsocks",
+				v2ray_protocol = notEmpty(uri.plugin) and "shadowsocks" or nil,
+				address = uri.server
+				port = uri.server_port,
+				shadowsocks_encrypt_method = uri.method,
+				password = uri.password,
+				shadowsocks_plugin = uri.plugin,
+				shadowsocks_plugin_opts = uri.plugin_opts
+			}
+		end
+	elseif type(uri) == "string" then
+		uri = uri:split("://")
+		if uri[1] == "ss" then
+			-- "Lovely" Shadowrocket format
+			local suri = uri[2]:split("#")
+			local salias = ""
+			if table.getn(suri) <= 2 then
+				if table.getn(suri) == 2 then
+					salias = "#" .. suri[2]
+				end
+				if b64decode(suri[1]) then
+					uri = { "ss", b64decode(suri[1]) .. salias }
+				end
 			end
-		end
 
-		-- SIP002 format https://shadowsocks.org/guide/sip002.html
-		local url = URL.parse('http://' .. uri[2])
-		local alias = urldecode(url.fragment)
+			-- SIP002 format https://shadowsocks.org/guide/sip002.html
+			local url = URL.parse('http://' .. uri[2])
+			local alias = url.fragment:urldecode(true)
 
-		local userinfo
-		if url.user and url.password then
-			-- User info encoded with URIComponent, mostly for ss2022
-			userinfo = { url.user, b64decode(url.password) }
-		elseif url.user then
-			-- User info encoded with base64
-			userinfo = b64decode(url.user):split(":")
-		end
-
-		local plugin, plugin_opts
-		if notEmpty(url.query) and url.query.plugin then
-			local plugin_info = url.query.plugin:split(";")
-			plugin = plugin_info[1]
-			if table.getn(plugin_info) >= 2 then
-				plugin_opts = table.concat(table.splice(plugin_info, 1, 1), ";")
+			local userinfo
+			if url.user and url.password then
+				-- User info encoded with URIComponent, mostly for ss2022
+				userinfo = { url.user, b64decode(url.password) }
+			elseif url.user then
+				-- User info encoded with base64
+				userinfo = b64decode(url.user):split(":")
 			end
-		end
 
-		if not checkTabValue(shadowsocks_encrypt_method)[userinfo[1]] then
-			log('Skipping unsupported Shadowsocks node:', b64decode(alias) or url.host)
-			return nil
-		end
-
-		config = {
-			alias = alias,
-			type = plugin and "v2ray" or "shadowsocks",
-			v2ray_protocol = plugin and "shadowsocks" or nil,
-			address = url.host,
-			port = url.port,
-			shadowsocks_encrypt_method = userinfo[1],
-			password = userinfo[2],
-			shadowsocks_plugin = plugin,
-			shadowsocks_plugin_opts = plugin_opts
-		}
-	elseif uri[1] == "ssr" then
-		-- https://coderschool.cn/2498.html
-		uri = b64decode(uri[2]):split("/")
-		local userinfo = uri[1]:split(":")
-		local params = URL.parseQuery(uri[2]:gsub('^\?', ''))
-
-		config = {
-			alias = b64decode(params.remarks),
-			tpye = "v2ray",
-			v2ray_protocol = "shadowsocksr",
-			address = userinfo[1],
-			port = userinfo[2],
-			shadowsocksr_encrypt_method = userinfo[4],
-			password = b64decode(userinfo[6]),
-			shadowsocksr_protocol = userinfo[3],
-			shadowsocksr_protocol_param = b64decode(params.protoparam),
-			shadowsocksr_obfs = userinfo[5],
-			shadowsocksr_obfs_param = b64decode(params.obfsparam)
-		}
-	elseif uri[1] == "trojan" then
-		-- https://p4gefau1t.github.io/trojan-go/developer/url/
-		local url = URL.parse('http://' .. uri)
-
-		config = {
-			alias = urldecode(url.fragment),
-			type = "v2ray",
-			v2ray_protocol = "trojan",
-			address = url.host,
-			port = url.port,
-			password = urldecode(url.user),
-			tls = "1",
-			tls_sni = notEmpty(url.query) and url.query.sni or nil
-		}
-	elseif uri[1] == "vless" then
-		-- https://github.com/XTLS/Xray-core/discussions/716
-		local url = URL.parse('http://' .. uri)
-
-		config = {
-			alias = urldecode(url.fragment),
-			type = "v2ray",
-			v2ray_protocol = "vless",
-			address = url.host,
-			port = url.port,
-			v2ray_uuid = url.user,
-			v2ray_vless_encrypt = url.query.encryption or "none",
-			v2ray_transport = url.query.type,
-			tls = (url.query.security == "tls") and "1" or "0",
-			tls_sni = url.query.sni,
-			tls_alpn = url.query.alpn and urldecode(url.query.alpn):split(",") or nil,
-			v2ray_xtls = (url.query.security == "xtls") and "1" or "0",
-			v2ray_xtls_flow = url.query.flow
-		}
-		if config.v2ray_transport == "grpc" then
-			config["grpc_servicename"] = url.query.serviceName
-			config["grpc_mode"] = url.query.mode or "gun"
-		elseif string.match("h2,tcp,ws", config.v2ray_transport) then
-			config["http_header"] = (config.v2ray_transport == "tcp") and (url.query.headerType or "none") or nil
-			config["h2_host"] = url.query.host and urldecode(url.query.host) or nil
-			config["h2_path"] = url.query.path and urldecode(url.query.path) or nil
-			if config.h2_path and config.h2_path:match("\?ed=") then
-				config["websocket_early_data_header"] = "Sec-WebSocket-Protocol"
-				config["websocket_early_data"] = config.h2_path:split('?ed=')[2]
-				config["h2_path"] = config.h2_path:split("?ed=")[1]
+			if not checkTabValue(shadowsocks_encrypt_method)[userinfo[1]] then
+				log('Skipping unsupported Shadowsocks node:', b64decode(alias) or url.host)
+				return nil
 			end
-		elseif config.v2ray_transport == "mkcp" then
-			config["mkcp_seed"] = url.query.seed
-			config["mkcp_header"] = url.query.headerType or "none"
-			-- Default settings from v2rayN
-			config["mkcp_downlink_capacity"] = "100"
-			config["mkcp_uplink_capacity"] = "12"
-			config["mkcp_read_buffer_size"] = "2"
-			config["mkcp_write_buffer_size"] = "2"
-			config["mkcp_mtu"] = "1350"
-			config["mkcp_tti"] = "50"
-		elseif config.v2ray_transport == "quic" then
-			config["quic_security"] = url.query.quicSecurity or "none"
-			config["quic_key"] = url.query.key
-			config["mkcp_header"] = url.query.headerType or "none"
-		end
-	elseif uri[1] == "vmess" then
-		-- https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2)
-		uri = JSON.parse(b64decode(uri[2]))
-		if uri.v == "2" then
+
+			local plugin, plugin_opts
+			if notEmpty(url.query) and url.query.plugin then
+				local plugin_info = url.query.plugin:split(";")
+				plugin = plugin_info[1]
+				if table.getn(plugin_info) >= 2 then
+					plugin_opts = table.concat(table.splice(plugin_info, 1, 1), ";")
+				end
+			end
+
+			config = {
+				alias = alias,
+				type = plugin and "v2ray" or "shadowsocks",
+				v2ray_protocol = plugin and "shadowsocks" or nil,
+				address = url.host,
+				port = url.port,
+				shadowsocks_encrypt_method = userinfo[1],
+				password = userinfo[2],
+				shadowsocks_plugin = plugin,
+				shadowsocks_plugin_opts = plugin_opts
+			}
+		elseif uri[1] == "ssr" then
+			-- https://coderschool.cn/2498.html
+			uri = b64decode(uri[2]):split("/")
+			local userinfo = uri[1]:split(":")
+			local params = URL.parseQuery(uri[2]:gsub('^\?', ''))
+
+			config = {
+				alias = b64decode(params.remarks),
+				tpye = "v2ray",
+				v2ray_protocol = "shadowsocksr",
+				address = userinfo[1],
+				port = userinfo[2],
+				shadowsocksr_encrypt_method = userinfo[4],
+				password = b64decode(userinfo[6]),
+				shadowsocksr_protocol = userinfo[3],
+				shadowsocksr_protocol_param = b64decode(params.protoparam),
+				shadowsocksr_obfs = userinfo[5],
+				shadowsocksr_obfs_param = b64decode(params.obfsparam)
+			}
+		elseif uri[1] == "trojan" then
+			-- https://p4gefau1t.github.io/trojan-go/developer/url/
+			local url = URL.parse('http://' .. uri)
+
+			config = {
+				alias = url.fragment and url.fragment:urldecode(true) or nil,
+				type = "v2ray",
+				v2ray_protocol = "trojan",
+				address = url.host,
+				port = url.port,
+				password = url.user:urldecode(true),
+				tls = "1",
+				tls_sni = notEmpty(url.query) and url.query.sni or nil
+			}
+		elseif uri[1] == "vless" then
+			-- https://github.com/XTLS/Xray-core/discussions/716
+			local url = URL.parse('http://' .. uri)
+
+			config = {
+				alias = url.fragment and url.fragment:urldecode(true) or nil,
+				type = "v2ray",
+				v2ray_protocol = "vless",
+				address = url.host,
+				port = url.port,
+				v2ray_uuid = url.user,
+				v2ray_vless_encrypt = url.query.encryption or "none",
+				v2ray_transport = url.query.type,
+				tls = (url.query.security == "tls") and "1" or "0",
+				tls_sni = url.query.sni,
+				tls_alpn = url.query.alpn and url.query.alpn:urldecode(true):split(",") or nil,
+				v2ray_xtls = (url.query.security == "xtls") and "1" or "0",
+				v2ray_xtls_flow = url.query.flow
+			}
+			if config.v2ray_transport == "grpc" then
+				config["grpc_servicename"] = url.query.serviceName
+				config["grpc_mode"] = url.query.mode or "gun"
+			elseif string.match("h2,tcp,ws", config.v2ray_transport) then
+				config["http_header"] = (config.v2ray_transport == "tcp") and (url.query.headerType or "none") or nil
+				config["h2_host"] = url.query.host and url.query.host:urldecode(true) or nil
+				config["h2_path"] = url.query.path and url.query.path:urldecode(true) or nil
+				if config.h2_path and config.h2_path:match("\?ed=") then
+					config["websocket_early_data_header"] = "Sec-WebSocket-Protocol"
+					config["websocket_early_data"] = config.h2_path:split('?ed=')[2]
+					config["h2_path"] = config.h2_path:split("?ed=")[1]
+				end
+			elseif config.v2ray_transport == "mkcp" then
+				config["mkcp_seed"] = url.query.seed
+				config["mkcp_header"] = url.query.headerType or "none"
+				-- Default settings from v2rayN
+				config["mkcp_downlink_capacity"] = "100"
+				config["mkcp_uplink_capacity"] = "12"
+				config["mkcp_read_buffer_size"] = "2"
+				config["mkcp_write_buffer_size"] = "2"
+				config["mkcp_mtu"] = "1350"
+				config["mkcp_tti"] = "50"
+			elseif config.v2ray_transport == "quic" then
+				config["quic_security"] = url.query.quicSecurity or "none"
+				config["quic_key"] = url.query.key
+				config["mkcp_header"] = url.query.headerType or "none"
+			end
+		elseif uri[1] == "vmess" then
+			-- https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2)
+			uri = JSON.parse(b64decode(uri[2]))
+
+			if uri.v ~= "2" then
+				return nil
 			-- https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
-			if notEmpty(uri.aid) and tonumber(uri.aid) ~= 0 then
+			elseif notEmpty(uri.aid) and tonumber(uri.aid) ~= 0 then
 				log("Skipping outdated VMess node:", uri.alias or uri.add)
 				return nil
 			end
@@ -287,8 +305,6 @@ local function parse_uri(uri)
 				config["quic_key"] = uri.path
 				config["mkcp_header"] = notEmpty(uri.type) or "none"
 			end
-		else
-			return nil
 		end
 	end
 

@@ -31,11 +31,7 @@ function parse_share_link(uri) {
 			if (padding)
 				str = str + Array(padding + 1).join('=');
 
-			return atob(str);
-		}
-
-		function b64decodeUnicode(str) {
-			return decodeURIComponent(Array.prototype.map.call(b64decode(str), function (c) {
+			return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {
 				return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
 			}).join(''));
 		}
@@ -119,7 +115,7 @@ function parse_share_link(uri) {
 			var params = new URLSearchParams(uri[1]);
 			var protoparam = params.get('protoparam') ? b64decode(params.get('protoparam')) : null;
 			var obfsparam = params.get('obfsparam') ? b64decode(params.get('obfsparam')) : null;
-			var remarks = params.get('remarks') ? b64decodeUnicode(params.get('remarks')) : null;
+			var remarks = params.get('remarks') ? b64decode(params.get('remarks')) : null;
 
 			config = {
 				alias: remarks,
@@ -207,55 +203,54 @@ function parse_share_link(uri) {
 			break;
 		case 'vmess':
 			/* https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2) */
-			uri = JSON.parse(b64decodeUnicode(uri[1]));
+			uri = JSON.parse(b64decode(uri[1]));
 
-			if (uri.v === '2') {
-				/* https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6 */
-				if (uri.aid && parseInt(uri.aid) !== 0)
-					return null;
-
-				config = {
-					alias: uri.ps,
-					type: 'v2ray',
-					v2ray_protocol: 'vmess',
-					address: uri.add,
-					port: uri.port,
-					v2ray_uuid: uri.id,
-					v2ray_vmess_encrypt: uri.scy || 'auto',
-					v2ray_transport: uri.net,
-					tls: uri.tls === 'tls' ? '1' : '0',
-					tls_sni: uri.sni || uri.host,
-					tls_alpn: uri.alpn ? uri.alpn.split(',') : null
-				};
-				if (config.v2ray_transport === 'grpc') {
-					config['grpc_servicename'] = uri.path;
-					config['grpc_mode'] = 'gun';
-				} else if (['h2', 'tcp', 'ws'].includes(config.v2ray_transport)) {
-					config['http_header'] = config.v2ray_transport === 'tcp' ? uri.type || 'none' : null;
-					config['h2_host'] = uri.host;
-					config['h2_path'] = uri.path;
-					if (config.h2_path && config.h2_path.includes('?ed=')) {
-						config['websocket_early_data_header'] = 'Sec-WebSocket-Protocol';
-						config['websocket_early_data'] = config.h2_path.split('?ed=')[1];
-						config['h2_path'] = config.h2_path.split('?ed=')[0];
-					}
-				} else if (config.v2ray_transport === 'mkcp') {
-					config['mkcp_seed'] = uri.path;
-					config['mkcp_header'] = uri.type || 'none';
-					/* Default settings from v2rayN */
-					config['mkcp_downlink_capacity'] = '100';
-					config['mkcp_uplink_capacity'] = '12';
-					config['mkcp_read_buffer_size'] = '2';
-					config['mkcp_write_buffer_size'] = '2';
-					config['mkcp_mtu'] = '1350';
-					config['mkcp_tti'] = '50';
-				} else if (config.v2ray_transport === 'quic') {
-					config['quic_security'] = uri.host || 'none';
-					config['quic_key'] = uri.path;
-					config['mkcp_header'] = uri.type || 'none';
-				}
-			} else
+			if (uri.v !== '2')
 				return null;
+			/* https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6 */
+			else if (uri.aid && parseInt(uri.aid) !== 0)
+				return null;
+
+			config = {
+				alias: uri.ps,
+				type: 'v2ray',
+				v2ray_protocol: 'vmess',
+				address: uri.add,
+				port: uri.port,
+				v2ray_uuid: uri.id,
+				v2ray_vmess_encrypt: uri.scy || 'auto',
+				v2ray_transport: uri.net,
+				tls: uri.tls === 'tls' ? '1' : '0',
+				tls_sni: uri.sni || uri.host,
+				tls_alpn: uri.alpn ? uri.alpn.split(',') : null
+			};
+			if (config.v2ray_transport === 'grpc') {
+				config['grpc_servicename'] = uri.path;
+				config['grpc_mode'] = 'gun';
+			} else if (['h2', 'tcp', 'ws'].includes(config.v2ray_transport)) {
+				config['http_header'] = config.v2ray_transport === 'tcp' ? uri.type || 'none' : null;
+				config['h2_host'] = uri.host;
+				config['h2_path'] = uri.path;
+				if (config.h2_path && config.h2_path.includes('?ed=')) {
+					config['websocket_early_data_header'] = 'Sec-WebSocket-Protocol';
+					config['websocket_early_data'] = config.h2_path.split('?ed=')[1];
+					config['h2_path'] = config.h2_path.split('?ed=')[0];
+				}
+			} else if (config.v2ray_transport === 'mkcp') {
+				config['mkcp_seed'] = uri.path;
+				config['mkcp_header'] = uri.type || 'none';
+				/* Default settings from v2rayN */
+				config['mkcp_downlink_capacity'] = '100';
+				config['mkcp_uplink_capacity'] = '12';
+				config['mkcp_read_buffer_size'] = '2';
+				config['mkcp_write_buffer_size'] = '2';
+				config['mkcp_mtu'] = '1350';
+				config['mkcp_tti'] = '50';
+			} else if (config.v2ray_transport === 'quic') {
+				config['quic_security'] = uri.host || 'none';
+				config['quic_key'] = uri.path;
+				config['mkcp_header'] = uri.type || 'none';
+			}
 
 			break;
 		}
