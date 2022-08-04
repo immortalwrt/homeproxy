@@ -28,8 +28,8 @@ local shadowsocks_encrypt_method = {
 -- Common var end
 
 -- String parser start
-string.urldecode = luci.util.urldecode
-string.urlencode = luci.util.urlencode
+local urldecode = luci.util.urldecode
+local urlencode = luci.util.urlencode
 
 local JSON = { parse = luci.jsonc.parse, dump = luci.jsonc.stringify }
 local URL = require "url"
@@ -42,7 +42,7 @@ local function b64decode(str)
 	str = str:gsub("_", "/"):gsub("-", "+")
 
 	local padding = #str % 4
-	str = str .. string.sub('====', padding + 1)
+	str = str .. string.sub("====", padding + 1)
 
 	return nixio.bin.b64decode(str)
 end
@@ -105,7 +105,7 @@ local function parse_uri(uri)
 		if uri.type == "ss" then
 			-- SIP008 format https://shadowsocks.org/guide/sip008.html
 			if not checkTabValue(shadowsocks_encrypt_method)[uri.method] then
-				log('Skipping unsupported Shadowsocks node:', b64decode(uri.remarks) or url.server)
+				log("Skipping unsupported Shadowsocks node:", b64decode(uri.remarks) or url.server)
 				return nil
 			end
 
@@ -137,8 +137,8 @@ local function parse_uri(uri)
 			end
 
 			-- SIP002 format https://shadowsocks.org/guide/sip002.html
-			local url = URL.parse('http://' .. uri[2])
-			local alias = url.fragment:urldecode(true)
+			local url = URL.parse("http://" .. uri[2])
+			local alias = urldecode(url.fragment, true)
 
 			local userinfo
 			if url.user and url.password then
@@ -150,7 +150,7 @@ local function parse_uri(uri)
 			end
 
 			if not checkTabValue(shadowsocks_encrypt_method)[userinfo[1]] then
-				log('Skipping unsupported Shadowsocks node:', b64decode(alias) or url.host)
+				log("Skipping unsupported Shadowsocks node:", b64decode(alias) or url.host)
 				return nil
 			end
 
@@ -178,7 +178,7 @@ local function parse_uri(uri)
 			-- https://coderschool.cn/2498.html
 			uri = b64decode(uri[2]):split("/")
 			local userinfo = uri[1]:split(":")
-			local params = URL.parseQuery(uri[2]:gsub('^\?', ''))
+			local params = URL.parseQuery(uri[2]:gsub("^\?", ""))
 
 			config = {
 				alias = b64decode(params.remarks),
@@ -195,24 +195,24 @@ local function parse_uri(uri)
 			}
 		elseif uri[1] == "trojan" then
 			-- https://p4gefau1t.github.io/trojan-go/developer/url/
-			local url = URL.parse('http://' .. uri)
+			local url = URL.parse("http://" .. uri)
 
 			config = {
-				alias = url.fragment and url.fragment:urldecode(true) or nil,
+				alias = urldecode(url.fragment, true),
 				type = "v2ray",
 				v2ray_protocol = "trojan",
 				address = url.host,
 				port = url.port,
-				password = url.user:urldecode(true),
+				password = urldecode(url.user, true),
 				tls = "1",
 				tls_sni = notEmpty(url.query) and url.query.sni or nil
 			}
 		elseif uri[1] == "vless" then
 			-- https://github.com/XTLS/Xray-core/discussions/716
-			local url = URL.parse('http://' .. uri)
+			local url = URL.parse("http://" .. uri)
 
 			config = {
-				alias = url.fragment and url.fragment:urldecode(true) or nil,
+				alias = urldecode(url.fragment, true),
 				type = "v2ray",
 				v2ray_protocol = "vless",
 				address = url.host,
@@ -222,7 +222,7 @@ local function parse_uri(uri)
 				v2ray_transport = url.query.type,
 				tls = (url.query.security == "tls") and "1" or "0",
 				tls_sni = url.query.sni,
-				tls_alpn = url.query.alpn and url.query.alpn:urldecode(true):split(",") or nil,
+				tls_alpn = url.query.alpn and urldecode(url.query.alpn, true):split(",") or nil,
 				v2ray_xtls = (url.query.security == "xtls") and "1" or "0",
 				v2ray_xtls_flow = url.query.flow
 			}
@@ -231,11 +231,11 @@ local function parse_uri(uri)
 				config["grpc_mode"] = url.query.mode or "gun"
 			elseif string.match("h2,tcp,ws", config.v2ray_transport) then
 				config["http_header"] = (config.v2ray_transport == "tcp") and (url.query.headerType or "none") or nil
-				config["h2_host"] = url.query.host and url.query.host:urldecode(true) or nil
-				config["h2_path"] = url.query.path and url.query.path:urldecode(true) or nil
+				config["h2_host"] = urldecode(url.query.host, true)
+				config["h2_path"] = urldecode(url.query.path, true)
 				if config.h2_path and config.h2_path:match("\?ed=") then
 					config["websocket_early_data_header"] = "Sec-WebSocket-Protocol"
-					config["websocket_early_data"] = config.h2_path:split('?ed=')[2]
+					config["websocket_early_data"] = config.h2_path:split("?ed=")[2]
 					config["h2_path"] = config.h2_path:split("?ed=")[1]
 				end
 			elseif config.v2ray_transport == "mkcp" then
@@ -276,7 +276,7 @@ local function parse_uri(uri)
 				v2ray_transport = uri.net,
 				tls = (uri.tls == "tls") and "1" or "0",
 				tls_sni = uri.sni or uri.host,
-				tls_alpn = notEmpty(uri.alpn) and uri.alpn:split(',') or nil
+				tls_alpn = notEmpty(uri.alpn) and uri.alpn:split(",") or nil
 			}
 			if config.v2ray_transport == "grpc" then
 				config["grpc_servicename"] = uri.path
@@ -287,7 +287,7 @@ local function parse_uri(uri)
 				config["h2_path"] = uri.path
 				if notEmpty(config.h2_path) and config.h2_path:match("\?ed=") then
 					config["websocket_early_data_header"] = "Sec-WebSocket-Protocol"
-					config["websocket_early_data"] = config.h2_path:split('?ed=')[2]
+					config["websocket_early_data"] = config.h2_path:split("?ed=")[2]
 					config["h2_path"] = config.h2_path:split("?ed=")[1]
 				end
 			elseif config.v2ray_transport == "mkcp" then
