@@ -73,10 +73,6 @@ function parse_share_link(uri) {
 					plugin_opts = plugin_info.slice(1) ? plugin_info.slice(1).join(';') : null;
 				}
 
-				/* Check if address, method and password exist */
-				if (!url.hostname || !userinfo || userinfo.length !== 2)
-					return null;
-
 				config = {
 					alias: alias,
 					type: plugin ? 'v2ray' : 'shadowsocks',
@@ -100,10 +96,6 @@ function parse_share_link(uri) {
 
 				var method = uri[0].split(':')[0];
 				var password = uri[0].split(':').slice(1).join(':');
-
-				/* Check if address, method and password exist */
-				if (!uri[1].split(':')[0] || !method || !password)
-					return false;
 
 				config = {
 					type: 'shadowsocks',
@@ -147,10 +139,6 @@ function parse_share_link(uri) {
 		case 'trojan':
 			/* https://p4gefau1t.github.io/trojan-go/developer/url/ */
 			var url = new URL('http://' + uri[1]);
-
-			/* Check if address and password exist */
-			if (!url.hostname || !url.username)
-				return null;
 
 			config = {
 				alias: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
@@ -222,9 +210,8 @@ function parse_share_link(uri) {
 			uri = JSON.parse(b64decodeUnicode(uri[1]));
 
 			if (uri.v === '2') {
-				/* Check if address, uuid, type, and alterId exist */
 				/* https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6 */
-				if (!uri.add || !uri.id || !uri.net || (uri.aid && parseInt(uri.aid) !== 0))
+				if (uri.aid && parseInt(uri.aid) !== 0)
 					return null;
 
 				config = {
@@ -272,6 +259,13 @@ function parse_share_link(uri) {
 
 			break;
 		}
+	}
+
+	if (config) {
+		if (!config.address || !config.port)
+			return null;
+		else if (!config.alias)
+			config['alias'] = config.address + ':' + config.port;
 	}
 
 	return config;
@@ -491,7 +485,7 @@ return view.extend({
 		}
 
 		o = s.option(form.Value, 'alias', _('Alias'));
-		/* o.rmempty = false; */
+		o.rmempty = false;
 
 		o = s.option(form.ListValue, 'type', _('Type'));
 		o.value('http', _('HTTP'));

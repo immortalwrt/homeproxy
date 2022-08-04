@@ -142,9 +142,8 @@ local function parse_uri(uri)
 			end
 		end
 
-		-- Check if address, method and password exist
-		if not (url.host and table.getn(userinfo) == 2 and checkTabValue(shadowsocks_encrypt_method)[userinfo[1]]) then
-			log('Skipping invalid Shadowsocks node:', b64decode(alias) or url.host)
+		if not checkTabValue(shadowsocks_encrypt_method)[userinfo[1]] then
+			log('Skipping unsupported Shadowsocks node:', b64decode(alias) or url.host)
 			return nil
 		end
 
@@ -165,12 +164,6 @@ local function parse_uri(uri)
 		local userinfo = uri[1]:split(":")
 		local params = URL.parseQuery(uri[2]:gsub('^\?', ''))
 
-		-- Check if address, method and password exist
-		if isEmpty(userinfo[1]) or isEmpty(userinfo[4]) or isEmpty(userinfo[6]) then
-			log("Skipping invalid ShadowsocksR node:", b64decode(params.remarks) or userinfo[0])
-			return nil
-		end
-
 		config = {
 			alias = b64decode(params.remarks),
 			tpye = "v2ray",
@@ -188,12 +181,6 @@ local function parse_uri(uri)
 		-- https://p4gefau1t.github.io/trojan-go/developer/url/
 		local url = URL.parse('http://' .. uri)
 
-		-- Check if address and password exist
-		if not (url.host and url.user) then
-			log("Skipping invalid Trojan node:", urldecode(url.fragment) or url.host)
-			return nil
-		end
-
 		config = {
 			alias = urldecode(url.fragment),
 			type = "v2ray",
@@ -207,12 +194,6 @@ local function parse_uri(uri)
 	elseif uri[1] == "vless" then
 		-- https://github.com/XTLS/Xray-core/discussions/716
 		local url = URL.parse('http://' .. uri)
-
-		-- Check if address, uuid and type exist
-		if not (url.host and url.user and notEmpty(url.query) and url.query.type) then
-			log("Skipping invalid VLESS node:", urldecode(url.fragment) or url.host)
-			return nil
-		end
 
 		config = {
 			alias = urldecode(url.fragment),
@@ -260,10 +241,9 @@ local function parse_uri(uri)
 		-- https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2)
 		uri = JSON.parse(b64decode(uri[2]))
 		if uri.v == "2" then
-			-- Check if address, uuid, type, and alterId exist
 			-- https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
-			if isEmpty(uri) or isEmpty(uri.add) or isEmpty(uri.id) or isEmpty(uri.net) or (notEmpty(uri.aid) and tonumber(uri.aid) ~= 0) then
-				log("Skipping invalid VMess node:", uri.alias or uri.add)
+			if notEmpty(uri.aid) and tonumber(uri.aid) ~= 0 then
+				log("Skipping outdated VMess node:", uri.alias or uri.add)
 				return nil
 			end
 
@@ -309,6 +289,15 @@ local function parse_uri(uri)
 			end
 		else
 			return nil
+		end
+	end
+
+	if notEmpty(config) then
+		if isEmpty(config.address) or isEmpty(config.port) then
+			log("Skipping invalid", config.type, "node:", config.alias)
+			return nil
+		elseif isEmpty(config.alias) then
+			config["alias"] = config.address .. ":" .. config.port
 		end
 	end
 
