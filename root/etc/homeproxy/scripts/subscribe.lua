@@ -122,7 +122,28 @@ local function parse_uri(uri)
 		end
 	elseif type(uri) == "string" then
 		uri = uri:split("://")
-		if uri[1] == "ss" then
+		if uri[1] == "hysteria" then
+			-- https://github.com/HyNetwork/hysteria/wiki/URI-Scheme
+			local url = URL.parse("http://" .. uri[2])
+			local params = url.query
+
+			config = {
+				alias = urldecode(url.fragment, true),
+				type = "hysteria",
+				address = url.hostname,
+				port = url.port,
+				hysteria_protocol = params.protocol or "udp",
+				hysteria_auth_type = params.auth and "string" or nil,
+				hysteria_auth_payload = params.auth,
+				hysteria_password = params.obfsParam,
+				mkcp_downlink_capacity = params.downmbps,
+				mkcp_uplink_capacity = params.upmbps,
+				tls = "1",
+				tls_sni = params.peer,
+				tls_alpn = params.alpn,
+				tls_insecure = params.insecure or "0"
+			}
+		elseif uri[1] == "ss" then
 			-- "Lovely" Shadowrocket format
 			local suri = uri[2]:split("#")
 			local salias = ""
@@ -137,7 +158,6 @@ local function parse_uri(uri)
 
 			-- SIP002 format https://shadowsocks.org/guide/sip002.html
 			local url = URL.parse("http://" .. uri[2])
-			local alias = urldecode(url.fragment, true)
 
 			local userinfo
 			if url.user and url.password then
@@ -163,7 +183,7 @@ local function parse_uri(uri)
 			end
 
 			config = {
-				alias = alias,
+				alias = urldecode(url.fragment, true),
 				type = plugin and "v2ray" or "shadowsocks",
 				v2ray_protocol = plugin and "shadowsocks" or nil,
 				address = url.host,
@@ -209,6 +229,7 @@ local function parse_uri(uri)
 		elseif uri[1] == "vless" then
 			-- https://github.com/XTLS/Xray-core/discussions/716
 			local url = URL.parse("http://" .. uri)
+			local params = url.query
 
 			config = {
 				alias = urldecode(url.fragment, true),
@@ -217,29 +238,29 @@ local function parse_uri(uri)
 				address = url.host,
 				port = url.port,
 				v2ray_uuid = url.user,
-				v2ray_vless_encrypt = url.query.encryption or "none",
-				v2ray_transport = url.query.type,
-				tls = (url.query.security == "tls") and "1" or "0",
-				tls_sni = url.query.sni,
-				tls_alpn = url.query.alpn and urldecode(url.query.alpn, true):split(",") or nil,
-				v2ray_xtls = (url.query.security == "xtls") and "1" or "0",
-				v2ray_xtls_flow = url.query.flow
+				v2ray_vless_encrypt = params.encryption or "none",
+				v2ray_transport = params.type,
+				tls = (params.security == "tls") and "1" or "0",
+				tls_sni = params.sni,
+				tls_alpn = params.alpn and urldecode(params.alpn, true):split(",") or nil,
+				v2ray_xtls = (params.security == "xtls") and "1" or "0",
+				v2ray_xtls_flow = params.flow
 			}
 			if config.v2ray_transport == "grpc" then
-				config["grpc_servicename"] = url.query.serviceName
-				config["grpc_mode"] = url.query.mode or "gun"
+				config["grpc_servicename"] = params.serviceName
+				config["grpc_mode"] = params.mode or "gun"
 			elseif string.match("h2,tcp,ws", config.v2ray_transport) then
-				config["http_header"] = (config.v2ray_transport == "tcp") and (url.query.headerType or "none") or nil
-				config["h2_host"] = urldecode(url.query.host, true)
-				config["h2_path"] = urldecode(url.query.path, true)
+				config["http_header"] = (config.v2ray_transport == "tcp") and (params.headerType or "none") or nil
+				config["h2_host"] = urldecode(params.host, true)
+				config["h2_path"] = urldecode(params.path, true)
 				if config.h2_path and config.h2_path:match("\?ed=") then
 					config["websocket_early_data_header"] = "Sec-WebSocket-Protocol"
 					config["websocket_early_data"] = config.h2_path:split("?ed=")[2]
 					config["h2_path"] = config.h2_path:split("?ed=")[1]
 				end
 			elseif config.v2ray_transport == "mkcp" then
-				config["mkcp_seed"] = url.query.seed
-				config["mkcp_header"] = url.query.headerType or "none"
+				config["mkcp_seed"] = params.seed
+				config["mkcp_header"] = params.headerType or "none"
 				-- Default settings from v2rayN
 				config["mkcp_downlink_capacity"] = "100"
 				config["mkcp_uplink_capacity"] = "12"
@@ -248,9 +269,9 @@ local function parse_uri(uri)
 				config["mkcp_mtu"] = "1350"
 				config["mkcp_tti"] = "50"
 			elseif config.v2ray_transport == "quic" then
-				config["quic_security"] = url.query.quicSecurity or "none"
-				config["quic_key"] = url.query.key
-				config["mkcp_header"] = url.query.headerType or "none"
+				config["quic_security"] = params.quicSecurity or "none"
+				config["quic_key"] = params.key
+				config["mkcp_header"] = params.headerType or "none"
 			end
 		elseif uri[1] == "vmess" then
 			-- https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2)

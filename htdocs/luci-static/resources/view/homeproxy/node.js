@@ -9,6 +9,7 @@
 'require uci';
 'require ui';
 'require view';
+'require tools.widgets as widgets';
 
 function fs_installed(binray) {
 	return fs.exec('/usr/bin/which', [ binray ]).then(function (res) {
@@ -37,6 +38,29 @@ function parse_share_link(uri) {
 		}
 
 		switch (uri[0]) {
+		case 'hysteria':
+			/* https://github.com/HyNetwork/hysteria/wiki/URI-Scheme */
+			var url = new URL('http://' + uri[1]);
+			var params = url.searchParams;
+
+			config = {
+				alias: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
+				type: 'hysteria',
+				address: url.hostname,
+				port: url.port || '80',
+				hysteria_protocol: params.get('protocol') || 'udp',
+				hysteria_auth_type: params.get('auth') ? 'string' : null,
+				hysteria_auth_payload: params.get('auth'),
+				hysteria_password: params.get('obfsParam'),
+				mkcp_downlink_capacity: params.get('downmbps'),
+				mkcp_uplink_capacity: params.get('upmbps'),
+				tls: '1',
+				tls_sni: params.get('peer'),
+				tls_alpn: params.get('alpn'),
+				tls_insecure: params.get('insecure') || '0'
+			}
+
+			break;
 		case 'ss':
 			try {
 				/* "Lovely" Shadowrocket format */
@@ -172,10 +196,15 @@ function parse_share_link(uri) {
 				v2ray_xtls: params.get('security') === 'xtls' ? '1' : '0',
 				v2ray_xtls_flow: params.get('flow')
 			};
-			if (config.v2ray_transport === 'grpc') {
+			switch (config.v2ray_transport) {
+			case 'grpc':
 				config['grpc_servicename'] = params.get('serviceName');
 				config['grpc_mode'] = params.get('mode') || 'gun';
-			} else if (['h2', 'tcp', 'ws'].includes(config.v2ray_transport)) {
+
+				break;
+			case 'h2':
+			case 'tcp':
+			case 'ws':
 				config['http_header'] = config.v2ray_transport === 'tcp' ? params.get('headerType') || 'none' : null;
 				config['h2_host'] = params.get('host') ? decodeURIComponent(params.get('host')) : null;
 				config['h2_path'] = params.get('host') ? decodeURIComponent(params.get('path')) : null;
@@ -184,7 +213,9 @@ function parse_share_link(uri) {
 					config['websocket_early_data'] = config.h2_path.split('?ed=')[1];
 					config['h2_path'] = config.h2_path.split('?ed=')[0];
 				}
-			} else if (config.v2ray_transport === 'mkcp') {
+
+				break;
+			case 'mkcp':
 				config['mkcp_seed'] = params.get('seed');
 				config['mkcp_header'] = params.get('headerType') || 'none';
 				/* Default settings from v2rayN */
@@ -194,10 +225,14 @@ function parse_share_link(uri) {
 				config['mkcp_write_buffer_size'] = '2';
 				config['mkcp_mtu'] = '1350';
 				config['mkcp_tti'] = '50';
-			} else if (config.v2ray_transport === 'quic') {
+
+				break;
+			case 'quic':
 				config['quic_security'] = params.get('quicSecurity') || 'none';
 				config['quic_key'] = params.get('key');
 				config['mkcp_header'] = params.get('headerType') || 'none';
+
+				break;
 			}
 
 			break;
@@ -224,10 +259,15 @@ function parse_share_link(uri) {
 				tls_sni: uri.sni || uri.host,
 				tls_alpn: uri.alpn ? uri.alpn.split(',') : null
 			};
-			if (config.v2ray_transport === 'grpc') {
+			switch (config.v2ray_transport) {
+			case 'grpc':
 				config['grpc_servicename'] = uri.path;
 				config['grpc_mode'] = 'gun';
-			} else if (['h2', 'tcp', 'ws'].includes(config.v2ray_transport)) {
+				
+				break;
+			case 'h2':
+			case 'tcp':
+			case 'ws':
 				config['http_header'] = config.v2ray_transport === 'tcp' ? uri.type || 'none' : null;
 				config['h2_host'] = uri.host;
 				config['h2_path'] = uri.path;
@@ -236,7 +276,9 @@ function parse_share_link(uri) {
 					config['websocket_early_data'] = config.h2_path.split('?ed=')[1];
 					config['h2_path'] = config.h2_path.split('?ed=')[0];
 				}
-			} else if (config.v2ray_transport === 'mkcp') {
+
+				break;
+			case 'mkcp':
 				config['mkcp_seed'] = uri.path;
 				config['mkcp_header'] = uri.type || 'none';
 				/* Default settings from v2rayN */
@@ -246,10 +288,14 @@ function parse_share_link(uri) {
 				config['mkcp_write_buffer_size'] = '2';
 				config['mkcp_mtu'] = '1350';
 				config['mkcp_tti'] = '50';
-			} else if (config.v2ray_transport === 'quic') {
+
+				break;
+			case 'quic':
 				config['quic_security'] = uri.host || 'none';
 				config['quic_key'] = uri.path;
 				config['mkcp_header'] = uri.type || 'none';
+
+				break;
 			}
 
 			break;
@@ -508,19 +554,6 @@ return view.extend({
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
-			_('If set, the server domain name will be resolved to IP before connecting. dns.strategy will be used if empty.'));
-		o.value('', _('Default'));
-		o.value('prefer_ipv4', _('Prefer IPv4'));
-		o.value('prefer_ipv6', _('Prefer IPv6'));
-		o.value('ipv4_only', _('IPv4 only'));
-		o.value('ipv6_only', _('IPv6 only'));
-		o.depends('type', 'http');
-		o.depends('type', 'shadowsocks');
-		o.depends('type', 'socks');
-		o.depends('type', 'vmess');
-		o.modalonly = true;
-
 		o = s.option(form.Value, 'address', _('Address'));
 		o.datatype = 'host';
 		o.rmempty = false;
@@ -590,10 +623,10 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'hysteria_auth_type', _('Authentication type'));
-		o.value('0', _('Disable'));
-		o.value('1', _('Base64'));
-		o.value('2', _('String'));
-		o.default = '0';
+		o.value('disabled', _('Disable'));
+		o.value('base64', _('Base64'));
+		o.value('string', _('String'));
+		o.default = 'disabled';
 		o.depends('type', 'hysteria');
 		o.rmempty = false;
 		o.modalonly = true;
@@ -1156,6 +1189,42 @@ return view.extend({
 		}
 		o.modalonly = true;
 		/* TLS config end */
+
+		/* Advanced settings start */
+		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
+			_('If set, the server domain name will be resolved to IP before connecting.<br/>dns.strategy will be used if empty.'));
+		o.value('', _('Default'));
+		o.value('prefer_ipv4', _('Prefer IPv4'));
+		o.value('prefer_ipv6', _('Prefer IPv6'));
+		o.value('ipv4_only', _('IPv4 only'));
+		o.value('ipv6_only', _('IPv6 only'));
+		o.depends('type', 'http');
+		o.depends('type', 'shadowsocks');
+		o.depends('type', 'socks');
+		o.depends('type', 'trojan');
+		o.depends('type', 'vmess');
+		o.modalonly = true;
+
+		/* TODO: use ListValue */
+		o = s.option(form.Value, 'detour', _('Detour'),
+			_('The tag of the upstream outbound. Other dial fields will be ignored when enabled.'));
+		o.depends('type', 'http');
+		o.depends('type', 'shadowsocks');
+		o.depends('type', 'socks');
+		o.depends('type', 'trojan');
+		o.depends('type', 'vmess');
+		o.modalonly = true;
+
+		o = s.option(widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
+			_('The network interface to bind to.'));
+		o.depends('type', 'http');
+		o.depends('type', 'shadowsocks');
+		o.depends('type', 'socks');
+		o.depends('type', 'trojan');
+		o.depends('type', 'vmess');
+		o.multiple = false;
+		o.modalonly = true;
+		/* Advanced settings end */
 
 		return m.render();
 	}
