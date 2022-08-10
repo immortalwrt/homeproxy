@@ -72,6 +72,7 @@ return view.extend({
 
 		o = s.option(form.ListValue, 'type', _('Type'));
 		o.value('http', _('HTTP'));
+		o.value('naiveproxy', _('NaïveProxy'));
 		o.value('shadowsocks', _('Shadowsocks'));
 		o.value('socks', _('Socks'));
 		o.value('trojan', _('Trojan'));
@@ -130,6 +131,7 @@ return view.extend({
 		o = s.option(form.Flag, 'tls', _('TLS'));
 		o.default = o.disabled;
 		o.depends('type', 'http');
+		o.depends('type', 'naiveproxy');
 		o.depends('type', 'trojan');
 		o.depends('type', 'vmess');
 		o.rmempty = false;
@@ -256,6 +258,7 @@ return view.extend({
 		o.value('udp', _('UDP'));
 		o.value('both', _('Both'));
 		o.default = 'both';
+		o.depends('type', 'naiveproxy');
 		o.depends('type', 'shadowsocks');
 		o.modalonly = true;
 
