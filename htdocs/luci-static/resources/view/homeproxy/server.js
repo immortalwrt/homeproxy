@@ -74,6 +74,7 @@ return view.extend({
 		o.value('http', _('HTTP'));
 		o.value('shadowsocks', _('Shadowsocks'));
 		o.value('socks', _('Socks'));
+		o.value('trojan', _('Trojan'));
 		o.value('vmess', _('VMess'));
 		o.rmempty = false;
 
@@ -129,6 +130,7 @@ return view.extend({
 		o = s.option(form.Flag, 'tls', _('TLS'));
 		o.default = o.disabled;
 		o.depends('type', 'http');
+		o.depends('type', 'trojan');
 		o.depends('type', 'vmess');
 		o.rmempty = false;
 		o.modalonly = true;
@@ -247,10 +249,6 @@ return view.extend({
 		o.value('prefer_ipv6', _('Prefer IPv6'));
 		o.value('ipv4_only', _('IPv4 only'));
 		o.value('ipv6_only', _('IPv6 only'));
-		o.depends('type', 'http');
-		o.depends('type', 'shadowsocks');
-		o.depends('type', 'socks');
-		o.depends('type', 'vmess');
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'network', _('Network'));

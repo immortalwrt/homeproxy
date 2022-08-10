@@ -490,6 +490,7 @@ return view.extend({
 			o.value('naiveproxy', _('NaïveProxy'));
 		o.value('shadowsocks', _('Shadowsocks'));
 		o.value('socks', _('Socks'));
+		o.value('trojan', _('Trojan'));
 		o.value('v2ray', _('V2ray'));
 		o.value('vmess', _('VMess'));
 		o.rmempty = false;
@@ -504,6 +505,7 @@ return view.extend({
 		o.value('vmess', _('VMess'));
 		o.value('wireguard', _('WireGuard'));
 		o.depends('type', 'v2ray');
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
@@ -540,6 +542,7 @@ return view.extend({
 		o.depends('type', 'http');
 		o.depends('type', 'naiveproxy');
 		o.depends('type', 'shadowsocks');
+		o.depends('type', 'trojan');
 		o.depends({'type': 'socks', 'socks_ver': '5'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'http'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
@@ -563,12 +566,16 @@ return view.extend({
 		o = s.option(form.ListValue, 'naiveproxy_network'), _('Network mode');
 		o.value('h2', _('HTTP/2'));
 		o.value('quic', _('QUIC'));
+		o.default = 'h2';
 		o.depends('type', 'naiveproxy');
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'naiveproxy_concurrency', _('Concurrency'));
 		o.datatype = 'uinteger';
+		o.default = '1';
 		o.depends('type', 'naiveproxy');
+		o.rmempty = false;
 		o.modalonly = true;
 		/* NaïveProxy config end */
 
@@ -577,14 +584,18 @@ return view.extend({
 		o.value('udp');
 		o.value('wechat-video');
 		o.value('faketcp');
+		o.default = 'udp';
 		o.depends('type', 'hysteria');
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'hysteria_auth_type', _('Authentication type'));
 		o.value('0', _('Disable'));
 		o.value('1', _('Base64'));
 		o.value('2', _('String'));
+		o.default = '0';
 		o.depends('type', 'hysteria');
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'hysteria_auth_payload', _('Authentication payload'));
@@ -610,6 +621,7 @@ return view.extend({
 		o = s.option(form.Flag, 'hysteria_disable_mtu_discovery', _('Disable Path MTU discovery'));
 		o.default = o.disabled;
 		o.depends('type', 'hysteria');
+		o.rmempty = false;
 		o.modalonly = true;
 		/* Hysteria config end */
 
@@ -627,22 +639,26 @@ return view.extend({
 		o.default = 'aes-128-gcm';
 		o.depends('type', 'shadowsocks');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'shadowsocks_tfo', _('TCP fast open'));
 		o.default = o.disabled;
 		o.depends('type', 'shadowsocks');
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'shadowsocks_uot', _('UDP over TCP'),
 			_('Enable the SUoT protocol, requires server support.'));
 		o.default = o.disabled;
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'shadowsocks_ivcheck', _('Bloom filter'));
 		o.default = o.disabled;
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'shadowsocks_plugin', _('Plugin'));
@@ -682,6 +698,7 @@ return view.extend({
 		o.value('chacha20');
 		o.value('chacha20-ietf');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocksr'});
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'shadowsocksr_protocol', _('Protocol'));
@@ -697,6 +714,7 @@ return view.extend({
 		o.value('auth_chain_e');
 		o.value('auth_chain_f');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocksr'});
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'shadowsocksr_protocol_param', _('Protocol param'));
@@ -710,6 +728,7 @@ return view.extend({
 		o.value('random_head');
 		o.value('tls1.2_ticket_auth');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocksr'});
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'shadowsocksr_obfs_param', _('Obfs param'));
@@ -725,6 +744,7 @@ return view.extend({
 		o.default = '5';
 		o.depends('type', 'socks');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks'});
+		o.rmempty = false;
 		o.modalonly = true;
 		/* Socks config end */
 
@@ -760,6 +780,7 @@ return view.extend({
 		o.default = 'aes-128-gcm';
 		o.depends('type', 'vmess');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vmess'});
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'vmess_global_padding', 'Global padding',
@@ -1003,6 +1024,7 @@ return view.extend({
 		o = s.option(form.Flag, 'tls', _('TLS'));
 		o.default = o.disabled;
 		o.depends('type', 'http');
+		o.depends('type', 'trojan');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'http'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
@@ -1044,6 +1066,7 @@ return view.extend({
 		o.depends({'type': 'http', 'tls': '1'});
 		o.depends({'type': 'shadowsocks', 'tls': '1'});
 		o.depends({'type': 'socks', 'tls': '1'});
+		o.depends({'type': 'trojan', 'tls': '1'});
 		o.depends({'type': 'vmess', 'tls': '1'});
 		o.rmempty = false;
 		o.modalonly = true;
@@ -1058,6 +1081,7 @@ return view.extend({
 		o.depends({'type': 'http', 'tls': '1'});
 		o.depends({'type': 'shadowsocks', 'tls': '1'});
 		o.depends({'type': 'socks', 'tls': '1'});
+		o.depends({'type': 'trojan', 'tls': '1'});
 		o.depends({'type': 'vmess', 'tls': '1'});
 		o.rmempty = false;
 		o.modalonly = true;
@@ -1084,6 +1108,7 @@ return view.extend({
 		o.depends({'type': 'http', 'tls': '1'});
 		o.depends({'type': 'shadowsocks', 'tls': '1'});
 		o.depends({'type': 'socks', 'tls': '1'});
+		o.depends({'type': 'trojan', 'tls': '1'});
 		o.depends({'type': 'vmess', 'tls': '1'});
 		o.optional = true;
 		o.modalonly = true;
