@@ -218,8 +218,7 @@ local function parse_uri(uri)
 
 			config = {
 				alias = urldecode(url.fragment, true),
-				type = "v2ray",
-				v2ray_protocol = "trojan",
+				type = "trojan",
 				address = url.host,
 				port = url.port,
 				password = urldecode(url.user, true),
