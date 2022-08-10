@@ -9,7 +9,6 @@
 'require uci';
 'require ui';
 'require view';
-'require tools.widgets as widgets';
 
 function fs_installed(binray) {
 	return fs.exec('/usr/bin/which', [ binray ]).then(function (res) {
@@ -1189,42 +1188,6 @@ return view.extend({
 		}
 		o.modalonly = true;
 		/* TLS config end */
-
-		/* Advanced settings start */
-		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
-			_('If set, the server domain name will be resolved to IP before connecting.<br/>dns.strategy will be used if empty.'));
-		o.value('', _('Default'));
-		o.value('prefer_ipv4', _('Prefer IPv4'));
-		o.value('prefer_ipv6', _('Prefer IPv6'));
-		o.value('ipv4_only', _('IPv4 only'));
-		o.value('ipv6_only', _('IPv6 only'));
-		o.depends('type', 'http');
-		o.depends('type', 'shadowsocks');
-		o.depends('type', 'socks');
-		o.depends('type', 'trojan');
-		o.depends('type', 'vmess');
-		o.modalonly = true;
-
-		/* TODO: use ListValue */
-		o = s.option(form.Value, 'detour', _('Detour'),
-			_('The tag of the upstream outbound. Other dial fields will be ignored when enabled.'));
-		o.depends('type', 'http');
-		o.depends('type', 'shadowsocks');
-		o.depends('type', 'socks');
-		o.depends('type', 'trojan');
-		o.depends('type', 'vmess');
-		o.modalonly = true;
-
-		o = s.option(widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
-			_('The network interface to bind to.'));
-		o.depends('type', 'http');
-		o.depends('type', 'shadowsocks');
-		o.depends('type', 'socks');
-		o.depends('type', 'trojan');
-		o.depends('type', 'vmess');
-		o.multiple = false;
-		o.modalonly = true;
-		/* Advanced settings end */
 
 		return m.render();
 	}
