@@ -404,10 +404,10 @@ return view.extend({
 		o.inputstyle = 'reset';
 		o.inputtitle = function() {
 			var subnodes = [];
-			for (var i of uci.sections(data[0], 'node')) {
-				if (i.from_subscription === '1')
-					subnodes = subnodes.concat(i['.name'])
-			}
+			uci.sections(data[0], 'node', function(res) {
+				if (res.from_subscription === '1')
+					subnodes = subnodes.concat(res['.name'])
+			});
 
 			if (subnodes.length > 0) {
 				return _('Remove %s node(s)').format(subnodes.length);
@@ -418,10 +418,10 @@ return view.extend({
 		}
 		o.onclick = function() {
 			var subnodes = [];
-			for (var i of uci.sections(data[0], 'node')) {
-				if (i.from_subscription === '1')
-					subnodes = subnodes.concat(i['.name'])
-			}
+			uci.sections(data[0], 'node', function(res) {
+				if (res.from_subscription === '1')
+					subnodes = subnodes.concat(res['.name'])
+			});
 
 			for (var i in subnodes)
 				uci.remove(data[0], subnodes[i]);
@@ -1023,24 +1023,13 @@ return view.extend({
 		o.modalonly = true;
 		/* WebSocket config end */
 
-		/* Mux */
-		o = s.option(form.Flag, 'v2ray_mux', _('Mux'));
-		o.default = o.disabled;
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'http'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'trojan'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vmess'});
-		o.modalonly = true;
-
 		/* XTLS config start */
 		o = s.option(form.Flag, 'v2ray_xtls', _('XTLS'));
 		o.default = o.disabled;
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'trojan', 'v2ray_transport': 'tcp', 'v2ray_mux': '0', 'tls': '0'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'trojan', 'v2ray_transport': 'mkcp', 'v2ray_mux': '0', 'tls': '0'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless', 'v2ray_transport': 'tcp', 'v2ray_mux': '0', 'tls': '0'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless', 'v2ray_transport': 'mkcp', 'v2ray_mux': '0', 'tls': '0'});
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'trojan', 'v2ray_transport': 'tcp', 'multiplex': '0', 'tls': '0'});
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'trojan', 'v2ray_transport': 'mkcp', 'multiplex': '0', 'tls': '0'});
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless', 'v2ray_transport': 'tcp', 'multiplex': '0', 'tls': '0'});
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless', 'v2ray_transport': 'mkcp', 'multiplex': '0', 'tls': '0'});
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'v2ray_xtls_flow', _('Flow'));
@@ -1055,6 +1044,32 @@ return view.extend({
 		o.modalonly = true;
 		/* XTLS config end */
 		/* V2ray config end */
+
+		/* Mux config start */
+		o = s.option(form.Flag, 'multiplex', _('Multiplex'));
+		o.default = o.disabled;
+		o.depends('type', 'shadowsocks');
+		o.depends('type', 'trojan');
+		o.depends('type', 'vmess');
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'http'});
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks'});
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'trojan'});
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless'});
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vmess'});
+		o.modalonly = true;
+
+		o = s.option(form.ListValue, 'multiplex_protocol', _('Protocol'),
+			_('Multiplex protocol.'));
+		o.value('smux');
+		o.value('yamux');
+		o.default = 'smux';
+		o.depends('type', 'shadowsocks');
+		o.depends('type', 'trojan');
+		o.depends('type', 'vmess');
+		o.rmempty = false;
+		o.modalonly = true;
+		/* Mux config end */
 
 		/* TLS config start */
 		o = s.option(form.Flag, 'tls', _('TLS'));
@@ -1194,11 +1209,13 @@ return view.extend({
 			delete this.keylist;
 			delete this.vallist;
 
+			var _this = this;
 			this.value('', _('None'));
-			for (var i of uci.sections(data[0], 'node'))
-				if (i['.name'] !== section_id && native_protocols.includes(i.type))
-					this.value(i['.name'], String.format('[%s] %s',
-						i.type, i.alias || i.server + ':' + i.server_port));
+			uci.sections(data[0], 'node', function(res) {
+				if (res['.name'] !== section_id && native_protocols.includes(res.type))
+					_this.value(res['.name'], String.format('[%s] %s',
+						res.type, res.alias || res.server + ':' + res.server_port));
+			});
 
 			return this.super('load', section_id);
 		}

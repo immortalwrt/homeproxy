@@ -92,11 +92,12 @@ return view.extend({
 
 		/* Cache all configured proxy nodes, they will be called multiple times. */
 		var proxy_nodes = {};
-		for (var i of uci.sections(data[0], 'node'))
-			proxy_nodes[i['.name']] = [ i.type,
+		uci.sections(data[0], 'node', function(res) {
+			proxy_nodes[res['.name']] = [ res.type,
 				String.format('[%s] %s',
-					i.type === 'v2ray' ? i.v2ray_protocol : i.type,
-					i.alias || i.server + ':' + i.server_port) ];
+					res.type === 'v2ray' ? res.v2ray_protocol : res.type,
+					res.alias || res.server + ':' + res.server_port) ];
+		});
 
 		s = m.section(form.NamedSection, 'config', 'homeproxy');
 
@@ -341,7 +342,7 @@ return view.extend({
 					return _('Expecting: %s').format(_('end with letters or numbers'));
 				else {
 					var repeating = false;
-					uci.sections(data[0], 'dns_server').forEach(function(res) {
+					uci.sections(data[0], 'dns_server', function(res) {
 						if (res['.name'] !== section_id && res.tag === value)
 							repeating = true;
 					});
@@ -504,8 +505,10 @@ return view.extend({
 			delete this.keylist;
 			delete this.vallist;
 
-			for (var i of uci.sections(data[0], 'dns_server'))
-				this.value(i.tag);
+			var _this = this;
+			uci.sections(data[0], 'dns_server', function(res) {
+				_this.value(res.tag);
+			});
 
 			return this.super('load', section_id);
 		}
