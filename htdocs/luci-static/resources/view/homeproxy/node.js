@@ -1057,11 +1057,36 @@ return view.extend({
 		o.value('smux');
 		o.value('yamux');
 		o.default = 'smux';
-		o.depends('type', 'shadowsocks');
-		o.depends('type', 'trojan');
-		o.depends('type', 'vmess');
+		o.depends({'type': 'shadowsocks', 'multiplex': '1'});
+		o.depends({'type': 'trojan', 'multiplex': '1'});
+		o.depends({'type': 'vmess', 'multiplex': '1'});
 		o.rmempty = false;
 		o.modalonly = true;
+
+		o = s.option(form.Value, 'max_connections', _('Maximum connections'));
+		o.datatype = 'uinteger';
+		o.depends({'type': 'shadowsocks', 'multiplex': '1'});
+		o.depends({'type': 'trojan', 'multiplex': '1'});
+		o.depends({'type': 'vmess', 'multiplex': '1'});
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'min_streams', _('Minimum streams'),
+			_('Minimum multiplexed streams in a connection before opening a new connection.'));
+		o.datatype = 'uinteger';
+		o.depends({'type': 'shadowsocks', 'multiplex': '1'});
+		o.depends({'type': 'trojan', 'multiplex': '1'});
+		o.depends({'type': 'vmess', 'multiplex': '1'});
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'max_streams', _('Maximum streams'),
+			_('Maximum multiplexed streams in a connection before opening a new connection.<br/>' +
+				'Conflict with <code>Maximum connections</code> and <code>Minimum streams</code>.'));
+		o.datatype = 'uinteger';
+		o.depends({'type': 'shadowsocks', 'multiplex': '1', 'max_connections': '', 'min_streams': ''});
+		o.depends({'type': 'trojan', 'multiplex': '1', 'max_connections': '', 'min_streams': ''});
+		o.depends({'type': 'vmess', 'multiplex': '1', 'max_connections': '', 'min_streams': ''});
+		o.modalonly = true;
+
 		/* Mux config end */
 
 		/* TLS config start */
