@@ -233,15 +233,6 @@ return view.extend({
 		o.default = 'both';
 		o.rmempty = false;
 
-		o = ss.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
-			_('If set, the server domain name will be resolved to IP before connecting.<br/>dns.strategy will be used if empty.<br/>Note: Hysteria, NaïveProxy and V2ray nodes are not apply.'));
-		o.value('', _('Default'));
-		o.value('prefer_ipv4', _('Prefer IPv4'));
-		o.value('prefer_ipv6', _('Prefer IPv6'));
-		o.value('ipv4_only', _('IPv4 only'));
-		o.value('ipv6_only', _('IPv6 only'));
-		o.modalonly = true;
-
 		/* TODO: use ListValue */
 		o = ss.option(form.Value, 'detour', _('Detour'),
 			_('The tag of the upstream outbound. Other dial fields will be ignored when enabled.<br/>Note: Hysteria, NaïveProxy and V2ray nodes are not apply.'));
@@ -250,6 +241,20 @@ return view.extend({
 		o = ss.option(widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
 			_('The network interface to bind to.<br/>Note: Hysteria, NaïveProxy and V2ray nodes are not apply.'));
 		o.multiple = false;
+		o.modalonly = true;
+
+		o = ss.option(form.Flag, 'tcp_fast_open', _('TCP fast open'));
+		o.default = o.disabled;
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = ss.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
+			_('If set, the server domain name will be resolved to IP before connecting.<br/>dns.strategy will be used if empty.<br/>Note: Hysteria, NaïveProxy and V2ray nodes are not apply.'));
+		o.value('', _('Default'));
+		o.value('prefer_ipv4', _('Prefer IPv4'));
+		o.value('prefer_ipv6', _('Prefer IPv6'));
+		o.value('ipv4_only', _('IPv4 only'));
+		o.value('ipv6_only', _('IPv6 only'));
 		o.modalonly = true;
 
 		o = s.taboption('routing', form.SectionValue, '_routing', form.GridSection, 'routing', _('Routing settings'));

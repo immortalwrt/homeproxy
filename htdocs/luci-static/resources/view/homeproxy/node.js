@@ -674,14 +674,8 @@ return view.extend({
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.Flag, 'shadowsocks_tfo', _('TCP fast open'));
-		o.default = o.disabled;
-		o.depends('type', 'shadowsocks');
-		o.rmempty = false;
-		o.modalonly = true;
-
 		o = s.option(form.Flag, 'shadowsocks_uot', _('UDP over TCP'),
-			_('Enable the SUoT protocol, requires server support.'));
+			_('Enable the SUoT protocol, requires server support. Conflict with multiplex.'));
 		o.default = o.disabled;
 		o.depends('type', 'shadowsocks');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
