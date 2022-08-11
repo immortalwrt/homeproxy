@@ -41,22 +41,19 @@ function renderStatus(isRunning) {
 
 function validatePortRange (section_id, value) {
 	if (section_id && value) {
-		var start_port = parseInt(value.split(':')[0]);
-		var end_port = parseInt(value.split(':')[1]);
-		var error_message = _('Expecting: %s').format(_('valid port range'));
+		value = value.match(/^(\d+)?\:(\d+)?$/);
+		if (value) {
+			if (!value[1] && !value[2])
+				return _('Expecting: %s').format(_('valid port range (port1:port2)'));
 
-		if (value.split(':').length !== 2 || (!start_port && !end_port))
-			return error_message;
-		else if (value.split(':')[0] && (start_port.toString() === 'NaN' || start_port.toString() !== value.split(':')[0]))
-			return error_message;
-		else if (value.split(':')[1] && (end_port.toString() === 'NaN' || end_port.toString() !== value.split(':')[1]))
-			return error_message;
-		else if (start_port && (start_port < 1 || start_port > 65535))
-			return error_message;
-		else if (end_port && (end_port < 1 || end_port > 65535))
-			return error_message;
-		else if (start_port && end_port && start_port >= end_port)
-			return error_message;
+			if (!value[1])
+				value[1] = 0;
+			if (!value[2])
+				value[2] = 65535;
+			if (value[1] >= value[2] || value[2] > 65535)
+				return _('Expecting: %s').format( _('valid port range (port1:port2)'));
+		} else
+			return _('Expecting: %s').format(_('valid port range'));
 	}
 
 	return true;
