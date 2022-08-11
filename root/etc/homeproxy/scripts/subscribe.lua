@@ -68,13 +68,7 @@ table.splice = function(tbl, start, length)
 	return spliced, remainder
 end
 
-local function isEmpty(res)
-	return res == nil or res == "" or (type(res) == "table" and next(res) == nil)
-end
-
-local function notEmpty(res)
-	return not isEmpty(res) and res
-end
+local validation = require "luci.cbi.datatypes"
 
 -- https://www.04007.cn/article/135.html
 local function checkTabValue(tab)
@@ -85,6 +79,14 @@ local function checkTabValue(tab)
 	end
 
 	return revtab
+end
+
+local function isEmpty(res)
+	return res == nil or res == "" or (type(res) == "table" and next(res) == nil)
+end
+
+local function notEmpty(res)
+	return not isEmpty(res) and res
 end
 -- String helper end
 
@@ -328,7 +330,7 @@ local function parse_uri(uri)
 	end
 
 	if notEmpty(config) then
-		if isEmpty(config.address) or isEmpty(config.port) then
+		if not (validation.host(config.address) and validation.port(config.port)) then
 			log("Skipping invalid", config.type, "node:", config.alias)
 			return nil
 		elseif isEmpty(config.alias) then
