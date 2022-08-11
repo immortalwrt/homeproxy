@@ -328,6 +328,7 @@ return view.extend({
 		var have_naiveproxy = data[2];
 
 		var native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'vmess' ];
+		var v2ray_native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'vless', 'vmess' ];
 
 		m = new form.Map('homeproxy', _('Edit nodes'));
 
@@ -865,12 +866,8 @@ return view.extend({
 		o.value('tcp', _('TCP'));
 		o.value('ws', _('WebSocket'));
 		o.default = 'tcp';
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'http'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'trojan'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vmess'});
+		for (i in v2ray_native_protocols)
+			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]})
 		o.modalonly = true;
 
 		/* gRPC/H2 config start */
@@ -1051,12 +1048,8 @@ return view.extend({
 		o.depends('type', 'shadowsocks');
 		o.depends('type', 'trojan');
 		o.depends('type', 'vmess');
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'http'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'trojan'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vmess'});
+		for (i in v2ray_native_protocols)
+			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]})
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'multiplex_protocol', _('Protocol'),
@@ -1076,12 +1069,8 @@ return view.extend({
 		o.default = o.disabled;
 		o.depends('type', 'http');
 		o.depends('type', 'trojan');
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'http'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'trojan'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vmess'});
+		for (i in v2ray_native_protocols)
+			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]})
 		o.depends('type', 'vmess');
 		o.modalonly = true;
 
@@ -1234,7 +1223,8 @@ return view.extend({
 		o.default = o.disabled;
 		for (var i in native_protocols)
 			o.depends('type', native_protocols[i])
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
+		for (i in v2ray_native_protocols)
+			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]})
 		o.rmempty = false;
 		o.modalonly = true;
 
