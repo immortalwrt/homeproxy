@@ -104,8 +104,6 @@ function parse_share_link(uri) {
 					shadowsocks_plugin: plugin,
 					shadowsocks_plugin_opts: plugin_opts
 				};
-
-				break;
 			} catch(e) {
 				/* Legacy format https://github.com/shadowsocks/shadowsocks-org/commit/78ca46cd6859a4e9475953ed34a2d301454f579e */
 				uri = uri[1].split('@');
@@ -124,16 +122,20 @@ function parse_share_link(uri) {
 					shadowsocks_encrypt_method: method,
 					password: password
 				};
-
-				break;
 			}
+
+			/* Check if method and password exist */
+			if (!config.shadowsocks_encrypt_method || !config.password)
+				return null;
+
+			break;
 		case 'ssr':
 			/* https://coderschool.cn/2498.html */
 			uri = b64decode(uri[1]).split('/');
 			var userinfo = uri[0].split(':')
 
-			/* Check if address, method and password exist */
-			if (!userinfo[0] || !userinfo[3] || !userinfo[5])
+			/* Check if method and password exist */
+			if (!userinfo[3] || !userinfo[5])
 				return null;
 
 			var params = new URLSearchParams(uri[1]);
@@ -160,6 +162,10 @@ function parse_share_link(uri) {
 			/* https://p4gefau1t.github.io/trojan-go/developer/url/ */
 			var url = new URL('http://' + uri[1]);
 
+			/* Check if password exists */
+			if (!url.username)
+				return null;
+
 			config = {
 				alias: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
 				type: 'v2ray',
@@ -177,8 +183,8 @@ function parse_share_link(uri) {
 			var url = new URL('http://' + uri[1]);
 			var params = url.searchParams;
 
-			/* Check if address, uuid and type exist */
-			if (!url.hostname || !url.username || !params.get('type'))
+			/* Check if uuid and type exist */
+			if (!url.username || !params.get('type'))
 				return null;
 
 			config = {
