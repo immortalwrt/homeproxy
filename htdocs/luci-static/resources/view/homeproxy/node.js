@@ -683,6 +683,7 @@ return view.extend({
 		o = s.option(form.Flag, 'shadowsocks_uot', _('UDP over TCP'),
 			_('Enable the SUoT protocol, requires server support.'));
 		o.default = o.disabled;
+		o.depends('type', 'shadowsocks');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
 		o.rmempty = false;
 		o.modalonly = true;
