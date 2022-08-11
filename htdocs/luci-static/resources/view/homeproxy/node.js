@@ -9,6 +9,7 @@
 'require uci';
 'require ui';
 'require view';
+'require tools.widgets as widgets';
 
 function fs_installed(binray) {
 	return fs.exec('/usr/bin/which', [ binray ]).then(function (res) {
@@ -326,11 +327,7 @@ return view.extend({
 		var have_hysteria = data[1];
 		var have_naiveproxy = data[2];
 
-		var subnodes = [];
-		for (var i of uci.sections(data[0], 'node')) {
-			if (i.from_subscription === '1')
-				subnodes = subnodes.concat(i['.name'])
-		}
+		var native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'vmess' ];
 
 		m = new form.Map('homeproxy', _('Edit nodes'));
 
@@ -369,15 +366,15 @@ return view.extend({
 
 		o = s.option(form.ListValue, 'filter_nodes', _('Filter nodes'),
 			_('Drop/keep specific node(s) from subscriptions.'));
-		o.value('0', _('Disable'));
-		o.value('1', _('Blacklist mode'));
-		o.value('2', _('Whitelist mode'));
-		o.default = '0';
+		o.value('disabled', _('Disable'));
+		o.value('blacklist', _('Blacklist mode'));
+		o.value('whitelist', _('Whitelist mode'));
+		o.default = 'disabled';
 		o.rmempty = false;
 
 		o = s.option(form.DynamicList, 'filter_words', _('Filter keyword'),
 			_('Drop/keep node(s) that contain the specific keyword.'));
-		o.depends({'filter_nodes': '0', '!reverse': true});
+		o.depends({'filter_nodes': 'disabled', '!reverse': true});
 
 		o = s.option(form.Button, '_save_subscriptions', _('Save subscriptions settings'),
 			_('Save settings before updating subscriptions.'));
@@ -406,6 +403,12 @@ return view.extend({
 		o = s.option(form.Button, '_remove_subscriptions', _('Remove all nodes from subscriptions'));
 		o.inputstyle = 'reset';
 		o.inputtitle = function() {
+			var subnodes = [];
+			for (var i of uci.sections(data[0], 'node')) {
+				if (i.from_subscription === '1')
+					subnodes = subnodes.concat(i['.name'])
+			}
+
 			if (subnodes.length > 0) {
 				return _('Remove %s node(s)').format(subnodes.length);
 			} else {
@@ -414,6 +417,12 @@ return view.extend({
 			}
 		}
 		o.onclick = function() {
+			var subnodes = [];
+			for (var i of uci.sections(data[0], 'node')) {
+				if (i.from_subscription === '1')
+					subnodes = subnodes.concat(i['.name'])
+			}
+
 			for (var i in subnodes)
 				uci.remove(data[0], subnodes[i]);
 
@@ -1091,8 +1100,6 @@ return view.extend({
 		o.value('1.3');
 		o.default = '1.0';
 		o.depends({'type': 'http', 'tls': '1'});
-		o.depends({'type': 'shadowsocks', 'tls': '1'});
-		o.depends({'type': 'socks', 'tls': '1'});
 		o.depends({'type': 'trojan', 'tls': '1'});
 		o.depends({'type': 'vmess', 'tls': '1'});
 		o.rmempty = false;
@@ -1106,8 +1113,6 @@ return view.extend({
 		o.value('1.3');
 		o.default = '1.3';
 		o.depends({'type': 'http', 'tls': '1'});
-		o.depends({'type': 'shadowsocks', 'tls': '1'});
-		o.depends({'type': 'socks', 'tls': '1'});
 		o.depends({'type': 'trojan', 'tls': '1'});
 		o.depends({'type': 'vmess', 'tls': '1'});
 		o.rmempty = false;
@@ -1133,8 +1138,6 @@ return view.extend({
 		o.value('TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256');
 		o.value('TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256');
 		o.depends({'type': 'http', 'tls': '1'});
-		o.depends({'type': 'shadowsocks', 'tls': '1'});
-		o.depends({'type': 'socks', 'tls': '1'});
 		o.depends({'type': 'trojan', 'tls': '1'});
 		o.depends({'type': 'vmess', 'tls': '1'});
 		o.optional = true;
@@ -1184,6 +1187,52 @@ return view.extend({
 		o.modalonly = true;
 		/* TLS config end */
 
+		/* Extra settings start */
+		o = s.option(form.ListValue, 'outbound', _('Outbound'),
+			_('The tag of the upstream outbound. Other dial fields will be ignored when enabled.'));
+		o.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			this.value('', _('None'));
+			for (var i of uci.sections(data[0], 'node'))
+				if (i['.name'] !== section_id && native_protocols.includes(i.type))
+					this.value(i['.name'], String.format('[%s] %s',
+						i.type, i.alias || i.server + ':' + i.server_port));
+
+			return this.super('load', section_id);
+		}
+		for (var i in native_protocols)
+			o.depends('type', native_protocols[i])
+		o.modalonly = true;
+
+		o = s.option(widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
+			_('The network interface to bind to.'));
+		o.multiple = false;
+		for (var i in native_protocols)
+			o.depends('type', native_protocols[i])
+		o.modalonly = true;
+
+		o = s.option(form.Flag, 'tcp_fast_open', _('TCP fast open'));
+		o.default = o.disabled;
+		for (var i in native_protocols)
+			o.depends('type', native_protocols[i])
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
+			_('If set, the server domain name will be resolved to IP before connecting.<br/>dns.strategy will be used if empty.'));
+		o.value('', _('Default'));
+		o.value('prefer_ipv4', _('Prefer IPv4'));
+		o.value('prefer_ipv6', _('Prefer IPv6'));
+		o.value('ipv4_only', _('IPv4 only'));
+		o.value('ipv6_only', _('IPv6 only'));
+		for (var i in native_protocols)
+			o.depends('type', native_protocols[i])
+		o.modalonly = true;
+		/* Extra settings end */
+		
 		return m.render();
 	}
 });
