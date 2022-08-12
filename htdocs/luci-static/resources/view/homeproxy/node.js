@@ -233,7 +233,7 @@ function parse_share_link(uri) {
 				break;
 			case 'tcp':
 				config['tcp_header'] = params.get('headerType') || 'none';
-				if (config.tcp_header !== 'none') {
+				if (config.tcp_header === 'http') {
 					config['tcp_host'] = params.get('host') ? decodeURIComponent(params.get('host')).split(',') : null;
 					config['tcp_path'] = params.get('path') ? decodeURIComponent(params.get('path')).split(',') : null;
 				}
@@ -253,6 +253,9 @@ function parse_share_link(uri) {
 
 			break;
 		case 'vmess':
+			if (uri.includes('&'))
+				return null;
+
 			/* https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2) */
 			uri = JSON.parse(b64decode(uri[1]));
 
@@ -306,7 +309,7 @@ function parse_share_link(uri) {
 				break;
 			case 'tcp':
 				config['tcp_header'] = uri.type || 'none';
-				if (config.tcp_header !== 'none') {
+				if (config.tcp_header === 'http') {
 					config['tcp_host'] = uri.host ? uri.host.split(',') : null;
 					config['tcp_path'] = uri.path ? uri.path.split(',') : null;
 				}
@@ -399,8 +402,8 @@ return view.extend({
 		o.default = 'disabled';
 		o.rmempty = false;
 
-		o = s.option(form.DynamicList, 'filter_words', _('Filter keyword'),
-			_('Drop/keep node(s) that contain the specific keyword.'));
+		o = s.option(form.DynamicList, 'filter_words', _('Filter keywords'),
+			_('Drop/keep node(s) that contain the specific keywords. Regex is supported.'));
 		o.depends({'filter_nodes': 'disabled', '!reverse': true});
 
 		o = s.option(form.Button, '_save_subscriptions', _('Save subscriptions settings'),
@@ -432,7 +435,7 @@ return view.extend({
 		o.inputtitle = function() {
 			var subnodes = [];
 			uci.sections(data[0], 'node', function(res) {
-				if (res.from_subscription === '1')
+				if (res.group_hashKey || res.hashKey)
 					subnodes = subnodes.concat(res['.name'])
 			});
 
@@ -446,7 +449,7 @@ return view.extend({
 		o.onclick = function() {
 			var subnodes = [];
 			uci.sections(data[0], 'node', function(res) {
-				if (res.from_subscription === '1')
+				if (res.group_hashKey || res.hashKey)
 					subnodes = subnodes.concat(res['.name'])
 			});
 

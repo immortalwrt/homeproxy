@@ -59,23 +59,35 @@ local function b64decode(str)
 	local padding = #str % 4
 	str = str .. string.sub("====", padding + 1)
 
-	return nixio.bin.b64decode(str)
+	-- Sometimes it ends with "\0", only God knows why.
+	str = nixio.bin.b64decode(str)
+	return str and str:gsub("%z", "") or nil
 end
 -- String parser end
 
 -- Utilities start
-local md5 = require "md5"
-local uci = luci.model.uci.cursor()
+local sysinit = luci.sys.init
+
+local function md5(str)
+	local ret = luci.sys.exec("echo -n " .. luci.util.shellquote(urlencode(str)) .. " | md5sum | awk '{print $1}'")
+	return ret:trim()
+end
+
+local function wget(url)
+	if isEmpty(url) then
+		return nil
+	end
+
+	local stdout = luci.sys.exec(string.format("curl -fsL --connect-timeout '10' --retry '3' %s", luci.util.shellquote(url)))
+	return stdout:trim()
+end
 -- Utilities end
 
 -- Common var start
 local node_cache = {}
 local node_result = setmetatable({}, {__index = node_cache})
 
-local uciname = "homeproxy"
-local ucisection = "node"
-
-local shadowsocks_encrypt_method = {
+local shadowsocks_encrypt_methods = {
 	-- plain
 	"none",
 	-- aead
@@ -91,6 +103,36 @@ local shadowsocks_encrypt_method = {
 }
 -- Common var end
 
+-- UCI config start
+local uci = luci.model.uci.cursor()
+
+local uciname = "homeproxy"
+local ucisection = "node"
+
+local subscription_urls = uci:get(uciname, "subscription", "subscription_url", {})
+local filter_mode = uci:get(uciname, "subscription", "filter_nodes", "disabled")
+local filter_keywords = uci:get(uciname, "subscription", "filter_words", {})
+local via_proxy = uci:get(uciname, "subscription", "update_via_proxy", "0")
+
+local function filter_check(res)
+	if isEmpty(res) or filter_mode == "disabled" then
+		return false
+	end
+
+	local ret
+	for _, keyword in ipairs(filter_keywords) do
+		if res:find(keyword, nil, false) then
+			ret = true
+		end
+	end
+	if filter_mode == "whitelist" then
+		ret = not ret
+	end
+
+	return ret
+end
+-- UCI config end
+
 local function log(...)
 	-- TODO: write to log file directly
 	print(os.date("%Y-%m-%d %H:%M:%S [SUBSCRIBE UPDATE] ") .. table.concat({...}, " "))
@@ -100,10 +142,10 @@ local function parse_uri(uri)
 	local config
 
 	if type(uri) == "table" then
-		if uri.type == "ss" then
+		if uri.nodetype == "ss" then
 			-- SIP008 format https://shadowsocks.org/guide/sip008.html
-			if not table.contains(shadowsocks_encrypt_method, uri.method) then
-				log("Skipping unsupported Shadowsocks node:", b64decode(uri.remarks) or url.server)
+			if not table.contains(shadowsocks_encrypt_methods, uri.method) then
+				log("Skipping legacy Shadowsocks node:", b64decode(uri.remarks) or url.server)
 				return nil
 			end
 
@@ -146,29 +188,31 @@ local function parse_uri(uri)
 			-- "Lovely" Shadowrocket format
 			local suri = uri[2]:split("#")
 			local salias = ""
-			if table.getn(suri) <= 2 then
-				if table.getn(suri) == 2 then
-					salias = "#" .. suri[2]
+			local is_srt = false
+			if #suri <= 2 then
+				if #suri == 2 then
+					salias = "#" .. urlencode(suri[2], true)
 				end
 				if b64decode(suri[1]) then
-					uri = { "ss", b64decode(suri[1]) .. salias }
+					uri[2] = b64decode(suri[1]) .. salias
+					is_srt = true
 				end
 			end
 
 			-- SIP002 format https://shadowsocks.org/guide/sip002.html
 			local url = URL.parse("http://" .. uri[2])
 
-			local userinfo
+			local userinfo = {}
 			if url.user and url.password then
-				-- User info encoded with URIComponent, mostly for ss2022
-				userinfo = { url.user, b64decode(url.password) }
+				-- User info encoded with URIComponent
+				userinfo = { url.user, is_srt and url.password or b64decode(url.password) }
 			elseif url.user then
 				-- User info encoded with base64
 				userinfo = b64decode(url.user):split(":")
 			end
 
-			if not table.contains(shadowsocks_encrypt_method, userinfo[1]) then
-				log("Skipping unsupported Shadowsocks node:", b64decode(alias) or url.host)
+			if not table.contains(shadowsocks_encrypt_methods, userinfo[1]) then
+				log("Skipping legacy Shadowsocks node:", urldecode(url.fragment, true) or url.host or "NULL")
 				return nil
 			end
 
@@ -176,7 +220,7 @@ local function parse_uri(uri)
 			if notEmpty(url.query) and url.query.plugin then
 				local plugin_info = url.query.plugin:split(";")
 				plugin = plugin_info[1]
-				if table.getn(plugin_info) >= 2 then
+				if #plugin_info >= 2 then
 					plugin_opts = table.concat(table.splice(plugin_info, 1, 1), ";")
 				end
 			end
@@ -200,7 +244,7 @@ local function parse_uri(uri)
 
 			config = {
 				alias = b64decode(params.remarks),
-				tpye = "v2ray",
+				type = "v2ray",
 				v2ray_protocol = "shadowsocksr",
 				address = userinfo[1],
 				port = userinfo[2],
@@ -213,7 +257,7 @@ local function parse_uri(uri)
 			}
 		elseif uri[1] == "trojan" then
 			-- https://p4gefau1t.github.io/trojan-go/developer/url/
-			local url = URL.parse("http://" .. uri)
+			local url = URL.parse("http://" .. uri[2])
 
 			config = {
 				alias = urldecode(url.fragment, true),
@@ -226,7 +270,7 @@ local function parse_uri(uri)
 			}
 		elseif uri[1] == "vless" then
 			-- https://github.com/XTLS/Xray-core/discussions/716
-			local url = URL.parse("http://" .. uri)
+			local url = URL.parse("http://" .. uri[2])
 			local params = url.query
 
 			config = {
@@ -266,7 +310,7 @@ local function parse_uri(uri)
 				config["mkcp_header"] = params.headerType or "none"
 			elseif config.v2ray_transport == "tcp" then
 				config["tcp_header"] = notEmpty(params.headerType) or "none"
-				if config.tcp_header ~= "none" then
+				if config.tcp_header == "http" then
 					config["tcp_header"] = uri.type
 					config["tcp_host"] = notEmpty(params.host) and urldecode(params.host, true):split(',') or nil
 					config["tcp_path"] = notEmpty(params.path) and urldecode(params.path, true):split(',') or nil
@@ -281,10 +325,14 @@ local function parse_uri(uri)
 				end
 			end
 		elseif uri[1] == "vmess" then
+			if uri[2]:find('&') then
+				return nil
+			end
+
 			-- https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2)
 			uri = JSON.parse(b64decode(uri[2]))
 
-			if not uri or uri.v ~= "2" then
+			if uri.v ~= "2" then
 				return nil
 			-- https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
 			elseif notEmpty(uri.aid) and tonumber(uri.aid) ~= 0 then
@@ -327,7 +375,7 @@ local function parse_uri(uri)
 				config["mkcp_header"] = notEmpty(uri.type) or "none"
 			elseif config.v2ray_transport == "tcp" then
 				config["tcp_header"] = notEmpty(uri.type) or "none"
-				if config.tcp_header ~= "none" then
+				if config.tcp_header == "http" then
 					config["tcp_header"] = uri.type
 					config["tcp_host"] = notEmpty(uri.host) and uri.host:split(',') or nil
 					config["tcp_path"] = notEmpty(uri.path) and uri.path:split(',') or nil
@@ -356,5 +404,147 @@ local function parse_uri(uri)
 	return config
 end
 
-local main = function()
+local function main()
+	if via_proxy ~= "1" then
+		log("Stopping service...")
+		sysinit.stop(uciname)
+	end
+
+	for _, url in ipairs(subscription_urls) do
+		local res = wget(url)
+		if notEmpty(res) then
+			local groupHash = md5(url)
+			node_cache[groupHash] = {}
+
+			table.insert(node_result, {})
+			local index = #node_result
+
+			local nodes
+			if JSON.parse(res) then
+				nodes = JSON.parse(res).servers or JSON.parse(res)
+				if nodes[1].server and nodes[1].method then
+					for index, node in ipairs(nodes) do
+						nodes[index].nodetype = "ss"
+					end
+				end
+			else
+				nodes = b64decode(res)
+				nodes = nodes and nodes:gsub(" ", "_"):split("\n") or {}
+			end
+
+			local count = 0
+			for _, node in ipairs(nodes) do
+				local config
+				if notEmpty(node) then
+					config = parse_uri(node)
+				end
+				if notEmpty(config) then
+					local alias = config.alias
+					config.alias = nil
+					config.hashKey = md5(JSON.dump(config))
+					config.alias = alias
+
+					if filter_check(config.alias) then
+						log("Skipping blacklist node:", config.alias)
+					elseif node_cache[groupHash][config.hashKey] then
+						log("Skipping duplicate node:", config.alias)
+					else
+						count = count + 1
+						config.group_hashKey = groupHash
+						table.insert(node_result[index], config)
+						node_cache[groupHash][config.hashKey] = node_result[index][#node_result[index]]
+					end
+				end
+			end
+
+			log("Successfully fetched", count, "nodes of total", #nodes - 1, ".", "From:", url)
+		else
+			log("Failed to fetch resources from", url)
+		end
+	end
+
+	if isEmpty(node_result) then
+		log("Failed to update subscriptions: no valid node found.")
+		if via_proxy ~= "1" then
+			sysinit.start(uciname)
+		end
+		return false
+	end
+
+	local added, removed = 0, 0
+	uci:foreach(uciname, ucisection, function(cfg)
+		if cfg.group_hashKey or cfg.hashKey then
+			if not node_result[cfg.group_hashKey] or not node_result[cfg.group_hashKey][cfg.hashKey] then
+				uci:delete(uciname, cfg[".name"])
+				removed = removed + 1
+			else
+				uci:tset(uciname, cfg[".name"], node_result[cfg.group_hashKey][cfg.hashKey])
+				setmetatable(node_result[cfg.group_hashKey][cfg.hashKey], {__index = {isExisting = true}})
+			end
+		end
+	end)
+	for _, nodes in ipairs(node_result) do
+		for _, node in ipairs(nodes) do
+			if not node.isExisting then
+				local cfgvalue = uci:add(uciname, ucisection)
+				uci:tset(uciname, cfgvalue, node)
+				added = added + 1
+			end
+		end
+	end
+	uci:commit(uciname)
+
+	local main_server = uci:get(uciname, "config", "main_server")
+	if main_server ~= "nil" then
+		local need_restart = false
+		local first_server = uci:get_first(uciname, ucisection)
+		if first_server then
+			if not uci:get(uciname, main_server) then
+				uci:set(uciname, "config", "main_server", first_server[".name"])
+				need_restart = true
+				log("Main node is gone, switching to first node.")
+			end
+
+			local udp_server = uci:get(uciname, "config", "main_udp_server", "null")
+			if udp_server ~= "nil" and udp_server ~= "null" then
+				if not uci:get(uciname, udp_server) then
+					uci:set(uciname, "config", "main_udp_server", first_server[".name"])
+					need_restart = true
+					log("UDP node is gone, switching to main node.")
+				end
+			end
+
+			if via_proxy ~= "1" or need_restart then
+				log("Reloading service...")
+				uci:commit(uciname)
+				sysinit.stop(uciname)
+				sysinit.start(uciname)
+			end
+		else
+			log("No node available, stopping service...")
+			sysinit.stop(uciname)
+		end
+	end
+
+	log(added, "nodes added,", removed, "removed.")
+	log("Successfully updated subscriptions.")
+end
+
+if notEmpty(subscription_urls) then
+	xpcall(main, function(e)
+		log("Errors occurred during updating subscriptions:")
+		log(e)
+		log(debug.traceback())
+
+		sysinit.stop(uciname)
+		local main_server = uci:get(uciname, "config", "main_server", "nil")
+		if main_server ~= "nil" then
+			if notEmpty(uci:get(uciname, main_server)) then
+				log("Reloading service...")
+				sysinit.start(uciname)
+			else
+				log("No node available. Stopping...")
+			end
+		end
+	end)
 end

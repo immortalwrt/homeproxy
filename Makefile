@@ -12,7 +12,6 @@ LUCI_DEPENDS:= \
 	+sing-box \
 	+sagernet-core \
 	+curl \
-	+lua-md5 \
 	+lua-neturl
 
 define Package/luci-app-homeproxy/conffiles
