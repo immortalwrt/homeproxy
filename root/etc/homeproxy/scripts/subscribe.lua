@@ -312,7 +312,7 @@ local function parse_uri(uri)
 				config["grpc_servicename"] = uri.path
 				config["grpc_mode"] = "gun"
 			elseif config.v2ray_transport == "h2" then
-				config["h2_host"] = notEmpty(uri.host) and uri.host.split(',') or nil
+				config["h2_host"] = notEmpty(uri.host) and uri.host:split(',') or nil
 				config["h2_path"] = uri.path
 			elseif config.v2ray_transport == "mkcp" then
 				config["mkcp_seed"] = uri.path
