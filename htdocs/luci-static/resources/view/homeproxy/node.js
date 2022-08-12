@@ -209,16 +209,8 @@ function parse_share_link(uri) {
 
 				break;
 			case 'h2':
-			case 'tcp':
-			case 'ws':
-				config['http_header'] = config.v2ray_transport === 'tcp' ? params.get('headerType') || 'none' : null;
-				config['h2_host'] = params.get('host') ? decodeURIComponent(params.get('host')) : null;
-				config['h2_path'] = params.get('host') ? decodeURIComponent(params.get('path')) : null;
-				if (config.h2_path && config.h2_path.includes('?ed=')) {
-					config['websocket_early_data_header'] = 'Sec-WebSocket-Protocol';
-					config['websocket_early_data'] = config.h2_path.split('?ed=')[1];
-					config['h2_path'] = config.h2_path.split('?ed=')[0];
-				}
+				config['h2_host'] = params.get('host') ? decodeURIComponent(params.get('host')).split(',') : null;
+				config['h2_path'] = params.get('path') ? decodeURIComponent(params.get('path')) : null;
 
 				break;
 			case 'mkcp':
@@ -237,6 +229,24 @@ function parse_share_link(uri) {
 				config['quic_security'] = params.get('quicSecurity') || 'none';
 				config['quic_key'] = params.get('key');
 				config['mkcp_header'] = params.get('headerType') || 'none';
+
+				break;
+			case 'tcp':
+				config['tcp_header'] = params.get('headerType') || 'none';
+				if (config.tcp_header !== 'none') {
+					config['tcp_host'] = params.get('host') ? decodeURIComponent(params.get('host')).split(',') : null;
+					config['tcp_path'] = params.get('path') ? decodeURIComponent(params.get('path')).split(',') : null;
+				}
+
+				break;
+			case 'ws':
+				config['ws_host'] = params.get('host') ? decodeURIComponent(params.get('host')) : null;
+				config['ws_path'] = params.get('path') ? decodeURIComponent(params.get('path')) : null;
+				if (config.ws_path && config.ws_path.includes('?ed=')) {
+					config['websocket_early_data_header'] = 'Sec-WebSocket-Protocol';
+					config['websocket_early_data'] = config.ws_path.split('?ed=')[1];
+					config['ws_path'] = config.ws_path.split('?ed=')[0];
+				}
 
 				break;
 			}
@@ -272,16 +282,8 @@ function parse_share_link(uri) {
 				
 				break;
 			case 'h2':
-			case 'tcp':
-			case 'ws':
-				config['http_header'] = config.v2ray_transport === 'tcp' ? uri.type || 'none' : null;
-				config['h2_host'] = uri.host;
+				config['h2_host'] = uri.host ? uri.host.split(',') : null;
 				config['h2_path'] = uri.path;
-				if (config.h2_path && config.h2_path.includes('?ed=')) {
-					config['websocket_early_data_header'] = 'Sec-WebSocket-Protocol';
-					config['websocket_early_data'] = config.h2_path.split('?ed=')[1];
-					config['h2_path'] = config.h2_path.split('?ed=')[0];
-				}
 
 				break;
 			case 'mkcp':
@@ -300,6 +302,24 @@ function parse_share_link(uri) {
 				config['quic_security'] = uri.host || 'none';
 				config['quic_key'] = uri.path;
 				config['mkcp_header'] = uri.type || 'none';
+
+				break;
+			case 'tcp':
+				config['tcp_header'] = uri.type || 'none';
+				if (config.tcp_header !== 'none') {
+					config['tcp_host'] = uri.host ? uri.host.split(',') : null;
+					config['tcp_path'] = uri.path ? uri.path.split(',') : null;
+				}
+
+				break;
+			case 'ws':
+				config['ws_host'] = uri.host;
+				config['ws_path'] = uri.path;
+				if (config.ws_path && config.ws_path.includes('?ed=')) {
+					config['websocket_early_data_header'] = 'Sec-WebSocket-Protocol';
+					config['websocket_early_data'] = config.ws_path.split('?ed=')[1];
+					config['ws_path'] = config.ws_path.split('?ed=')[0];
+				}
 
 				break;
 			}
@@ -876,7 +896,7 @@ return view.extend({
 			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]})
 		o.modalonly = true;
 
-		/* gRPC/H2 config start */
+		/* gRPC config start */
 		o = s.option(form.Value, 'grpc_servicename', _('gRPC service name'));
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'grpc'});
 		o.modalonly = true;
@@ -888,33 +908,21 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'grpc'});
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'h2_host', _('Host'));
-		o.depends({'type': 'v2ray', 'v2ray_transport': 'h2'});
-		o.depends({'type': 'v2ray', 'v2ray_transport': 'ws'});
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'h2_path', _('Path'));
-		o.depends({'type': 'v2ray', 'v2ray_transport': 'h2'});
-		o.depends({'type': 'v2ray', 'v2ray_transport': 'ws'});
-		o.modalonly = true;
-
-		o = s.option(form.Flag, 'h2_health_check', _('Health check'));
+		o = s.option(form.Flag, 'grpc_health_check', _('Health check'));
 		o.default = o.disabled;
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'grpc'});
-		o.depends({'type': 'v2ray', 'v2ray_transport': 'h2'});
 		o.modalonly = true;
 
-		o = s.option(form.Flag, 'h2_health_check_timeout', _('Health check timeout'));
+		o = s.option(form.Flag, 'grpc_health_check_timeout', _('Health check timeout'));
 		o.datatype = 'uintger';
 		o.default = '20';
-		o.depends('h2_health_check', '1');
+		o.depends('grpc_health_check', '1');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'h2_idle_timeout', _('Idle timeout'));
+		o = s.option(form.Value, 'grpc_idle_timeout', _('Idle timeout'));
 		o.datatype = 'uinteger';
 		o.default = '60';
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'grpc'});
-		o.depends({'type': 'v2ray', 'v2ray_transport': 'h2'});
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'grpc_permit_without_stream', _('Permit Without Stream'));
@@ -922,11 +930,25 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'grpc'});
 		o.modalonly = true;
 
-		o = s.option(form.Flag, 'h2_health_check', _('Health check'));
+		o = s.option(form.Flag, 'grpc_health_check', _('Health check'));
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'grpc'});
+		o.modalonly = true;
+		/* gRPC config end */
+
+		/* HTTP/2 config start */
+		o = s.option(form.DynamicList, 'h2_host', _('Host'));
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'h2'});
 		o.modalonly = true;
-		/* gRPC/H2 config end */
+
+		o = s.option(form.Value, 'h2_path', _('Path'));
+		o.depends({'type': 'v2ray', 'v2ray_transport': 'h2'});
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'h2_method', _('Method'));
+		o.default = 'PUT';
+		o.depends({'type': 'v2ray', 'v2ray_transport': 'h2'});
+		o.modalonly = true;
+		/* HTTP/2 config end */
 
 		/* mKCP config start */
 		o = s.option(form.Value, 'mkcp_seed', _('mKCP seed'));
@@ -1001,19 +1023,29 @@ return view.extend({
 		o = s.option(form.ListValue, 'tcp_header', _('Header type'));
 		o.value('none');
 		o.value('http');
+		o.default = 'none';
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'tcp'});
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.DynamicList, 'tcp_host', _('Host'));
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'tcp', 'tcp_header': 'http'});
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'tcp_path', _('Path'));
+		o = s.option(form.DynamicList, 'tcp_path', _('Path'));
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'tcp', 'tcp_header': 'http'});
 		o.modalonly = true;
 		/* TCP config end */
 
 		/* WebSocket config start */
+		o = s.option(form.Value, 'ws_host', _('Host'));
+		o.depends({'type': 'v2ray', 'v2ray_transport': 'ws'});
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'ws_path', _('Path'));
+		o.depends({'type': 'v2ray', 'v2ray_transport': 'ws'});
+		o.modalonly = true;
+
 		o = s.option(form.Value, 'websocket_early_data', _('Early data'));
 		o.datatype = 'uinteger';
 		o.default = '2048';

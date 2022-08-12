@@ -250,15 +250,9 @@ local function parse_uri(uri)
 			if config.v2ray_transport == "grpc" then
 				config["grpc_servicename"] = params.serviceName
 				config["grpc_mode"] = params.mode or "gun"
-			elseif string.match("h2,tcp,ws", config.v2ray_transport) then
-				config["http_header"] = (config.v2ray_transport == "tcp") and (params.headerType or "none") or nil
-				config["h2_host"] = urldecode(params.host, true)
+			elseif config.v2ray_transport == "h2" then
+				config["h2_host"] = notEmpty(params.host) and urldecode(params.host, true):split(",")
 				config["h2_path"] = urldecode(params.path, true)
-				if config.h2_path and config.h2_path:match("\?ed=") then
-					config["websocket_early_data_header"] = "Sec-WebSocket-Protocol"
-					config["websocket_early_data"] = config.h2_path:split("?ed=")[2]
-					config["h2_path"] = config.h2_path:split("?ed=")[1]
-				end
 			elseif config.v2ray_transport == "mkcp" then
 				config["mkcp_seed"] = params.seed
 				config["mkcp_header"] = params.headerType or "none"
@@ -273,6 +267,21 @@ local function parse_uri(uri)
 				config["quic_security"] = params.quicSecurity or "none"
 				config["quic_key"] = params.key
 				config["mkcp_header"] = params.headerType or "none"
+			elseif config.v2ray_transport == "tcp" then
+				config["tcp_header"] = notEmpty(params.headerType) or "none"
+				if config.tcp_header ~= "none" then
+					config["tcp_header"] = uri.type
+					config["tcp_host"] = notEmpty(params.host) and urldecode(params.host, true):split(',') or nil
+					config["tcp_path"] = notEmpty(params.path) and urldecode(params.path, true):split(',') or nil
+				end
+			elseif config.v2ray_transport == "ws" then
+				config["ws_host"] = urldecode(params.host, true)
+				config["ws_path"] = urldecode(params.path, true)
+				if config.ws_path and config.ws_path:match("\?ed=") then
+					config["websocket_early_data_header"] = "Sec-WebSocket-Protocol"
+					config["websocket_early_data"] = config.ws_path:split("?ed=")[2]
+					config["ws_path"] = config.ws_path:split("?ed=")[1]
+				end
 			end
 		elseif uri[1] == "vmess" then
 			-- https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2)
@@ -302,15 +311,9 @@ local function parse_uri(uri)
 			if config.v2ray_transport == "grpc" then
 				config["grpc_servicename"] = uri.path
 				config["grpc_mode"] = "gun"
-			elseif string.match("h2,tcp,ws", config.v2ray_transport) then
-				config["http_header"] = (config.v2ray_transport == "tcp") and (notEmpty(uri.type) or "none") or nil
-				config["h2_host"] = uri.host
+			elseif config.v2ray_transport == "h2" then
+				config["h2_host"] = notEmpty(uri.host) and uri.host.split(',') or nil
 				config["h2_path"] = uri.path
-				if notEmpty(config.h2_path) and config.h2_path:match("\?ed=") then
-					config["websocket_early_data_header"] = "Sec-WebSocket-Protocol"
-					config["websocket_early_data"] = config.h2_path:split("?ed=")[2]
-					config["h2_path"] = config.h2_path:split("?ed=")[1]
-				end
 			elseif config.v2ray_transport == "mkcp" then
 				config["mkcp_seed"] = uri.path
 				config["mkcp_header"] = notEmpty(uri.type) or "none"
@@ -325,6 +328,21 @@ local function parse_uri(uri)
 				config["quic_security"] = notEmpty(uri.host) or "none"
 				config["quic_key"] = uri.path
 				config["mkcp_header"] = notEmpty(uri.type) or "none"
+			elseif config.v2ray_transport == "tcp" then
+				config["tcp_header"] = notEmpty(uri.type) or "none"
+				if config.tcp_header ~= "none" then
+					config["tcp_header"] = uri.type
+					config["tcp_host"] = notEmpty(uri.host) and uri.host:split(',') or nil
+					config["tcp_path"] = notEmpty(uri.path) and uri.path:split(',') or nil
+				end
+			elseif config.v2ray_transport == "ws" then
+				config["ws_host"] = uri.host
+				config["ws_path"] = uri.path
+				if notEmpty(config.ws_host) and config.ws_host:match("\?ed=") then
+					config["websocket_early_data_header"] = "Sec-WebSocket-Protocol"
+					config["websocket_early_data"] = config.ws_host:split("?ed=")[2]
+					config["ws_host"] = config.ws_host:split("?ed=")[1]
+				end
 			end
 		end
 	end
