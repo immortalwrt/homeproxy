@@ -114,7 +114,7 @@ local function parse_uri(uri)
 				alias = uri.remarks,
 				type = notEmpty(uri.plugin) and "v2ray" or "shadowsocks",
 				v2ray_protocol = notEmpty(uri.plugin) and "shadowsocks" or nil,
-				address = uri.server
+				address = uri.server,
 				port = uri.server_port,
 				shadowsocks_encrypt_method = uri.method,
 				password = uri.password,
@@ -293,10 +293,10 @@ local function parse_uri(uri)
 				address = uri.add,
 				port = uri.port,
 				v2ray_uuid = uri.id,
-				v2ray_vmess_encrypt = uri.scy or "auto",
+				v2ray_vmess_encrypt = notEmpty(uri.scy) or "auto",
 				v2ray_transport = uri.net,
 				tls = (uri.tls == "tls") and "1" or "0",
-				tls_sni = uri.sni or uri.host,
+				tls_sni = notEmpty(uri.sni) or uri.host,
 				tls_alpn = notEmpty(uri.alpn) and uri.alpn:split(",") or nil
 			}
 			if config.v2ray_transport == "grpc" then
