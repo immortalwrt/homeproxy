@@ -278,11 +278,11 @@ local function parse_uri(uri)
 			-- https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2)
 			uri = JSON.parse(b64decode(uri[2]))
 
-			if uri.v ~= "2" then
+			if not uri or uri.v ~= "2" then
 				return nil
 			-- https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
 			elseif notEmpty(uri.aid) and tonumber(uri.aid) ~= 0 then
-				log("Skipping outdated VMess node:", uri.alias or uri.add)
+				log("Skipping outdated VMess node:", uri.ps or uri.add)
 				return nil
 			end
 
