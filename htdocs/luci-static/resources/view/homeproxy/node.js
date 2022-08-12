@@ -1260,7 +1260,7 @@ return view.extend({
 					return fs.remove('/etc/homeproxy/certs/client_ca.pem');
 				}
 
-				ui.addNotification(null, E('p', _('Your certificate was successfully uploaded. Size: %s.').format(res.size)));
+				ui.addNotification(null, E('p', _('Your certificate was successfully uploaded. Size: %sB.').format(res.size)));
 			}, this, ev.target))
 			.catch(function(e) { ui.addNotification(null, E('p', e.message)) })
 			.finally(L.bind(function(btn, input) {

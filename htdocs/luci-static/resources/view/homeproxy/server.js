@@ -20,11 +20,11 @@ return view.extend({
 			btn.firstChild.data = _('Checking %s...').format(_(type));
 
 			if (res.size <= 0) {
-				ui.addNotification(null, E('p', _('The uploaded %s is empty.').format(_type)));
+				ui.addNotification(null, E('p', _('The uploaded %s is empty.').format(_(type))));
 				return fs.remove(String.format('/etc/homeproxy/certs/%s.pem', filename));
 			}
 
-			ui.addNotification(null, E('p', _('Your %s was successfully uploaded. Size: %s.').format(_(type), res.size)));
+			ui.addNotification(null, E('p', _('Your %s was successfully uploaded. Size: %sB.').format(_(type), res.size)));
 		}, this, ev.target))
 		.catch(function(e) { ui.addNotification(null, E('p', e.message)) })
 		.finally(L.bind(function(btn, input) {
