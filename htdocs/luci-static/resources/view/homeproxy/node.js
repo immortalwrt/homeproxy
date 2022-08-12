@@ -1078,6 +1078,16 @@ return view.extend({
 		o.depends('v2ray_xtls', '1');
 		o.modalonly = true;
 		/* XTLS config end */
+
+		o = s.option(form.ListValue, 'v2ray_packet_encoding', _('Packet encoding'));
+		o.value('none', _('None'));
+		o.value('packet', _('packet (v2ray-core v5+)'));
+		o.value('xudp', _('Xudp (Xray-core)'));
+		o.default = 'xudp';
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless'});
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vmess'});
+		o.rmempty = false;
+		o.modalonly = true;
 		/* V2ray config end */
 
 		/* Mux config start */
