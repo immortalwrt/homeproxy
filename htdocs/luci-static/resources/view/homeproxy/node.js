@@ -893,7 +893,7 @@ return view.extend({
 		o.value('ws', _('WebSocket'));
 		o.default = 'tcp';
 		for (i in v2ray_native_protocols)
-			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]})
+			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]});
 		o.modalonly = true;
 
 		/* gRPC config start */
@@ -1097,7 +1097,16 @@ return view.extend({
 		o.depends('type', 'trojan');
 		o.depends('type', 'vmess');
 		for (i in v2ray_native_protocols)
-			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]})
+			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]});
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'v2ray_concurrency', _('Concurrency'));
+		o.datatype = 'range(0,1024)';
+		o.default = '1';
+		for (i in v2ray_native_protocols)
+			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i], 'multiplex': '1'});
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'multiplex_protocol', _('Protocol'),
@@ -1143,7 +1152,7 @@ return view.extend({
 		o.depends('type', 'http');
 		o.depends('type', 'trojan');
 		for (i in v2ray_native_protocols)
-			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]})
+			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]});
 		o.depends('type', 'vmess');
 		o.modalonly = true;
 
@@ -1294,7 +1303,7 @@ return view.extend({
 		for (var i in native_protocols)
 			o.depends('type', native_protocols[i])
 		for (i in v2ray_native_protocols)
-			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]})
+			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]});
 		o.rmempty = false;
 		o.modalonly = true;
 

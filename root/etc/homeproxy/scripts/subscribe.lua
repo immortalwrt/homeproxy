@@ -9,22 +9,38 @@ require "luci.sys"
 require "luci.util"
 require "nixio"
 
--- Common var start
-local shadowsocks_encrypt_method = {
-	-- plain
-	"none",
-	-- aead
-	"aes-128-gcm",
-	"aes-192-gcm",
-	"aes-256-gcm",
-	"chacha20-ietf-poly1305",
-	"xchacha20-ietf-poly1305",
-	-- aead 2022
-	"2022-blake3-aes-128-gcm",
-	"2022-blake3-aes-256-gcm",
-	"2022-blake3-chacha20-poly1305"
-}
--- Common var end
+-- String helper start
+string.split = luci.util.split
+string.trim = luci.util.trim
+
+table.contains = luci.util.contains
+table.dump = luci.util.dumptable
+table.splice = function(tbl, start, length)
+	length = length or 1
+	start = start or 1
+	local endd = start + length
+	local spliced = {}
+	local remainder = {}
+	for i, elt in ipairs(tbl) do
+		if i < start or i >= endd then
+			table.insert(spliced, elt)
+		else
+			table.insert(remainder, elt)
+		end
+	end
+	return spliced, remainder
+end
+
+local validation = require "luci.cbi.datatypes"
+
+local function isEmpty(res)
+	return res == nil or res == "" or (type(res) == "table" and next(res) == nil)
+end
+
+local function notEmpty(res)
+	return not isEmpty(res) and res
+end
+-- String helper end
 
 -- String parser start
 local urldecode = luci.util.urldecode
@@ -47,52 +63,33 @@ local function b64decode(str)
 end
 -- String parser end
 
--- String helper start
-string.split = luci.util.split
-string.trim = luci.util.trim
-
-table.dump = luci.util.dumptable
-table.splice = function(tbl, start, length)
-	length = length or 1
-	start = start or 1
-	local endd = start + length
-	local spliced = {}
-	local remainder = {}
-	for i, elt in ipairs(tbl) do
-		if i < start or i >= endd then
-			table.insert(spliced, elt)
-		else
-			table.insert(remainder, elt)
-		end
-	end
-	return spliced, remainder
-end
-
-local validation = require "luci.cbi.datatypes"
-
--- https://www.04007.cn/article/135.html
-local function checkTabValue(tab)
-	local revtab = {}
-
-	for k,v in pairs(tab) do
-		revtab[v] = true
-	end
-
-	return revtab
-end
-
-local function isEmpty(res)
-	return res == nil or res == "" or (type(res) == "table" and next(res) == nil)
-end
-
-local function notEmpty(res)
-	return not isEmpty(res) and res
-end
--- String helper end
-
 -- Utilities start
 local md5 = require "md5"
+local uci = luci.model.uci.cursor()
 -- Utilities end
+
+-- Common var start
+local node_cache = {}
+local node_result = setmetatable({}, {__index = node_cache})
+
+local uciname = "homeproxy"
+local ucisection = "node"
+
+local shadowsocks_encrypt_method = {
+	-- plain
+	"none",
+	-- aead
+	"aes-128-gcm",
+	"aes-192-gcm",
+	"aes-256-gcm",
+	"chacha20-ietf-poly1305",
+	"xchacha20-ietf-poly1305",
+	-- aead 2022
+	"2022-blake3-aes-128-gcm",
+	"2022-blake3-aes-256-gcm",
+	"2022-blake3-chacha20-poly1305"
+}
+-- Common var end
 
 local function log(...)
 	-- TODO: write to log file directly
@@ -105,7 +102,7 @@ local function parse_uri(uri)
 	if type(uri) == "table" then
 		if uri.type == "ss" then
 			-- SIP008 format https://shadowsocks.org/guide/sip008.html
-			if not checkTabValue(shadowsocks_encrypt_method)[uri.method] then
+			if not table.contains(shadowsocks_encrypt_method, uri.method) then
 				log("Skipping unsupported Shadowsocks node:", b64decode(uri.remarks) or url.server)
 				return nil
 			end
@@ -170,7 +167,7 @@ local function parse_uri(uri)
 				userinfo = b64decode(url.user):split(":")
 			end
 
-			if not checkTabValue(shadowsocks_encrypt_method)[userinfo[1]] then
+			if not table.contains(shadowsocks_encrypt_method, userinfo[1]) then
 				log("Skipping unsupported Shadowsocks node:", b64decode(alias) or url.host)
 				return nil
 			end
@@ -357,4 +354,7 @@ local function parse_uri(uri)
 	end
 
 	return config
+end
+
+local main = function()
 end
