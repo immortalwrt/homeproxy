@@ -349,7 +349,7 @@ local function parse_uri(uri)
 
 	if notEmpty(config) then
 		if not (validation.host(config.address) and validation.port(config.port)) then
-			log("Skipping invalid", config.type, "node:", config.alias)
+			log("Skipping invalid", config.type, "node:", config.alias or "NULL")
 			return nil
 		elseif isEmpty(config.alias) then
 			config["alias"] = config.address .. ":" .. config.port

@@ -1232,18 +1232,15 @@ return view.extend({
 		o.onclick = function(ev) {
 			fs.exec('/bin/mkdir', [ '-p', '/etc/homeproxy/certs/' ]);
 
-			return ui.uploadFile('/etc/homeproxy/certs/client_ca.pem.tmp', ev.target)
+			return ui.uploadFile('/etc/homeproxy/certs/client_ca.pem', ev.target)
 			.then(L.bind(function(btn, res) {
 				btn.firstChild.data = _('Checking certificate...');
-				return fs.stat('/etc/homeproxy/certs/client_ca.pem.tmp');
-			}, this, ev.target))
-			.then(L.bind(function(btn, res) {
+
 				if (res.size <= 0) {
 					ui.addNotification(null, E('p', _('The uploaded certificate is empty.')));
-					return fs.remove('/etc/homeproxy/certs/client_ca.pem.tmp');
+					return fs.remove('/etc/homeproxy/certs/client_ca.pem');
 				}
 
-				fs.exec('/bin/mv', [ '/etc/homeproxy/certs/client_ca.pem.tmp', '/etc/homeproxy/certs/client_ca.pem' ]);
 				ui.addNotification(null, E('p', _('Your certificate was successfully uploaded. Size: %s.').format(res.size)));
 			}, this, ev.target))
 			.catch(function(e) { ui.addNotification(null, E('p', e.message)) })
@@ -1278,8 +1275,8 @@ return view.extend({
 		o = s.option(widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
 			_('The network interface to bind to.'));
 		o.multiple = false;
-		for (var i in native_protocols)
-			o.depends('type', native_protocols[i])
+		o.noaliases = true;
+		o.nobridges = true;
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'tcp_fast_open', _('TCP fast open'));
