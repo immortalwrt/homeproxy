@@ -316,7 +316,7 @@ local function parse_uri(uri)
 					config["tcp_path"] = notEmpty(params.path) and urldecode(params.path, true):split(',') or nil
 				end
 			elseif config.v2ray_transport == "ws" then
-				config["ws_host"] = urldecode(params.host, true)
+				config["ws_host"] = (config.tls ~= "1") and urldecode(params.host, true) or nil
 				config["ws_path"] = urldecode(params.path, true)
 				if config.ws_path and config.ws_path:match("\?ed=") then
 					config["websocket_early_data_header"] = "Sec-WebSocket-Protocol"
@@ -381,7 +381,7 @@ local function parse_uri(uri)
 					config["tcp_path"] = notEmpty(uri.path) and uri.path:split(',') or nil
 				end
 			elseif config.v2ray_transport == "ws" then
-				config["ws_host"] = uri.host
+				config["ws_host"] = (config.tls ~= "1") and uri.host or nil
 				config["ws_path"] = uri.path
 				if notEmpty(config.ws_host) and config.ws_host:match("\?ed=") then
 					config["websocket_early_data_header"] = "Sec-WebSocket-Protocol"

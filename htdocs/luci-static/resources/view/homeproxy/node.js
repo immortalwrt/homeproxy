@@ -240,7 +240,7 @@ function parse_share_link(uri) {
 
 				break;
 			case 'ws':
-				config['ws_host'] = params.get('host') ? decodeURIComponent(params.get('host')) : null;
+				config['ws_host'] = config.tls !== '1' ? (params.get('host') ? decodeURIComponent(params.get('host')) : null) : null;
 				config['ws_path'] = params.get('path') ? decodeURIComponent(params.get('path')) : null;
 				if (config.ws_path && config.ws_path.includes('?ed=')) {
 					config['websocket_early_data_header'] = 'Sec-WebSocket-Protocol';
@@ -316,7 +316,7 @@ function parse_share_link(uri) {
 
 				break;
 			case 'ws':
-				config['ws_host'] = uri.host;
+				config['ws_host'] = config.tls !== '1' ? uri.host : null;
 				config['ws_path'] = uri.path;
 				if (config.ws_path && config.ws_path.includes('?ed=')) {
 					config['websocket_early_data_header'] = 'Sec-WebSocket-Protocol';
@@ -1042,7 +1042,7 @@ return view.extend({
 
 		/* WebSocket config start */
 		o = s.option(form.Value, 'ws_host', _('Host'));
-		o.depends({'type': 'v2ray', 'v2ray_transport': 'ws'});
+		o.depends({'type': 'v2ray', 'v2ray_transport': 'ws', 'tls': '0'});
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'ws_path', _('Path'));
