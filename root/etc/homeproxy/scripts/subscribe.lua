@@ -2,6 +2,8 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 --
 -- Copyright (C) 2022 ImmortalWrt.org
+--
+-- Thanks to luci-app-ssr-plus
 
 require "luci.jsonc"
 require "luci.model.uci"
