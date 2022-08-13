@@ -403,7 +403,7 @@ return view.extend({
 		o.rmempty = false;
 
 		o = s.option(form.DynamicList, 'filter_words', _('Filter keywords'),
-			_('Drop/keep node(s) that contain the specific keywords. Regex is supported.'));
+			_('Drop/keep node(s) that contain the specific keywords. <a target="_blank" href="https://www.lua.org/pil/20.2.html">Regex</a> is supported.'));
 		o.depends({'filter_nodes': 'disabled', '!reverse': true});
 
 		o = s.option(form.Button, '_save_subscriptions', _('Save subscriptions settings'),
