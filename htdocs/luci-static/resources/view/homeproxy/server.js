@@ -197,9 +197,10 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Button, '_upload_cert', _('Upload certificate'),
-			_('Your %s will be saved to "/etc/homeproxy/certs/%s.pem".<br />' +
-			'<strong>Save your configuration before uploading files!</strong>')
-			.format(_('certificate'), 'server_publickey'));
+			_('Your %s will be saved to "/etc/homeproxy/certs/%s.pem".')
+			.format(_('certificate'), 'server_publickey') +
+			'<br/>' +
+			_('<strong>Save your configuration before uploading files!</strong>'));
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends('tls', '1');
@@ -214,9 +215,10 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Button, '_upload_key', _('Upload key'),
-			_('Your %s will be saved to "/etc/homeproxy/certs/%s.pem".<br />' +
-			'<strong>Save your configuration before uploading files!</strong>')
-			.format(_('private key'), 'server_privatekey'));
+			_('Your %s will be saved to "/etc/homeproxy/certs/%s.pem".')
+			.format(_('private'), 'server_privatekey') +
+			'<br/>' +
+			_('<strong>Save your configuration before uploading files!</strong>'));
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends('tls', '1');

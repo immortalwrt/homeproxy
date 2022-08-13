@@ -1272,9 +1272,10 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Button, '_upload_cert', _('Upload certificate'),
-			_('Your %s will be saved to "/etc/homeproxy/certs/%s.pem".<br />' +
-			'<strong>Save your configuration before uploading files!</strong>')
-			.format(_('certificate'), 'client_ca'));
+			_('Your %s will be saved to "/etc/homeproxy/certs/%s.pem".')
+			.format(_('certificate'), 'client_ca') +
+			'<br/>' +
+			_('<strong>Save your configuration before uploading files!</strong>'));
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends('tls_self_sign', '1');
