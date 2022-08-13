@@ -311,7 +311,6 @@ local function parse_uri(uri)
 			elseif config.v2ray_transport == "tcp" then
 				config["tcp_header"] = notEmpty(params.headerType) or "none"
 				if config.tcp_header == "http" then
-					config["tcp_header"] = uri.type
 					config["tcp_host"] = notEmpty(params.host) and urldecode(params.host, true):split(',') or nil
 					config["tcp_path"] = notEmpty(params.path) and urldecode(params.path, true):split(',') or nil
 				end
