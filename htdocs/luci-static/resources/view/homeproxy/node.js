@@ -20,7 +20,7 @@ function fs_installed(binray) {
 	});
 }
 
-function parse_share_link(uri, allow_insecure) {
+function parse_share_link(uri, allow_insecure, packet_encoding) {
 	var config;
 
 	uri = uri.split('://');
@@ -203,7 +203,8 @@ function parse_share_link(uri, allow_insecure) {
 				tls_sni: params.get('sni'),
 				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')).split(',') : null,
 				v2ray_xtls: params.get('security') === 'xtls' ? '1' : '0',
-				v2ray_xtls_flow: params.get('flow')
+				v2ray_xtls_flow: params.get('flow'),
+				v2ray_packet_encoding: packet_encoding
 			};
 			switch (config.v2ray_transport) {
 			case 'grpc':
@@ -282,7 +283,8 @@ function parse_share_link(uri, allow_insecure) {
 				tls: uri.tls === 'tls' ? '1' : '0',
 				tls_insecure: allow_insecure,
 				tls_sni: uri.sni || uri.host,
-				tls_alpn: uri.alpn ? uri.alpn.split(',') : null
+				tls_alpn: uri.alpn ? uri.alpn.split(',') : null,
+				v2ray_packet_encoding: packet_encoding
 			};
 			switch (config.v2ray_transport) {
 			case 'grpc':
@@ -420,6 +422,13 @@ return view.extend({
 		o.default = o.disabled;
 		o.rmempty = false;
 
+		o = s.option(form.ListValue, 'default_packet_encoding', _('Default packet encoding'));
+		o.value('none', _('None'));
+		o.value('packet', _('packet (v2ray-core v5+)'));
+		o.value('xudp', _('Xudp (Xray-core)'));
+		o.default = 'xudp';
+		o.rmempty = false;
+
 		o = s.option(form.Button, '_save_subscriptions', _('Save subscriptions settings'),
 			_('Save settings before updating subscriptions.'));
 		o.inputstyle = 'apply';
@@ -519,7 +528,8 @@ return view.extend({
 								var imported_node = 0;
 								input_links.forEach(function(s) {
 									var allow_insecure = uci.get(data[0], 'subscription', 'allow_insecure_in_subs') || '0';
-									var config = parse_share_link(s, allow_insecure);
+									var packet_encoding = uci.get(data[0], 'subscription', 'default_packet_encoding') || 'xudp';
+									var config = parse_share_link(s, allow_insecure, packet_encoding);
 									if (config) {
 										var sid = uci.add(data[0], 'node');
 										Object.keys(config).forEach(function(k) {

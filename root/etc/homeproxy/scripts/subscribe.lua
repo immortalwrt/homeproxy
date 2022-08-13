@@ -109,9 +109,10 @@ local uci = luci.model.uci.cursor()
 local uciname = "homeproxy"
 local ucisection = "node"
 
-local allow_insecure = uci:get(uciname, "subscription", "tls_insecure", "allow_insecure_in_subs", "0")
+local allow_insecure = uci:get(uciname, "subscription", "allow_insecure_in_subs", "0")
 local filter_mode = uci:get(uciname, "subscription", "filter_nodes", "disabled")
 local filter_keywords = uci:get(uciname, "subscription", "filter_words", {})
+local packet_encoding = uci:get(uciname, "subscription", "default_packet_encoding", "xudp")
 local subscription_urls = uci:get(uciname, "subscription", "subscription_url", {})
 local via_proxy = uci:get(uciname, "subscription", "update_via_proxy", "0")
 
@@ -290,7 +291,8 @@ local function parse_uri(uri)
 				tls_sni = params.sni,
 				tls_alpn = params.alpn and urldecode(params.alpn, true):split(",") or nil,
 				v2ray_xtls = (params.security == "xtls") and "1" or "0",
-				v2ray_xtls_flow = params.flow
+				v2ray_xtls_flow = params.flow,
+				v2ray_packet_encoding = packet_encoding
 			}
 
 			if config.v2ray_transport == "grpc" then
@@ -358,7 +360,8 @@ local function parse_uri(uri)
 				tls = (uri.tls == "tls") and "1" or "0",
 				tls_insecure = allow_insecure,
 				tls_sni = notEmpty(uri.sni) or uri.host,
-				tls_alpn = notEmpty(uri.alpn) and uri.alpn:split(",") or nil
+				tls_alpn = notEmpty(uri.alpn) and uri.alpn:split(",") or nil,
+				v2ray_packet_encoding = packet_encoding
 			}
 			if config.v2ray_transport == "grpc" then
 				config["grpc_servicename"] = uri.path
