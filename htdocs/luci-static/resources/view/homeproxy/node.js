@@ -20,7 +20,7 @@ function fs_installed(binray) {
 	});
 }
 
-function parse_share_link(uri) {
+function parse_share_link(uri, allow_insecure) {
 	var config;
 
 	uri = uri.split('://');
@@ -55,6 +55,7 @@ function parse_share_link(uri) {
 				mkcp_downlink_capacity: params.get('downmbps'),
 				mkcp_uplink_capacity: params.get('upmbps'),
 				tls: '1',
+				tls_insecure: allow_insecure,
 				tls_sni: params.get('peer'),
 				tls_alpn: params.get('alpn'),
 				tls_insecure: params.get('insecure') || '0'
@@ -174,6 +175,7 @@ function parse_share_link(uri) {
 				port: url.port || '80',
 				password: decodeURIComponent(url.username),
 				tls: '1',
+				tls_insecure: allow_insecure,
 				tls_sni: url.searchParams.get('sni')
 			};
 
@@ -197,6 +199,7 @@ function parse_share_link(uri) {
 				v2ray_vless_encrypt: params.get('encryption') || 'none',
 				v2ray_transport: params.get('type') || 'tcp',
 				tls: params.get('security') === 'tls' ? '1' : '0',
+				tls_insecure: allow_insecure,
 				tls_sni: params.get('sni'),
 				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')).split(',') : null,
 				v2ray_xtls: params.get('security') === 'xtls' ? '1' : '0',
@@ -277,6 +280,7 @@ function parse_share_link(uri) {
 				v2ray_vmess_encrypt: uri.scy || 'auto',
 				v2ray_transport: uri.net,
 				tls: uri.tls === 'tls' ? '1' : '0',
+				tls_insecure: allow_insecure,
 				tls_sni: uri.sni || uri.host,
 				tls_alpn: uri.alpn ? uri.alpn.split(',') : null
 			};
@@ -409,6 +413,13 @@ return view.extend({
 			_('Drop/keep node(s) that contain the specific keywords. <a target="_blank" href="https://www.lua.org/pil/20.2.html">Regex</a> is supported.'));
 		o.depends({'filter_nodes': 'disabled', '!reverse': true});
 
+		o = s.option(form.Flag, 'allow_insecure_in_subs', _('Allow insecure in subscriptions'),
+			_('Allow insecure connection by default when add nodes form subscriptions.') +
+			'<br/>' +
+			_('This is <b>DANGEROUS</b>, your traffic is almost like <b>PLAIN TEXT</b>! Use at your own risk!'));
+		o.default = o.disabled;
+		o.rmempty = false;
+
 		o = s.option(form.Button, '_save_subscriptions', _('Save subscriptions settings'),
 			_('Save settings before updating subscriptions.'));
 		o.inputstyle = 'apply';
@@ -507,7 +518,8 @@ return view.extend({
 
 								var imported_node = 0;
 								input_links.forEach(function(s) {
-									var config = parse_share_link(s);
+									var allow_insecure = uci.get(data[0], 'subscription', 'allow_insecure_in_subs') || '0';
+									var config = parse_share_link(s, allow_insecure);
 									if (config) {
 										var sid = uci.add(data[0], 'node');
 										Object.keys(config).forEach(function(k) {
@@ -1177,7 +1189,9 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'tls_insecure', _('Allow insecure'),
-			_('Allow insecure connection at TLS client. This is <b>DANGEROUS</b>, your traffic is almost like <b>PLAIN TEXT</b>! Use at your own risk!'));
+			_('Allow insecure connection at TLS client.') +
+			'<br/>' +
+			_('This is <b>DANGEROUS</b>, your traffic is almost like <b>PLAIN TEXT</b>! Use at your own risk!'));
 		o.default = o.disabled;
 		o.depends('type', 'hysteria');
 		o.depends('tls', '1');
@@ -1324,7 +1338,7 @@ return view.extend({
 			o.depends('type', native_protocols[i])
 		o.modalonly = true;
 		/* Extra settings end */
-		
+
 		return m.render();
 	}
 });
