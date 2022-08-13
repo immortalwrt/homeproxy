@@ -116,6 +116,17 @@ local packet_encoding = uci:get(uciname, "subscription", "default_packet_encodin
 local subscription_urls = uci:get(uciname, "subscription", "subscription_url", {})
 local via_proxy = uci:get(uciname, "subscription", "update_via_proxy", "0")
 
+-- Log start
+luci.sys.call("mkdir -p /var/run/homeproxy/")
+
+local logfile = io.open("/var/run/homeproxy/homeproxy.log", "a")
+io.output(logfile)
+
+local function log(...)
+	io.write(os.date("%Y-%m-%d %H:%M:%S [SUBSCRIBE UPDATE] ") .. table.concat({...}, " ") .. "\n")
+end
+-- Log end
+
 local function filter_check(res)
 	if isEmpty(res) or filter_mode == "disabled" then
 		return false
@@ -134,11 +145,6 @@ local function filter_check(res)
 	return ret
 end
 -- UCI config end
-
-local function log(...)
-	-- TODO: write to log file directly
-	print(os.date("%Y-%m-%d %H:%M:%S [SUBSCRIBE UPDATE] ") .. table.concat({...}, " "))
-end
 
 local function parse_uri(uri)
 	local config
@@ -299,11 +305,11 @@ local function parse_uri(uri)
 				config["grpc_servicename"] = params.serviceName
 				config["grpc_mode"] = params.mode or "gun"
 			elseif config.v2ray_transport == "http" then
-				config["v2ray_transport"] == "h2"
+				config["v2ray_transport"] = "h2"
 				config["h2_host"] = notEmpty(params.host) and urldecode(params.host, true):split(",")
 				config["h2_path"] = urldecode(params.path, true)
 			elseif config.v2ray_transport == "kcp" then
-				config["v2ray_transport"] == "mkcp"
+				config["v2ray_transport"] = "mkcp"
 				config["mkcp_seed"] = params.seed
 				config["mkcp_header"] = params.headerType or "none"
 				-- Default settings from v2rayN
@@ -370,7 +376,7 @@ local function parse_uri(uri)
 				config["h2_host"] = notEmpty(uri.host) and uri.host:split(',') or nil
 				config["h2_path"] = uri.path
 			elseif config.v2ray_transport == "kcp" then
-				config["v2ray_transport"] == "mkcp"
+				config["v2ray_transport"] = "mkcp"
 				config["mkcp_seed"] = uri.path
 				config["mkcp_header"] = notEmpty(uri.type) or "none"
 				-- Default settings from v2rayN
@@ -385,7 +391,7 @@ local function parse_uri(uri)
 				config["quic_key"] = uri.path
 				config["mkcp_header"] = notEmpty(uri.type) or "none"
 			elseif config.v2ray_transport == "tcp" then
-				config["tcp_header"] = uri.type === "http" and "http" or "none"
+				config["tcp_header"] = (uri.type == "http") and "http" or "none"
 				if config.tcp_header == "http" then
 					config["tcp_header"] = uri.type
 					config["tcp_host"] = notEmpty(uri.host) and uri.host:split(',') or nil
@@ -476,9 +482,12 @@ local function main()
 
 	if isEmpty(node_result) then
 		log("Failed to update subscriptions: no valid node found.")
+		io.close(logfile)
+
 		if via_proxy ~= "1" then
 			sysinit.start(uciname)
 		end
+
 		return false
 	end
 
@@ -539,6 +548,7 @@ local function main()
 
 	log(added, "nodes added,", removed, "removed.")
 	log("Successfully updated subscriptions.")
+	io.close(logfile)
 end
 
 if notEmpty(subscription_urls) then
@@ -557,5 +567,6 @@ if notEmpty(subscription_urls) then
 				log("No node available. Stopping...")
 			end
 		end
+		io.close(logfile)
 	end)
 end
