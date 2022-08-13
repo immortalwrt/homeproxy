@@ -520,7 +520,7 @@ local function main()
 		local first_server = uci:get_first(uciname, ucisection)
 		if first_server then
 			if not uci:get(uciname, main_server) then
-				uci:set(uciname, "config", "main_server", first_server[".name"])
+				uci:set(uciname, "config", "main_server", first_server)
 				need_restart = true
 				log("Main node is gone, switching to first node.")
 			end
@@ -528,7 +528,7 @@ local function main()
 			local udp_server = uci:get(uciname, "config", "main_udp_server", "null")
 			if udp_server ~= "nil" and udp_server ~= "null" then
 				if not uci:get(uciname, udp_server) then
-					uci:set(uciname, "config", "main_udp_server", first_server[".name"])
+					uci:set(uciname, "config", "main_udp_server", first_server)
 					need_restart = true
 					log("UDP node is gone, switching to main node.")
 				end
@@ -553,7 +553,7 @@ end
 
 if notEmpty(subscription_urls) then
 	xpcall(main, function(e)
-		log("Errors occurred during updating subscriptions:")
+		log("An error occurred during updating subscriptions:")
 		log(e)
 		log(debug.traceback())
 

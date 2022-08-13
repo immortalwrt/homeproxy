@@ -450,7 +450,14 @@ return view.extend({
 			}
 		}
 		o.onclick = function() {
-			/* TODO: add corresponding script. */
+			var _this = this;
+
+			return fs.exec('/etc/homeproxy/scripts/subscribe.lua').then(function (res) {
+				return location.reload();
+			}).catch(function (err) {
+				ui.addNotification(null, E('p', _('An error occurred during updating subscriptions: %s').format(err)));
+				return _this.map.reset();
+			});
 		}
 
 		o = s.option(form.Button, '_remove_subscriptions', _('Remove all nodes from subscriptions'));

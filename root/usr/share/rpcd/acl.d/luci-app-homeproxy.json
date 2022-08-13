@@ -3,7 +3,7 @@
 		"description": "Grant access to homeproxy configuration",
 		"read": {
 			"file": {
-				"/etc/homeproxy/*": [ "read" ],
+				"/etc/homeproxy/scripts/subscribe.lua": [ "exec" ],
 				"/usr/bin/which": [ "exec" ],
 				"/bin/mkdir -p /etc/homeproxy/certs/": [ "exec" ]
 			},
@@ -14,7 +14,9 @@
 		},
 		"write": {
 			"file": {
-				"/etc/homeproxy/*": [ "write" ]
+				"/etc/homeproxy/certs/client_ca.pem": [ "write" ],
+				"/etc/homeproxy/certs/server_publickey.pem": [ "write" ],
+				"/etc/homeproxy/certs/server_privatekey.pem": [ "write" ]
 			},
 			"uci": [ "homeproxy" ]
 		}
