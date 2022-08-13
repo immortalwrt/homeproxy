@@ -308,7 +308,7 @@ function parse_share_link(uri) {
 
 				break;
 			case 'tcp':
-				config['tcp_header'] = uri.type || 'none';
+				config['tcp_header'] = uri.type === "http" ? "http" : 'none';
 				if (config.tcp_header === 'http') {
 					config['tcp_host'] = uri.host ? uri.host.split(',') : null;
 					config['tcp_path'] = uri.path ? uri.path.split(',') : null;

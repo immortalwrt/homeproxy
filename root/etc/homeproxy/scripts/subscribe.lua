@@ -374,7 +374,7 @@ local function parse_uri(uri)
 				config["quic_key"] = uri.path
 				config["mkcp_header"] = notEmpty(uri.type) or "none"
 			elseif config.v2ray_transport == "tcp" then
-				config["tcp_header"] = notEmpty(uri.type) or "none"
+				config["tcp_header"] = uri.type === "http" and "http" or "none"
 				if config.tcp_header == "http" then
 					config["tcp_header"] = uri.type
 					config["tcp_host"] = notEmpty(uri.host) and uri.host:split(',') or nil
