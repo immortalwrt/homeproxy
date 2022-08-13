@@ -195,7 +195,7 @@ function parse_share_link(uri) {
 				port: url.port || '80',
 				v2ray_uuid: url.username,
 				v2ray_vless_encrypt: params.get('encryption') || 'none',
-				v2ray_transport: params.get('type') === 'http' ? 'h2' : params.get('type') || 'tcp',
+				v2ray_transport: params.get('type') || 'tcp',
 				tls: params.get('security') === 'tls' ? '1' : '0',
 				tls_sni: params.get('sni'),
 				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')).split(',') : null,
@@ -209,11 +209,13 @@ function parse_share_link(uri) {
 
 				break;
 			case 'http':
+				config['v2ray_transport'] = 'h2';
 				config['h2_host'] = params.get('host') ? decodeURIComponent(params.get('host')).split(',') : null;
 				config['h2_path'] = params.get('path') ? decodeURIComponent(params.get('path')) : null;
 
 				break;
-			case 'mkcp':
+			case 'kcp':
+				config['v2ray_transport'] = 'mkcp';
 				config['mkcp_seed'] = params.get('seed');
 				config['mkcp_header'] = params.get('headerType') || 'none';
 				/* Default settings from v2rayN */
@@ -289,7 +291,8 @@ function parse_share_link(uri) {
 				config['h2_path'] = uri.path;
 
 				break;
-			case 'mkcp':
+			case 'kcp':
+				config['v2ray_transport'] = 'mkcp';
 				config['mkcp_seed'] = uri.path;
 				config['mkcp_header'] = uri.type || 'none';
 				/* Default settings from v2rayN */

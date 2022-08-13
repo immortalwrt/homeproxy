@@ -281,20 +281,23 @@ local function parse_uri(uri)
 				port = url.port,
 				v2ray_uuid = url.user,
 				v2ray_vless_encrypt = params.encryption or "none",
-				v2ray_transport = (params.type == "http") and "h2" or params.type,
+				v2ray_transport = params.type or "tcp",
 				tls = (params.security == "tls") and "1" or "0",
 				tls_sni = params.sni,
 				tls_alpn = params.alpn and urldecode(params.alpn, true):split(",") or nil,
 				v2ray_xtls = (params.security == "xtls") and "1" or "0",
 				v2ray_xtls_flow = params.flow
 			}
+
 			if config.v2ray_transport == "grpc" then
 				config["grpc_servicename"] = params.serviceName
 				config["grpc_mode"] = params.mode or "gun"
 			elseif config.v2ray_transport == "http" then
+				config["v2ray_transport"] == "h2"
 				config["h2_host"] = notEmpty(params.host) and urldecode(params.host, true):split(",")
 				config["h2_path"] = urldecode(params.path, true)
-			elseif config.v2ray_transport == "mkcp" then
+			elseif config.v2ray_transport == "kcp" then
+				config["v2ray_transport"] == "mkcp"
 				config["mkcp_seed"] = params.seed
 				config["mkcp_header"] = params.headerType or "none"
 				-- Default settings from v2rayN
@@ -358,7 +361,8 @@ local function parse_uri(uri)
 			elseif config.v2ray_transport == "h2" then
 				config["h2_host"] = notEmpty(uri.host) and uri.host:split(',') or nil
 				config["h2_path"] = uri.path
-			elseif config.v2ray_transport == "mkcp" then
+			elseif config.v2ray_transport == "kcp" then
+				config["v2ray_transport"] == "mkcp"
 				config["mkcp_seed"] = uri.path
 				config["mkcp_header"] = notEmpty(uri.type) or "none"
 				-- Default settings from v2rayN
