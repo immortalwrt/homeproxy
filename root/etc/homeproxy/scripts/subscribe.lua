@@ -73,12 +73,12 @@ local function md5(str)
 	return ret:trim()
 end
 
-local function wget(url)
+local function curl(url)
 	if isEmpty(url) then
 		return nil
 	end
 
-	local stdout = luci.sys.exec(string.format("curl -fsL --connect-timeout '10' --retry '3' %s", luci.util.shellquote(url)))
+	local stdout = luci.sys.exec("curl -fsL --connect-timeout '10' --retry '3' " .. luci.util.shellquote(url))
 	return stdout:trim()
 end
 -- Utilities end
@@ -411,7 +411,7 @@ local function main()
 	end
 
 	for _, url in ipairs(subscription_urls) do
-		local res = wget(url)
+		local res = curl(url)
 		if notEmpty(res) then
 			local groupHash = md5(url)
 			node_cache[groupHash] = {}
