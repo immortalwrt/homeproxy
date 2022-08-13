@@ -195,7 +195,7 @@ function parse_share_link(uri) {
 				port: url.port || '80',
 				v2ray_uuid: url.username,
 				v2ray_vless_encrypt: params.get('encryption') || 'none',
-				v2ray_transport: params.get('type'),
+				v2ray_transport: params.get('type') === 'http' ? 'h2' : params.get('type') || 'tcp',
 				tls: params.get('security') === 'tls' ? '1' : '0',
 				tls_sni: params.get('sni'),
 				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')).split(',') : null,
@@ -208,7 +208,7 @@ function parse_share_link(uri) {
 				config['grpc_mode'] = params.get('mode') || 'gun';
 
 				break;
-			case 'h2':
+			case 'http':
 				config['h2_host'] = params.get('host') ? decodeURIComponent(params.get('host')).split(',') : null;
 				config['h2_path'] = params.get('path') ? decodeURIComponent(params.get('path')) : null;
 

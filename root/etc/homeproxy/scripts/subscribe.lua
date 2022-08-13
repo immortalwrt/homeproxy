@@ -281,7 +281,7 @@ local function parse_uri(uri)
 				port = url.port,
 				v2ray_uuid = url.user,
 				v2ray_vless_encrypt = params.encryption or "none",
-				v2ray_transport = params.type,
+				v2ray_transport = (params.type == "http") and "h2" or params.type,
 				tls = (params.security == "tls") and "1" or "0",
 				tls_sni = params.sni,
 				tls_alpn = params.alpn and urldecode(params.alpn, true):split(",") or nil,
@@ -291,7 +291,7 @@ local function parse_uri(uri)
 			if config.v2ray_transport == "grpc" then
 				config["grpc_servicename"] = params.serviceName
 				config["grpc_mode"] = params.mode or "gun"
-			elseif config.v2ray_transport == "h2" then
+			elseif config.v2ray_transport == "http" then
 				config["h2_host"] = notEmpty(params.host) and urldecode(params.host, true):split(",")
 				config["h2_path"] = urldecode(params.path, true)
 			elseif config.v2ray_transport == "mkcp" then
