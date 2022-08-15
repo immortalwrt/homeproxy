@@ -1323,7 +1323,7 @@ return view.extend({
 			var _this = this;
 			this.value('', _('None'));
 			uci.sections(data[0], 'node', function(res) {
-				if (res['.name'] !== section_id && native_protocols.includes(res.type))
+				if (res['.name'] !== section_id)
 					_this.value(res['.name'], String.format('[%s] %s',
 						res.type, res.alias || res.server + ':' + res.server_port));
 			});

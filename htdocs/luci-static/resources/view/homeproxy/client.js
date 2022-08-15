@@ -361,8 +361,20 @@ return view.extend({
 		so.value('local', _('Local'));
 		so.rmempty = false;
 
-		so = ss.option(form.Value, 'address_resolver', _('Address resolver'),
+		so = ss.option(form.ListValue, 'address_resolver', _('Address resolver'),
 			_('Tag of a another server to resolve the domain name in the address. Required if address contains domain.'));
+		so.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			var _this = this;
+			uci.sections(data[0], 'dns_server', function(res) {
+				if (res['.name'] !== section_id)
+					_this.value(res.tag);
+			});
+
+			return this.super('load', section_id);
+		}
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'address_strategy', _('Address strategy'),
