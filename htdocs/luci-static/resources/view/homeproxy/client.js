@@ -368,6 +368,7 @@ return view.extend({
 			delete this.vallist;
 
 			var _this = this;
+			this.value('', _('None'));
 			uci.sections(data[0], 'dns_server', function(res) {
 				if (res['.name'] !== section_id)
 					_this.value(res.tag);
