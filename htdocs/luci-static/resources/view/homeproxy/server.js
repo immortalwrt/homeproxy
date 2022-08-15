@@ -55,11 +55,11 @@ return view.extend({
 		s.nodescriptions = true;
 		s.sortable = true;
 		s.modaltitle = function(section_id) {
-			var alias = uci.get(data[0], section_id, 'alias');
-			return alias ? _('Server') + ' » ' + alias : _('Add a server');
+			var label = uci.get(data[0], section_id, 'label');
+			return label ? _('Server') + ' » ' + label : _('Add a server');
 		}
 
-		o = s.option(form.Value, 'alias', _('Alias'));
+		o = s.option(form.Value, 'label', _('Label'));
 		o.rmempty = false;
 
 		o = s.option(form.Flag, 'enabled', _('Enable'));

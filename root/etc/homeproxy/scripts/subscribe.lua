@@ -151,14 +151,14 @@ local function parse_uri(uri)
 
 	if type(uri) == "table" then
 		if uri.nodetype == "sip008" then
-			-- SIP008 format https://shadowsocks.org/guide/sip008.html
+			-- https://shadowsocks.org/guide/sip008.html
 			if not table.contains(shadowsocks_encrypt_methods, uri.method) then
 				log("Skipping legacy Shadowsocks node:", b64decode(uri.remarks) or url.server)
 				return nil
 			end
 
 			config = {
-				alias = uri.remarks,
+				label = uri.remarks,
 				type = notEmpty(uri.plugin) and "v2ray" or "shadowsocks",
 				v2ray_protocol = notEmpty(uri.plugin) and "shadowsocks" or nil,
 				address = uri.server,
@@ -177,7 +177,7 @@ local function parse_uri(uri)
 			local params = url.query
 
 			config = {
-				alias = urldecode(url.fragment, true),
+				label = urldecode(url.fragment, true),
 				type = "hysteria",
 				address = url.hostname,
 				port = url.port,
@@ -196,17 +196,17 @@ local function parse_uri(uri)
 		elseif uri[1] == "ss" then
 			-- "Lovely" Shadowrocket format
 			local suri = uri[2]:split("#")
-			local salias = ""
+			local slabel = ""
 			if #suri <= 2 then
 				if #suri == 2 then
-					salias = "#" .. urlencode(suri[2], true)
+					slabel = "#" .. urlencode(suri[2], true)
 				end
 				if b64decode(suri[1]) then
-					uri[2] = b64decode(suri[1]) .. salias
+					uri[2] = b64decode(suri[1]) .. slabel
 				end
 			end
 
-			-- SIP002 format https://shadowsocks.org/guide/sip002.html
+			-- https://shadowsocks.org/guide/sip002.html
 			local url = URL.parse("http://" .. uri[2])
 
 			local userinfo = {}
@@ -233,7 +233,7 @@ local function parse_uri(uri)
 			end
 
 			config = {
-				alias = urldecode(url.fragment, true),
+				label = urldecode(url.fragment, true),
 				type = plugin and "v2ray" or "shadowsocks",
 				v2ray_protocol = plugin and "shadowsocks" or nil,
 				address = url.host,
@@ -250,7 +250,7 @@ local function parse_uri(uri)
 			local params = URL.parseQuery(uri[2]:gsub("^\?", ""))
 
 			config = {
-				alias = b64decode(params.remarks),
+				label = b64decode(params.remarks),
 				type = "v2ray",
 				v2ray_protocol = "shadowsocksr",
 				address = userinfo[1],
@@ -267,7 +267,7 @@ local function parse_uri(uri)
 			local url = URL.parse("http://" .. uri[2])
 
 			config = {
-				alias = urldecode(url.fragment, true),
+				label = urldecode(url.fragment, true),
 				type = "trojan",
 				address = url.host,
 				port = url.port,
@@ -282,7 +282,7 @@ local function parse_uri(uri)
 			local params = url.query
 
 			config = {
-				alias = urldecode(url.fragment, true),
+				label = urldecode(url.fragment, true),
 				type = "v2ray",
 				v2ray_protocol = "vless",
 				address = url.host,
@@ -353,7 +353,7 @@ local function parse_uri(uri)
 			end
 
 			config = {
-				alias = uri.ps,
+				label = uri.ps,
 				type = "v2ray",
 				v2ray_protocol = "vmess",
 				address = uri.add,
@@ -414,10 +414,10 @@ local function parse_uri(uri)
 
 	if notEmpty(config) then
 		if not (validation.host(config.address) and validation.port(config.port)) then
-			log("Skipping invalid", config.type, "node:", config.alias or "NULL")
+			log("Skipping invalid", config.type, "node:", config.label or "NULL")
 			return nil
-		elseif isEmpty(config.alias) then
-			config["alias"] = config.address .. ":" .. config.port
+		elseif isEmpty(config.label) then
+			config["label"] = config.address .. ":" .. config.port
 		end
 	end
 
@@ -460,15 +460,15 @@ local function main()
 					config = parse_uri(node)
 				end
 				if notEmpty(config) then
-					local alias = config.alias
-					config.alias = nil
+					local label = config.label
+					config.label = nil
 					config.hashKey = md5(JSON.dump(config))
-					config.alias = alias
+					config.label = label
 
-					if filter_check(config.alias) then
-						log("Skipping blacklist node:", config.alias)
+					if filter_check(config.label) then
+						log("Skipping blacklist node:", config.label)
 					elseif node_cache[groupHash][config.hashKey] then
-						log("Skipping duplicate node:", config.alias)
+						log("Skipping duplicate node:", config.label)
 					else
 						count = count + 1
 						config.group_hashKey = groupHash

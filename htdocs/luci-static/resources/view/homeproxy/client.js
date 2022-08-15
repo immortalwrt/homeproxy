@@ -92,7 +92,7 @@ return view.extend({
 			proxy_nodes[res['.name']] = [ res.type,
 				String.format('[%s] %s',
 					res.type === 'v2ray' ? res.v2ray_protocol : res.type,
-					res.alias || res.server + ':' + res.server_port) ];
+					res.label || res.server + ':' + res.server_port) ];
 		});
 
 		s = m.section(form.NamedSection, 'config', 'homeproxy');
@@ -321,35 +321,12 @@ return view.extend({
 		ss.nodescriptions = true;
 		ss.sortable = true;
 		ss.modaltitle = function(section_id) {
-			var tag = uci.get(data[0], section_id, 'tag');
-			return tag ? _('DNS server') + ' » ' + tag : _('Add a DNS server');
+			var label = uci.get(data[0], section_id, 'label');
+			return label ? _('DNS server') + ' » ' + label : _('Add a DNS server');
 		}
 
-		so = ss.option(form.Value, 'tag', _('Tag'));
-		so.validate = function(section_id, value) {
-			if (section_id) {				
-				if (value === null || value === '')
-					return _('Expecting: non-empty value');
-				else if (value === 'main')
-					return _('Expecting: %s').format(_('non-preset tag'));
-				else if (value.match('[a-zA-Z0-9\-\_]+').toString() !== value)
-					return _('Expecting: %s').format(_('letters, numbers, hyphens and underscores only'));
-				else if (value.endsWith('-') || value.endsWith('_'))
-					return _('Expecting: %s').format(_('end with letters or numbers'));
-				else {
-					var repeating = false;
-					uci.sections(data[0], 'dns_server', function(res) {
-						if (res['.name'] !== section_id && res.tag === value)
-							repeating = true;
-					});
-
-					if (repeating)
-						return _('Expecting: %s').format(_('non-repeating tag'));
-				}
-			}
-
-			return true;
-		}
+		so = ss.option(form.Value, 'label', _('Label'));
+		so.rmempty = false;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
 		so.default = o.disabled;
@@ -368,10 +345,11 @@ return view.extend({
 			delete this.vallist;
 
 			var _this = this;
-			this.value('', _('None'));
+			_this.value('', _('None'));
+			_this.value('main-dns', _('Main DNS server'));
 			uci.sections(data[0], 'dns_server', function(res) {
 				if (res['.name'] !== section_id)
-					_this.value(res.tag);
+					_this.value(res.label);
 			});
 
 			return this.super('load', section_id);
@@ -516,7 +494,7 @@ return view.extend({
 
 			var _this = this;
 			uci.sections(data[0], 'dns_server', function(res) {
-				_this.value(res.tag);
+				_this.value(res.label);
 			});
 
 			return this.super('load', section_id);

@@ -44,7 +44,7 @@ function parse_share_link(uri, allow_insecure, packet_encoding) {
 			var params = url.searchParams;
 
 			config = {
-				alias: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
+				label: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
 				type: 'hysteria',
 				address: url.hostname,
 				port: url.port || '80',
@@ -67,17 +67,16 @@ function parse_share_link(uri, allow_insecure, packet_encoding) {
 				/* "Lovely" Shadowrocket format */
 				try {
 					var suri = uri[1].split('#');
-					var salias = '';
+					var slabel = '';
 					if (suri.length <= 2) {
 						if (suri.length === 2)
-							salias = '#' + suri[1];
-						uri = [null, b64decode(suri[0]) + salias];
+							slabel = '#' + suri[1];
+						uri = [null, b64decode(suri[0]) + slabel];
 					}
 				} catch(e) { }
 
 				/* SIP002 format https://shadowsocks.org/guide/sip002.html */
 				var url = new URL('http://' + uri[1]);
-				var alias = url.hash ? decodeURIComponent(url.hash.slice(1)) : null;
 
 				var userinfo;
 				if (url.username && url.password)
@@ -95,7 +94,7 @@ function parse_share_link(uri, allow_insecure, packet_encoding) {
 				}
 
 				config = {
-					alias: alias,
+					label: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
 					type: plugin ? 'v2ray' : 'shadowsocks',
 					v2ray_protocol: plugin ? 'shadowsocks' : null,
 					address: url.hostname,
@@ -145,7 +144,7 @@ function parse_share_link(uri, allow_insecure, packet_encoding) {
 			var remarks = params.get('remarks') ? b64decode(params.get('remarks')) : null;
 
 			config = {
-				alias: remarks,
+				label: remarks,
 				type: 'v2ray',
 				v2ray_protocol: 'shadowsocksr',
 				address: userinfo[0],
@@ -168,7 +167,7 @@ function parse_share_link(uri, allow_insecure, packet_encoding) {
 				return null;
 
 			config = {
-				alias: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
+				label: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
 				type: 'v2ray',
 				v2ray_protocol: 'trojan',
 				address: url.hostname,
@@ -190,7 +189,7 @@ function parse_share_link(uri, allow_insecure, packet_encoding) {
 				return null;
 
 			config = {
-				alias: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
+				label: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
 				type: 'v2ray',
 				v2ray_protocol: 'vless',
 				address: url.hostname,
@@ -272,7 +271,7 @@ function parse_share_link(uri, allow_insecure, packet_encoding) {
 				return null;
 
 			config = {
-				alias: uri.ps,
+				label: uri.ps,
 				type: 'v2ray',
 				v2ray_protocol: 'vmess',
 				address: uri.add,
@@ -348,8 +347,8 @@ function parse_share_link(uri, allow_insecure, packet_encoding) {
 	if (config) {
 		if (!config.address || !config.port)
 			return null;
-		else if (!config.alias)
-			config['alias'] = config.address + ':' + config.port;
+		else if (!config.label)
+			config['label'] = config.address + ':' + config.port;
 	}
 
 	return config;
@@ -509,8 +508,8 @@ return view.extend({
 		s.nodescriptions = true;
 		s.sortable = true;
 		s.modaltitle = function(section_id) {
-			var alias = uci.get(data[0], section_id, 'alias') || uci.get(data[0], section_id, 'address');
-			return alias ? _('Node') + ' » ' + alias : _('Add a node');
+			var label = uci.get(data[0], section_id, 'label') || uci.get(data[0], section_id, 'address');
+			return label ? _('Node') + ' » ' + label : _('Add a node');
 		}
 
 		/* Import subscription links start */
@@ -600,7 +599,7 @@ return view.extend({
 			return this.map.save(null, true);
 		}
 
-		o = s.option(form.Value, 'alias', _('Alias'));
+		o = s.option(form.Value, 'label', _('Label'));
 		o.rmempty = false;
 
 		o = s.option(form.ListValue, 'type', _('Type'));
@@ -1321,11 +1320,11 @@ return view.extend({
 			delete this.vallist;
 
 			var _this = this;
-			this.value('', _('None'));
+			_this.value('', _('None'));
 			uci.sections(data[0], 'node', function(res) {
 				if (res['.name'] !== section_id)
 					_this.value(res['.name'], String.format('[%s] %s',
-						res.type, res.alias || res.server + ':' + res.server_port));
+						res.type, res.label || res.server + ':' + res.server_port));
 			});
 
 			return this.super('load', section_id);
