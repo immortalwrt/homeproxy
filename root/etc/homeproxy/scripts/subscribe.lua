@@ -150,7 +150,7 @@ local function parse_uri(uri)
 	local config
 
 	if type(uri) == "table" then
-		if uri.nodetype == "ss" then
+		if uri.nodetype == "sip008" then
 			-- SIP008 format https://shadowsocks.org/guide/sip008.html
 			if not table.contains(shadowsocks_encrypt_methods, uri.method) then
 				log("Skipping legacy Shadowsocks node:", b64decode(uri.remarks) or url.server)
@@ -197,14 +197,12 @@ local function parse_uri(uri)
 			-- "Lovely" Shadowrocket format
 			local suri = uri[2]:split("#")
 			local salias = ""
-			local is_srt = false
 			if #suri <= 2 then
 				if #suri == 2 then
 					salias = "#" .. urlencode(suri[2], true)
 				end
 				if b64decode(suri[1]) then
 					uri[2] = b64decode(suri[1]) .. salias
-					is_srt = true
 				end
 			end
 
@@ -214,7 +212,7 @@ local function parse_uri(uri)
 			local userinfo = {}
 			if url.user and url.password then
 				-- User info encoded with URIComponent
-				userinfo = { url.user, is_srt and url.password or b64decode(url.password) }
+				userinfo = { url.user, urldecode(url.password) }
 			elseif url.user then
 				-- User info encoded with base64
 				userinfo = b64decode(url.user):split(":")
@@ -447,7 +445,7 @@ local function main()
 				nodes = JSON.parse(res).servers or JSON.parse(res)
 				if nodes[1].server and nodes[1].method then
 					for index, node in ipairs(nodes) do
-						nodes[index].nodetype = "ss"
+						nodes[index].nodetype = "sip008"
 					end
 				end
 			else
