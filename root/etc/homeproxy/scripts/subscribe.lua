@@ -326,8 +326,8 @@ local function parse_uri(uri)
 			elseif config.v2ray_transport == "tcp" then
 				config["tcp_header"] = notEmpty(params.headerType) or "none"
 				if config.tcp_header == "http" then
-					config["tcp_host"] = notEmpty(params.host) and urldecode(params.host, true):split(',') or nil
-					config["tcp_path"] = notEmpty(params.path) and urldecode(params.path, true):split(',') or nil
+					config["tcp_host"] = notEmpty(params.host) and urldecode(params.host, true):split(",") or nil
+					config["tcp_path"] = notEmpty(params.path) and urldecode(params.path, true):split(",") or nil
 				end
 			elseif config.v2ray_transport == "ws" then
 				config["ws_host"] = (config.tls ~= "1") and urldecode(params.host, true) or nil
@@ -339,7 +339,7 @@ local function parse_uri(uri)
 				end
 			end
 		elseif uri[1] == "vmess" then
-			if uri[2]:find('&') then
+			if uri[2]:find("&") then
 				return nil
 			end
 
@@ -373,7 +373,7 @@ local function parse_uri(uri)
 				config["grpc_servicename"] = uri.path
 				config["grpc_mode"] = "gun"
 			elseif config.v2ray_transport == "h2" then
-				config["h2_host"] = notEmpty(uri.host) and uri.host:split(',') or nil
+				config["h2_host"] = notEmpty(uri.host) and uri.host:split(",") or nil
 				config["h2_path"] = uri.path
 			elseif config.v2ray_transport == "kcp" then
 				config["v2ray_transport"] = "mkcp"
@@ -394,8 +394,8 @@ local function parse_uri(uri)
 				config["tcp_header"] = (uri.type == "http") and "http" or "none"
 				if config.tcp_header == "http" then
 					config["tcp_header"] = uri.type
-					config["tcp_host"] = notEmpty(uri.host) and uri.host:split(',') or nil
-					config["tcp_path"] = notEmpty(uri.path) and uri.path:split(',') or nil
+					config["tcp_host"] = notEmpty(uri.host) and uri.host:split(",") or nil
+					config["tcp_path"] = notEmpty(uri.path) and uri.path:split(",") or nil
 				else
 					conifg["type"] = "vmess"
 					config["v2ray_protocol"] = nil
