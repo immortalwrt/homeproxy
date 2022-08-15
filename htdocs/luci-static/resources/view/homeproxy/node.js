@@ -321,6 +321,11 @@ function parse_share_link(uri, allow_insecure, packet_encoding) {
 				if (config.tcp_header === 'http') {
 					config['tcp_host'] = uri.host ? uri.host.split(',') : null;
 					config['tcp_path'] = uri.path ? uri.path.split(',') : null;
+				} else {
+					conifg['type'] = 'vmess';
+					config['v2ray_protocol'] = null;
+					config['v2ray_transport'] = null;
+					config['v2ray_packet_encoding'] = null;
 				}
 
 				break;
