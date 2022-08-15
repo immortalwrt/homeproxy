@@ -2,8 +2,6 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 --
 -- Copyright (C) 2022 ImmortalWrt.org
---
--- Thanks to luci-app-ssr-plus
 
 require "luci.jsonc"
 require "luci.model.uci"
@@ -428,6 +426,7 @@ local function parse_uri(uri)
 	return config
 end
 
+-- Thanks to luci-app-ssr-plus
 local function main()
 	if via_proxy ~= "1" then
 		log("Stopping service...")
