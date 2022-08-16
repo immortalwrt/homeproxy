@@ -8,6 +8,7 @@
 'require poll';
 'require rpc';
 'require uci';
+'require validation';
 'require view';
 'require tools.widgets as widgets';
 
@@ -113,11 +114,10 @@ return view.extend({
 		for (var i in proxy_nodes)
 			o.value(i, proxy_nodes[i][1]);
 		o.default = 'nil';
-		o.depends({'routing': 'custom', '!reverse': true});
+		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.rmempty = false;
 
-		o = s.taboption('general', form.ListValue, 'routing', _('Routing settings'));
-		o.value('disabled', _('Disable'));
+		o = s.taboption('general', form.ListValue, 'routing_mode', _('Routing settings'));
 		o.value('gfwlist', _('GFWList'));
 		o.value('bypass_mainland_china', _('Bypass mainland China'));
 		o.value('proxy_mainland_china', _('Only proxy mainland China'));
@@ -131,7 +131,7 @@ return view.extend({
 		o.value('all', _('All ports'));
 		o.value('common', _('Common ports only (bypass P2P traffic)'));
 		o.default = 'common';
-		o.depends({'routing': 'custom', '!reverse': true});
+		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.rmempty = false;
 		o.validate = function(section_id, value) {
 			if (section_id && value !== 'all' && value !== 'common') {
@@ -153,21 +153,21 @@ return view.extend({
 		}
 
 		o = s.taboption('general', form.Value, 'dns_server', _('DNS server'),
-			_('You can only have one server set. Custom DNS server format as IP:PORT.'));
+			_('You can only have one server set. Custom DNS server format as plain IPv4/IPv6.'));
 		o.value('local', _('Follow system'));
 		o.value('wan', _('Use DNS server from WAN'));
-		o.value('1.1.1.1:53', _('CloudFlare Public DNS (1.1.1.1:53)'));
-		o.value('208.67.222.222:53', _('Cisco Public DNS (208.67.222.222:53)'));
-		o.value('8.8.8.8:53', _('Google Public DNS (8.8.8.8:53)'));
+		o.value('1.1.1.1', _('CloudFlare Public DNS (1.1.1.1)'));
+		o.value('208.67.222.222', _('Cisco Public DNS (208.67.222.222)'));
+		o.value('8.8.8.8', _('Google Public DNS (8.8.8.8)'));
 		o.value('', _('---'));
-		o.value('223.5.5.5:53', _('Aliyun Public DNS (223.5.5.5:53)'));
-		o.value('119.29.29.29:53', _('Tencent Public DNS (119.29.29.29:53)'));
-		o.value('114.114.114.114:53', _('Xinfeng Public DNS (114.114.114.114:53)'));
-		o.default = '8.8.8.8:53';
+		o.value('223.5.5.5', _('Aliyun Public DNS (223.5.5.5)'));
+		o.value('119.29.29.29', _('Tencent Public DNS (119.29.29.29)'));
+		o.value('114.114.114.114', _('Xinfeng Public DNS (114.114.114.114)'));
+		o.default = '8.8.8.8';
 		o.validate = function(section_id, value) {
-			/* TODO: find a proper way to validate DNS server */
-			if (section_id && (value == null || value == ''))
-				return _('Expecting: non-empty value');
+			if (!['local', 'wan'].includes(value)
+					&& !(validation.parseIPv4(value) || validation.parseIPv6(value)))
+				return _('Expecting: %s').format(_('valid IP address'));
 
 			return true;
 		}
@@ -233,7 +233,6 @@ return view.extend({
 		so = ss.option(form.Flag, 'invert', _('Invert'),
 			_('Invert match result.'));
 		so.default = so.disabled;
-		so.depends({'mode': 'default', '!reverse': true})
 		so.rmempty = false;
 		so.modalonly = true;
 
@@ -312,6 +311,10 @@ return view.extend({
 			_('Match process name.'));
 		so.modalonly = true;
 
+		so = ss.option(form.DynamicList, 'user', _('User'),
+			_('Match user name.'));
+		so.modalonly = true;
+
 		so = ss.option(form.ListValue, 'outbound', _('Outbound'),
 			_('Tag of the target outbound.'));
 		so.value('direct', _('Direct'));
@@ -353,7 +356,7 @@ return view.extend({
 
 			var _this = this;
 			_this.value('', _('None'));
-			_this.value('main-dns', _('Main DNS server'));
+			_this.value('main', _('Main DNS server'));
 			uci.sections(data[0], 'dns_server', function(res) {
 				if (res['.name'] !== section_id)
 					_this.value(res['.name'], res.label);
@@ -413,7 +416,6 @@ return view.extend({
 		so = ss.option(form.Flag, 'invert', _('Invert'),
 			_('Invert match result.'));
 		so.default = so.disabled;
-		so.depends({'mode': 'default', '!reverse': true})
 		so.rmempty = false;
 		so.modalonly = true;
 
@@ -492,6 +494,10 @@ return view.extend({
 			_('Match process name.'));
 		so.modalonly = true;
 
+		so = ss.option(form.DynamicList, 'user', _('User'),
+			_('Match user name.'));
+		so.modalonly = true;
+
 		so = ss.option(form.MultiValue, 'outbound', _('Outbound'),
 			_('Match outbound.'));
 		so.value('main', _('Main server'));
@@ -506,6 +512,8 @@ return view.extend({
 			delete this.vallist;
 
 			var _this = this;
+			_this.value('main', _('Main DNS server'));
+			_this.value('block', _('Block DNS queries'));
 			uci.sections(data[0], 'dns_server', function(res) {
 				_this.value(res['.name'], res.label);
 			});
@@ -514,7 +522,7 @@ return view.extend({
 		}
 		so.rmempty = false;
 
-		so = ss.option(form.Flag, 'disable_cache', _('Disable dns cache'),
+		so = ss.option(form.Flag, 'dns_disable_cache', _('Disable dns cache'),
 			_('Disable cache and save cache in this query.'));
 		so.default = so.disabled;
 		so.rmempty = false;

@@ -231,16 +231,9 @@ return view.extend({
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.Flag, 'sniff', _('Enable sniffing'),
-			_('See <a target="_blank" href="https://sing-box.sagernet.org/configuration/route/sniff/">Sniff</a> for details.'));
-		o.default = o.enabled;
-		o.rmempty = false;
-		o.modalonly = true;
-
 		o = s.option(form.Flag, 'sniff_override', _('Override destination'),
 			_('Override the connection destination address with the sniffed domain.'));
 		o.default = o.enabled;
-		o.depends('sniff', '1');
 		o.rmempty = false;
 
 		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
