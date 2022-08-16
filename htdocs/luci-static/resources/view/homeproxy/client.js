@@ -9,6 +9,7 @@
 'require rpc';
 'require uci';
 'require view';
+'require tools.widgets as widgets';
 
 var callServiceList = rpc.declare({
 	object: 'service',
@@ -184,16 +185,16 @@ return view.extend({
 		o.default = o.disabled;
 		o.rmempty = false;
 
-		o = s.taboption('general', form.Flag, 'sniff', _('Enable sniffing'),
-			_('See <a target="_blank" href="https://sing-box.sagernet.org/configuration/route/sniff/">Sniff</a> for details.'));
-		o.default = o.enabled;
-		o.rmempty = false;
-
 		o = s.taboption('general', form.Flag, 'sniff_override', _('Override destination'),
 			_('Override the connection destination address with the sniffed domain.'));
 		o.default = o.enabled;
-		o.depends('sniff', '1');
 		o.rmempty = false;
+
+		o = s.taboption('general', widgets.DeviceSelect, 'default_interface', _('Default interface'),
+			_('Bind outbound connections to the specified NIC by default. Auto detect if leave empty.'));
+		o.multiple = false;
+		o.noaliases = true;
+		o.nobridges = true;
 
 		/* FIXME: only show up with "Custom routing" enabled */
 		s.tab('routing', _('Custom routing'),
@@ -218,15 +219,21 @@ return view.extend({
 		so.rmempty = false;
 		so.editable = true;
 
-		so = ss.option(form.ListValue, 'mode', _('Mode'));
+		so = ss.option(form.ListValue, 'mode', _('Mode'),
+			_('The default rule uses the following matching logic:<br/>' +
+			'<code>(domain || domain_suffix || domain_keyword || domain_regex || geosite || geoip || ip_cidr)</code> &&<br/>' +
+			'<code>(source_geoip || source_ip_cidr)</code> &&<br/>' +
+			'<code>other fields</code>.'));
+		so.value('default', _('Default'));
 		so.value('and', _('And'));
 		so.value('or', _('Or'));
-		so.default = 'or';
+		so.default = 'default';
 		so.rmempty = false;
 
 		so = ss.option(form.Flag, 'invert', _('Invert'),
 			_('Invert match result.'));
 		so.default = so.disabled;
+		so.depends({'mode': 'default', '!reverse': true})
 		so.rmempty = false;
 		so.modalonly = true;
 
@@ -349,7 +356,7 @@ return view.extend({
 			_this.value('main-dns', _('Main DNS server'));
 			uci.sections(data[0], 'dns_server', function(res) {
 				if (res['.name'] !== section_id)
-					_this.value(res.label);
+					_this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);
@@ -371,7 +378,7 @@ return view.extend({
 		so.value('direct', _('Direct'));
 		so.value('main', _('Main server'));
 		for (var i in proxy_nodes)
-				so.value(i, proxy_nodes[i][1]);
+			so.value(i, proxy_nodes[i][1]);
 
 		o = s.taboption('routing', form.SectionValue, '_dns_rule', form.GridSection, 'dns_rule', _('DNS rules'));
 		ss = o.subsection;
@@ -392,15 +399,21 @@ return view.extend({
 		so.rmempty = false;
 		so.editable = true;
 
-		so = ss.option(form.ListValue, 'mode', _('Mode'));
+		so = ss.option(form.ListValue, 'mode', _('Mode'),
+			_('The default rule uses the following matching logic:<br/>' +
+			'<code>(domain || domain_suffix || domain_keyword || domain_regex || geosite || geoip || ip_cidr)</code> &&<br/>' +
+			'<code>(source_geoip || source_ip_cidr)</code> &&<br/>' +
+			'<code>other fields</code>.'));
+		so.value('default', _('Default'));
 		so.value('and', _('And'));
 		so.value('or', _('Or'));
-		so.default = 'or';
+		so.default = 'default';
 		so.rmempty = false;
 
 		so = ss.option(form.Flag, 'invert', _('Invert'),
 			_('Invert match result.'));
 		so.default = so.disabled;
+		so.depends({'mode': 'default', '!reverse': true})
 		so.rmempty = false;
 		so.modalonly = true;
 
@@ -494,7 +507,7 @@ return view.extend({
 
 			var _this = this;
 			uci.sections(data[0], 'dns_server', function(res) {
-				_this.value(res.label);
+				_this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);

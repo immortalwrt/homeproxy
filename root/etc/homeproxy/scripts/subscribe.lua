@@ -50,7 +50,7 @@ local JSON = { parse = luci.jsonc.parse, dump = luci.jsonc.stringify }
 local URL = require "url"
 
 local function b64decode(str)
-	if not str or #str == 0 then
+	if isEmpty(str) then
 		return nil
 	end
 
