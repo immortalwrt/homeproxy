@@ -188,10 +188,9 @@ local function parse_uri(uri)
 				mkcp_downlink_capacity = params.downmbps,
 				mkcp_uplink_capacity = params.upmbps,
 				tls = "1",
-				tls_insecure = allow_insecure,
+				tls_insecure = params.insecure or "0",
 				tls_sni = params.peer,
-				tls_alpn = params.alpn,
-				tls_insecure = params.insecure or "0"
+				tls_alpn = params.alpn
 			}
 		elseif uri[1] == "ss" then
 			-- "Lovely" Shadowrocket format
@@ -273,7 +272,6 @@ local function parse_uri(uri)
 				port = url.port,
 				password = urldecode(url.user, true),
 				tls = "1",
-				tls_insecure = allow_insecure,
 				tls_sni = notEmpty(url.query) and url.query.sni or nil
 			}
 		elseif uri[1] == "vless" then
@@ -291,12 +289,10 @@ local function parse_uri(uri)
 				v2ray_vless_encrypt = params.encryption or "none",
 				v2ray_transport = params.type or "tcp",
 				tls = (params.security == "tls") and "1" or "0",
-				tls_insecure = allow_insecure,
 				tls_sni = params.sni,
 				tls_alpn = params.alpn and urldecode(params.alpn, true):split(",") or nil,
 				v2ray_xtls = (params.security == "xtls") and "1" or "0",
-				v2ray_xtls_flow = params.flow,
-				v2ray_packet_encoding = packet_encoding
+				v2ray_xtls_flow = params.flow
 			}
 
 			if config.v2ray_transport == "grpc" then
@@ -362,10 +358,8 @@ local function parse_uri(uri)
 				v2ray_vmess_encrypt = notEmpty(uri.scy) or "auto",
 				v2ray_transport = uri.net,
 				tls = (uri.tls == "tls") and "1" or "0",
-				tls_insecure = allow_insecure,
 				tls_sni = notEmpty(uri.sni) or uri.host,
-				tls_alpn = notEmpty(uri.alpn) and uri.alpn:split(",") or nil,
-				v2ray_packet_encoding = packet_encoding
+				tls_alpn = notEmpty(uri.alpn) and uri.alpn:split(",") or nil
 			}
 			if config.v2ray_transport == "grpc" then
 				config["grpc_servicename"] = uri.path
@@ -398,7 +392,6 @@ local function parse_uri(uri)
 					conifg["type"] = "vmess"
 					config["v2ray_protocol"] = nil
 					config["v2ray_transport"] = nil
-					config["v2ray_packet_encoding"] = nil
 				end
 			elseif config.v2ray_transport == "ws" then
 				config["ws_host"] = (config.tls ~= "1") and uri.host or nil
@@ -470,10 +463,18 @@ local function main()
 					elseif node_cache[groupHash][config.hashKey] then
 						log("Skipping duplicate node:", config.label)
 					else
-						count = count + 1
-						config.group_hashKey = groupHash
+						if config.tls == "1" then
+							config["tls_insecure"] = allow_insecure
+						end
+						if config.type == "v2ray" and string.match("vless,vmess", config.v2ray_protocol) then
+							config["v2ray_packet_encoding"] = packet_encoding
+						end
+
+						config["group_hashKey"] = groupHash
 						table.insert(node_result[index], config)
 						node_cache[groupHash][config.hashKey] = node_result[index][#node_result[index]]
+
+						count = count + 1
 					end
 				end
 			end

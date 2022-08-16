@@ -20,7 +20,7 @@ function fs_installed(binray) {
 	});
 }
 
-function parse_share_link(uri, allow_insecure, packet_encoding) {
+function parse_share_link(uri) {
 	var config;
 
 	uri = uri.split('://');
@@ -55,7 +55,6 @@ function parse_share_link(uri, allow_insecure, packet_encoding) {
 				mkcp_downlink_capacity: params.get('downmbps'),
 				mkcp_uplink_capacity: params.get('upmbps'),
 				tls: '1',
-				tls_insecure: allow_insecure,
 				tls_sni: params.get('peer'),
 				tls_alpn: params.get('alpn'),
 				tls_insecure: params.get('insecure') || '0'
@@ -174,7 +173,6 @@ function parse_share_link(uri, allow_insecure, packet_encoding) {
 				port: url.port || '80',
 				password: decodeURIComponent(url.username),
 				tls: '1',
-				tls_insecure: allow_insecure,
 				tls_sni: url.searchParams.get('sni')
 			};
 
@@ -198,12 +196,10 @@ function parse_share_link(uri, allow_insecure, packet_encoding) {
 				v2ray_vless_encrypt: params.get('encryption') || 'none',
 				v2ray_transport: params.get('type') || 'tcp',
 				tls: params.get('security') === 'tls' ? '1' : '0',
-				tls_insecure: allow_insecure,
 				tls_sni: params.get('sni'),
 				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')).split(',') : null,
 				v2ray_xtls: params.get('security') === 'xtls' ? '1' : '0',
-				v2ray_xtls_flow: params.get('flow'),
-				v2ray_packet_encoding: packet_encoding
+				v2ray_xtls_flow: params.get('flow')
 			};
 			switch (config.v2ray_transport) {
 			case 'grpc':
@@ -280,10 +276,8 @@ function parse_share_link(uri, allow_insecure, packet_encoding) {
 				v2ray_vmess_encrypt: uri.scy || 'auto',
 				v2ray_transport: uri.net,
 				tls: uri.tls === 'tls' ? '1' : '0',
-				tls_insecure: allow_insecure,
 				tls_sni: uri.sni || uri.host,
-				tls_alpn: uri.alpn ? uri.alpn.split(',') : null,
-				v2ray_packet_encoding: packet_encoding
+				tls_alpn: uri.alpn ? uri.alpn.split(',') : null
 			};
 			switch (config.v2ray_transport) {
 			case 'grpc':
@@ -324,7 +318,6 @@ function parse_share_link(uri, allow_insecure, packet_encoding) {
 					conifg['type'] = 'vmess';
 					config['v2ray_protocol'] = null;
 					config['v2ray_transport'] = null;
-					config['v2ray_packet_encoding'] = null;
 				}
 
 				break;
@@ -540,8 +533,13 @@ return view.extend({
 								input_links.forEach(function(s) {
 									var allow_insecure = uci.get(data[0], 'subscription', 'allow_insecure_in_subs') || '0';
 									var packet_encoding = uci.get(data[0], 'subscription', 'default_packet_encoding') || 'xudp';
-									var config = parse_share_link(s, allow_insecure, packet_encoding);
+									var config = parse_share_link(s);
 									if (config) {
+										if (config.tls === '1')
+											config['tls_insecure'] = allow_insecure
+										if (config.type === 'v2ray' && ['vless', 'vmess'].includes(config.v2ray_protocol))
+											config['v2ray_packet_encoding'] = packet_encoding
+
 										var sid = uci.add(data[0], 'node');
 										Object.keys(config).forEach(function(k) {
 											uci.set(data[0], sid, k, config[k]);
