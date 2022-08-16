@@ -107,14 +107,17 @@ local shadowsocks_encrypt_methods = {
 local uci = luci.model.uci.cursor()
 
 local uciname = "homeproxy"
-local ucisection = "node"
+local ucimain = "config"
+local ucinode = "node"
+local ucisubscription = "subscription"
 
-local allow_insecure = uci:get(uciname, "subscription", "allow_insecure_in_subs", "0")
-local filter_mode = uci:get(uciname, "subscription", "filter_nodes", "disabled")
-local filter_keywords = uci:get(uciname, "subscription", "filter_words", {})
-local packet_encoding = uci:get(uciname, "subscription", "default_packet_encoding", "xudp")
-local subscription_urls = uci:get(uciname, "subscription", "subscription_url", {})
-local via_proxy = uci:get(uciname, "subscription", "update_via_proxy", "0")
+local allow_insecure = uci:get(uciname, ucisubscription, "allow_insecure_in_subs", "0")
+local filter_mode = uci:get(uciname, ucisubscription, "filter_nodes", "disabled")
+local filter_keywords = uci:get(uciname, ucisubscription, "filter_words", {})
+local packet_encoding = uci:get(uciname, ucisubscription, "default_packet_encoding", "xudp")
+local subscription_urls = uci:get(uciname, ucisubscription, "subscription_url", {})
+local via_proxy = uci:get(uciname, ucisubscription, "update_via_proxy", "0")
+-- UCI config end
 
 -- Log start
 luci.sys.call("mkdir -p /var/run/homeproxy/")
@@ -497,7 +500,7 @@ local function main()
 	end
 
 	local added, removed = 0, 0
-	uci:foreach(uciname, ucisection, function(cfg)
+	uci:foreach(uciname, ucinode, function(cfg)
 		if cfg.group_hashKey or cfg.hashKey then
 			if not node_result[cfg.group_hashKey] or not node_result[cfg.group_hashKey][cfg.hashKey] then
 				uci:delete(uciname, cfg[".name"])
@@ -511,7 +514,7 @@ local function main()
 	for _, nodes in ipairs(node_result) do
 		for _, node in ipairs(nodes) do
 			if not node.isExisting then
-				local cfgvalue = uci:add(uciname, ucisection)
+				local cfgvalue = uci:add(uciname, ucinode)
 				uci:tset(uciname, cfgvalue, node)
 				added = added + 1
 			end
@@ -519,21 +522,21 @@ local function main()
 	end
 	uci:commit(uciname)
 
-	local main_server = uci:get(uciname, "config", "main_server")
+	local main_server = uci:get(uciname, ucimain, "main_server")
 	if main_server ~= "nil" then
 		local need_restart = false
-		local first_server = uci:get_first(uciname, ucisection)
+		local first_server = uci:get_first(uciname, ucinode)
 		if first_server then
 			if not uci:get(uciname, main_server) then
-				uci:set(uciname, "config", "main_server", first_server)
+				uci:set(uciname, ucimain, "main_server", first_server)
 				need_restart = true
 				log("Main node is gone, switching to first node.")
 			end
 
-			local udp_server = uci:get(uciname, "config", "main_udp_server", "null")
+			local udp_server = uci:get(uciname, ucimain, "main_udp_server", "null")
 			if udp_server ~= "nil" and udp_server ~= "null" then
 				if not uci:get(uciname, udp_server) then
-					uci:set(uciname, "config", "main_udp_server", first_server)
+					uci:set(uciname, ucimain, "main_udp_server", first_server)
 					need_restart = true
 					log("UDP node is gone, switching to main node.")
 				end
@@ -563,7 +566,7 @@ if notEmpty(subscription_urls) then
 		log(debug.traceback())
 
 		sysinit.stop(uciname)
-		local main_server = uci:get(uciname, "config", "main_server", "nil")
+		local main_server = uci:get(uciname, ucimain, "main_server", "nil")
 		if main_server ~= "nil" then
 			if notEmpty(uci:get(uciname, main_server)) then
 				log("Reloading service...")
