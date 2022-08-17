@@ -362,7 +362,7 @@ return view.extend({
 		var have_hysteria = data[1];
 		var have_naiveproxy = data[2];
 
-		var native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'vmess' ];
+		var native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'vmess', 'wireguard' ];
 		var v2ray_native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'vless', 'vmess' ];
 
 		m = new form.Map('homeproxy', _('Edit nodes'));
@@ -611,6 +611,7 @@ return view.extend({
 		o.value('trojan', _('Trojan'));
 		o.value('v2ray', _('V2ray'));
 		o.value('vmess', _('VMess'));
+		o.value('wireguard', _('Wireguard'));
 		o.rmempty = false;
 
 		o = s.option(form.ListValue, 'v2ray_protocol', _('V2ray protocol'));
@@ -621,7 +622,6 @@ return view.extend({
 		o.value('trojan', _('Trojan'));
 		o.value('vless', _('VLESS'));
 		o.value('vmess', _('VMess'));
-		o.value('wireguard', _('WireGuard'));
 		o.depends('type', 'v2ray');
 		o.rmempty = false;
 		o.modalonly = true;
@@ -895,31 +895,7 @@ return view.extend({
 		o.default = o.enabled;
 		o.depends('type', 'vmess');
 		o.rmempty = false;
-		o.modalonly = true;
-
-		/* Wireguard config start */
-		o = s.option(form.DynamicList, 'wireguard_local_addresses', _('Local addresses'));
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'wireguard'});
-		o.rmempty = false;
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'wireguard_private_key', _('Private key'));
-		o.password = true;
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'wireguard'});
-		o.rmempty = false;
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'wireguard_peer_pubkey', _('Peer pubkic key'));
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'wireguard'});
-		o.rmempty = false;
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'wireguard_preshared_key', _('Pre-shared key'));
-		o.password = true;
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'wireguard'});
-		o.rmempty = false;
-		o.modalonly = true;
-		/* Wireguard config end */
+		o.modalonly = true;	
 
 		o = s.option(form.ListValue, 'v2ray_transport', _('Transport'));
 		o.value('grpc', _('gRPC'));
@@ -1126,6 +1102,30 @@ return view.extend({
 		o.rmempty = false;
 		o.modalonly = true;
 		/* V2ray config end */
+
+		/* Wireguard config start */
+		o = s.option(form.DynamicList, 'wireguard_local_addresses', _('Local addresses'));
+		o.depends('type', 'wireguard');
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'wireguard_private_key', _('Private key'));
+		o.password = true;
+		o.depends('type', 'wireguard');
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'wireguard_peer_pubkey', _('Peer pubkic key'));
+		o.depends('type', 'wireguard');
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'wireguard_preshared_key', _('Pre-shared key'));
+		o.password = true;
+		o.depends('type', 'wireguard');
+		o.rmempty = false;
+		o.modalonly = true;
+		/* Wireguard config end */
 
 		/* Mux config start */
 		o = s.option(form.Flag, 'multiplex', _('Multiplex'));

@@ -527,7 +527,7 @@ return view.extend({
 		so.default = so.disabled;
 		so.rmempty = false;
 		so.modalonly = true;
-		
+
 		return m.render();
 	}
 });
