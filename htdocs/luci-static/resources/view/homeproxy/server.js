@@ -73,7 +73,7 @@ return view.extend({
 
 		o = s.option(form.ListValue, 'type', _('Type'));
 		o.value('http', _('HTTP'));
-		o.value('naiveproxy', _('NaïveProxy'));
+		o.value('naive', _('NaïveProxy'));
 		o.value('shadowsocks', _('Shadowsocks'));
 		o.value('socks', _('Socks'));
 		o.value('trojan', _('Trojan'));
@@ -85,28 +85,28 @@ return view.extend({
 		o.datatype = 'port';
 		o.rmempty = false;
 
-		o = s.option(form.DynamicList, 'username_password', _('Username / Password (UUID)'),
-			_('Format as user:pass(uuid).'));
+		o = s.option(form.Value, 'username', _('Username'));
+		o.depends('type', 'http');
+		o.depends('type', 'naive');
+		o.depends('type', 'socks');
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'password', _('Password (UUID)'));
 		o.validate = function(section_id, value) {
 			if (section_id) {
-				if (this.formvalue(section_id).length === 0)
-					return _('Expecting: non-empty value');
-				else if (!value)
-					return true;
-
-				var user = value.split(':')[0], pass = value.split(':')[1];
-				if (value.split(':').length > 2 || !user || !pass)
-					return _('Expecting: %s').format(_('valid user:pass(uuid) pair'));
+				if (!value)
+					return _('Expecting: %s').format(_('non-empty value'));
 
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
 				if (type === 'shadowsocks') {
 					var encmode = this.map.lookupOption('shadowsocks_encrypt_method', section_id)[0].formvalue(section_id);
-					if (encmode === '2022-blake3-aes-128-gcm' && pass.length !== 16)
+					if (encmode === '2022-blake3-aes-128-gcm' && value.length !== 16)
 						return _('Expecting: %s').format(_('password with %d characters')).format(16);
-					else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode) && pass.length !== 32)
+					else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode) && value.length !== 32)
 						return _('Expecting: %s').format(_('password with %d characters')).format(32);
 				} else if (type === 'vmess')
-					if (pass.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
+					if (value.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
 						return _('Expecting: %s').format(_('valid uuid string'));
 			}
 
@@ -252,8 +252,7 @@ return view.extend({
 		o = s.option(form.ListValue, 'network', _('Network'));
 		o.value('tcp', _('TCP'));
 		o.value('udp', _('UDP'));
-		o.value('both', _('Both'));
-		o.default = 'both';
+		o.value('', _('Both'));
 		o.depends('type', 'naiveproxy');
 		o.depends('type', 'shadowsocks');
 		o.modalonly = true;

@@ -221,9 +221,9 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'ip_version', _('IP version'),
 			_('4 or 6. Not limited if empty.'));
-		so.value('', _('Both'));
 		so.value('4', _('IPv4'));
 		so.value('6', _('IPv6'));
+		so.value('', _('Both'));
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'mode', _('Mode'),
@@ -246,16 +246,13 @@ return view.extend({
 		so = ss.option(form.ListValue, 'network', _('Network'));
 		so.value('tcp', _('TCP'));
 		so.value('udp', _('UDP'));
-		so.value('both', _('Both'));
-		so.default = 'both';
-		so.rmempty = false;
+		so.value('', _('Both'));
 
 		so = ss.option(form.MultiValue, 'protocol', _('Protocol'),
 			_('Sniffed protocol, see <a target="_blank" href="https://sing-box.sagernet.org/configuration/route/sniff/">Sniff</a> for details.'));
 		so.value('http', _('HTTP'));
 		so.value('tls', _('TLS'));
 		so.value('quic', _('QUIC'));
-		so.value('dns', _('DNS'));
 
 		so = ss.option(form.DynamicList, 'domain', _('Domain name'),
 			_('Match full domain.'));
@@ -429,9 +426,7 @@ return view.extend({
 		so = ss.option(form.ListValue, 'network', _('Network'));
 		so.value('tcp', _('TCP'));
 		so.value('udp', _('UDP'));
-		so.value('both', _('Both'));
-		so.default = 'both';
-		so.rmempty = false;
+		so.value('', _('Both'));
 
 		so = ss.option(form.MultiValue, 'protocol', _('Protocol'),
 			_('Sniffed protocol, see <a target="_blank" href="https://sing-box.sagernet.org/configuration/route/sniff/">Sniff</a> for details.'));

@@ -660,7 +660,7 @@ return view.extend({
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
 				var v2ray_protocol = this.map.lookupOption('v2ray_protocol', section_id)[0].formvalue(section_id) || '';
 				if (required_type.includes(type) || required_type.includes(v2ray_protocol))
-					return _('Expecting: non-empty value');
+					return _('Expecting: %s').format(_('non-empty value'));
 			}
 
 			return true;
@@ -848,7 +848,7 @@ return view.extend({
 		o.validate = function(section_id, value) {
 			if (section_id) {
 				if (value == null || value == '')
-					return _('Expecting: non-empty value');
+					return _('Expecting: %s').format(_('non-empty value'));
 				else if (value.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
 					return _('Expecting: %s').format(_('valid uuid string'));
 			}
