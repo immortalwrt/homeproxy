@@ -219,6 +219,13 @@ return view.extend({
 		so.rmempty = false;
 		so.editable = true;
 
+		so = ss.option(form.ListValue, 'ip_version', _('IP version'),
+			_('4 or 6. Not limited if empty.'));
+		so.value('', _('Both'));
+		so.value('4', _('IPv4'));
+		so.value('6', _('IPv6'));
+		so.modalonly = true;
+
 		so = ss.option(form.ListValue, 'mode', _('Mode'),
 			_('The default rule uses the following matching logic:<br/>' +
 			'<code>(domain || domain_suffix || domain_keyword || domain_regex || geosite || geoip || ip_cidr)</code> &&<br/>' +
