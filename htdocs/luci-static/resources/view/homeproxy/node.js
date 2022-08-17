@@ -362,7 +362,7 @@ return view.extend({
 		var have_hysteria = data[1];
 		var have_naiveproxy = data[2];
 
-		var native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'vmess', 'wireguard' ];
+		var native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'wireguard', 'vmess' ];
 		var v2ray_native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'vless', 'vmess' ];
 
 		m = new form.Map('homeproxy', _('Edit nodes'));
@@ -610,8 +610,8 @@ return view.extend({
 		o.value('socks', _('Socks'));
 		o.value('trojan', _('Trojan'));
 		o.value('v2ray', _('V2ray'));
+		o.value('wireguard', _('WireGuard'));
 		o.value('vmess', _('VMess'));
-		o.value('wireguard', _('Wireguard'));
 		o.rmempty = false;
 
 		o = s.option(form.ListValue, 'v2ray_protocol', _('V2ray protocol'));
@@ -648,11 +648,11 @@ return view.extend({
 		o.depends('type', 'naiveproxy');
 		o.depends('type', 'shadowsocks');
 		o.depends('type', 'trojan');
-		o.depends({'type': 'socks', 'socks_ver': '5'});
+		o.depends({'type': 'socks', 'socks_version': '5'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'http'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocksr'});
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks', 'socks_ver': '5'});
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks', 'socks_version': '5'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'trojan'});
 		o.validate = function(section_id, value) {
 			if (section_id && (value === null || value === '')) {
@@ -747,14 +747,6 @@ return view.extend({
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.Flag, 'shadowsocks_uot', _('UDP over TCP'),
-			_('Enable the SUoT protocol, requires server support. Conflict with multiplex.'));
-		o.default = o.disabled;
-		o.depends('type', 'shadowsocks');
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
-		o.rmempty = false;
-		o.modalonly = true;
-
 		o = s.option(form.Flag, 'shadowsocks_ivcheck', _('Bloom filter'));
 		o.default = o.disabled;
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
@@ -837,7 +829,7 @@ return view.extend({
 		/* ShadowsocksR config end */
 
 		/* Socks config start */
-		o = s.option(form.ListValue, 'socks_ver', _('Socks version'));
+		o = s.option(form.ListValue, 'socks_version', _('Socks version'));
 		o.value('4', _('Socks4'));
 		o.value('4a', _('Socks4A'));
 		o.value('5', _('Socks5'));
@@ -1008,8 +1000,8 @@ return view.extend({
 
 		o = s.option(form.Value, 'mkcp_mtu', _('MTU'));
 		o.datatype = 'range(0,9000)';
+		o.depends('type', 'wireguard');
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'mkcp'});
-		o.depends({'type': 'v2ray', 'v2ray_transport': 'wireguard'});
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'mkcp_tti', _('TTI'));
@@ -1104,23 +1096,27 @@ return view.extend({
 		/* V2ray config end */
 
 		/* Wireguard config start */
-		o = s.option(form.DynamicList, 'wireguard_local_addresses', _('Local addresses'));
+		o = s.option(form.DynamicList, 'wireguard_local_address', _('Local address'),
+			_('List of IP (v4 or v6) addresses (optionally with CIDR masks) to be assigned to the interface.'));
 		o.depends('type', 'wireguard');
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'wireguard_private_key', _('Private key'));
+		o = s.option(form.Value, 'wireguard_private_key', _('Private key'),
+			_('WireGuard requires base64-encoded private keys.'));
 		o.password = true;
 		o.depends('type', 'wireguard');
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'wireguard_peer_pubkey', _('Peer pubkic key'));
+		o = s.option(form.Value, 'wireguard_peer_public_key', _('Peer pubkic key'),
+			_('WireGuard peer public key.'));
 		o.depends('type', 'wireguard');
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'wireguard_preshared_key', _('Pre-shared key'));
+		o = s.option(form.Value, 'wireguard_pre_shared_key', _('Pre-shared key'),
+			_('WireGuard pre-shared key.'));
 		o.password = true;
 		o.depends('type', 'wireguard');
 		o.rmempty = false;
@@ -1157,14 +1153,14 @@ return view.extend({
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'max_connections', _('Maximum connections'));
+		o = s.option(form.Value, 'multiplex_max_connections', _('Maximum connections'));
 		o.datatype = 'uinteger';
 		o.depends({'type': 'shadowsocks', 'multiplex': '1'});
 		o.depends({'type': 'trojan', 'multiplex': '1'});
 		o.depends({'type': 'vmess', 'multiplex': '1'});
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'min_streams', _('Minimum streams'),
+		o = s.option(form.Value, 'multiplex_min_streams', _('Minimum streams'),
 			_('Minimum multiplexed streams in a connection before opening a new connection.'));
 		o.datatype = 'uinteger';
 		o.depends({'type': 'shadowsocks', 'multiplex': '1'});
@@ -1172,15 +1168,14 @@ return view.extend({
 		o.depends({'type': 'vmess', 'multiplex': '1'});
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'max_streams', _('Maximum streams'),
+		o = s.option(form.Value, 'multiplex_max_streams', _('Maximum streams'),
 			_('Maximum multiplexed streams in a connection before opening a new connection.<br/>' +
 				'Conflict with <code>Maximum connections</code> and <code>Minimum streams</code>.'));
 		o.datatype = 'uinteger';
-		o.depends({'type': 'shadowsocks', 'multiplex': '1', 'max_connections': '', 'min_streams': ''});
-		o.depends({'type': 'trojan', 'multiplex': '1', 'max_connections': '', 'min_streams': ''});
-		o.depends({'type': 'vmess', 'multiplex': '1', 'max_connections': '', 'min_streams': ''});
+		o.depends({'type': 'shadowsocks', 'multiplex': '1', 'multiplex_max_connections': '', 'multiplex_min_streams': ''});
+		o.depends({'type': 'trojan', 'multiplex': '1', 'multiplex_max_connections': '', 'multiplex_min_streams': ''});
+		o.depends({'type': 'vmess', 'multiplex': '1', 'multiplex_max_connections': '', 'multiplex_min_streams': ''});
 		o.modalonly = true;
-
 		/* Mux config end */
 
 		/* TLS config start */
@@ -1311,6 +1306,42 @@ return view.extend({
 		/* TLS config end */
 
 		/* Extra settings start */
+		o = s.option(widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
+			_('The network interface to bind to.'));
+		o.multiple = false;
+		o.noaliases = true;
+		o.nobridges = true;
+		o.modalonly = true;
+
+		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
+			_('If set, the server domain name will be resolved to IP before connecting.<br/>dns.strategy will be used if empty.'));
+		o.value('', _('Default'));
+		o.value('prefer_ipv4', _('Prefer IPv4'));
+		o.value('prefer_ipv6', _('Prefer IPv6'));
+		o.value('ipv4_only', _('IPv4 only'));
+		o.value('ipv6_only', _('IPv6 only'));
+		for (var i in native_protocols)
+			o.depends('type', native_protocols[i])
+		o.modalonly = true;
+
+		o = s.option(form.Flag, 'tcp_fast_open', _('TCP fast open'));
+		o.default = o.disabled;
+		for (var i in native_protocols)
+			o.depends('type', native_protocols[i])
+		for (i in v2ray_native_protocols)
+			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]});
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.Flag, 'udp_over_tcp', _('UDP over TCP'),
+			_('Enable the SUoT protocol, requires server support. Conflict with multiplex.'));
+		o.default = o.disabled;
+		o.depends('type', 'socks');
+		o.depends({'type': 'shadowsocks', 'multiplex': '0'});
+		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks', 'multiplex': '0'});
+		o.rmempty = false;
+		o.modalonly = true;
+
 		o = s.option(form.ListValue, 'outbound', _('Outbound'),
 			_('The tag of the upstream outbound. Other dial fields will be ignored when enabled.'));
 		o.load = function(section_id) {
@@ -1327,33 +1358,6 @@ return view.extend({
 
 			return this.super('load', section_id);
 		}
-		for (var i in native_protocols)
-			o.depends('type', native_protocols[i])
-		o.modalonly = true;
-
-		o = s.option(widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
-			_('The network interface to bind to.'));
-		o.multiple = false;
-		o.noaliases = true;
-		o.nobridges = true;
-		o.modalonly = true;
-
-		o = s.option(form.Flag, 'tcp_fast_open', _('TCP fast open'));
-		o.default = o.disabled;
-		for (var i in native_protocols)
-			o.depends('type', native_protocols[i])
-		for (i in v2ray_native_protocols)
-			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]});
-		o.rmempty = false;
-		o.modalonly = true;
-
-		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
-			_('If set, the server domain name will be resolved to IP before connecting.<br/>dns.strategy will be used if empty.'));
-		o.value('', _('Default'));
-		o.value('prefer_ipv4', _('Prefer IPv4'));
-		o.value('prefer_ipv6', _('Prefer IPv6'));
-		o.value('ipv4_only', _('IPv4 only'));
-		o.value('ipv6_only', _('IPv6 only'));
 		for (var i in native_protocols)
 			o.depends('type', native_protocols[i])
 		o.modalonly = true;
