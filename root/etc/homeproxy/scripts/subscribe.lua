@@ -111,12 +111,12 @@ local ucimain = "config"
 local ucinode = "node"
 local ucisubscription = "subscription"
 
-local allow_insecure = uci:get(uciname, ucisubscription, "allow_insecure_in_subs", "0")
-local filter_mode = uci:get(uciname, ucisubscription, "filter_nodes", "disabled")
-local filter_keywords = uci:get(uciname, ucisubscription, "filter_words", {})
-local packet_encoding = uci:get(uciname, ucisubscription, "default_packet_encoding", "xudp")
-local subscription_urls = uci:get(uciname, ucisubscription, "subscription_url", {})
-local via_proxy = uci:get(uciname, ucisubscription, "update_via_proxy", "0")
+local allow_insecure = uci:get(uciname, ucisubscription, "allow_insecure_in_subs") or "0"
+local filter_mode = uci:get(uciname, ucisubscription, "filter_nodes") or "disabled"
+local filter_keywords = uci:get(uciname, ucisubscription, "filter_words") or {}
+local packet_encoding = uci:get(uciname, ucisubscription, "default_packet_encoding") or "xudp"
+local subscription_urls = uci:get(uciname, ucisubscription, "subscription_url") or {}
+local via_proxy = uci:get(uciname, ucisubscription, "update_via_proxy") or "0"
 -- UCI config end
 
 -- Log start
@@ -533,8 +533,8 @@ local function main()
 				log("Main node is gone, switching to first node.")
 			end
 
-			local udp_server = uci:get(uciname, ucimain, "main_udp_server", "null")
-			if udp_server ~= "nil" and udp_server ~= "null" then
+			local udp_server = uci:get(uciname, ucimain, "main_udp_server") or "nil"
+			if udp_server ~= "nil" and udp_server ~= "same" then
 				if not uci:get(uciname, udp_server) then
 					uci:set(uciname, ucimain, "main_udp_server", first_server)
 					need_restart = true
@@ -566,7 +566,7 @@ if notEmpty(subscription_urls) then
 		log(debug.traceback())
 
 		sysinit.stop(uciname)
-		local main_server = uci:get(uciname, ucimain, "main_server", "nil")
+		local main_server = uci:get(uciname, ucimain, "main_server") or "nil"
 		if main_server ~= "nil" then
 			if notEmpty(uci:get(uciname, main_server)) then
 				log("Reloading service...")
