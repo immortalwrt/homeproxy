@@ -1352,7 +1352,7 @@ return view.extend({
 			_this.value('', _('None'));
 			uci.sections(data[0], 'node', function(res) {
 				if (res['.name'] !== section_id)
-					_this.value(res['.name'], String.format('[%s] %s',
+					_this.value(res['.name'] + '-out', String.format('[%s] %s',
 						res.type, res.label || res.server + ':' + res.server_port));
 			});
 

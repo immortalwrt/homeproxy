@@ -321,11 +321,11 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'outbound', _('Outbound'),
 			_('Tag of the target outbound.'));
-		so.value('direct', _('Direct'));
-		so.value('block', _('Block'));
-		so.value('main', _('Main server'));
+		so.value('direct-out', _('Direct'));
+		so.value('block-out', _('Block'));
+		so.value('main-out', _('Main server'));
 		for (var i in proxy_nodes)
-			so.value(i, proxy_nodes[i][1]);
+			so.value(i + '-out', proxy_nodes[i][1]);
 		so.rmempty = false;
 
 		o = s.taboption('routing', form.SectionValue, '_dns_server', form.GridSection, 'dns_server', _('DNS servers'));
@@ -349,7 +349,6 @@ return view.extend({
 
 		so = ss.option(form.Value, 'address', _('Address'),
 			_('The address of the dns server. Support UDP, TCP, DoT, DoH and RCode.'));
-		so.value('local', _('Local'));
 		so.rmempty = false;
 
 		so = ss.option(form.ListValue, 'address_resolver', _('Address resolver'),
@@ -360,10 +359,11 @@ return view.extend({
 
 			var _this = this;
 			_this.value('', _('None'));
-			_this.value('main', _('Main DNS server'));
+			_this.value('local-dns', _('System DNS resolver'))
+			_this.value('main-dns', _('Main DNS server'));
 			uci.sections(data[0], 'dns_server', function(res) {
 				if (res['.name'] !== section_id)
-					_this.value(res['.name'], res.label);
+					_this.value(res['.name'] + '-dns', res.label);
 			});
 
 			return this.super('load', section_id);
@@ -377,15 +377,14 @@ return view.extend({
 		so.value('prefer_ipv6', _('Prefer IPv6'));
 		so.value('ipv4_only', _('IPv4 only'));
 		so.value('ipv6_only', _('IPv6 only'));
-		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'outbound', _('Outbound'),
-			_('Tag of an outbound for connecting to the dns server. Default outbound will be used if empty.'));
-		so.value('', _('None'));
-		so.value('direct', _('Direct'));
-		so.value('main', _('Main server'));
+			_('Tag of an outbound for connecting to the dns server.'));
+		so.value('direct-out', _('Direct'));
+		so.value('main-out', _('Main server'));
 		for (var i in proxy_nodes)
-			so.value(i, proxy_nodes[i][1]);
+			so.value(i + '-out', proxy_nodes[i][1]);
+		so.rmempty = false;
 
 		o = s.taboption('routing', form.SectionValue, '_dns_rule', form.GridSection, 'dns_rule', _('DNS rules'));
 		ss = o.subsection;
@@ -502,9 +501,10 @@ return view.extend({
 
 		so = ss.option(form.MultiValue, 'outbound', _('Outbound'),
 			_('Match outbound.'));
-		so.value('main', _('Main server'));
+		so.value('direct-out', _('Direct'));
+		so.value('main-out', _('Main server'));
 		for (var i in proxy_nodes)
-			so.value(i, proxy_nodes[i][1]);
+			so.value(i + '-out', proxy_nodes[i][1]);
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'server', _('Server'),
@@ -514,10 +514,11 @@ return view.extend({
 			delete this.vallist;
 
 			var _this = this;
-			_this.value('main', _('Main DNS server'));
-			_this.value('block', _('Block DNS queries'));
+			_this.value('local-dns', _('System DNS resolver'))
+			_this.value('main-dns', _('Main DNS server'));
+			_this.value('block-dns', _('Block DNS queries'));
 			uci.sections(data[0], 'dns_server', function(res) {
-				_this.value(res['.name'], res.label);
+				_this.value(res['.name'] + '-dns', res.label);
 			});
 
 			return this.super('load', section_id);
