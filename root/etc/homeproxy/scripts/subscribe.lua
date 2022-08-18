@@ -120,9 +120,9 @@ local via_proxy = uci:get(uciname, ucisubscription, "update_via_proxy") or "0"
 -- UCI config end
 
 -- Log start
-luci.sys.call("mkdir -p /var/run/homeproxy/")
+luci.sys.call("mkdir -p /var/log/homeproxy/")
 
-local logfile = io.open("/var/run/homeproxy/homeproxy.log", "a")
+local logfile = io.open("/var/log/homeproxy/homeproxy.log", "a")
 io.output(logfile)
 
 local function log(...)
