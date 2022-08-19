@@ -57,8 +57,10 @@ local dns_server = uci:get(uciconfig, ucimain, "dns_server") or "8.8.8.8"
 
 local enable_server = uci:get(uciconfig, uciserver, "enabled") or "0"
 
-local dns_strategy, dns_disable_cache, sniff_override, default_interface
+local tproxy_enabled, dns_strategy, dns_disable_cache, sniff_override, default_interface
 if routing_mode == "custom" then
+	tproxy_enabled = uci:get(uciconfig, ucimain, "enabled") or "0"
+
 	-- DNS settings
 	dns_strategy = uci:get(uciconfig, ucidnssetting, "dns_strategy") or "prefer_ipv4"
 	dns_default_server = uci:get(uciconfig, ucidnssetting, "default_server") or "local-out"
@@ -295,7 +297,7 @@ end
 
 -- Inbound start
 config.inbounds = {}
-if main_server ~= "nil" then
+if tproxy_enabled == "1" or main_server ~= "nil" then
 	config.inbounds[1] = {
 		type = "tun",
 		tag = "tun-in",

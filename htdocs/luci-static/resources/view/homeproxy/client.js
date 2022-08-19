@@ -99,6 +99,10 @@ return view.extend({
 
 		s = m.section(form.NamedSection, 'config', 'homeproxy');
 
+		o = s.option(form.Flag, 'enabled', _('Enable'));
+		o.depends('routing_mode', 'custom');
+		o.rmempty = false;
+
 		o = s.option(form.ListValue, 'main_server', _('Main server'));
 		o.value('nil', _('Disable'));
 		for (var i in proxy_nodes)
