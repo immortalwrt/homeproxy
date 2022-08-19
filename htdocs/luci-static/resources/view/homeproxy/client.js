@@ -99,16 +99,15 @@ return view.extend({
 
 		s = m.section(form.NamedSection, 'config', 'homeproxy');
 
-		s.tab('general', _('General Settings'));
-
-		o = s.taboption('general', form.ListValue, 'main_server', _('Main server'));
+		o = s.option(form.ListValue, 'main_server', _('Main server'));
 		o.value('nil', _('Disable'));
 		for (var i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
 		o.default = 'nil';
+		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.rmempty = false;
 
-		o = s.taboption('general', form.ListValue, 'main_udp_server', _('Main UDP server'));
+		o = s.option(form.ListValue, 'main_udp_server', _('Main UDP server'));
 		o.value('nil', _('Disable'));
 		o.value('same', _('Same as main server'));
 		for (var i in proxy_nodes)
@@ -117,7 +116,7 @@ return view.extend({
 		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.rmempty = false;
 
-		o = s.taboption('general', form.ListValue, 'routing_mode', _('Routing mode'));
+		o = s.option(form.ListValue, 'routing_mode', _('Routing mode'));
 		o.value('gfwlist', _('GFWList'));
 		o.value('bypass_mainland_china', _('Bypass mainland China'));
 		o.value('proxy_mainland_china', _('Only proxy mainland China'));
@@ -126,7 +125,7 @@ return view.extend({
 		o.default = '2';
 		o.rmempty = false;
 
-		o = s.taboption('general', form.Value, 'routing_port', _('Routing ports'),
+		o = s.option(form.Value, 'routing_port', _('Routing ports'),
 			_('Specify target port(s) that get proxied. Multiple ports must be separated by commas.'));
 		o.value('all', _('All ports'));
 		o.value('common', _('Common ports only (bypass P2P traffic)'));
@@ -151,7 +150,7 @@ return view.extend({
 			return true;
 		}
 
-		o = s.taboption('general', form.Value, 'dns_server', _('DNS server'),
+		o = s.option(form.Value, 'dns_server', _('DNS server'),
 			_('You can only have one server set. Custom DNS server format as plain IPv4/IPv6.'));
 		o.value('local', _('Follow system'));
 		o.value('wan', _('Use DNS server from WAN'));
@@ -163,6 +162,7 @@ return view.extend({
 		o.value('119.29.29.29', _('Tencent Public DNS (119.29.29.29)'));
 		o.value('114.114.114.114', _('Xinfeng Public DNS (114.114.114.114)'));
 		o.default = '8.8.8.8';
+		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.validate = function(section_id, value) {
 			if (!['local', 'wan'].includes(value)
 					&& !(validation.parseIPv4(value) || validation.parseIPv6(value)))
@@ -171,13 +171,10 @@ return view.extend({
 			return true;
 		}
 
-		/* FIXME: only show up with "Custom routing" enabled */
-		s.tab('routing', _('Custom routing'),
-			_('<h4>Advanced routing settings. Only apply when "Custom rouing" is enabled.</h4>'));
+		o = s.option(form.SectionValue, '_routing_setting', form.NamedSection, 'routing_setting', 'homeproxy', _('Routing settings'));
+		o.depends('routing_mode', 'custom');
 
-		o = s.taboption('routing', form.SectionValue, '_routing_setting', form.NamedSection, 'routing_setting', 'homeproxy', _('Routing settings'));
 		ss = o.subsection;
-
 		so = ss.option(form.Flag, 'sniff_override', _('Override destination'),
 			_('Override the connection destination address with the sniffed domain.'));
 		so.default = so.enabled;
@@ -191,9 +188,9 @@ return view.extend({
 			var _this = this;
 			_this.value('direct-out', _('Direct'));
 			_this.value('block-out', _('Block'));
-			_this.value('main-out', _('Main server'));
 			uci.sections(data[0], 'routing_node', function(res) {
-				_this.value(res['.name'] + '-out', res.label);
+				if (res.enabled === '1')
+					_this.value(res['.name'] + '-out', res.label);
 			});
 
 			return this.super('load', section_id);
@@ -207,7 +204,9 @@ return view.extend({
 		so.noaliases = true;
 		so.nobridges = true;
 
-		o = s.taboption('routing', form.SectionValue, '_routing_node', form.GridSection, 'routing_node', _('Routing nodes'));
+		o = s.option(form.SectionValue, '_routing_node', form.GridSection, 'routing_node', _('Routing nodes'));
+		o.depends('routing_mode', 'custom');
+
 		ss = o.subsection;
 		ss.addremove = true;
 		ss.anonymous = true;
@@ -220,6 +219,10 @@ return view.extend({
 
 		so = ss.option(form.Value, 'label', _('Label'));
 		so.validate = L.bind(hp.validateUniqueLabel, this, data[0], 'routing_node');
+
+		so = ss.option(form.Flag, 'enabled', _('Enable'));
+		so.rmempty = false;
+		so.editable = true;
 
 		so = ss.option(form.ListValue, 'node', _('Node'));
 		for (var i in proxy_nodes)
@@ -268,7 +271,7 @@ return view.extend({
 			var _this = this;
 			_this.value('', _('Default'))
 			uci.sections(data[0], 'routing_node', function(res) {
-				if (res['.name'] !== section_id)
+				if (res['.name'] !== section_id && res.enabled === '1')
 					_this.value(res.node, res.label);
 			});
 
@@ -291,7 +294,9 @@ return view.extend({
 			return true;
 		}
 
-		o = s.taboption('routing', form.SectionValue, '_routing_rule', form.GridSection, 'routing_rule', _('Routing rules'));
+		o = s.option(form.SectionValue, '_routing_rule', form.GridSection, 'routing_rule', _('Routing rules'));
+		o.depends('routing_mode', 'custom');
+
 		ss = o.subsection;
 		ss.addremove = true;
 		ss.anonymous = true;
@@ -419,16 +424,18 @@ return view.extend({
 			var _this = this;
 			_this.value('direct-out', _('Direct'));
 			_this.value('block-out', _('Block'));
-			_this.value('main-out', _('Main server'));
 			uci.sections(data[0], 'routing_node', function(res) {
-				_this.value(res['.name'] + '-out', res.label);
+				if (res.enabled === '1')
+					_this.value(res['.name'] + '-out', res.label);
 			});
 
 			return this.super('load', section_id);
 		}
 		so.rmempty = false;
 
-		o = s.taboption('routing', form.SectionValue, '_dns_setting', form.NamedSection, 'dns_setting', 'homeproxy', _('DNS settings'));
+		o = s.option(form.SectionValue, '_dns_setting', form.NamedSection, 'dns_setting', 'homeproxy', _('DNS settings'));
+		o.depends('routing_mode', 'custom');
+
 		ss = o.subsection;
 
 		so = ss.option(form.ListValue, 'dns_strategy', _('DNS strategy'),
@@ -447,9 +454,9 @@ return view.extend({
 
 			var _this = this;
 			_this.value('local-dns', _('System DNS resolver'));
-			_this.value('main-dns', _('Main DNS server'));
 			uci.sections(data[0], 'dns_server', function(res) {
-				_this.value(res['.name'] + '-dns', res.label);
+				if (res.enabled === '1')
+					_this.value(res['.name'] + '-dns', res.label);
 			});
 
 			return this.super('load', section_id);
@@ -466,7 +473,9 @@ return view.extend({
 		so.depends('disable_cache', '0');
 		so.rmempty = false;
 
-		o = s.taboption('routing', form.SectionValue, '_dns_server', form.GridSection, 'dns_server', _('DNS servers'));
+		o = s.option(form.SectionValue, '_dns_server', form.GridSection, 'dns_server', _('DNS servers'));
+		o.depends('routing_mode', 'custom');
+
 		ss = o.subsection;
 		ss.addremove = true;
 		ss.anonymous = true;
@@ -498,9 +507,8 @@ return view.extend({
 			var _this = this;
 			_this.value('', _('None'));
 			_this.value('local-dns', _('System DNS resolver'));
-			_this.value('main-dns', _('Main DNS server'));
 			uci.sections(data[0], 'dns_server', function(res) {
-				if (res['.name'] !== section_id)
+				if (res['.name'] !== section_id && res.enabled === '1')
 					_this.value(res['.name'] + '-dns', res.label);
 			});
 
@@ -524,9 +532,9 @@ return view.extend({
 
 			var _this = this;
 			_this.value('direct-out', _('Direct'));
-			_this.value('main-out', _('Main server'));
 			uci.sections(data[0], 'routing_node', function(res) {
-				_this.value(res['.name'] + '-out', res.label);
+				if (res.enabled === '1')
+					_this.value(res['.name'] + '-out', res.label);
 			});
 
 			return this.super('load', section_id);
@@ -534,7 +542,9 @@ return view.extend({
 		so.default = 'direct-out';
 		so.rmempty = false;
 
-		o = s.taboption('routing', form.SectionValue, '_dns_rule', form.GridSection, 'dns_rule', _('DNS rules'));
+		o = s.option(form.SectionValue, '_dns_rule', form.GridSection, 'dns_rule', _('DNS rules'));
+		o.depends('routing_mode', 'custom');
+
 		ss = o.subsection;
 		ss.addremove = true;
 		ss.anonymous = true;
@@ -555,7 +565,7 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'mode', _('Mode'),
 			_('The default rule uses the following matching logic:<br/>' +
-			'<code>(domain || domain_suffix || domain_keyword || domain_regex || geosite || geoip || ip_cidr)</code> &&<br/>' +
+			'<code>(domain || domain_suffix || domain_keyword || domain_regex || geosite || ip_cidr)</code> &&<br/>' +
 			'<code>(source_geoip || source_ip_cidr)</code> &&<br/>' +
 			'<code>other fields</code>.'));
 		so.value('default', _('Default'));
@@ -607,10 +617,6 @@ return view.extend({
 			_('Match source geoip.'));
 		so.modalonly = true;
 
-		so = ss.option(form.DynamicList, 'geoip', _('GeoIP'),
-			_('Match geoip.'));
-		so.modalonly = true;
-
 		so = ss.option(form.DynamicList, 'source_ip_cidr', _('Source IP CIDR'),
 			_('Match source ip cidr.'));
 		so.modalonly = true;
@@ -656,9 +662,9 @@ return view.extend({
 			var _this = this;
 			_this.value('direct-out', _('Direct'));
 			_this.value('block-out', _('Block'));
-			_this.value('main-out', _('Main server'));
 			uci.sections(data[0], 'routing_node', function(res) {
-				_this.value(res['.name'] + '-out', res.label);
+				if (res.enabled === '1')
+					_this.value(res['.name'] + '-out', res.label);
 			});
 
 			return this.super('load', section_id);
@@ -673,10 +679,10 @@ return view.extend({
 
 			var _this = this;
 			_this.value('local-dns', _('System DNS resolver'));
-			_this.value('main-dns', _('Main DNS server'));
 			_this.value('block-dns', _('Block DNS queries'));
 			uci.sections(data[0], 'dns_server', function(res) {
-				_this.value(res['.name'] + '-dns', res.label);
+				if (res.enabled === '1')
+					_this.value(res['.name'] + '-dns', res.label);
 			});
 
 			return this.super('load', section_id);
