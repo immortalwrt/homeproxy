@@ -449,7 +449,7 @@ return view.extend({
 		o.inputtitle = function() {
 			var subnodes = [];
 			uci.sections(data[0], 'node', function(res) {
-				if (res.group_hashKey || res.hashKey)
+				if (res.grouphash || res.nameHash)
 					subnodes = subnodes.concat(res['.name'])
 			});
 
@@ -463,7 +463,7 @@ return view.extend({
 		o.onclick = function() {
 			var subnodes = [];
 			uci.sections(data[0], 'node', function(res) {
-				if (res.group_hashKey || res.hashKey)
+				if (res.grouphash || res.nameHash)
 					subnodes = subnodes.concat(res['.name'])
 			});
 
@@ -1203,28 +1203,31 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'tls_min_version', _('Minimum TLS version'),
-			_('The minimum TLS version that is acceptable. Default to 1.0.'));
+			_('The minimum TLS version that is acceptable.'));
 		for (var i in hp.tls_versions)
-			o.value(hp.tls_versions[i])
+			o.value(hp.tls_versions[i]);
 		o.default = '1.0';
 		o.depends({'type': 'http', 'tls': '1'});
 		o.depends({'type': 'trojan', 'tls': '1'});
 		o.depends({'type': 'vmess', 'tls': '1'});
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'tls_max_version', _('Maximum TLS version'),
-			_('The maximum TLS version that is acceptable. Default to 1.3.'));
+			_('The maximum TLS version that is acceptable.'));
 		for (var i in hp.tls_versions)
-			o.value(hp.tls_versions[i])
+			o.value(hp.tls_versions[i]);
+		o.default = '1.3';
 		o.depends({'type': 'http', 'tls': '1'});
 		o.depends({'type': 'trojan', 'tls': '1'});
 		o.depends({'type': 'vmess', 'tls': '1'});
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.MultiValue, 'tls_cipher_suites', _('Cipher suites'),
 			_('The elliptic curves that will be used in an ECDHE handshake, in preference order. If empty, the default will be used.'));
 		for (var i in hp.tls_cipher_suites)
-			o.value(hp.tls_cipher_suites[i])
+			o.value(hp.tls_cipher_suites[i]);
 		o.depends({'type': 'http', 'tls': '1'});
 		o.depends({'type': 'trojan', 'tls': '1'});
 		o.depends({'type': 'vmess', 'tls': '1'});
@@ -1235,6 +1238,7 @@ return view.extend({
 			_('If you have the root certificate, use this option instead of allowing insecure.'));
 		o.default = o.disabled;
 		o.depends('tls_insecure', '0');
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'tls_cert_path', _('Certificate path'),

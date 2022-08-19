@@ -551,6 +551,5 @@ end
 
 luci.sys.call("mkdir -p /var/run/homeproxy/")
 local conffile = io.open("/var/run/homeproxy/sing-box.json", "w")
-io.output(conffile)
-io.write(JSON.dump(config, 1))
-io.close(conffile)
+conffile.write(JSON.dump(config, 1))
+conffile:close()

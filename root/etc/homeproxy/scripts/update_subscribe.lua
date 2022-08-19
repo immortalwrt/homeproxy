@@ -126,10 +126,9 @@ local main_udp_server = uci:get(uciname, ucimain, "main_udp_server") or "nil"
 luci.sys.call("mkdir -p /var/run/homeproxy/")
 
 local logfile = io.open("/var/run/homeproxy/homeproxy.log", "a")
-io.output(logfile)
 
 local function log(...)
-	io.write(os.date("%Y-%m-%d %H:%M:%S [SUBSCRIBE] ") .. table.concat({...}, " ") .. "\n")
+	logfile:write(os.date("%Y-%m-%d %H:%M:%S [SUBSCRIBE] ") .. table.concat({...}, " ") .. "\n")
 end
 -- Log end
 
@@ -399,7 +398,7 @@ local function parse_uri(uri)
 					config["tcp_host"] = notEmpty(uri.host) and uri.host:split(",") or nil
 					config["tcp_path"] = notEmpty(uri.path) and uri.path:split(",") or nil
 				else
-					conifg["type"] = "vmess"
+					config["type"] = "vmess"
 					config["v2ray_protocol"] = nil
 					config["v2ray_transport"] = nil
 				end
@@ -465,12 +464,13 @@ local function main()
 				if notEmpty(config) then
 					local label = config.label
 					config.label = nil
-					config.hashKey = md5(JSON.dump(config))
+					setmetatable(config, { __index = {confHash = md5(JSON.dump(config))} })
 					config.label = label
+					config.nameHash = md5(label)
 
 					if filter_check(config.label) then
 						log("Skipping blacklist node:", config.label)
-					elseif node_cache[groupHash][config.hashKey] then
+					elseif node_cache[groupHash][config.confHash] or node_cache[groupHash][config.nameHash] then
 						log("Skipping duplicate node:", config.label)
 					else
 						if config.tls == "1" then
@@ -480,9 +480,10 @@ local function main()
 							config["v2ray_packet_encoding"] = packet_encoding
 						end
 
-						config["group_hashKey"] = groupHash
+						config["grouphash"] = groupHash
 						table.insert(node_result[index], config)
-						node_cache[groupHash][config.hashKey] = node_result[index][#node_result[index]]
+						node_cache[groupHash][config.confHash] = node_result[index][#node_result[index]]
+						node_cache[groupHash][config.nameHash] = node_result[index][#node_result[index]]
 
 						count = count + 1
 					end
@@ -497,7 +498,7 @@ local function main()
 
 	if isEmpty(node_result) then
 		log("Failed to update subscriptions: no valid node found.")
-		io.close(logfile)
+		logfile:close()
 
 		if via_proxy ~= "1" then
 			sysinit.start(uciname)
@@ -508,13 +509,13 @@ local function main()
 
 	local added, removed = 0, 0
 	uci:foreach(uciname, ucinode, function(cfg)
-		if cfg.group_hashKey or cfg.hashKey then
-			if not node_result[cfg.group_hashKey] or not node_result[cfg.group_hashKey][cfg.hashKey] then
+		if cfg.grouphash or cfg.nameHash then
+			if not node_result[cfg.grouphash] or not node_result[cfg.grouphash][cfg.nameHash] then
 				uci:delete(uciname, cfg[".name"])
 				removed = removed + 1
 			else
-				uci:tset(uciname, cfg[".name"], node_result[cfg.group_hashKey][cfg.hashKey])
-				setmetatable(node_result[cfg.group_hashKey][cfg.hashKey], {__index = {isExisting = true}})
+				uci:tset(uciname, cfg[".name"], node_result[cfg.grouphash][cfg.nameHash])
+				setmetatable(node_result[cfg.grouphash][cfg.nameHash], {__index = {isExisting = true}})
 			end
 		end
 	end)
@@ -563,7 +564,7 @@ local function main()
 
 	log(added, "nodes added,", removed, "removed.")
 	log("Successfully updated subscriptions.")
-	io.close(logfile)
+	logfile:close()
 end
 
 if notEmpty(subscription_urls) then
@@ -581,6 +582,6 @@ if notEmpty(subscription_urls) then
 				log("No node available. Stopping...")
 			end
 		end
-		io.close(logfile)
+		logfile:close()
 	end)
 end
