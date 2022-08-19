@@ -16,7 +16,7 @@ LUCI_DEPENDS:= \
 
 define Package/luci-app-homeproxy/conffiles
 /etc/config/homeproxy
-/etc/homeproxy/
+/etc/homeproxy/certs/
 endef
 
 include $(TOPDIR)/feeds/luci/luci.mk
