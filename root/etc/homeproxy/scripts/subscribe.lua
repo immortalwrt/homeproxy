@@ -126,7 +126,7 @@ local logfile = io.open("/var/run/homeproxy/homeproxy.log", "a")
 io.output(logfile)
 
 local function log(...)
-	io.write(os.date("%Y-%m-%d %H:%M:%S [SUBSCRIBE UPDATE] ") .. table.concat({...}, " ") .. "\n")
+	io.write(os.date("%Y-%m-%d %H:%M:%S [SUBSCRIBE] ") .. table.concat({...}, " ") .. "\n")
 end
 -- Log end
 

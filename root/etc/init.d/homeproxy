@@ -55,11 +55,9 @@ start_service() {
 	procd_set_param command "$PROG"
 	procd_append_param command run --config "$RUN_DIR/sing-box.json"
 
-	procd_set_param stdout 1
-	procd_set_param stderr 1
-	procd_set_param respawn
-
-	procd_close_instance
+	uci rename "dhcp.@dnsmasq[0].nonwildcard"="_orig_nonwildcard" 2>"/dev/null"
+	uci set "dhcp.@dnsmasq[0].nonwildcard"=1
+	uci commit "dhcp"
 
 	if [ -z "$FW4" ]; then
 		mkdir -p "/var/etc/"
@@ -68,16 +66,27 @@ start_service() {
 		sh "/var/etc/$CONF.include"
 	fi
 
+	procd_set_param stdout 1
+	procd_set_param stderr 1
+	procd_set_param respawn
+
+	procd_close_instance
+
 	log "$(sing-box version | awk '{print $1,$2}') started."
 }
 
 stop_service() {
-	rm -f "$RUN_DIR/sing-box.json" "$RUN_DIR/sing-box.log"
+	uci del "dhcp.@dnsmasq[0].nonwildcard" 2>"/dev/null"
+	uci rename "dhcp.@dnsmasq[0]._orig_nonwildcard"="nonwildcard" 2>"/dev/null"
+	uci commit "dhcp"
+
 	if [ -z "$FW4" ]; then
-		iptables -D FORWARD -o "$TUNNAME" -j ACCEPT
-		[ -z "$(command -v ip6tables)" ] || ip6tables -D FORWARD -o "$TUNNAME" -j ACCEPT
+		iptables -D FORWARD -o "$TUNNAME" -j ACCEPT 2>"/dev/null"
+		[ -z "$(command -v ip6tables)" ] || ip6tables -D FORWARD -o "$TUNNAME" -j ACCEPT 2>"/dev/null"
 		rm -f "/var/etc/$CONF.include"
 	fi
+
+	rm -f "$RUN_DIR/sing-box.json" "$RUN_DIR/sing-box.log"
 
 	log "Service stopped."
 }
