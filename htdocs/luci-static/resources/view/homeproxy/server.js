@@ -5,33 +5,11 @@
 
 'use strict';
 'require form';
-'require fs';
-'require poll';
 'require uci';
-'require ui';
 'require view';
+'require tools.homeproxy as hp';
 
 return view.extend({
-	cert_upload: function(type, filename, ev) {
-		fs.exec('/bin/mkdir', [ '-p', '/etc/homeproxy/certs/' ]);
-
-		return ui.uploadFile(String.format('/etc/homeproxy/certs/%s.pem', filename), ev.target)
-		.then(L.bind(function(btn, res) {
-			btn.firstChild.data = _('Checking %s...').format(_(type));
-
-			if (res.size <= 0) {
-				ui.addNotification(null, E('p', _('The uploaded %s is empty.').format(_(type))));
-				return fs.remove(String.format('/etc/homeproxy/certs/%s.pem', filename));
-			}
-
-			ui.addNotification(null, E('p', _('Your %s was successfully uploaded. Size: %sB.').format(_(type), res.size)));
-		}, this, ev.target))
-		.catch(function(e) { ui.addNotification(null, E('p', e.message)) })
-		.finally(L.bind(function(btn, input) {
-			btn.firstChild.data = _('Upload...');
-		}, this, ev.target));
-	},
-
 	load: function() {
 		return Promise.all([
 			uci.load('homeproxy')
@@ -115,15 +93,8 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'shadowsocks_encrypt_method', _('Encrypt method'));
-		o.value('none');
-		o.value('aes-128-gcm');
-		o.value('aes-192-gcm');
-		o.value('aes-256-gcm');
-		o.value('chacha20-ietf-poly1305');
-		o.value('xchacha20-ietf-poly1305');
-		o.value('2022-blake3-aes-128-gcm');
-		o.value('2022-blake3-aes-256-gcm');
-		o.value('2022-blake3-chacha20-poly1305');
+		for (var i in hp.shadowsocks_encrypt_methods)
+			o.value(hp.shadowsocks_encrypt_methods[i]);
 		o.default = 'aes-128-gcm';
 		o.depends('type', 'shadowsocks');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
@@ -208,7 +179,7 @@ return view.extend({
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends('tls', '1');
-		o.onclick = L.bind(this.cert_upload, this, 'certificate', 'server_publickey');
+		o.onclick = L.bind(hp.uploadCertificate, this, 'certificate', 'server_publickey');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'tls_key_path', _('Key path'),
@@ -226,7 +197,7 @@ return view.extend({
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends('tls', '1');
-		o.onclick = L.bind(this.cert_upload, this, 'private key', 'server_privatekey');
+		o.onclick = L.bind(hp.uploadCertificate, this, 'private key', 'server_privatekey');
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'tcp_fast_open', _('TCP fast open'),

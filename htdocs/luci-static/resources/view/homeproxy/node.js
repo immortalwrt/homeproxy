@@ -9,34 +9,14 @@
 'require uci';
 'require ui';
 'require view';
+'require tools.homeproxy as hp';
 'require tools.widgets as widgets';
-
-function fs_installed(binray) {
-	return fs.exec('/usr/bin/which', [ binray ]).then(function (res) {
-		if (res.stdout && res.stdout.trim() !== '')
-			return true;
-		else
-			return false;
-	});
-}
 
 function parse_share_link(uri) {
 	var config;
 
 	uri = uri.split('://');
 	if (uri[0] && uri[1]) {
-		/* Thanks to luci-app-ssr-plus */
-		function b64decode(str) {
-			str = str.replace(/-/g, '+').replace(/_/g, '/');
-			var padding = (4 - str.length % 4) % 4;
-			if (padding)
-				str = str + Array(padding + 1).join('=');
-
-			return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {
-				return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-			}).join(''));
-		}
-
 		switch (uri[0]) {
 		case 'hysteria':
 			/* https://github.com/HyNetwork/hysteria/wiki/URI-Scheme */
@@ -70,7 +50,7 @@ function parse_share_link(uri) {
 					if (suri.length <= 2) {
 						if (suri.length === 2)
 							slabel = '#' + suri[1];
-						uri = [null, b64decode(suri[0]) + slabel];
+						uri = [null, hp.decodeBase64Str(suri[0]) + slabel];
 					}
 				} catch(e) { }
 
@@ -83,7 +63,10 @@ function parse_share_link(uri) {
 					userinfo = [url.username, decodeURIComponent(url.password)];
 				else if (url.username)
 					/* User info encoded with base64 */
-					userinfo = b64decode(url.username).split(':');
+					userinfo = hp.decodeBase64Str(url.username).split(':');
+
+				if (!hp.shadowsocks_encrypt_methods.includes(userinfo[0]))
+					return null;
 
 				var plugin, plugin_opts;
 				if (url.search && url.searchParams.get('plugin')) {
@@ -130,7 +113,7 @@ function parse_share_link(uri) {
 			break;
 		case 'ssr':
 			/* https://coderschool.cn/2498.html */
-			uri = b64decode(uri[1]).split('/');
+			uri = hp.decodeBase64Str(uri[1]).split('/');
 			var userinfo = uri[0].split(':')
 
 			/* Check if method and password exist */
@@ -138,9 +121,9 @@ function parse_share_link(uri) {
 				return null;
 
 			var params = new URLSearchParams(uri[1]);
-			var protoparam = params.get('protoparam') ? b64decode(params.get('protoparam')) : null;
-			var obfsparam = params.get('obfsparam') ? b64decode(params.get('obfsparam')) : null;
-			var remarks = params.get('remarks') ? b64decode(params.get('remarks')) : null;
+			var protoparam = params.get('protoparam') ? hp.decodeBase64Str(params.get('protoparam')) : null;
+			var obfsparam = params.get('obfsparam') ? hp.decodeBase64Str(params.get('obfsparam')) : null;
+			var remarks = params.get('remarks') ? hp.decodeBase64Str(params.get('remarks')) : null;
 
 			config = {
 				label: remarks,
@@ -149,7 +132,7 @@ function parse_share_link(uri) {
 				address: userinfo[0],
 				port: userinfo[1],
 				shadowsocksr_encrypt_method: userinfo[3],
-				password: b64decode(userinfo[5]),
+				password: hp.decodeBase64Str(userinfo[5]),
 				shadowsocksr_protocol: userinfo[2],
 				shadowsocksr_protocol_param: protoparam,
 				shadowsocksr_obfs: userinfo[4],
@@ -258,7 +241,7 @@ function parse_share_link(uri) {
 				return null;
 
 			/* https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2) */
-			uri = JSON.parse(b64decode(uri[1]));
+			uri = JSON.parse(hp.decodeBase64Str(uri[1]));
 
 			if (uri.v !== '2')
 				return null;
@@ -351,8 +334,8 @@ return view.extend({
 	load: function() {
 		return Promise.all([
 			uci.load('homeproxy'),
-			fs_installed('hysteria'),
-			fs_installed('naive')
+			hp.findBinary('hysteria'),
+			hp.findBinary('naive')
 		]);
 	},
 
@@ -598,7 +581,7 @@ return view.extend({
 		}
 
 		o = s.option(form.Value, 'label', _('Label'));
-		o.rmempty = false;
+		o.validate = L.bind(hp.validateUniqueLabel, this, data[0], 'node');
 
 		o = s.option(form.ListValue, 'type', _('Type'));
 		o.value('http', _('HTTP'));
@@ -732,15 +715,8 @@ return view.extend({
 
 		/* Shadowsocks config start */
 		o = s.option(form.ListValue, 'shadowsocks_encrypt_method', _('Encrypt method'));
-		o.value('none');
-		o.value('aes-128-gcm');
-		o.value('aes-192-gcm');
-		o.value('aes-256-gcm');
-		o.value('chacha20-ietf-poly1305');
-		o.value('xchacha20-ietf-poly1305');
-		o.value('2022-blake3-aes-128-gcm');
-		o.value('2022-blake3-aes-256-gcm');
-		o.value('2022-blake3-chacha20-poly1305');
+		for (var i in hp.shadowsocks_encrypt_methods)
+			o.value(hp.shadowsocks_encrypt_methods[i]);
 		o.default = 'aes-128-gcm';
 		o.depends('type', 'shadowsocks');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
@@ -1283,47 +1259,11 @@ return view.extend({
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends('tls_self_sign', '1');
-		o.onclick = function(ev) {
-			fs.exec('/bin/mkdir', [ '-p', '/etc/homeproxy/certs/' ]);
-
-			return ui.uploadFile('/etc/homeproxy/certs/client_ca.pem', ev.target)
-			.then(L.bind(function(btn, res) {
-				btn.firstChild.data = _('Checking certificate...');
-
-				if (res.size <= 0) {
-					ui.addNotification(null, E('p', _('The uploaded certificate is empty.')));
-					return fs.remove('/etc/homeproxy/certs/client_ca.pem');
-				}
-
-				ui.addNotification(null, E('p', _('Your certificate was successfully uploaded. Size: %sB.').format(res.size)));
-			}, this, ev.target))
-			.catch(function(e) { ui.addNotification(null, E('p', e.message)) })
-			.finally(L.bind(function(btn, input) {
-				btn.firstChild.data = _('Upload...');
-			}, this, ev.target));
-		}
+		o.onclick = L.bind(hp.uploadCertificate, this, 'certificate', 'client_ca');
 		o.modalonly = true;
 		/* TLS config end */
 
 		/* Extra settings start */
-		o = s.option(widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
-			_('The network interface to bind to.'));
-		o.multiple = false;
-		o.noaliases = true;
-		o.nobridges = true;
-		o.modalonly = true;
-
-		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
-			_('If set, the server domain name will be resolved to IP before connecting.<br/>dns.strategy will be used if empty.'));
-		o.value('', _('Default'));
-		o.value('prefer_ipv4', _('Prefer IPv4'));
-		o.value('prefer_ipv6', _('Prefer IPv6'));
-		o.value('ipv4_only', _('IPv4 only'));
-		o.value('ipv6_only', _('IPv6 only'));
-		for (var i in native_protocols)
-			o.depends('type', native_protocols[i])
-		o.modalonly = true;
-
 		o = s.option(form.Flag, 'tcp_fast_open', _('TCP fast open'));
 		o.default = o.disabled;
 		for (var i in native_protocols)
@@ -1340,26 +1280,6 @@ return view.extend({
 		o.depends({'type': 'shadowsocks', 'multiplex': '0'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks', 'multiplex': '0'});
 		o.rmempty = false;
-		o.modalonly = true;
-
-		o = s.option(form.ListValue, 'outbound', _('Outbound'),
-			_('The tag of the upstream outbound. Other dial fields will be ignored when enabled.'));
-		o.load = function(section_id) {
-			delete this.keylist;
-			delete this.vallist;
-
-			var _this = this;
-			_this.value('', _('None'));
-			uci.sections(data[0], 'node', function(res) {
-				if (res['.name'] !== section_id)
-					_this.value(res['.name'] + '-out', String.format('[%s] %s',
-						res.type, res.label || res.server + ':' + res.server_port));
-			});
-
-			return this.super('load', section_id);
-		}
-		for (var i in native_protocols)
-			o.depends('type', native_protocols[i])
 		o.modalonly = true;
 		/* Extra settings end */
 
