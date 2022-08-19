@@ -48,7 +48,7 @@ start_service() {
 		return 1
 	fi
 
-	if ! "$PROG" check --config "$RUN_DIR/sing-box.json" 2>"$RUN_DIR/homeproxy.log"; then
+	if ! "$PROG" check --config "$RUN_DIR/sing-box.json" 2>>"$RUN_DIR/homeproxy.log"; then
 		log "Error: wrong configuration detected."
 	fi
 
