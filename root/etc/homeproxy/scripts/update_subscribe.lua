@@ -486,7 +486,7 @@ local function main()
 				end
 			end
 
-			log("Successfully fetched", count, "nodes of total", #nodes - 1, ".", "From:", url)
+			log("Successfully fetched", count, "nodes of total", #nodes, ".", "From:", url)
 		else
 			log("Failed to fetch resources from", url)
 		end
