@@ -348,6 +348,8 @@ return view.extend({
 		var native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'wireguard', 'vmess' ];
 		var v2ray_native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'vless', 'vmess' ];
 
+		var routing_mode = uci.get(data[0], 'config', 'routing_mode');
+
 		m = new form.Map('homeproxy', _('Edit nodes'));
 
 		s = m.section(form.NamedSection, 'subscription', 'homeproxy');
@@ -564,13 +566,17 @@ return view.extend({
 		o.modalonly = false;
 		o.inputstyle = 'apply';
 		o.inputtitle = function(section_id) {
-			var main_server = uci.get(data[0], 'config', 'main_server');
-			if (main_server == section_id) {
+			if (routing_mode === 'custom')
 				this.readonly = true;
-				return _('Applied');
-			} else {
-				this.readonly = false;
-				return _('Apply');
+			else {
+				var main_server = uci.get(data[0], 'config', 'main_server');
+				if (main_server == section_id) {
+					this.readonly = true;
+					return _('Applied');
+				} else {
+					this.readonly = false;
+					return _('Apply');
+				}
 			}
 		}
 		o.onclick = function(_, section_id) {

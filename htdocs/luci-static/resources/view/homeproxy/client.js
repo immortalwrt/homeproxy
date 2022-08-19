@@ -72,7 +72,7 @@ return view.extend({
 		var m, s, o, ss, so;
 
 		m = new form.Map('homeproxy', _('HomeProxy'),
-			_('The modern ImmortalWrt proxy platform for ARM64/AMD64.'));
+			_('The modern ImmortalWrt proxy platform for ARM64/AMD64. Powered by sing-box.'));
 
 		s = m.section(form.TypedSection);
 		s.anonymous = true;
@@ -281,14 +281,14 @@ return view.extend({
 			if (section_id && value) {
 				var node = this.map.lookupOption('node', section_id)[0].formvalue(section_id);
 
-				var conflict;
+				var conflict = false;
 				uci.sections(data[0], 'routing_node', function(res) {
 					if (res['.name'] !== section_id)
 						if (res.outbound === node && res.node == value)
-							conflict = res.label;
+							conflict = true;
 				});
 				if (conflict)
-					return _('Recursive outbound detected! Conflict with "%s".').format(conflict);
+					return _('Recursive outbound detected!');
 			}
 
 			return true;
@@ -513,6 +513,20 @@ return view.extend({
 			});
 
 			return this.super('load', section_id);
+		}
+		so.validate = function(section_id, value) {
+			if (section_id && value) {
+				var conflict = false;
+				uci.sections(data[0], 'dns_server', function(res) {
+					if (res['.name'] !== section_id)
+						if (res.address_resolver === section_id + '-dns' && res['.name'] + '-dns' == value)
+							conflict = true;
+				});
+				if (conflict)
+					return _('Recursive resolver detected!');
+			}
+
+			return true;
 		}
 		so.modalonly = true;
 
