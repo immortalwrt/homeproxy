@@ -117,6 +117,9 @@ local filter_keywords = uci:get(uciname, ucisubscription, "filter_words") or {}
 local packet_encoding = uci:get(uciname, ucisubscription, "default_packet_encoding") or "xudp"
 local subscription_urls = uci:get(uciname, ucisubscription, "subscription_url") or {}
 local via_proxy = uci:get(uciname, ucisubscription, "update_via_proxy") or "0"
+
+local main_server = uci:get(uciname, ucimain, "main_server") or "nil"
+local main_udp_server = uci:get(uciname, ucimain, "main_udp_server") or "nil"
 -- UCI config end
 
 -- Log start
@@ -526,36 +529,36 @@ local function main()
 	end
 	uci:commit(uciname)
 
-	local main_server = uci:get(uciname, ucimain, "main_server") or "nil"
+	local need_restart = (via_proxy ~= "1")
 	if main_server ~= "nil" then
-		local need_restart = false
 		local first_server = uci:get_first(uciname, ucinode)
 		if first_server then
 			if not uci:get(uciname, main_server) then
 				uci:set(uciname, ucimain, "main_server", first_server)
+				uci:commit(uciname)
 				need_restart = true
 				log("Main node is gone, switching to first node.")
 			end
 
-			local udp_server = uci:get(uciname, ucimain, "main_udp_server") or "nil"
-			if udp_server ~= "nil" and udp_server ~= "same" then
-				if not uci:get(uciname, udp_server) then
+			if main_udp_server ~= "nil" and main_udp_server ~= "same" then
+				if not uci:get(uciname, main_udp_server) then
 					uci:set(uciname, ucimain, "main_udp_server", first_server)
+					uci:commit(uciname)
 					need_restart = true
 					log("UDP node is gone, switching to main node.")
 				end
 			end
-
-			if via_proxy ~= "1" or need_restart then
-				log("Reloading service...")
-				uci:commit(uciname)
-				sysinit.stop(uciname)
-				sysinit.start(uciname)
-			end
 		else
+			need_restart = false
 			log("No node available, stopping service...")
 			sysinit.stop(uciname)
 		end
+	end
+
+	if need_restart then
+		log("Reloading service...")
+		sysinit.stop(uciname)
+		sysinit.start(uciname)
 	end
 
 	log(added, "nodes added,", removed, "removed.")
@@ -570,7 +573,6 @@ if notEmpty(subscription_urls) then
 		log(debug.traceback())
 
 		sysinit.stop(uciname)
-		local main_server = uci:get(uciname, ucimain, "main_server") or "nil"
 		if main_server ~= "nil" then
 			if notEmpty(uci:get(uciname, main_server)) then
 				log("Reloading service...")

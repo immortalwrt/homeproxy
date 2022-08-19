@@ -36,7 +36,7 @@ start_service() {
 	config_get default_outbound "routing" "default_outbound" "nil"
 
 	if [ "$main_server" = "nil" ] && [ "$routing_mode" = "custom" -a "$default_outbound" = "nil" ] && [ "$enabled_server" = "0" ]; then
-		return 1
+		exit 1
 	fi
 
 	mkdir -p "$RUN_DIR"
@@ -45,13 +45,13 @@ start_service() {
 	local inbounds="$(jsonfilter -i "$RUN_DIR/sing-box.json" -e "@.inbounds")"
 	if [ ! -e "$RUN_DIR/sing-box.json" ]; then
 		log "Error: failed to generate configuration."
-		return 1
+		exit 1
 	elif [ -z "$inbounds" ] || [ "$inbounds" = "[ ]" ]; then
 		log "Error: no valid inbound found."
-		return 1
+		exit 1
 	elif ! "$PROG" check --config "$RUN_DIR/sing-box.json" 2>>"$LOG_PATH"; then
 		log "Error: wrong configuration detected."
-		return 1
+		exit 1
 	fi
 
 	procd_open_instance "sing-box"
