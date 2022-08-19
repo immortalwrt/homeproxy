@@ -7,7 +7,6 @@ require "luci.jsonc"
 require "luci.model.uci"
 require "luci.sys"
 require "luci.util"
-require "nixio"
 
 -- String helper start
 string.split = luci.util.split
@@ -174,12 +173,12 @@ end
 local config = {}
 
 -- Log
---[[ config.log = {
+config.log = {
 	disabled = false,
 	level = "info",
 	output = "/var/log/homeproxy/sing-box.log",
 	timestamp = true
-} ]]
+}
 
 -- DNS start
 -- Default settings
@@ -537,4 +536,8 @@ elseif routing_mode == "global" then
 end
 -- Routing rules end
 
-print(JSON.dump(config, 1))
+luci.sys.call("mkdir -p /var/run/homeproxy/")
+local conffile = io.open("/var/run/homeproxy/sing-box.json", "w")
+io.output(conffile)
+io.write(JSON.dump(config, 1))
+io.close(conffile)
