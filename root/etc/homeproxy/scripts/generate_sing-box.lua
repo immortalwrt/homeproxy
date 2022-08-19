@@ -202,21 +202,20 @@ config.dns = {
 			address = "rcode://name_error"
 		},
 	},
+	final = "local-dns",
 	strategy = dns_strategy,
 	disable_cache = (dns_disable_cache == "1"),
 	disable_expire = (dns_disable_cache_expire == "1")
 }
 
--- Main DNS
-if routing_mode ~= "custom" then
+if routing_mode ~= "custom" and main_server ~= "nil" then
+	-- Main DNS
 	config.dns.servers[3] = {
 		tag = "main-dns",
 		address = dns_server,
 		detour = "main-out"
 	}
-end
 
-if table.contains({ "bypass_mainland_china", "gfwlist", "proxy_mainland_china" }, routing_mode) then
 	local dns_geosite
 	if routing_mode == "bypass_mainland_china" then
 		dns_geosite = { "geolocation-!cn" }
@@ -233,8 +232,7 @@ if table.contains({ "bypass_mainland_china", "gfwlist", "proxy_mainland_china" }
 			server = "main-dns"
 		}
 	}
-	config.dns.final = "local-dns"
-elseif routing_mode == "custom" then
+elseif routing_mode == "custom" and default_outbound ~= "nil" then
 	-- DNS servers
 	uci:foreach(uciconfig, ucidnsserver, function(cfg)
 		if cfg.enabled == "1" then
@@ -297,8 +295,6 @@ elseif routing_mode == "custom" then
 	end)
 
 	config.dns.final = dns_default_server
-elseif routing_mode == "global" then
-	config.dns.final = "main-dns"
 end
 -- DNS end
 
@@ -438,12 +434,12 @@ config.route = {
 	geoip = {
 		path = "/etc/homeproxy/resources/geoip.db",
 		download_url = "https://github.com/1715173329/sing-geoip/releases/latest/download/geoip.db",
-		download_detour = (routing_mode == "custom") and default_outbound or (routing_mode ~= "proxy_mainland_china") and "main-out" or "direct-out"
+		download_detour = (routing_mode == "custom" and default_outbound ~= "nil") and default_outbound or (routing_mode ~= "proxy_mainland_china" and main_server ~= "nil") and "main-out" or "direct-out"
 	},
 	geosite = {
 		path = "/etc/homeproxy/resources/geosite.db",
 		download_url = "https://github.com/1715173329/sing-geosite/releases/latest/download/geosite.db",
-		download_detour = (routing_mode == "custom") and default_outbound or (routing_mode ~= "proxy_mainland_china") and "main-out" or "direct-out"
+		download_detour = (routing_mode == "custom" and default_outbound ~= "nil") and default_outbound or (routing_mode ~= "proxy_mainland_china" and main_server ~= "nil") and "main-out" or "direct-out"
 	},
 	rules = {
 		{
@@ -451,11 +447,12 @@ config.route = {
 			outbound = "dns-out"
 		}
 	},
+	final = "direct-out",
 	auto_detect_interface = isEmpty(default_interface) and true or false,
 	default_interface = default_interface
 }
 
-if table.contains({ "bypass_mainland_china", "gfwlist", "proxy_mainland_china" }, routing_mode) then
+if routing_mode ~= "custom" and main_server ~= "nil" then
 	-- Routing ports
 	if parse_port(routing_port) then
 		config.route.rules[2] = {
@@ -466,10 +463,11 @@ if table.contains({ "bypass_mainland_china", "gfwlist", "proxy_mainland_china" }
 	end
 
 	-- Routing rules
-	local routing_geosite, routing_geosite
+	local routing_geosite, routing_geosite, routing_invert
 	if routing_mode == "bypass_mainland_china" then
 		routing_geosite = { "cn" }
 		routing_geoip = { "cn", "private" }
+		routing_invert = true
 	elseif routing_mode == "proxy_mainland_china" then
 		routing_geosite = { "cn" }
 		routing_geoip = { "cn" }
@@ -480,32 +478,26 @@ if table.contains({ "bypass_mainland_china", "gfwlist", "proxy_mainland_china" }
 
 	-- Main out
 	config.route.rules[#config.route.rules+1] = {
-		geosite = table.clone(routing_geosite),
-		geoip = table.clone(routing_geoip),
-		outbound = (routing_mode == "bypass_mainland_china") and "direct-out" or "main-out"
+		geosite = routing_geosite and table.clone(routing_geosite) or nil,
+		geoip = routing_geoip and table.clone(routing_geoip) or nil,
+		outbound = "main-out",
+		invert = routing_invert
 	}
 
 	-- Main UDP out
 	if main_udp_server == "nil" then
-		config.route.rules[#config.route.rules].network = (routing_mode ~= "bypass_mainland_china") and "tcp" or nil
-		if routing_mode == "bypass_mainland_china" then
-			config.route.rules[#config.route.rules+1] = {
-				network = "udp",
-				outbound = "direct-out"
-			}
-		end
+		config.route.rules[#config.route.rules].network = "tcp"
 	elseif main_udp_server ~= "same" and main_udp_server ~= main_server then
-		config.route.rules[#config.route.rules].network = (routing_mode ~= "bypass_mainland_china") and "tcp" or nil
+		config.route.rules[#config.route.rules].network = "tcp"
 		config.route.rules[#config.route.rules+1] = {
-			geosite = (routing_mode ~= "bypass_mainland_china") and routing_geosite or nil,
-			geoip = (routing_mode ~= "bypass_mainland_china") and routing_geoip or nil,
+			geosite = routing_geosite,
+			geoip = routing_geoip,
 			network = "udp",
-			outbound = "main-udp-out"
+			outbound = "main-udp-out",
+			invert = routing_invert
 		}
 	end
-
-	config.route.final = (routing_mode == "bypass_mainland_china") and "main-out" or "direct-out"
-elseif routing_mode == "custom" then
+elseif routing_mode == "custom" and default_outbound ~= "nil" then
 	uci:foreach(uciconfig, uciroutingrule, function(cfg)
 		if cfg.enabled == "1" then
 			local routing_rule
@@ -551,8 +543,6 @@ elseif routing_mode == "custom" then
 	end)
 
 	config.route.final = default_outbound
-elseif routing_mode == "global" then
-	config.route.final = "main-out"
 end
 -- Routing rules end
 
