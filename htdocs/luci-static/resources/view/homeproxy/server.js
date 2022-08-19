@@ -136,23 +136,23 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'hysteria_recv_window_conn', _('QUIC stream receive window'),
-			_('The QUIC stream-level flow control window for receiving data.<br/>' +
-				'<code>67108864 (64 MB/s)</code> will be used if empty.'));
+			_('The QUIC stream-level flow control window for receiving data.'));
 		o.datatype = 'uinteger';
+		o.default = '67108864';
 		o.depends('type', 'hysteria');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'hysteria_recv_window_client', _('QUIC connection receive window'),
-			_('The QUIC connection-level flow control window for receiving data.<br/>' +
-				'<code>15728640 (15 MB/s)</code> will be used if empty.'));
+			_('The QUIC connection-level flow control window for receiving data.'));
 		o.datatype = 'uinteger';
+		o.default = '15728640';
 		o.depends('type', 'hysteria');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'hysteria_max_conn_client', _('QUIC maximum concurrent bidirectional streams'),
-			_('The maximum number of QUIC concurrent bidirectional streams that a peer is allowed to open.<br/>'+
-			'<code>1024</code> will be used if empty.'));
+			_('The maximum number of QUIC concurrent bidirectional streams that a peer is allowed to open.'));
 		o.datatype = 'uinteger';
+		o.default = '1024';
 		o.depends('type', 'hysteria');
 		o.modalonly = true;
 

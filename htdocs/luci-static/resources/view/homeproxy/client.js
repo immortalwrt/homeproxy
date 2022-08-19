@@ -122,7 +122,7 @@ return view.extend({
 		o.value('proxy_mainland_china', _('Only proxy mainland China'));
 		o.value('custom', _('Custom routing'));
 		o.value('global', _('Global'));
-		o.default = '2';
+		o.default = 'bypass_mainland_china';
 		o.rmempty = false;
 
 		o = s.option(form.Value, 'routing_port', _('Routing ports'),
@@ -466,11 +466,11 @@ return view.extend({
 		so.rmempty = false;
 
 		so = ss.option(form.Flag, 'disable_cache', _('Disable DNS cache'));
-		so.default = o.disabled;
+		so.default = so.disabled;
 		so.rmempty = false;
 
 		so = ss.option(form.Flag, 'disable_cache_expire', _('Disable cache expire'));
-		so.default = o.disabled;
+		so.default = so.disabled;
 		so.depends('disable_cache', '0');
 		so.rmempty = false;
 
@@ -491,7 +491,7 @@ return view.extend({
 		so.validate = L.bind(hp.validateUniqueLabel, this, data[0], 'dns_server');
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
-		so.default = o.disabled;
+		so.default = so.disabled;
 		so.rmempty = false;
 		so.editable = true;
 
