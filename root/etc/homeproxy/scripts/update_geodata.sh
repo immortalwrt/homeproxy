@@ -104,6 +104,10 @@ case "$1" in
 	check_update "geosite" "$GEOSITE_REPO"
 	ret2="$?"
 
+	if [ "$2" = "update_subscription" ]; then
+		lua "$GEODATA_DIR/../scripts/update_subscribe.lua"
+	fi
+
 	rm -f "$LOCK"
 
 	if [ "$ret1" = "1" ] || [ "$ret2" = "1" ]; then
@@ -115,7 +119,7 @@ case "$1" in
 	fi
 	;;
 *)
-	echo -e "Usage: $0 get_version | update_version"
+	echo -e "Usage: $0 get_version | update_version <update_subscription>"
 	exit 1
 	;;
 esac

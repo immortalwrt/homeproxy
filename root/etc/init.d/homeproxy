@@ -23,6 +23,8 @@ log() {
 }
 
 start_service() {
+	stop
+
 	config_load "$CONF"
 
 	local main_server enabled_server
@@ -56,14 +58,30 @@ start_service() {
 	procd_set_param command "$PROG"
 	procd_append_param command run --config "$RUN_DIR/sing-box.json"
 
+	# Auto update
+	local auto_update auto_update_time
+	config_get_bool auto_update "subscription" "auto_update" "0"
+	if [ "auto_update" = "1" ]; then
+		config_get auto_update_time "subscription" "auto_update_time" "2"
+		echo "0 ${auto_update_time} * * * $HP_DIR/scripts/update_geodata.sh update_version update_subscription" >> "/etc/crontabs/root"
+	fi
+	# Clean log
+	echo -e "*/10 * * * * $HP_DIR/scripts/clean_log.sh" >> "/etc/crontabs/root"
+	/etc/init.d/cron restart
+
+	# Hijack DNS
 	uci rename "dhcp.@dnsmasq[0].nonwildcard"="_orig_nonwildcard" 2>"/dev/null"
 	uci set "dhcp.@dnsmasq[0].nonwildcard"=1
 	uci commit "dhcp"
 
+	# Set firewall
 	if [ -z "$FW4" ]; then
 		mkdir -p "/var/etc/"
+
+		# Allow FORWARD
 		echo "iptables -I FORWARD -o $TUNNAME -j ACCEPT" > "/var/etc/$CONF.include"
 		[ -z "$(command -v ip6tables)" ] || echo "ip6tables -I FORWARD -o $TUNNAME -j ACCEPT" >> "/var/etc/$CONF.include"
+
 		sh "/var/etc/$CONF.include"
 	fi
 
@@ -77,6 +95,9 @@ start_service() {
 }
 
 stop_service() {
+	sed -i "/$CONF/d" "/etc/crontabs/root"
+	/etc/init.d/cron restart
+
 	uci del "dhcp.@dnsmasq[0].nonwildcard" 2>"/dev/null"
 	uci rename "dhcp.@dnsmasq[0]._orig_nonwildcard"="nonwildcard" 2>"/dev/null"
 	uci commit "dhcp"

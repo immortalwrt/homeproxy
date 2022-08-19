@@ -436,7 +436,7 @@ return view.extend({
 		o.onclick = function() {
 			var _this = this;
 
-			return fs.exec('/etc/homeproxy/scripts/subscribe.lua').then(function (res) {
+			return fs.exec('/etc/homeproxy/scripts/update_subscribe.lua').then(function (res) {
 				return location.reload();
 			}).catch(function (err) {
 				ui.addNotification(null, E('p', _('An error occurred during updating subscriptions: %s').format(err)));
