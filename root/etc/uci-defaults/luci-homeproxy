@@ -1,0 +1,15 @@
+#!/bin/sh
+
+[ -e "$(command -v fw4)" ] || {
+	uci -q batch <<-EOF >/dev/null
+		delete firewall.homeproxy
+		set firewall.homeproxy=include
+		set firewall.homeproxy.type=script
+		set firewall.homeproxy.path=/var/etc/homeproxy.include
+		set firewall.homeproxy.reload=1
+		commit firewall
+	EOF
+}
+
+rm -f /tmp/luci-indexcache
+exit 0
