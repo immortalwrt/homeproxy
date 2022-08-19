@@ -78,7 +78,7 @@ elseif table.contains({"all", "nil"}, routing_port) then
 else
 	routing_port = routing_port:split(",")
 end
-local native_protocols = { "http", "shadowsocks", "socks", "trojan", "wireguard", "vmess" }
+local native_protocols = { "http", "hysteria","shadowsocks", "socks", "trojan", "wireguard", "vmess" }
 -- UCI config end
 
 -- Config helper start
@@ -97,6 +97,15 @@ local function generate_outbound(server)
 		username = server.username,
 		password = server.password,
 
+		-- Hysteria
+		up_mbps = server.mkcp_uplink_capacity,
+		down_mbps = server.mkcp_downlink_capacity,
+		obfs = server.hysteria_obfs_password,
+		auth = (server.hysteria_auth_type == "base64") and server.hysteria_auth_payload or nil,
+		auth_str = (server.hysteria_auth_type == "string") and server.hysteria_auth_payload or nil,
+		recv_window_conn = tonumber(server.hysteria_recv_window_conn),
+		recv_window = tonumber(server.hysteria_revc_window),
+		disable_mtu_discovery = server.hysteria_disable_mtu_discovery and (server.hysteria_disable_mtu_discovery == "1") or nil,
 		-- Shadowsocks
 		method = server.shadowsocks_encrypt_method,
 		-- Socks
@@ -104,8 +113,8 @@ local function generate_outbound(server)
 		-- VMess
 		uuid = server.v2ray_uuid,
 		security = server.v2ray_vmess_encrypt,
-		global_padding = server.vmess_global_padding and (server.vmess_global_padding == "1"),
-		authenticated_length = server.vmess_authenticated_length and (server.vmess_authenticated_length == "1"),
+		global_padding = server.vmess_global_padding and (server.vmess_global_padding == "1") or nil,
+		authenticated_length = server.vmess_authenticated_length and (server.vmess_authenticated_length == "1") or nil,
 		-- WireGuard
 		local_address = server.wireguard_local_address,
 		private_key = server.wireguard_private_key,
@@ -174,7 +183,7 @@ local config = {}
 -- Log
 config.log = {
 	disabled = false,
-	level = "info",
+	level = "warn",
 	output = "/var/run/homeproxy/sing-box.log",
 	timestamp = true
 }
@@ -328,9 +337,21 @@ if enable_server == "1" then
 				domain_strategy = cfg.domain_strategy,
 				network = cfg.network,
 
+				-- Hysteria
+				up_mbps = cfg.hysteria_uplink_capacity,
+				down_mbps = cfg.hysteria_downlink_capacity,
+				obfs = cfg.hysteria_obfs_password,
+				auth = (cfg.hysteria_auth_type == "base64") and cfg.hysteria_auth_payload or nil,
+				auth_str = (cfg.hysteria_auth_type == "string") and cfg.hysteria_auth_payload or nil,
+				recv_window_conn = tonumber(cfg.hysteria_recv_window_conn),
+				recv_window_client = tonumber(cfg.hysteria_revc_window_client),
+				max_conn_client = tonumber(cfg.hysteria_max_conn_client),
+				disable_mtu_discovery = cfg.hysteria_disable_mtu_discovery and (cfg.hysteria_disable_mtu_discovery == "1") or nil,
+
 				-- Shadowsocks
 				method = (cfg.type == "shadowsocks") and cfg.shadowsocks_encrypt_method or nil,
 				password = (cfg.type == "shadowsocks") and cfg.password or nil,
+
 				users = (cfg.type ~= "shadowsocks") and {
 					{
 						name = table.contains({"trojan", "vmess"}, cfg.type) and cfg[".name"] .. "-server" or nil,

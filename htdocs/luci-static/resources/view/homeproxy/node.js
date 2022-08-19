@@ -23,6 +23,10 @@ function parse_share_link(uri) {
 			var url = new URL('http://' + uri[1]);
 			var params = url.searchParams;
 
+			/* WeChat-Video / FakeTCP are unsupported by sing-box currently */
+			if (params.get('protocol') && params.get('protocol') !== 'udp')
+				return null;
+
 			config = {
 				label: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
 				type: 'hysteria',
@@ -31,7 +35,7 @@ function parse_share_link(uri) {
 				hysteria_protocol: params.get('protocol') || 'udp',
 				hysteria_auth_type: params.get('auth') ? 'string' : null,
 				hysteria_auth_payload: params.get('auth'),
-				hysteria_password: params.get('obfsParam'),
+				hysteria_obfs_password: params.get('obfsParam'),
 				mkcp_downlink_capacity: params.get('downmbps'),
 				mkcp_uplink_capacity: params.get('upmbps'),
 				tls: '1',
@@ -334,7 +338,6 @@ return view.extend({
 	load: function() {
 		return Promise.all([
 			uci.load('homeproxy'),
-			hp.findBinary('hysteria'),
 			hp.findBinary('naive')
 		]);
 	},
@@ -342,10 +345,9 @@ return view.extend({
 	render: function(data) {
 		var m, s, o;
 
-		var have_hysteria = data[1];
-		var have_naiveproxy = data[2];
+		var have_naiveproxy = data[1];
 
-		var native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'wireguard', 'vmess' ];
+		var native_protocols = [ 'http', 'hysteria','shadowsocks', 'socks', 'trojan', 'wireguard', 'vmess' ];
 		var v2ray_native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'vless', 'vmess' ];
 
 		var routing_mode = uci.get(data[0], 'config', 'routing_mode');
@@ -591,8 +593,7 @@ return view.extend({
 
 		o = s.option(form.ListValue, 'type', _('Type'));
 		o.value('http', _('HTTP'));
-		if (have_hysteria)
-			o.value('hysteria', _('Hysteria'));
+		o.value('hysteria', _('Hysteria'));
 		if (have_naiveproxy)
 			o.value('naiveproxy', _('NaïveProxy'));
 		o.value('shadowsocks', _('Shadowsocks'));
@@ -676,8 +677,10 @@ return view.extend({
 		/* Hysteria config start */
 		o = s.option(form.ListValue, 'hysteria_protocol', _('Protocol'));
 		o.value('udp');
-		o.value('wechat-video');
-		o.value('faketcp');
+		/* WeChat-Video / FakeTCP are unsupported by sing-box currently
+		   o.value('wechat-video');
+		   o.value('faketcp');
+		*/
 		o.default = 'udp';
 		o.depends('type', 'hysteria');
 		o.rmempty = false;
@@ -693,26 +696,31 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'hysteria_auth_payload', _('Authentication payload'));
-		o.depends({'type': 'hysteria', 'auth_type': '1'});
-		o.depends({'type': 'hysteria', 'auth_type': '2'});
+		o.depends({'type': 'hysteria', 'hysteria_auth_type': 'base64'});
+		o.depends({'type': 'hysteria', 'hysteria_auth_type': 'string'});
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'hysteria_password', _('Obfuscate password'));
+		o = s.option(form.Value, 'hysteria_obfs_password', _('Obfuscate password'));
 		o.depends('type', 'hysteria');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'hysteria_revc_window', _('QUIC connection receive window'));
+		o = s.option(form.Value, 'hysteria_recv_window_conn', _('QUIC stream receive window'),
+			_('The QUIC stream-level flow control window for receiving data.<br/>' +
+				'<code>67108864 (64 MB/s)</code> will be used if empty.'));
 		o.datatype = 'uinteger';
 		o.depends('type', 'hysteria');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'hysteria_recv_window_conn', _('QUIC stream receive window'));
+		o = s.option(form.Value, 'hysteria_revc_window', _('QUIC connection receive window'),
+			_('The QUIC connection-level flow control window for receiving data.<br/>' +
+				'<code>15728640 (15 MB/s)</code> will be used if empty.'));
 		o.datatype = 'uinteger';
 		o.depends('type', 'hysteria');
 		o.modalonly = true;
 
-		o = s.option(form.Flag, 'hysteria_disable_mtu_discovery', _('Disable Path MTU discovery'));
+		o = s.option(form.Flag, 'hysteria_disable_mtu_discovery', _('Disable Path MTU discovery'),
+			_('Disables Path MTU Discovery (RFC 8899). Packets will then be at most 1252 (IPv4) / 1232 (IPv6) bytes in size.'));
 		o.default = o.disabled;
 		o.depends('type', 'hysteria');
 		o.rmempty = false;

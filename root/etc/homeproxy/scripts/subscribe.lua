@@ -179,6 +179,10 @@ local function parse_uri(uri)
 			local url = URL.parse("http://" .. uri[2])
 			local params = url.query
 
+			if notEmpty(params.protocol) and params.protocol ~= "udp" then
+				log("Skipping unsupported hysteria node:", urldecode(url.fragment, true) or url.host or "NULL")
+			end
+
 			config = {
 				label = urldecode(url.fragment, true),
 				type = "hysteria",
@@ -187,7 +191,7 @@ local function parse_uri(uri)
 				hysteria_protocol = params.protocol or "udp",
 				hysteria_auth_type = params.auth and "string" or nil,
 				hysteria_auth_payload = params.auth,
-				hysteria_password = params.obfsParam,
+				hysteria_obfs_password = params.obfsParam,
 				mkcp_downlink_capacity = params.downmbps,
 				mkcp_uplink_capacity = params.upmbps,
 				tls = "1",

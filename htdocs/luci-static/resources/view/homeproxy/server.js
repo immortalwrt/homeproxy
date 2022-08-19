@@ -51,6 +51,7 @@ return view.extend({
 
 		o = s.option(form.ListValue, 'type', _('Type'));
 		o.value('http', _('HTTP'));
+		o.value('hysteria', _('Hysteria'));
 		o.value('naive', _('NaïveProxy'));
 		o.value('shadowsocks', _('Shadowsocks'));
 		o.value('socks', _('Socks'));
@@ -90,8 +91,80 @@ return view.extend({
 
 			return true;
 		}
+		o.depends({'type': 'hysteria', '!reverse': true});
 		o.modalonly = true;
 
+		/* Hysteria config start */
+		o = s.option(form.ListValue, 'hysteria_protocol', _('Protocol'));
+		o.value('udp');
+		/* WeChat-Video / FakeTCP are unsupported by sing-box currently
+		   o.value('wechat-video');
+		   o.value('faketcp');
+		*/
+		o.default = 'udp';
+		o.depends('type', 'hysteria');
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'hysteria_downlink_capacity', _('Downlink capacity'));
+		o.datatype = 'uinteger';
+		o.depends('type', 'hysteria');
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'hysteria_uplink_capacity', _('Uplink capacity'));
+		o.datatype = 'uinteger';
+		o.depends('type', 'hysteria');
+		o.modalonly = true;
+
+		o = s.option(form.ListValue, 'hysteria_auth_type', _('Authentication type'));
+		o.value('disabled', _('Disable'));
+		o.value('base64', _('Base64'));
+		o.value('string', _('String'));
+		o.default = 'disabled';
+		o.depends('type', 'hysteria');
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'hysteria_auth_payload', _('Authentication payload'));
+		o.depends({'type': 'hysteria', 'hysteria_auth_type': 'base64'});
+		o.depends({'type': 'hysteria', 'hysteria_auth_type': 'string'});
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'hysteria_obfs_password', _('Obfuscate password'));
+		o.depends('type', 'hysteria');
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'hysteria_recv_window_conn', _('QUIC stream receive window'),
+			_('The QUIC stream-level flow control window for receiving data.<br/>' +
+				'<code>67108864 (64 MB/s)</code> will be used if empty.'));
+		o.datatype = 'uinteger';
+		o.depends('type', 'hysteria');
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'hysteria_recv_window_client', _('QUIC connection receive window'),
+			_('The QUIC connection-level flow control window for receiving data.<br/>' +
+				'<code>15728640 (15 MB/s)</code> will be used if empty.'));
+		o.datatype = 'uinteger';
+		o.depends('type', 'hysteria');
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'hysteria_max_conn_client', _('QUIC maximum concurrent bidirectional streams'),
+			_('The maximum number of QUIC concurrent bidirectional streams that a peer is allowed to open.<br/>'+
+			'<code>1024</code> will be used if empty.'));
+		o.datatype = 'uinteger';
+		o.depends('type', 'hysteria');
+		o.modalonly = true;
+
+		o = s.option(form.Flag, 'hysteria_disable_mtu_discovery', _('Disable Path MTU discovery'),
+			_('Disables Path MTU Discovery (RFC 8899). Packets will then be at most 1252 (IPv4) / 1232 (IPv6) bytes in size.'));
+		o.default = o.disabled;
+		o.depends('type', 'hysteria');
+		o.rmempty = false;
+		o.modalonly = true;
+		/* Hysteria config end */
+
+		/* Shadowsocks config */
 		o = s.option(form.ListValue, 'shadowsocks_encrypt_method', _('Encrypt method'));
 		for (var i in hp.shadowsocks_encrypt_methods)
 			o.value(hp.shadowsocks_encrypt_methods[i]);
@@ -100,6 +173,7 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
 		o.modalonly = true;
 
+		/* TLS config start */
 		o = s.option(form.Flag, 'tls', _('TLS'));
 		o.default = o.disabled;
 		o.depends('type', 'http');
@@ -176,7 +250,9 @@ return view.extend({
 		o.depends('tls', '1');
 		o.onclick = L.bind(hp.uploadCertificate, this, 'private key', 'server_privatekey');
 		o.modalonly = true;
+		/* TLS config end */
 
+		/* Extra settings start */
 		o = s.option(form.Flag, 'tcp_fast_open', _('TCP fast open'),
 			_('Enable tcp fast open for listener.'));
 		o.default = o.disabled;
@@ -204,6 +280,7 @@ return view.extend({
 		o.depends('type', 'naiveproxy');
 		o.depends('type', 'shadowsocks');
 		o.modalonly = true;
+		/* Extra settings end */
 
 		return m.render();
 	}
