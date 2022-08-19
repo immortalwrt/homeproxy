@@ -395,34 +395,37 @@ config.outbounds = {
 if routing_mode ~= "custom" and main_server ~= "nil" then
 	local main_server_cfg = uci:get_all(uciconfig, main_server) or {}
 	if table.contains(native_protocols, main_server_cfg.type) then
-		local outbound = generate_outbound(main_server_cfg)
-		outbound.tag = "main-out"
-		config.outbounds[4] = outbound
+		config.outbounds[4] = generate_outbound(main_server_cfg)
 	else
 		config.outbounds[4] = generate_external_outbound(main_server_cfg)
 	end
+	config.outbounds[4] = "main-out"
 
 	if main_udp_server ~= "nil" and main_udp_server ~= "same" and main_udp_server ~= main_server then
 		local main_udp_server_cfg = uci:get_all(uciconfig, main_udp_server) or {}
 		if table.contains(native_protocols, main_udp_server_cfg.type) then
-			local outbound = generate_outbound(main_udp_server_cfg)
-			outbound.tag = "main-udp-out"
-			config.outbounds[5] = outbound
+			config.outbounds[5] = generate_outbound(main_udp_server_cfg)
 		else
 			config.outbounds[5] = generate_external_outbound(main_udp_server_cfg)
 		end
+		config.outbounds[5] = "main-udp-out"
 	end
 end
 
-if routing_mode == "custom" then
+if routing_mode == "custom" and default_outbound ~= "nil" then
 	uci:foreach(uciconfig, uciroutingnode, function(cfg)
 		if cfg.enabled == "1" then
 			local outbound = uci:get_all(uciconfig, cfg.node:gsub("-out$", "")) or {}
 			local index = #config.outbounds + 1
-			config.outbounds[index] = generate_outbound(outbound)
-			config.outbounds[index].domain_strategy = cfg.domain_strategy
-			config.outbounds[index].bind_interface = cfg.bind_interface
-			config.outbounds[index].detour = cfg.outbound
+			if table.contains(native_protocols, main_server_cfg.type) then
+				config.outbounds[index] = generate_outbound(outbound)
+				config.outbounds[index].domain_strategy = cfg.domain_strategy
+				config.outbounds[index].bind_interface = cfg.bind_interface
+				config.outbounds[index].detour = cfg.outbound
+			else
+				config.outbounds[index] = generate_external_outbound(outbound)
+			end
+			
 		end
 	end)
 end

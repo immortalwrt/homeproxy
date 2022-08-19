@@ -46,10 +46,9 @@ start_service() {
 	elif [ -z "$inbounds" ] || [ "$inbounds" = "[ ]" ]; then
 		log "Error: no valid inbound found."
 		return 1
-	fi
-
-	if ! "$PROG" check --config "$RUN_DIR/sing-box.json" 2>>"$RUN_DIR/homeproxy.log"; then
+	elif ! "$PROG" check --config "$RUN_DIR/sing-box.json" 2>>"$RUN_DIR/homeproxy.log"; then
 		log "Error: wrong configuration detected."
+		return 1
 	fi
 
 	procd_open_instance "sing-box"
@@ -79,9 +78,13 @@ stop_service() {
 		[ -z "$(command -v ip6tables)" ] || ip6tables -D FORWARD -o "$TUNNAME" -j ACCEPT
 		rm -f "/var/etc/$CONF.include"
 	fi
+
+	log "Service stopped."
 }
 
 reload_service() {
+	log "Reloading service..."
+
 	stop
 	start
 }
