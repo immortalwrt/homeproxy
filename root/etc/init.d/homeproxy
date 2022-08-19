@@ -17,6 +17,10 @@ RUN_DIR="/var/run/homeproxy"
 
 FW4="$(command -v fw4)"
 
+log() {
+	echo -e "$(date "+%Y-%m-%d %H:%M:%S") [DAEMON] $*" >> "$RUN_DIR/homeproxy.log"
+}
+
 start_service() {
 	config_load "$NAME"
 
@@ -36,7 +40,7 @@ start_service() {
 	"$HP_HOME"/scripts/generate_sing-box.lua
 
 	if [ "$(jsonfilter -i "$RUN_DIR/sing-box.json" -e "@.inbounds")" = "[ ]" ]; then
-		echo -e "No valid inbound found, stopping..." >> "$RUN_DIR/homeproxy.log"
+		log "No valid inbound found, stopping..."
 		return 1
 	end
 
@@ -56,6 +60,8 @@ start_service() {
 		[ -z "$(command -v ip6tables)" ] || echo "ip6tables -I FORWARD -o $TUNNAME -j ACCEPT" >> "/var/etc/$NAME.include"
 		sh "/var/etc/$NAME.include"
 	fi
+
+	log "$(sing-box version | awk '{print $1,$2}') started."
 }
 
 stop_service() {
