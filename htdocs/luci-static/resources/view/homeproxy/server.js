@@ -42,6 +42,7 @@ return view.extend({
 		}
 
 		o = s.option(form.Value, 'label', _('Label'));
+		o.validate = L.bind(hp.validateUniqueValue, this, data[0], 'server', 'label');
 		o.rmempty = false;
 
 		o = s.option(form.Flag, 'enabled', _('Enable'));
@@ -62,7 +63,7 @@ return view.extend({
 		o = s.option(form.Value, 'port', _('Port'),
 			_('The port must be unique.'));
 		o.datatype = 'port';
-		o.rmempty = false;
+		o.validate = L.bind(hp.validateUniqueValue, this, data[0], 'server', 'port');
 
 		o = s.option(form.Value, 'username', _('Username'));
 		o.depends('type', 'http');

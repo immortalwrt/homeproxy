@@ -589,7 +589,7 @@ return view.extend({
 		}
 
 		o = s.option(form.Value, 'label', _('Label'));
-		o.validate = L.bind(hp.validateUniqueLabel, this, data[0], 'node');
+		o.validate = L.bind(hp.validateUniqueValue, this, data[0], 'node', 'label');
 
 		o = s.option(form.ListValue, 'type', _('Type'));
 		o.value('http', _('HTTP'));

@@ -93,7 +93,7 @@ return baseclass.extend({
 		}, this, ev.target));
 	},
 
-	validateUniqueLabel: function(uciconfig, ucisection, section_id, value) {
+	validateUniqueValue: function(uciconfig, ucisection, ucioption, section_id, value) {
 		if (section_id) {
 			if (value === null || value === '')
 				return _('Expecting: %s').format(_('non-empty value'));
@@ -101,11 +101,11 @@ return baseclass.extend({
 				var duplicate = false;
 				uci.sections(uciconfig, ucisection, function(res) {
 					if (res['.name'] !== section_id)
-						if (res.label === value)
+						if (res[ucioption] === value)
 							duplicate = true
 				});
 				if (duplicate)
-					return _('The label was already taken.');
+					return _('The %s was already taken.').format(_(ucioption));
 			}
 		}
 	

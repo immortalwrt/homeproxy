@@ -219,7 +219,7 @@ return view.extend({
 		}
 
 		so = ss.option(form.Value, 'label', _('Label'));
-		so.validate = L.bind(hp.validateUniqueLabel, this, data[0], 'routing_node');
+		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'routing_node', 'label');
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
 		so.rmempty = false;
@@ -309,7 +309,7 @@ return view.extend({
 		}
 
 		so = ss.option(form.Value, 'label', _('Label'));
-		so.validate = L.bind(hp.validateUniqueLabel, this, data[0], 'routing_rule');
+		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'routing_rule', 'label');
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
 		so.default = so.disabled;
@@ -489,7 +489,7 @@ return view.extend({
 		}
 
 		so = ss.option(form.Value, 'label', _('Label'));
-		so.validate = L.bind(hp.validateUniqueLabel, this, data[0], 'dns_server');
+		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'dns_server', 'label');
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
 		so.default = so.disabled;
@@ -572,7 +572,7 @@ return view.extend({
 		}
 
 		so = ss.option(form.Value, 'label', _('Label'));
-		so.validate = L.bind(hp.validateUniqueLabel, this, data[0], 'dns_rule');
+		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'dns_rule', 'label');
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
 		so.default = so.disabled;
