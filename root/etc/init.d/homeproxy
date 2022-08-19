@@ -22,7 +22,7 @@ log() {
 }
 
 start_service() {
-	config_load "$NAME"
+	config_load "$CONF"
 
 	local main_server enabled_server
 	config_get main_server "config" "main_server" "nil"
@@ -36,13 +36,21 @@ start_service() {
 		return 1
 	fi
 
-	mkdir -p "$LOG_DIR"
-	"$HP_HOME"/scripts/generate_sing-box.lua
+	mkdir -p "$RUN_DIR"
+	"$HP_DIR"/scripts/generate_sing-box.lua
 
-	if [ "$(jsonfilter -i "$RUN_DIR/sing-box.json" -e "@.inbounds")" = "[ ]" ]; then
-		log "No valid inbound found, stopping..."
+	local inbounds="$(jsonfilter -i "$RUN_DIR/sing-box.json" -e "@.inbounds")"
+	if [ ! -e "$RUN_DIR/sing-box.json" ]; then
+		log "Error: failed to generate configuration."
 		return 1
-	end
+	elif [ -z "$inbounds" ] || [ "$inbounds" = "[ ]" ]; then
+		log "Error: no valid inbound found."
+		return 1
+	fi
+
+	if ! "$PROG" check --config "$RUN_DIR/sing-box.json" 2>"$RUN_DIR/homeproxy.log"; then
+		log "Error: wrong configuration detected."
+	fi
 
 	procd_open_instance "sing-box"
 	procd_set_param command "$PROG"
@@ -56,19 +64,20 @@ start_service() {
 
 	if [ -z "$FW4" ]; then
 		mkdir -p "/var/etc/"
-		echo "iptables -I FORWARD -o $TUNNAME -j ACCEPT" > "/var/etc/$NAME.include"
-		[ -z "$(command -v ip6tables)" ] || echo "ip6tables -I FORWARD -o $TUNNAME -j ACCEPT" >> "/var/etc/$NAME.include"
-		sh "/var/etc/$NAME.include"
+		echo "iptables -I FORWARD -o $TUNNAME -j ACCEPT" > "/var/etc/$CONF.include"
+		[ -z "$(command -v ip6tables)" ] || echo "ip6tables -I FORWARD -o $TUNNAME -j ACCEPT" >> "/var/etc/$CONF.include"
+		sh "/var/etc/$CONF.include"
 	fi
 
 	log "$(sing-box version | awk '{print $1,$2}') started."
 }
 
 stop_service() {
+	rm -f "$RUN_DIR/sing-box.json" "$RUN_DIR/sing-box.log"
 	if [ -z "$FW4" ]; then
 		iptables -D FORWARD -o "$TUNNAME" -j ACCEPT
 		[ -z "$(command -v ip6tables)" ] || ip6tables -D FORWARD -o "$TUNNAME" -j ACCEPT
-		rm -f "/var/etc/$NAME.include"
+		rm -f "/var/etc/$CONF.include"
 	fi
 }
 
@@ -78,5 +87,5 @@ reload_service() {
 }
 
 service_triggers() {
-	procd_add_reload_trigger "$NAME"
+	procd_add_reload_trigger "$CONF"
 }
