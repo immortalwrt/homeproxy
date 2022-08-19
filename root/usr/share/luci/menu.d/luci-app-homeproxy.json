@@ -33,5 +33,13 @@
 			"type": "view",
 			"path": "homeproxy/server"
 		}
+	},
+	"admin/services/homeproxy/status": {
+		"title": "Service status",
+		"order": 30,
+		"action": {
+			"type": "view",
+			"path": "homeproxy/status"
+		}
 	}
 }

@@ -14,11 +14,12 @@ TUNNAME="emortal-singbox"
 
 HP_DIR="/etc/homeproxy"
 RUN_DIR="/var/run/homeproxy"
+LOG_PATH="$RUN_DIR/homeproxy.log"
 
 FW4="$(command -v fw4)"
 
 log() {
-	echo -e "$(date "+%Y-%m-%d %H:%M:%S") [DAEMON] $*" >> "$RUN_DIR/homeproxy.log"
+	echo -e "$(date "+%Y-%m-%d %H:%M:%S") [DAEMON] $*" >> "$LOG_PATH"
 }
 
 start_service() {
@@ -46,7 +47,7 @@ start_service() {
 	elif [ -z "$inbounds" ] || [ "$inbounds" = "[ ]" ]; then
 		log "Error: no valid inbound found."
 		return 1
-	elif ! "$PROG" check --config "$RUN_DIR/sing-box.json" 2>>"$RUN_DIR/homeproxy.log"; then
+	elif ! "$PROG" check --config "$RUN_DIR/sing-box.json" 2>>"$LOG_PATH"; then
 		log "Error: wrong configuration detected."
 		return 1
 	fi

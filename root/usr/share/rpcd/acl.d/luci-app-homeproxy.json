@@ -3,9 +3,12 @@
 		"description": "Grant access to homeproxy configuration",
 		"read": {
 			"file": {
+				"/bin/mkdir -p /etc/homeproxy/certs/": [ "exec" ],
 				"/etc/homeproxy/scripts/subscribe.lua": [ "exec" ],
+				"/etc/homeproxy/scripts/update_geodata.sh": [ "exec" ],
 				"/usr/bin/which": [ "exec" ],
-				"/bin/mkdir -p /etc/homeproxy/certs/": [ "exec" ]
+				"/var/run/homeproxy/homeproxy.log": [ "read" ],
+				"/var/run/homeproxy/sing-box.log": [ "read" ]
 			},
 			"ubus": {
 				"service": [ "list" ]
