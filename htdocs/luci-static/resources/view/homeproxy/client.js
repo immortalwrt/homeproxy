@@ -171,7 +171,7 @@ return view.extend({
 			return true;
 		}
 
-		o = s.option(form.SectionValue, '_routing_setting', form.NamedSection, 'routing_setting', 'homeproxy', _('Routing settings'));
+		o = s.option(form.SectionValue, '_routing', form.NamedSection, 'routing', 'homeproxy', _('Routing settings'));
 		o.depends('routing_mode', 'custom');
 
 		ss = o.subsection;
@@ -433,7 +433,7 @@ return view.extend({
 		}
 		so.rmempty = false;
 
-		o = s.option(form.SectionValue, '_dns_setting', form.NamedSection, 'dns_setting', 'homeproxy', _('DNS settings'));
+		o = s.option(form.SectionValue, '_dns', form.NamedSection, 'dns', 'homeproxy', _('DNS settings'));
 		o.depends('routing_mode', 'custom');
 
 		ss = o.subsection;

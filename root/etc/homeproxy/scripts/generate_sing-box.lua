@@ -36,11 +36,11 @@ local uci = luci.model.uci.cursor()
 local uciconfig = "homeproxy"
 local ucimain = "config"
 
-local ucidnssetting = "dns_setting"
+local ucidnssetting = "dns"
 local ucidnsserver = "dns_server"
 local ucidnsrule = "dns_rule"
 
-local uciroutingsetting = "routing_setting"
+local uciroutingsetting = "routing"
 local uciroutingnode = "routing_node"
 local uciroutingrule = "routing_rule"
 
