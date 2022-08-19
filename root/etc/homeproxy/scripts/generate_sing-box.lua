@@ -56,10 +56,9 @@ local dns_server = uci:get(uciconfig, ucimain, "dns_server") or "8.8.8.8"
 
 local enable_server = uci:get(uciconfig, uciserver, "enabled") or "0"
 
-local tproxy_enabled, dns_strategy, dns_disable_cache, sniff_override, default_interface
+local dns_strategy, dns_default_server, dns_disable_cache, dns_disable_cache_expire
+local sniff_override, default_outbound, default_interface
 if routing_mode == "custom" then
-	tproxy_enabled = uci:get(uciconfig, ucimain, "enabled") or "0"
-
 	-- DNS settings
 	dns_strategy = uci:get(uciconfig, ucidnssetting, "dns_strategy") or "prefer_ipv4"
 	dns_default_server = uci:get(uciconfig, ucidnssetting, "default_server") or "local-out"
@@ -68,7 +67,7 @@ if routing_mode == "custom" then
 
 	-- Routing settings
 	sniff_override = uci:get(uciconfig, uciroutingsetting, "sniff_override") or "1"
-	default_outbound = uci:get(uciconfig, uciroutingsetting, "default_outbound") or "direct-out"
+	default_outbound = uci:get(uciconfig, uciroutingsetting, "default_outbound") or "nil"
 	default_interface = uci:get(uciconfig, uciroutingsetting, "default_interface")
 end
 
@@ -176,7 +175,7 @@ local config = {}
 config.log = {
 	disabled = false,
 	level = "info",
-	output = "/var/log/homeproxy/sing-box.log",
+	output = "/var/run/homeproxy/sing-box.log",
 	timestamp = true
 }
 
@@ -296,7 +295,7 @@ end
 
 -- Inbound start
 config.inbounds = {}
-if tproxy_enabled == "1" or main_server ~= "nil" then
+if (routing_mode == "custom" and default_outbound ~= "nil") or main_server ~= "nil" then
 	config.inbounds[1] = {
 		type = "tun",
 		tag = "tun-in",

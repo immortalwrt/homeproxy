@@ -99,10 +99,6 @@ return view.extend({
 
 		s = m.section(form.NamedSection, 'config', 'homeproxy');
 
-		o = s.option(form.Flag, 'enabled', _('Enable'));
-		o.depends('routing_mode', 'custom');
-		o.rmempty = false;
-
 		o = s.option(form.ListValue, 'main_server', _('Main server'));
 		o.value('nil', _('Disable'));
 		for (var i in proxy_nodes)
@@ -190,6 +186,7 @@ return view.extend({
 			delete this.vallist;
 
 			var _this = this;
+			_this.value('nil', _('Disable'));
 			_this.value('direct-out', _('Direct'));
 			_this.value('block-out', _('Block'));
 			uci.sections(data[0], 'routing_node', function(res) {
@@ -199,7 +196,7 @@ return view.extend({
 
 			return this.super('load', section_id);
 		}
-		so.default = 'direct-out';
+		so.default = 'nil';
 		so.rmempty = false;
 
 		so = ss.option(widgets.DeviceSelect, 'default_interface', _('Default interface'),
