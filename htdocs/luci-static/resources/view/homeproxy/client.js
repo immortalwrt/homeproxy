@@ -350,6 +350,7 @@ return view.extend({
 		so.value('http', _('HTTP'));
 		so.value('tls', _('TLS'));
 		so.value('quic', _('QUIC'));
+		so.value('stun', _('STUN'));
 
 		so = ss.option(form.DynamicList, 'domain', _('Domain name'),
 			_('Match full domain.'));
@@ -606,6 +607,7 @@ return view.extend({
 		so.value('tls', _('TLS'));
 		so.value('quic', _('QUIC'));
 		so.value('dns', _('DNS'));
+		so.value('stun', _('STUN'));
 
 		so = ss.option(form.DynamicList, 'domain', _('Domain name'),
 			_('Match full domain.'));
