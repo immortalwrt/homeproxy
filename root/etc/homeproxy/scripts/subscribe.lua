@@ -526,7 +526,7 @@ local function main()
 	end
 	uci:commit(uciname)
 
-	local main_server = uci:get(uciname, ucimain, "main_server")
+	local main_server = uci:get(uciname, ucimain, "main_server") or "nil"
 	if main_server ~= "nil" then
 		local need_restart = false
 		local first_server = uci:get_first(uciname, ucinode)
