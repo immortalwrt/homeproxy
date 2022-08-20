@@ -33,6 +33,7 @@ var css = '				\
 .description {				\
 	background-color: #33ccff;	\
 }';
+var spanTemp = '<div style="margin-top:7px;margin-left:3px;">%s</div>';
 
 var hp_dir = '/var/run/homeproxy';
 var hp_geoupdater = '/etc/homeproxy/scripts/update_geodata.sh';
@@ -76,7 +77,6 @@ return view.extend({
 		o = s.option(form.DummyValue, '_service_status', _('Service status'));
 		o.cfgvalue = function() {
 			var _this = this;
-			var spanTemp = '<div style="margin-top:7px;margin-left:3px;">%s</div>';
 			var strongTemp = '<strong style="color:%s">%s: %s</strong>'
 
 			var res = data[0] ? strongTemp.format('green', 'Sing-box', _('RUNNING')) : strongTemp.format('red', 'Sing-box', _('NOT RUNNING'));
@@ -89,20 +89,20 @@ return view.extend({
 		o = s.option(form.DummyValue, '_geodata_version', _('GeoData version'));
 		o.cfgvalue = function() {
 			var _this = this;
-			var spanTemp = '<div style="margin-top:7px;margin-left:3px;">%s</div>';
-
 			return fs.exec(hp_geoupdater, [ 'get_version' ]).then(function(res) {
+				var errSpanTemp = '<div style="margin-top:13px;margin-left:3px;"><strong style="color:red">%s<strong></div>';
+
 				if (res.stdout.trim())
-					_this.default = String.format(spanTemp, res.stdout.trim());
+					_this.default = spanTemp.format(res.stdout.trim());
 				else {
 					ui.addNotification(null, E('p', [ _('Unknown error: %s').format(res) ]));
-					_this.default = String.format(spanTemp, String.format('<strong style="color:red">', _('unknown error')));
+					_this.default = errSpanTemp.format(_('unknown error'));
 				}
 
 				return null;
 			}).catch(function(err) {
 				ui.addNotification(null, E('p', [ _('Unknown error: %s').format(err) ]));
-				_this.default = String.format(spanTemp, 'red', _('unknown error'));
+				_this.default = errSpanTemp.format(_('unknown error'));
 
 				return null;
 			});

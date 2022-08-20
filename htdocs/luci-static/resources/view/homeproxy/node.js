@@ -340,9 +340,6 @@ return view.extend({
 	render: function(data) {
 		var m, s, o;
 
-		var native_protocols = [ 'http', 'hysteria','shadowsocks', 'socks', 'trojan', 'vmess', 'wireguard' ];
-		var v2ray_native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'vless', 'vmess' ];
-
 		var routing_mode = uci.get(data[0], 'config', 'routing_mode');
 
 		m = new form.Map('homeproxy', _('Edit nodes'));
@@ -859,8 +856,8 @@ return view.extend({
 		o.value('tcp', _('TCP'));
 		o.value('ws', _('WebSocket'));
 		o.default = 'tcp';
-		for (i in v2ray_native_protocols)
-			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]});
+		for (i in hp.v2ray_native_protocols)
+			o.depends({'type': 'v2ray', 'v2ray_protocol': hp.v2ray_native_protocols[i]});
 		o.modalonly = true;
 
 		/* gRPC config start */
@@ -1091,16 +1088,16 @@ return view.extend({
 		o.depends('type', 'shadowsocks');
 		o.depends('type', 'trojan');
 		o.depends('type', 'vmess');
-		for (i in v2ray_native_protocols)
-			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]});
+		for (i in hp.v2ray_native_protocols)
+			o.depends({'type': 'v2ray', 'v2ray_protocol': hp.v2ray_native_protocols[i]});
 		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'v2ray_concurrency', _('Concurrency'));
 		o.datatype = 'range(0,1024)';
 		o.default = '1';
-		for (i in v2ray_native_protocols)
-			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i], 'multiplex': '1'});
+		for (i in hp.v2ray_native_protocols)
+			o.depends({'type': 'v2ray', 'v2ray_protocol': hp.v2ray_native_protocols[i], 'multiplex': '1'});
 		o.rmempty = false;
 		o.modalonly = true;
 
@@ -1145,8 +1142,8 @@ return view.extend({
 		o.default = o.disabled;
 		o.depends('type', 'http');
 		o.depends('type', 'trojan');
-		for (i in v2ray_native_protocols)
-			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]});
+		for (i in hp.v2ray_native_protocols)
+			o.depends({'type': 'v2ray', 'v2ray_protocol': hp.v2ray_native_protocols[i]});
 		o.depends('type', 'vmess');
 		o.modalonly = true;
 
@@ -1234,10 +1231,10 @@ return view.extend({
 		/* Extra settings start */
 		o = s.option(form.Flag, 'tcp_fast_open', _('TCP fast open'));
 		o.default = o.disabled;
-		for (var i in native_protocols)
-			o.depends('type', native_protocols[i])
-		for (i in v2ray_native_protocols)
-			o.depends({'type': 'v2ray', 'v2ray_protocol': v2ray_native_protocols[i]});
+		for (var i in hp.native_protocols)
+			o.depends('type', hp.native_protocols[i])
+		for (i in hp.v2ray_native_protocols)
+			o.depends({'type': 'v2ray', 'v2ray_protocol': hp.v2ray_native_protocols[i]});
 		o.rmempty = false;
 		o.modalonly = true;
 

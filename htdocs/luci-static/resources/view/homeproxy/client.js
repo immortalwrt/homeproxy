@@ -124,6 +124,10 @@ return view.extend({
 		o.value('global', _('Global'));
 		o.default = 'bypass_mainland_china';
 		o.rmempty = false;
+		o.onchange = function(ev, section_id, value) {
+			if (value === 'custom')
+				this.map.save(null, true);
+		}
 
 		o = s.option(form.Value, 'routing_port', _('Routing ports'),
 			_('Specify target port(s) that get proxied. Multiple ports must be separated by commas.'));
@@ -225,9 +229,18 @@ return view.extend({
 		so.rmempty = false;
 		so.editable = true;
 
-		so = ss.option(form.ListValue, 'node', _('Node'));
+		so = ss.option(form.ListValue, 'node', _('Node'),
+			_('Outbound node'));
 		for (var i in proxy_nodes)
 			so.value(i + '-out', proxy_nodes[i]);
+		so.onchange = function(ev, section_id, value) {
+			var nodetype = uci.get(data[0], value.replace(/\-out$/, ''), 'type');
+			var desc = this.map.findElement('id', 'cbid.homeproxy.%s.node'.format(section_id)).nextElementSibling;
+			if (!hp.native_protocols.includes(nodetype))
+				desc.innerHTML = _('<strong>The node you selected is not natively supported, the fields below are unavailable.</strong>');
+			else
+				desc.innerHTML = _('Outbound node');
+		}
 		so.validate = function(section_id, value) {
 			if (section_id) {
 				if (value === null || value === '')

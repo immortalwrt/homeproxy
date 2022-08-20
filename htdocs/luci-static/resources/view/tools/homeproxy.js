@@ -10,6 +10,25 @@
 'require ui';
 
 return baseclass.extend({
+	native_protocols: [
+		'http',
+		'hysteria',
+		'shadowsocks',
+		'socks',
+		'trojan',
+		'vmess',
+		'wireguard'
+	],
+
+	v2ray_native_protocols: [
+		'http',
+		'shadowsocks',
+		'socks',
+		'trojan',
+		'vless',
+		'vmess'
+	],
+
 	shadowsocks_encrypt_methods: [
 		/* Stream */
 		'none',
