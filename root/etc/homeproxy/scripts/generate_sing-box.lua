@@ -17,7 +17,7 @@ table.contains = luci.util.contains
 table.dump = luci.util.dumptable
 
 local function isEmpty(res)
-	return res == nil or res == "" or (type(res) == "table" and next(res) == nil)
+	return res == nil or res == "" or res == "nil" or (type(res) == "table" and next(res) == nil)
 end
 
 local function notEmpty(res)
@@ -46,9 +46,6 @@ local uciroutingrule = "routing_rule"
 local ucinode = "node"
 local uciserver = "server"
 
-local main_server = uci:get(uciconfig, ucimain, "main_server") or "nil"
-local main_udp_server = uci:get(uciconfig, ucimain, "main_udp_server") or "nil"
-
 local routing_mode = uci:get(uciconfig, ucimain, "routing_mode") or "bypass_mainland_china"
 local routing_port = uci:get(uciconfig, ucimain, "routing_port") or "nil"
 
@@ -56,9 +53,13 @@ local dns_server = uci:get(uciconfig, ucimain, "dns_server") or "8.8.8.8"
 
 local enable_server = uci:get(uciconfig, uciserver, "enabled") or "0"
 
+local main_server, main_udp_server, default_outbound
 local dns_strategy, dns_default_server, dns_disable_cache, dns_disable_cache_expire
-local sniff_override, default_outbound, default_interface
-if routing_mode == "custom" then
+local sniff_override, default_interface
+if routing_mode ~= "custom" then
+	main_server = uci:get(uciconfig, ucimain, "main_server") or "nil"
+	main_udp_server = uci:get(uciconfig, ucimain, "main_udp_server") or "nil"
+else
 	-- DNS settings
 	dns_strategy = uci:get(uciconfig, ucidnssetting, "dns_strategy") or "prefer_ipv4"
 	dns_default_server = uci:get(uciconfig, ucidnssetting, "default_server") or "local-out"
@@ -208,7 +209,7 @@ config.dns = {
 	disable_expire = (dns_disable_cache_expire == "1")
 }
 
-if routing_mode ~= "custom" and main_server ~= "nil" then
+if notEmpty(main_server) then
 	-- Main DNS
 	config.dns.servers[3] = {
 		tag = "main-dns",
@@ -232,7 +233,7 @@ if routing_mode ~= "custom" and main_server ~= "nil" then
 			server = "main-dns"
 		}
 	}
-elseif routing_mode == "custom" and default_outbound ~= "nil" then
+elseif notEmpty(default_outbound) then
 	-- DNS servers
 	uci:foreach(uciconfig, ucidnsserver, function(cfg)
 		if cfg.enabled == "1" then
@@ -300,7 +301,7 @@ end
 
 -- Inbound start
 config.inbounds = {}
-if (routing_mode == "custom" and default_outbound ~= "nil") or main_server ~= "nil" then
+if notEmpty(main_server) or notEmpty(default_outbound) then
 	config.inbounds[1] = {
 		type = "tun",
 		tag = "tun-in",
@@ -392,7 +393,7 @@ config.outbounds = {
 }
 
 -- Main outbounds
-if routing_mode ~= "custom" and main_server ~= "nil" then
+if notEmpty(main_server) then
 	local main_server_cfg = uci:get_all(uciconfig, main_server) or {}
 	if table.contains(native_protocols, main_server_cfg.type) then
 		config.outbounds[4] = generate_outbound(main_server_cfg)
@@ -401,7 +402,7 @@ if routing_mode ~= "custom" and main_server ~= "nil" then
 	end
 	config.outbounds[4] = "main-out"
 
-	if main_udp_server ~= "nil" and main_udp_server ~= "same" and main_udp_server ~= main_server then
+	if notEmpty(main_udp_server) and main_udp_server ~= "same" and main_udp_server ~= main_server then
 		local main_udp_server_cfg = uci:get_all(uciconfig, main_udp_server) or {}
 		if table.contains(native_protocols, main_udp_server_cfg.type) then
 			config.outbounds[5] = generate_outbound(main_udp_server_cfg)
@@ -412,7 +413,7 @@ if routing_mode ~= "custom" and main_server ~= "nil" then
 	end
 end
 
-if routing_mode == "custom" and default_outbound ~= "nil" then
+if notEmpty(default_outbound) then
 	uci:foreach(uciconfig, uciroutingnode, function(cfg)
 		if cfg.enabled == "1" then
 			local outbound = uci:get_all(uciconfig, cfg.node:gsub("-out$", "")) or {}
@@ -434,16 +435,16 @@ end
 -- Routing rules start
 -- Default settings
 config.route = {
-	geoip = {
+	geoip = (notEmpty(main_server) or notEmpty(default_outbound)) and {
 		path = "/etc/homeproxy/resources/geoip.db",
 		download_url = "https://github.com/1715173329/sing-geoip/releases/latest/download/geoip.db",
-		download_detour = (routing_mode == "custom" and default_outbound ~= "nil") and default_outbound or (routing_mode ~= "proxy_mainland_china" and main_server ~= "nil") and "main-out" or "direct-out"
-	},
-	geosite = {
+		download_detour = notEmpty(default_outbound) and default_outbound or (routing_mode ~= "proxy_mainland_china" and notEmpty(main_server)) and "main-out" or "direct-out"
+	} or nil,
+	geosite = (notEmpty(main_server) or notEmpty(default_outbound)) and {
 		path = "/etc/homeproxy/resources/geosite.db",
 		download_url = "https://github.com/1715173329/sing-geosite/releases/latest/download/geosite.db",
-		download_detour = (routing_mode == "custom" and default_outbound ~= "nil") and default_outbound or (routing_mode ~= "proxy_mainland_china" and main_server ~= "nil") and "main-out" or "direct-out"
-	},
+		download_detour = notEmpty(default_outbound) and default_outbound or (routing_mode ~= "proxy_mainland_china" and notEmpty(main_server)) and "main-out" or "direct-out"
+	} or nil,
 	rules = {
 		{
 			protocol = "dns",
@@ -455,7 +456,7 @@ config.route = {
 	default_interface = default_interface
 }
 
-if routing_mode ~= "custom" and main_server ~= "nil" then
+if notEmpty(main_server) then
 	-- Routing ports
 	if parse_port(routing_port) then
 		config.route.rules[2] = {
@@ -488,7 +489,7 @@ if routing_mode ~= "custom" and main_server ~= "nil" then
 	}
 
 	-- Main UDP out
-	if main_udp_server == "nil" then
+	if notEmpty(main_udp_server) then
 		config.route.rules[#config.route.rules].network = "tcp"
 	elseif main_udp_server ~= "same" and main_udp_server ~= main_server then
 		config.route.rules[#config.route.rules].network = "tcp"
@@ -500,7 +501,7 @@ if routing_mode ~= "custom" and main_server ~= "nil" then
 			invert = routing_invert
 		}
 	end
-elseif routing_mode == "custom" and default_outbound ~= "nil" then
+elseif notEmpty(default_outbound) then
 	uci:foreach(uciconfig, uciroutingrule, function(cfg)
 		if cfg.enabled == "1" then
 			local routing_rule

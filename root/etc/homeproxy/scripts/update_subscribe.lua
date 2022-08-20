@@ -34,7 +34,7 @@ end
 local validation = require "luci.cbi.datatypes"
 
 local function isEmpty(res)
-	return res == nil or res == "" or (type(res) == "table" and next(res) == nil)
+	return res == nil or res == "" or res == "nil" or (type(res) == "table" and next(res) == nil)
 end
 
 local function notEmpty(res)
@@ -118,15 +118,18 @@ local packet_encoding = uci:get(uciname, ucisubscription, "default_packet_encodi
 local subscription_urls = uci:get(uciname, ucisubscription, "subscription_url") or {}
 local via_proxy = uci:get(uciname, ucisubscription, "update_via_proxy") or "0"
 
-local main_server = uci:get(uciname, ucimain, "main_server") or "nil"
-local main_udp_server = uci:get(uciname, ucimain, "main_udp_server") or "nil"
+local routing_mode = uci:get(uciconfig, ucimain, "routing_mode") or "bypass_mainland_china"
+local main_server, main_udp_server
+if routing_mode ~= "custom" then
+	main_server = uci:get(uciconfig, ucimain, "main_server") or "nil"
+	main_udp_server = uci:get(uciconfig, ucimain, "main_udp_server") or "nil"
+end
 -- UCI config end
 
 -- Log start
 luci.sys.call("mkdir -p /var/run/homeproxy/")
 
 local logfile = io.open("/var/run/homeproxy/homeproxy.log", "a")
-
 local function log(...)
 	logfile:write(os.date("%Y-%m-%d %H:%M:%S [SUBSCRIBE] ") .. table.concat({...}, " ") .. "\n")
 end
@@ -446,8 +449,8 @@ local function main()
 			if JSON.parse(res) then
 				nodes = JSON.parse(res).servers or JSON.parse(res)
 				if nodes[1].server and nodes[1].method then
-					for index, node in ipairs(nodes) do
-						nodes[index].nodetype = "sip008"
+					for i, _ in ipairs(nodes) do
+						nodes[i].nodetype = "sip008"
 					end
 				end
 			else
@@ -501,6 +504,7 @@ local function main()
 		logfile:close()
 
 		if via_proxy ~= "1" then
+			log("Starting service...")
 			sysinit.start(uciname)
 		end
 
@@ -515,7 +519,7 @@ local function main()
 				removed = removed + 1
 			else
 				uci:tset(uciname, cfg[".name"], node_result[cfg.grouphash][cfg.nameHash])
-				setmetatable(node_result[cfg.grouphash][cfg.nameHash], {__index = {isExisting = true}})
+				setmetatable(node_result[cfg.grouphash][cfg.nameHash], { __index = {isExisting = true} })
 			end
 		end
 	end)
@@ -531,7 +535,7 @@ local function main()
 	uci:commit(uciname)
 
 	local need_restart = (via_proxy ~= "1")
-	if main_server ~= "nil" then
+	if notEmpty(main_server) then
 		local first_server = uci:get_first(uciname, ucinode)
 		if first_server then
 			if not uci:get(uciname, main_server) then
@@ -541,18 +545,20 @@ local function main()
 				log("Main node is gone, switching to first node.")
 			end
 
-			if main_udp_server ~= "nil" and main_udp_server ~= "same" then
+			if notEmpty(main_udp_server) and main_udp_server ~= "same" then
 				if not uci:get(uciname, main_udp_server) then
 					uci:set(uciname, ucimain, "main_udp_server", first_server)
 					uci:commit(uciname)
 					need_restart = true
-					log("UDP node is gone, switching to main node.")
+					log("UDP node is gone, switching to first node.")
 				end
 			end
 		else
-			need_restart = false
-			log("No node available, stopping service...")
-			sysinit.stop(uciname)
+			uci:set(uciname, ucimain, "main_server", "nil")
+			uci:set(uciname, ucimain, "main_udp_server", "nil")
+			uci:commit(uciname)
+			need_restart = true
+			log("No node available, disable tproxy.")
 		end
 	end
 
@@ -573,15 +579,10 @@ if notEmpty(subscription_urls) then
 		log(e)
 		log(debug.traceback())
 
+		log("Reloading service...")
 		sysinit.stop(uciname)
-		if main_server ~= "nil" then
-			if notEmpty(uci:get(uciname, main_server)) then
-				log("Reloading service...")
-				sysinit.start(uciname)
-			else
-				log("No node available. Stopping...")
-			end
-		end
+		sysinit.start(uciname)
+
 		logfile:close()
 	end)
 end
