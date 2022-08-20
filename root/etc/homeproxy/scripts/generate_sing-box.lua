@@ -434,27 +434,28 @@ end
 
 -- Routing rules start
 -- Default settings
-config.route = {
-	geoip = (notEmpty(main_server) or notEmpty(default_outbound)) and {
-		path = "/etc/homeproxy/resources/geoip.db",
-		download_url = "https://github.com/1715173329/sing-geoip/releases/latest/download/geoip.db",
-		download_detour = notEmpty(default_outbound) and default_outbound or (routing_mode ~= "proxy_mainland_china" and notEmpty(main_server)) and "main-out" or "direct-out"
-	} or nil,
-	geosite = (notEmpty(main_server) or notEmpty(default_outbound)) and {
-		path = "/etc/homeproxy/resources/geosite.db",
-		download_url = "https://github.com/1715173329/sing-geosite/releases/latest/download/geosite.db",
-		download_detour = notEmpty(default_outbound) and default_outbound or (routing_mode ~= "proxy_mainland_china" and notEmpty(main_server)) and "main-out" or "direct-out"
-	} or nil,
-	rules = {
-		{
-			protocol = "dns",
-			outbound = "dns-out"
-		}
-	},
-	final = "direct-out",
-	auto_detect_interface = isEmpty(default_interface) and true or false,
-	default_interface = default_interface
-}
+if notEmpty(main_server) or notEmpty(default_outbound) then
+	config.route = {
+		geoip = {
+			path = "/etc/homeproxy/resources/geoip.db",
+			download_url = "https://github.com/1715173329/sing-geoip/releases/latest/download/geoip.db",
+			download_detour = notEmpty(default_outbound) and default_outbound or (routing_mode ~= "proxy_mainland_china" and notEmpty(main_server)) and "main-out" or "direct-out"
+		},
+		geosite = {
+			path = "/etc/homeproxy/resources/geosite.db",
+			download_url = "https://github.com/1715173329/sing-geosite/releases/latest/download/geosite.db",
+			download_detour = notEmpty(default_outbound) and default_outbound or (routing_mode ~= "proxy_mainland_china" and notEmpty(main_server)) and "main-out" or "direct-out"
+		},
+		rules = {
+			{
+				protocol = "dns",
+				outbound = "dns-out"
+			}
+		},
+		auto_detect_interface = isEmpty(default_interface) and true or nil,
+		default_interface = default_interface
+	}
+end
 
 if notEmpty(main_server) then
 	-- Routing ports
@@ -501,6 +502,8 @@ if notEmpty(main_server) then
 			invert = routing_invert
 		}
 	end
+
+	config.route.final = "direct-out"
 elseif notEmpty(default_outbound) then
 	uci:foreach(uciconfig, uciroutingrule, function(cfg)
 		if cfg.enabled == "1" then
@@ -552,5 +555,5 @@ end
 
 luci.sys.call("mkdir -p /var/run/homeproxy/")
 local conffile = io.open("/var/run/homeproxy/sing-box.json", "w")
-conffile.write(JSON.dump(config, 1))
+conffile:write(JSON.dump(config, 1))
 conffile:close()

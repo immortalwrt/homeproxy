@@ -17,23 +17,50 @@ RUN_DIR="/var/run/homeproxy"
 LOG_PATH="$RUN_DIR/homeproxy.log"
 
 FW4="$(command -v fw4)"
+IPT_RULE_NAME="homeproxy_inbound_rule"
 
 log() {
 	echo -e "$(date "+%Y-%m-%d %H:%M:%S") [DAEMON] $*" >> "$LOG_PATH"
 }
 
+setup_server_firewall() {
+	local cfg="$1"
+
+	local enabled
+	config_get_bool enabled "$cfg" "enabled"
+	[ "$enabled" = "1" ] || return 1
+
+	local port
+	config_get port "$cfg" "port"
+
+	if [ -z "$FW4" ]; then
+		for i in "iptables" "ip6tables"; do
+			[ -n "$(command -v "$i")" ] || continue
+			for v in "tcp" "udp"; do
+				echo -e "$i -t filter -A $IPT_RULE_NAME -p $v --dport $port -j ACCEPT" >> "/var/etc/$CONF.include"
+			done
+		done
+	fi
+}
+
 start_service() {
 	config_load "$CONF"
 
-	local main_server enabled_server
-	config_get main_server "config" "main_server" "nil"
-	config_get_bool enabled_server "server" "enabled" "0"
+	local routing_mode
+	config_get routing_mode "config" "routing_mode" "bypass_mainland_china"
 
-	local routing_mode default_outbound
-	config_get routing_mode "config" "routing_mode"
-	config_get default_outbound "routing" "default_outbound" "nil"
+	local main_server="nil"
+	local default_outbound="nil"
+	if [ "$routing_mode" != "custom" ]; then
+		config_get default_outbound "routing" "default_outbound" "nil"
+	else
+		config_get main_server "config" "main_server" "nil"
+	fi
 
-	if [ "$main_server" = "nil" ] && [ "$routing_mode" = "custom" -a "$default_outbound" = "nil" ] && [ "$enabled_server" = "0" ]; then
+	local server_enabled
+	config_get_bool server_enabled "server" "enabled" "0"
+
+	if [ "$main_server" = "nil" ] && [ "$default_outbound" = "nil" ] && [ "$server_enabled" = "0" ]; then
 		exit 1
 	fi
 
@@ -65,6 +92,7 @@ start_service() {
 
 	# Hijack DNS
 	uci rename "dhcp.@dnsmasq[0].nonwildcard"="_orig_nonwildcard" 2>"/dev/null"
+	uci rename "dhcp.@dnsmasq[0].dns_redirect"="_orig_dns_redirect" 2>"/dev/null"
 	uci set "dhcp.@dnsmasq[0].nonwildcard"=1
 	uci commit "dhcp"
 
@@ -73,8 +101,21 @@ start_service() {
 		mkdir -p "/var/etc/"
 
 		# Allow FORWARD
-		echo "iptables -I FORWARD -o $TUNNAME -j ACCEPT" > "/var/etc/$CONF.include"
-		[ -z "$(command -v ip6tables)" ] || echo "ip6tables -I FORWARD -o $TUNNAME -j ACCEPT" >> "/var/etc/$CONF.include"
+		for i in "iptables" "ip6tables"; do
+			[ -n "$(command -v "$i")" ] || continue
+			echo -e "$i -I FORWARD -m comment --comment \"Forward HomeProxy TUN\" -o $TUNNAME -j ACCEPT" >> "/var/etc/$CONF.include"
+		done
+
+		local server_auto_firewall
+		config_get_bool server_auto_firewall "server" "auto_firewall" "0"
+		if [ "$server_auto_firewall" = "1" ]; then
+			for i in "iptables" "ip6tables"; do
+				[ -n "$(command -v $i)" ] || continue
+				echo -e "$i -N $IPT_RULE_NAME" >> "/var/etc/$CONF.include"
+				echo -e "$i -t filter -I INPUT -j $IPT_RULE_NAME" >> "/var/etc/$CONF.include"
+			done
+			config_foreach setup_server_firewall "server"
+		fi
 
 		sh "/var/etc/$CONF.include"
 	fi
@@ -86,6 +127,7 @@ start_service() {
 	procd_set_param respawn
 	procd_close_instance
 
+	echo > "$RUN_DIR/sing-box.log"
 	log "$(sing-box version | awk '{print $1,$2}') started."
 }
 
@@ -95,11 +137,18 @@ stop_service() {
 
 	uci del "dhcp.@dnsmasq[0].nonwildcard" 2>"/dev/null"
 	uci rename "dhcp.@dnsmasq[0]._orig_nonwildcard"="nonwildcard" 2>"/dev/null"
+	uci rename "dhcp.@dnsmasq[0]._orig_dns_redirect"="dns_redirect" 2>"/dev/null"
 	uci commit "dhcp"
 
 	if [ -z "$FW4" ]; then
-		iptables -D FORWARD -o "$TUNNAME" -j ACCEPT 2>"/dev/null"
-		[ -z "$(command -v ip6tables)" ] || ip6tables -D FORWARD -o "$TUNNAME" -j ACCEPT 2>"/dev/null"
+		for i in "iptables" "ip6tables"; do
+			[ -n "$(command -v $i)" ] || continue
+			"$i" -D FORWARD -m comment --comment "Forward HomeProxy TUN" -o "$TUNNAME" -j ACCEPT
+			"$i" -F "$IPT_RULE_NAME"
+			"$i" -t filter -D INPUT -j "$IPT_RULE_NAME"
+			"$i" -X "$IPT_RULE_NAME"
+		done 2>"/dev/null"
+
 		rm -f "/var/etc/$CONF.include"
 	fi
 
