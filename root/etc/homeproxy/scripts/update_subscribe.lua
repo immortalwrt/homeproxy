@@ -400,10 +400,6 @@ local function parse_uri(uri)
 					config["tcp_header"] = uri.type
 					config["tcp_host"] = notEmpty(uri.host) and uri.host:split(",") or nil
 					config["tcp_path"] = notEmpty(uri.path) and uri.path:split(",") or nil
-				else
-					config["type"] = "vmess"
-					config["v2ray_protocol"] = nil
-					config["v2ray_transport"] = nil
 				end
 			elseif config.v2ray_transport == "ws" then
 				config["ws_host"] = (config.tls ~= "1") and uri.host or nil

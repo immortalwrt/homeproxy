@@ -301,10 +301,6 @@ function parse_share_link(uri) {
 				if (config.tcp_header === 'http') {
 					config['tcp_host'] = uri.host ? uri.host.split(',') : null;
 					config['tcp_path'] = uri.path ? uri.path.split(',') : null;
-				} else {
-					conifg['type'] = 'vmess';
-					config['v2ray_protocol'] = null;
-					config['v2ray_transport'] = null;
 				}
 
 				break;
