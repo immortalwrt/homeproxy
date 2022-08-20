@@ -63,14 +63,14 @@ return view.extend({
 				if (res.stdout.trim())
 					_this.default = String.format(spanTemp, res.stdout.trim());
 				else {
-					ui.addNotification(null, E('p', [ _('%s。').format(res) ]));
+					ui.addNotification(null, E('p', [ _('Unknown error: %s').format(res) ]));
 					_this.default = String.format(spanTemp, String.format('<strong style="color:red">', _('unknown error')));
 				}
 
 				return null;
 			}).catch(function(err) {
-				ui.addNotification(null, E('p', [ _('未知错误：%s。').format(err) ]));
-				_this.default = String.format(spanTemp, 'red', _('未知错误'));
+				ui.addNotification(null, E('p', [ _('Unknown error: %s').format(err) ]));
+				_this.default = String.format(spanTemp, 'red', _('unknown error'));
 
 				return null;
 			});
