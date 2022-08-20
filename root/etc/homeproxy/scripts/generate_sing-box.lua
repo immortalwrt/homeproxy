@@ -12,6 +12,10 @@ require "luci.util"
 string.split = luci.util.split
 string.trim = luci.util.trim
 
+function string:startswith(str)
+	return self:sub(1, #str) == str
+end
+
 table.clone = luci.util.clone
 table.contains = luci.util.contains
 table.dump = luci.util.dumptable
@@ -153,6 +157,24 @@ local function generate_external_outbound(server)
 	-- todo
 end
 
+local function get_outbound(cfg)
+	if isEmpty(cfg) then
+		return nil
+	end
+
+	if cfg:startswith("cfg") then
+		local node
+		node = uci:get(uciconfig, cfg, "node")
+		if isEmpty(node) then
+			error(cfg  .. "'s node is missing, please check your configuration.")
+		else
+			return node
+		end
+	else
+		return cfg
+	end
+end
+
 local function parse_port(strport)
 	if type(strport) ~= "table" or isEmpty(strport) then
 		return nil
@@ -243,7 +265,7 @@ elseif notEmpty(default_outbound) then
 				address = cfg.address,
 				address_resolver = cfg.address_resolver or nil,
 				address_strategy = cfg.address_strategy or nil,
-				detour = cfg.outbound
+				detour = get_outbound(cfg.outbound)
 			}
 		end
 	end)
@@ -270,7 +292,7 @@ elseif notEmpty(default_outbound) then
 				process_name = cfg.process_name,
 				user = cfg.user,
 				invert = (cfg.invert == "1"),
-				outbound = cfg.outbound,
+				outbound = get_outbound(cfg.outbound),
 				server = cfg.server,
 				disable_cache = (cfg.disable_cache == "1")
 			}
@@ -422,7 +444,7 @@ if notEmpty(default_outbound) then
 				config.outbounds[index] = generate_outbound(outbound)
 				config.outbounds[index].domain_strategy = cfg.domain_strategy
 				config.outbounds[index].bind_interface = cfg.bind_interface
-				config.outbounds[index].detour = cfg.outbound
+				config.outbounds[index].detour = get_outbound(cfg.outbound)
 			else
 				config.outbounds[index] = generate_external_outbound(outbound)
 			end
@@ -439,12 +461,12 @@ if notEmpty(main_server) or notEmpty(default_outbound) then
 		geoip = {
 			path = "/etc/homeproxy/resources/geoip.db",
 			download_url = "https://github.com/1715173329/sing-geoip/releases/latest/download/geoip.db",
-			download_detour = notEmpty(default_outbound) and default_outbound or (routing_mode ~= "proxy_mainland_china" and notEmpty(main_server)) and "main-out" or "direct-out"
+			download_detour = get_outbound(default_outbound) or (routing_mode ~= "proxy_mainland_china" and notEmpty(main_server)) and "main-out" or "direct-out"
 		},
 		geosite = {
 			path = "/etc/homeproxy/resources/geosite.db",
 			download_url = "https://github.com/1715173329/sing-geosite/releases/latest/download/geosite.db",
-			download_detour = notEmpty(default_outbound) and default_outbound or (routing_mode ~= "proxy_mainland_china" and notEmpty(main_server)) and "main-out" or "direct-out"
+			download_detour = get_outbound(default_outbound) or (routing_mode ~= "proxy_mainland_china" and notEmpty(main_server)) and "main-out" or "direct-out"
 		},
 		rules = {
 			{
@@ -528,7 +550,7 @@ elseif notEmpty(default_outbound) then
 				process_name = cfg.process_name,
 				user = cfg.user,
 				invert = (cfg.invert == "1"),
-				outbound = cfg.outbound
+				outbound = get_outbound(cfg.outbound)
 			}
 
 			local index = #config.route.rules + 1
@@ -543,13 +565,13 @@ elseif notEmpty(default_outbound) then
 					mode = cfg.mode,
 					rules = split_routing_rules(routing_rule),
 					invert = (cfg.invert == "1"),
-					outbound = cfg.outbound
+					outbound = get_outbound(cfg.outbound)
 				}
 			end
 		end
 	end)
 
-	config.route.final = default_outbound
+	config.route.final = get_outbound(default_outbound)
 end
 -- Routing rules end
 

@@ -191,7 +191,7 @@ return view.extend({
 			_this.value('block-out', _('Block'));
 			uci.sections(data[0], 'routing_node', function(res) {
 				if (res.enabled === '1')
-					_this.value(res.node, res.label);
+					_this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);
@@ -274,7 +274,7 @@ return view.extend({
 			_this.value('direct-out', _('Direct'))
 			uci.sections(data[0], 'routing_node', function(res) {
 				if (res['.name'] !== section_id && res.enabled === '1')
-					_this.value(res.node, res.label);
+					_this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);
@@ -286,7 +286,7 @@ return view.extend({
 				var conflict = false;
 				uci.sections(data[0], 'routing_node', function(res) {
 					if (res['.name'] !== section_id)
-						if (res.outbound === node && res.node == value)
+						if (res.outbound === section_id && res['.name'] == value)
 							conflict = true;
 				});
 				if (conflict)
@@ -429,7 +429,7 @@ return view.extend({
 			_this.value('block-out', _('Block'));
 			uci.sections(data[0], 'routing_node', function(res) {
 				if (res.enabled === '1')
-					_this.value(res.node, res.label);
+					_this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);
@@ -551,7 +551,7 @@ return view.extend({
 			_this.value('direct-out', _('Direct'));
 			uci.sections(data[0], 'routing_node', function(res) {
 				if (res.enabled === '1')
-					_this.value(res.node, res.label);
+					_this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);
@@ -682,7 +682,7 @@ return view.extend({
 			_this.value('block-out', _('Block'));
 			uci.sections(data[0], 'routing_node', function(res) {
 				if (res.enabled === '1')
-					_this.value(res.node, res.label);
+					_this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);
