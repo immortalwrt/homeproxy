@@ -337,17 +337,14 @@ function parse_share_link(uri) {
 return view.extend({
 	load: function() {
 		return Promise.all([
-			uci.load('homeproxy'),
-			hp.findBinary('naive')
+			uci.load('homeproxy')
 		]);
 	},
 
 	render: function(data) {
 		var m, s, o;
 
-		var have_naiveproxy = data[1];
-
-		var native_protocols = [ 'http', 'hysteria','shadowsocks', 'socks', 'trojan', 'wireguard', 'vmess' ];
+		var native_protocols = [ 'http', 'hysteria','shadowsocks', 'socks', 'trojan', 'vmess', 'wireguard' ];
 		var v2ray_native_protocols = [ 'http', 'shadowsocks', 'socks', 'trojan', 'vless', 'vmess' ];
 
 		var routing_mode = uci.get(data[0], 'config', 'routing_mode');
@@ -594,8 +591,6 @@ return view.extend({
 		o = s.option(form.ListValue, 'type', _('Type'));
 		o.value('http', _('HTTP'));
 		o.value('hysteria', _('Hysteria'));
-		if (have_naiveproxy)
-			o.value('naiveproxy', _('NaïveProxy'));
 		o.value('shadowsocks', _('Shadowsocks'));
 		o.value('socks', _('Socks'));
 		o.value('trojan', _('Trojan'));
@@ -626,7 +621,6 @@ return view.extend({
 
 		o = s.option(form.Value, 'username', _('Username'));
 		o.depends('type', 'http');
-		o.depends('type', 'naiveproxy');
 		o.depends('type', 'socks');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'http'});
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'socks'});
@@ -635,7 +629,6 @@ return view.extend({
 		o = s.option(form.Value, 'password', _('Password'));
 		o.password = true;
 		o.depends('type', 'http');
-		o.depends('type', 'naiveproxy');
 		o.depends('type', 'shadowsocks');
 		o.depends('type', 'trojan');
 		o.depends({'type': 'socks', 'socks_version': '5'});
@@ -646,7 +639,7 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'trojan'});
 		o.validate = function(section_id, value) {
 			if (section_id && (value === null || value === '')) {
-				var required_type = ['naiveproxy', 'shadowsocks', 'shadowsocksr', 'trojan'];
+				var required_type = ['shadowsocks', 'shadowsocksr', 'trojan'];
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
 				var v2ray_protocol = this.map.lookupOption('v2ray_protocol', section_id)[0].formvalue(section_id) || '';
 				if (required_type.includes(type) || required_type.includes(v2ray_protocol))
@@ -656,23 +649,6 @@ return view.extend({
 			return true;
 		}
 		o.modalonly = true;
-
-		/* NaïveProxy config start */
-		o = s.option(form.ListValue, 'naiveproxy_network'), _('Network mode');
-		o.value('h2', _('HTTP/2'));
-		o.value('quic', _('QUIC'));
-		o.default = 'h2';
-		o.depends('type', 'naiveproxy');
-		o.rmempty = false;
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'naiveproxy_concurrency', _('Concurrency'));
-		o.datatype = 'uinteger';
-		o.default = '1';
-		o.depends('type', 'naiveproxy');
-		o.rmempty = false;
-		o.modalonly = true;
-		/* NaïveProxy config end */
 
 		/* Hysteria config start */
 		o = s.option(form.ListValue, 'hysteria_protocol', _('Protocol'));
