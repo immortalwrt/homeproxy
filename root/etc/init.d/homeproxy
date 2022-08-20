@@ -17,7 +17,7 @@ RUN_DIR="/var/run/homeproxy"
 LOG_PATH="$RUN_DIR/homeproxy.log"
 
 FW4="$(command -v fw4)"
-IPT_RULE_NAME="homeproxy_inbound_rule"
+IPT_RULE_NAME="homeproxy_input_rule"
 
 log() {
 	echo -e "$(date "+%Y-%m-%d %H:%M:%S") [DAEMON] $*" >> "$LOG_PATH"
@@ -65,7 +65,7 @@ start_service() {
 	fi
 
 	mkdir -p "$RUN_DIR"
-	"$HP_DIR"/scripts/generate_sing-box.lua
+	"$HP_DIR"/scripts/generate_sing-box.lua 2>>"$LOG_PATH"
 
 	local inbounds="$(jsonfilter -i "$RUN_DIR/sing-box.json" -e "@.inbounds")"
 	if [ ! -e "$RUN_DIR/sing-box.json" ]; then

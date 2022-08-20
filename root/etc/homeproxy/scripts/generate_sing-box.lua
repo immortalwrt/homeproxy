@@ -79,7 +79,7 @@ elseif table.contains({"all", "nil"}, routing_port) then
 else
 	routing_port = routing_port:split(",")
 end
-local native_protocols = { "http", "hysteria","shadowsocks", "socks", "trojan", "wireguard", "vmess" }
+local native_protocols = { "http", "hysteria","shadowsocks", "socks", "trojan", "vmess", "wireguard" }
 -- UCI config end
 
 -- Config helper start
@@ -133,7 +133,7 @@ local function generate_outbound(server)
 		tls = (server.tls == "1") and {
 			enabled = true,
 			server_name = server.tls_sni,
-			insecure = server.tls_insecure,
+			insecure = (server.tls_insecure == "1"),
 			alpn = server.tls_alpn,
 			min_version = server.tls_min_version,
 			max_version = server.tls_max_version,
@@ -418,7 +418,7 @@ if notEmpty(default_outbound) then
 		if cfg.enabled == "1" then
 			local outbound = uci:get_all(uciconfig, cfg.node:gsub("-out$", "")) or {}
 			local index = #config.outbounds + 1
-			if table.contains(native_protocols, main_server_cfg.type) then
+			if table.contains(native_protocols, outbound.type) then
 				config.outbounds[index] = generate_outbound(outbound)
 				config.outbounds[index].domain_strategy = cfg.domain_strategy
 				config.outbounds[index].bind_interface = cfg.bind_interface
@@ -490,7 +490,7 @@ if notEmpty(main_server) then
 	}
 
 	-- Main UDP out
-	if notEmpty(main_udp_server) then
+	if isEmpty(main_udp_server) then
 		config.route.rules[#config.route.rules].network = "tcp"
 	elseif main_udp_server ~= "same" and main_udp_server ~= main_server then
 		config.route.rules[#config.route.rules].network = "tcp"
