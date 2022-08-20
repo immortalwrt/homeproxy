@@ -79,32 +79,37 @@ start_service() {
 		exit 1
 	fi
 
-	# Auto update
-	local auto_update auto_update_time
-	config_get_bool auto_update "subscription" "auto_update" "0"
-	if [ "auto_update" = "1" ]; then
-		config_get auto_update_time "subscription" "auto_update_time" "2"
-		echo "0 ${auto_update_time} * * * $HP_DIR/scripts/update_geodata.sh update_version update_subscription" >> "/etc/crontabs/root"
-	fi
-	# Clean log
-	echo -e "*/10 * * * * $HP_DIR/scripts/clean_log.sh" >> "/etc/crontabs/root"
-	/etc/init.d/cron restart
+	if [ "$main_server" != "nil" ] || [ "$default_outbound" != "nil" ]; then
+		# Auto update
+		local auto_update auto_update_time
+		config_get_bool auto_update "subscription" "auto_update" "0"
+		if [ "auto_update" = "1" ]; then
+			config_get auto_update_time "subscription" "auto_update_time" "2"
+			echo "0 ${auto_update_time} * * * $HP_DIR/scripts/update_geodata.sh update_version update_subscription" >> "/etc/crontabs/root"
+		fi
+		# Clean log
+		echo -e "*/10 * * * * $HP_DIR/scripts/clean_log.sh" >> "/etc/crontabs/root"
+		/etc/init.d/cron restart
 
-	# Hijack DNS
-	uci rename "dhcp.@dnsmasq[0].nonwildcard"="_orig_nonwildcard" 2>"/dev/null"
-	uci rename "dhcp.@dnsmasq[0].dns_redirect"="_orig_dns_redirect" 2>"/dev/null"
-	uci set "dhcp.@dnsmasq[0].nonwildcard"=1
-	uci commit "dhcp"
+		# Hijack DNS
+		uci rename "dhcp.@dnsmasq[0].nonwildcard"="_orig_nonwildcard" 2>"/dev/null"
+		uci rename "dhcp.@dnsmasq[0].dns_redirect"="_orig_dns_redirect" 2>"/dev/null"
+		uci set "dhcp.@dnsmasq[0].nonwildcard"=1
+		uci commit "dhcp"
+		touch "$RUN_DIR/.dns_hijacked"
+	fi
 
 	# Set firewall
 	if [ -z "$FW4" ]; then
 		mkdir -p "/var/etc/"
 
-		# Allow FORWARD
-		for i in "iptables" "ip6tables"; do
-			[ -n "$(command -v "$i")" ] || continue
-			echo -e "$i -I FORWARD -m comment --comment \"Forward HomeProxy TUN\" -o $TUNNAME -j ACCEPT" >> "/var/etc/$CONF.include"
-		done
+		if [ "$main_server" != "nil" ] || [ "$default_outbound" != "nil" ]; then
+			# Allow FORWARD
+			for i in "iptables" "ip6tables"; do
+				[ -n "$(command -v "$i")" ] || continue
+				echo -e "$i -I FORWARD -m comment --comment \"Forward HomeProxy TUN\" -o $TUNNAME -j ACCEPT" >> "/var/etc/$CONF.include"
+			done
+		fi
 
 		local server_auto_firewall
 		config_get_bool server_auto_firewall "server" "auto_firewall" "0"
@@ -135,12 +140,14 @@ stop_service() {
 	sed -i "/$CONF/d" "/etc/crontabs/root"
 	/etc/init.d/cron restart
 
-	uci del "dhcp.@dnsmasq[0].nonwildcard" 2>"/dev/null"
-	uci rename "dhcp.@dnsmasq[0]._orig_nonwildcard"="nonwildcard" 2>"/dev/null"
-	uci rename "dhcp.@dnsmasq[0]._orig_dns_redirect"="dns_redirect" 2>"/dev/null"
-	uci commit "dhcp"
+	[ ! -e "$RUN_DIR/.dns_hijacked" ] || {
+		uci del "dhcp.@dnsmasq[0].nonwildcard" 2>"/dev/null"
+		uci rename "dhcp.@dnsmasq[0]._orig_nonwildcard"="nonwildcard" 2>"/dev/null"
+		uci rename "dhcp.@dnsmasq[0]._orig_dns_redirect"="dns_redirect" 2>"/dev/null"
+		uci commit "dhcp"
+	}
 
-	if [ -z "$FW4" ]; then
+	if [ -e "/var/etc/$CONF.include" ]; then
 		for i in "iptables" "ip6tables"; do
 			[ -n "$(command -v $i)" ] || continue
 			"$i" -D FORWARD -m comment --comment "Forward HomeProxy TUN" -o "$TUNNAME" -j ACCEPT
@@ -152,6 +159,7 @@ stop_service() {
 		rm -f "/var/etc/$CONF.include"
 	fi
 
+	rm -r "$RUN_DIR/.dns_hijacked"
 	rm -f "$RUN_DIR/sing-box.json" "$RUN_DIR/sing-box.log"
 
 	log "Service stopped."
