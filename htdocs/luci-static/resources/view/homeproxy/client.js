@@ -271,6 +271,7 @@ return view.extend({
 
 			var _this = this;
 			_this.value('', _('Default'))
+			_this.value('direct-out', _('Direct'))
 			uci.sections(data[0], 'routing_node', function(res) {
 				if (res['.name'] !== section_id && res.enabled === '1')
 					_this.value(res.node, res.label);
