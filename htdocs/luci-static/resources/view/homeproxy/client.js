@@ -34,9 +34,9 @@ function renderStatus(isRunning) {
 	var spanTemp = '<em><span style="color:%s"><strong>%s %s</strong></span></em>';
 	var renderHTML;
 	if (isRunning) {
-		renderHTML = String.format(spanTemp, 'green', _('HomeProxy'), _('RUNNING'));
+		renderHTML = spanTemp.format('green', _('HomeProxy'), _('RUNNING'));
 	} else {
-		renderHTML = String.format(spanTemp, 'red', _('HomeProxy'), _('NOT RUNNING'));
+		renderHTML = spanTemp.format('red', _('HomeProxy'), _('NOT RUNNING'));
 	}
 
 	return renderHTML;
@@ -72,14 +72,14 @@ return view.extend({
 		var m, s, o, ss, so;
 
 		m = new form.Map('homeproxy', _('HomeProxy'),
-			_('The modern ImmortalWrt proxy platform for ARM64/AMD64. Powered by sing-box.'));
+			_('The modern ImmortalWrt proxy platform for ARM64/AMD64.'));
 
 		s = m.section(form.TypedSection);
 		s.anonymous = true;
 		s.render = function () {
 			poll.add(function () {
 				return L.resolveDefault(getServiceStatus()).then(function (res) {
-					var view = document.getElementById("service_status");
+					var view = document.getElementById('service_status');
 					view.innerHTML = renderStatus(res);
 				});
 			});
@@ -157,7 +157,7 @@ return view.extend({
 		o.value('1.1.1.1', _('CloudFlare Public DNS (1.1.1.1)'));
 		o.value('208.67.222.222', _('Cisco Public DNS (208.67.222.222)'));
 		o.value('8.8.8.8', _('Google Public DNS (8.8.8.8)'));
-		o.value('', _('---'));
+		o.value('', '---');
 		o.value('223.5.5.5', _('Aliyun Public DNS (223.5.5.5)'));
 		o.value('119.29.29.29', _('Tencent Public DNS (119.29.29.29)'));
 		o.value('114.114.114.114', _('Xinfeng Public DNS (114.114.114.114)'));

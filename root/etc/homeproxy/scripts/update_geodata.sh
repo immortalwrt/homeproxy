@@ -16,7 +16,7 @@ LOCK="$RUN_DIR/update_geodata.lock"
 mkdir -p "$RUN_DIR"
 
 log() {
-	echo -e "$(date "+%Y-%m-%d %H:%M:%S") [GeoData Updater] $*" >> "$LOG_PATH"
+	echo -e "$(date "+%Y-%m-%d %H:%M:%S") $*" >> "$LOG_PATH"
 }
 
 check_multi_task() {
