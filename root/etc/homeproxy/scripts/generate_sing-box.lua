@@ -400,7 +400,7 @@ if notEmpty(main_server) then
 	else
 		config.outbounds[4] = generate_external_outbound(main_server_cfg)
 	end
-	config.outbounds[4] = "main-out"
+	config.outbounds[4].tag = "main-out"
 
 	if notEmpty(main_udp_server) and main_udp_server ~= "same" and main_udp_server ~= main_server then
 		local main_udp_server_cfg = uci:get_all(uciconfig, main_udp_server) or {}
@@ -409,7 +409,7 @@ if notEmpty(main_server) then
 		else
 			config.outbounds[5] = generate_external_outbound(main_udp_server_cfg)
 		end
-		config.outbounds[5] = "main-udp-out"
+		config.outbounds[5].tag = "main-udp-out"
 	end
 end
 

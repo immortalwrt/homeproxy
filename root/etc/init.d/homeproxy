@@ -37,7 +37,7 @@ setup_server_firewall() {
 		for i in "iptables" "ip6tables"; do
 			[ -n "$(command -v "$i")" ] || continue
 			for v in "tcp" "udp"; do
-				echo -e "$i -t filter -A $IPT_RULE_NAME -p $v --dport $port -j ACCEPT" >> "/var/etc/$CONF.include"
+				echo -e "$i -t filter -A $IPT_RULE_NAME -p $v --dport $port -j ACCEPT" >> "$RUN_DIR/$CONF.include"
 			done
 		done
 	fi
@@ -52,9 +52,9 @@ start_service() {
 	local main_server="nil"
 	local default_outbound="nil"
 	if [ "$routing_mode" != "custom" ]; then
-		config_get default_outbound "routing" "default_outbound" "nil"
-	else
 		config_get main_server "config" "main_server" "nil"
+	else
+		config_get default_outbound "routing" "default_outbound" "nil"
 	fi
 
 	local server_enabled
@@ -92,22 +92,23 @@ start_service() {
 		/etc/init.d/cron restart
 
 		# Hijack DNS
-		uci rename "dhcp.@dnsmasq[0].nonwildcard"="_orig_nonwildcard" 2>"/dev/null"
 		uci rename "dhcp.@dnsmasq[0].dns_redirect"="_orig_dns_redirect" 2>"/dev/null"
-		uci set "dhcp.@dnsmasq[0].nonwildcard"=1
+		uci rename "dhcp.@dnsmasq[0].noresolv"="_orig_noresolv" 2>"/dev/null"
+		uci rename "dhcp.@dnsmasq[0].nonwildcard"="_orig_nonwildcard" 2>"/dev/null"
+		uci rename "dhcp.@dnsmasq[0].server"="_orig_server" 2>"/dev/null"
+		uci set "dhcp.@dnsmasq[0].nonwildcard"="0" 2>"/dev/null"
 		uci commit "dhcp"
+		/etc/init.d/dnsmasq restart
 		touch "$RUN_DIR/.dns_hijacked"
 	fi
 
 	# Set firewall
 	if [ -z "$FW4" ]; then
-		mkdir -p "/var/etc/"
-
 		if [ "$main_server" != "nil" ] || [ "$default_outbound" != "nil" ]; then
 			# Allow FORWARD
 			for i in "iptables" "ip6tables"; do
 				[ -n "$(command -v "$i")" ] || continue
-				echo -e "$i -I FORWARD -m comment --comment \"Forward HomeProxy TUN\" -o $TUNNAME -j ACCEPT" >> "/var/etc/$CONF.include"
+				echo -e "$i -I FORWARD -m comment --comment \"Forward HomeProxy TUN\" -o $TUNNAME -j ACCEPT" >> "$RUN_DIR/$CONF.include"
 			done
 		fi
 
@@ -116,13 +117,13 @@ start_service() {
 		if [ "$server_auto_firewall" = "1" ]; then
 			for i in "iptables" "ip6tables"; do
 				[ -n "$(command -v $i)" ] || continue
-				echo -e "$i -N $IPT_RULE_NAME" >> "/var/etc/$CONF.include"
-				echo -e "$i -t filter -I INPUT -j $IPT_RULE_NAME" >> "/var/etc/$CONF.include"
+				echo -e "$i -N $IPT_RULE_NAME" >> "$RUN_DIR/$CONF.include"
+				echo -e "$i -t filter -I INPUT -j $IPT_RULE_NAME" >> "$RUN_DIR/$CONF.include"
 			done
 			config_foreach setup_server_firewall "server"
 		fi
 
-		sh "/var/etc/$CONF.include"
+		sh "$RUN_DIR/$CONF.include"
 	fi
 
 	procd_open_instance "sing-box"
@@ -142,12 +143,16 @@ stop_service() {
 
 	[ ! -e "$RUN_DIR/.dns_hijacked" ] || {
 		uci del "dhcp.@dnsmasq[0].nonwildcard" 2>"/dev/null"
-		uci rename "dhcp.@dnsmasq[0]._orig_nonwildcard"="nonwildcard" 2>"/dev/null"
 		uci rename "dhcp.@dnsmasq[0]._orig_dns_redirect"="dns_redirect" 2>"/dev/null"
+		uci rename "dhcp.@dnsmasq[0]._orig_noresolv"="noresolv" 2>"/dev/null"
+		uci rename "dhcp.@dnsmasq[0]._orig_nonwildcard"="nonwildcard" 2>"/dev/null"
+		uci rename "dhcp.@dnsmasq[0]._orig_server"="server" 2>"/dev/null"
 		uci commit "dhcp"
+		/etc/init.d/dnsmasq restart
+		rm -f "$RUN_DIR/.dns_hijacked"
 	}
 
-	if [ -e "/var/etc/$CONF.include" ]; then
+	if [ -e "$RUN_DIR/$CONF.include" ]; then
 		for i in "iptables" "ip6tables"; do
 			[ -n "$(command -v $i)" ] || continue
 			"$i" -D FORWARD -m comment --comment "Forward HomeProxy TUN" -o "$TUNNAME" -j ACCEPT
@@ -156,10 +161,9 @@ stop_service() {
 			"$i" -X "$IPT_RULE_NAME"
 		done 2>"/dev/null"
 
-		rm -f "/var/etc/$CONF.include"
+		rm -f "$RUN_DIR/$CONF.include"
 	fi
 
-	rm -r "$RUN_DIR/.dns_hijacked"
 	rm -f "$RUN_DIR/sing-box.json" "$RUN_DIR/sing-box.log"
 
 	log "Service stopped."
