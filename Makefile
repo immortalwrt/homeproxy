@@ -13,7 +13,8 @@ LUCI_DEPENDS:= \
 	+sagernet-core \
 	+curl \
 	+lua-neturl \
-	+kmod-inet-diag
+	+kmod-inet-diag \
+	+kmod-netlink-diag
 
 define Package/luci-app-homeproxy/conffiles
 /etc/config/homeproxy

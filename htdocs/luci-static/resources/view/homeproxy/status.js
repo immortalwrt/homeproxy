@@ -158,7 +158,7 @@ return view.extend({
 			);
 
 			poll.add(L.bind(function() {
-				return fs.read(hp_dir + '/sing-box.log', 'text')
+				return fs.read_direct(hp_dir + '/sing-box.log', 'text')
 				.then(function(res) {
 					var log = E('pre', { 'wrap': 'pre' }, [
 						res.trim() || _('Log is clean.')

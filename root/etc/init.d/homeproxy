@@ -88,7 +88,7 @@ start_service() {
 			echo "0 ${auto_update_time} * * * $HP_DIR/scripts/update_geodata.sh update_version update_subscription" >> "/etc/crontabs/root"
 		fi
 		# Clean log
-		echo -e "*/10 * * * * $HP_DIR/scripts/clean_log.sh" >> "/etc/crontabs/root"
+		echo -e "*/3 * * * * $HP_DIR/scripts/clean_log.sh" >> "/etc/crontabs/root"
 		/etc/init.d/cron restart
 
 		# Hijack DNS
