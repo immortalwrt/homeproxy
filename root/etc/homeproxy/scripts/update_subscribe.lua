@@ -106,17 +106,17 @@ local shadowsocks_encrypt_methods = {
 -- UCI config start
 local uci = luci.model.uci.cursor()
 
-local uciname = "homeproxy"
+local uciconfig = "homeproxy"
 local ucimain = "config"
 local ucinode = "node"
 local ucisubscription = "subscription"
 
-local allow_insecure = uci:get(uciname, ucisubscription, "allow_insecure_in_subs") or "0"
-local filter_mode = uci:get(uciname, ucisubscription, "filter_nodes") or "disabled"
-local filter_keywords = uci:get(uciname, ucisubscription, "filter_words") or {}
-local packet_encoding = uci:get(uciname, ucisubscription, "default_packet_encoding") or "xudp"
-local subscription_urls = uci:get(uciname, ucisubscription, "subscription_url") or {}
-local via_proxy = uci:get(uciname, ucisubscription, "update_via_proxy") or "0"
+local allow_insecure = uci:get(uciconfig, ucisubscription, "allow_insecure_in_subs") or "0"
+local filter_mode = uci:get(uciconfig, ucisubscription, "filter_nodes") or "disabled"
+local filter_keywords = uci:get(uciconfig, ucisubscription, "filter_words") or {}
+local packet_encoding = uci:get(uciconfig, ucisubscription, "default_packet_encoding") or "xudp"
+local subscription_urls = uci:get(uciconfig, ucisubscription, "subscription_url") or {}
+local via_proxy = uci:get(uciconfig, ucisubscription, "update_via_proxy") or "0"
 
 local routing_mode = uci:get(uciconfig, ucimain, "routing_mode") or "bypass_mainland_china"
 local main_server, main_udp_server
@@ -186,6 +186,7 @@ local function parse_uri(uri)
 
 			if notEmpty(params.protocol) and params.protocol ~= "udp" then
 				log("Skipping unsupported hysteria node:", urldecode(url.fragment, true) or url.host or "NULL")
+				return nil
 			end
 
 			config = {
@@ -346,6 +347,8 @@ local function parse_uri(uri)
 			end
 		elseif uri[1] == "vmess" then
 			if uri[2]:find("&") then
+				-- "Lovely" shadowrocket format
+				log("Skipping unsupported vmess format.")
 				return nil
 			end
 
@@ -353,6 +356,7 @@ local function parse_uri(uri)
 			uri = JSON.parse(b64decode(uri[2]))
 
 			if uri.v ~= "2" then
+				log("Skipping unsupported vmess format.")
 				return nil
 			-- https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
 			elseif notEmpty(uri.aid) and tonumber(uri.aid) ~= 0 then
@@ -429,7 +433,7 @@ end
 local function main()
 	if via_proxy ~= "1" then
 		log("Stopping service...")
-		sysinit.stop(uciname)
+		sysinit.stop(uciconfig)
 	end
 
 	for _, url in ipairs(subscription_urls) do
@@ -475,7 +479,7 @@ local function main()
 						if config.tls == "1" then
 							config["tls_insecure"] = allow_insecure
 						end
-						if config.type == "v2ray" and string.match("vless,vmess", config.v2ray_protocol) then
+						if config.type == "v2ray" and table.contains({"vless", "vmess"}, config.v2ray_protocol) then
 							config["v2ray_packet_encoding"] = packet_encoding
 						end
 
@@ -501,20 +505,20 @@ local function main()
 
 		if via_proxy ~= "1" then
 			log("Starting service...")
-			sysinit.start(uciname)
+			sysinit.start(uciconfig)
 		end
 
 		return false
 	end
 
 	local added, removed = 0, 0
-	uci:foreach(uciname, ucinode, function(cfg)
+	uci:foreach(uciconfig, ucinode, function(cfg)
 		if cfg.grouphash or cfg.nameHash then
 			if not node_result[cfg.grouphash] or not node_result[cfg.grouphash][cfg.nameHash] then
-				uci:delete(uciname, cfg[".name"])
+				uci:delete(uciconfig, cfg[".name"])
 				removed = removed + 1
 			else
-				uci:tset(uciname, cfg[".name"], node_result[cfg.grouphash][cfg.nameHash])
+				uci:tset(uciconfig, cfg[".name"], node_result[cfg.grouphash][cfg.nameHash])
 				setmetatable(node_result[cfg.grouphash][cfg.nameHash], { __index = {isExisting = true} })
 			end
 		end
@@ -522,37 +526,37 @@ local function main()
 	for _, nodes in ipairs(node_result) do
 		for _, node in ipairs(nodes) do
 			if not node.isExisting then
-				local cfgvalue = uci:add(uciname, ucinode)
-				uci:tset(uciname, cfgvalue, node)
+				local cfgvalue = uci:add(uciconfig, ucinode)
+				uci:tset(uciconfig, cfgvalue, node)
 				added = added + 1
 			end
 		end
 	end
-	uci:commit(uciname)
+	uci:commit(uciconfig)
 
 	local need_restart = (via_proxy ~= "1")
 	if notEmpty(main_server) then
-		local first_server = uci:get_first(uciname, ucinode)
+		local first_server = uci:get_first(uciconfig, ucinode)
 		if first_server then
-			if not uci:get(uciname, main_server) then
-				uci:set(uciname, ucimain, "main_server", first_server)
-				uci:commit(uciname)
+			if not uci:get(uciconfig, main_server) then
+				uci:set(uciconfig, ucimain, "main_server", first_server)
+				uci:commit(uciconfig)
 				need_restart = true
 				log("Main node is gone, switching to first node.")
 			end
 
 			if notEmpty(main_udp_server) and main_udp_server ~= "same" then
-				if not uci:get(uciname, main_udp_server) then
-					uci:set(uciname, ucimain, "main_udp_server", first_server)
-					uci:commit(uciname)
+				if not uci:get(uciconfig, main_udp_server) then
+					uci:set(uciconfig, ucimain, "main_udp_server", first_server)
+					uci:commit(uciconfig)
 					need_restart = true
 					log("UDP node is gone, switching to first node.")
 				end
 			end
 		else
-			uci:set(uciname, ucimain, "main_server", "nil")
-			uci:set(uciname, ucimain, "main_udp_server", "nil")
-			uci:commit(uciname)
+			uci:set(uciconfig, ucimain, "main_server", "nil")
+			uci:set(uciconfig, ucimain, "main_udp_server", "nil")
+			uci:commit(uciconfig)
 			need_restart = true
 			log("No node available, disable tproxy.")
 		end
@@ -560,8 +564,8 @@ local function main()
 
 	if need_restart then
 		log("Reloading service...")
-		sysinit.stop(uciname)
-		sysinit.start(uciname)
+		sysinit.stop(uciconfig)
+		sysinit.start(uciconfig)
 	end
 
 	log(added, "nodes added,", removed, "removed.")
@@ -576,8 +580,8 @@ if notEmpty(subscription_urls) then
 		log(debug.traceback())
 
 		log("Reloading service...")
-		sysinit.stop(uciname)
-		sysinit.start(uciname)
+		sysinit.stop(uciconfig)
+		sysinit.start(uciconfig)
 
 		logfile:close()
 	end)
