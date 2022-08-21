@@ -53,7 +53,14 @@ local uciserver = "server"
 local routing_mode = uci:get(uciconfig, ucimain, "routing_mode") or "bypass_mainland_china"
 local routing_port = uci:get(uciconfig, ucimain, "routing_port") or "nil"
 
-local dns_server = uci:get(uciconfig, ucimain, "dns_server") or "8.8.8.8"
+local wan_dns = luci.sys.exec("ifstatus wan | jsonfilter -e '@[\"dns-server\"][0]'"):trim()
+if isEmpty(wan_dns) then
+	wan_dns = table.contains({"proxy_mainland_china", "global"}, routing_mode) and "8.8.8.8" or "114.114.114.114"
+end
+local dns_server = uci:get(uciconfig, ucimain, "dns_server")
+if isEmpty(dns_server) or dns_server == "wan" then
+	dns_server = wan_dns
+end
 
 local enable_server = uci:get(uciconfig, uciserver, "enabled") or "0"
 
@@ -216,8 +223,8 @@ config.log = {
 config.dns = {
 	servers = {
 		{
-			tag = "local-dns",
-			address = "local",
+			tag = "default-dns",
+			address = wan_dns,
 			detour = "direct-out"
 		},
 		{
@@ -225,7 +232,7 @@ config.dns = {
 			address = "rcode://name_error"
 		},
 	},
-	final = "local-dns",
+	final = "default-dns",
 	strategy = dns_strategy,
 	disable_cache = (dns_disable_cache == "1"),
 	disable_expire = (dns_disable_cache_expire == "1")
@@ -233,28 +240,30 @@ config.dns = {
 
 if notEmpty(main_server) then
 	-- Main DNS
-	config.dns.servers[3] = {
-		tag = "main-dns",
-		address = dns_server,
-		detour = "main-out"
-	}
-
-	local dns_geosite
-	if routing_mode == "bypass_mainland_china" then
-		dns_geosite = { "geolocation-!cn" }
-	elseif routing_mode == "gfwlist" then
-		dns_geosite = { "gfw" }
-	elseif routing_mode == "proxy_mainland_china" then
-		dns_geosite = { "cn" }
-	end
-
-	config.dns.rules = {
-		{
-			geosite = dns_geosite,
-			port = parse_port(routing_port),
-			server = "main-dns"
+	if dns_server ~= wan_dns then
+		config.dns.servers[3] = {
+			tag = "main-dns",
+			address = dns_server,
+			detour = "main-out"
 		}
-	}
+
+		local dns_geosite
+		if routing_mode == "bypass_mainland_china" then
+			dns_geosite = { "geolocation-!cn" }
+		elseif routing_mode == "gfwlist" then
+			dns_geosite = { "gfw" }
+		elseif routing_mode == "proxy_mainland_china" then
+			dns_geosite = { "cn" }
+		end
+
+		config.dns.rules = {
+			{
+				geosite = dns_geosite,
+				port = parse_port(routing_port),
+				server = "main-dns"
+			}
+		}
+	end
 elseif notEmpty(default_outbound) then
 	-- DNS servers
 	uci:foreach(uciconfig, ucidnsserver, function(cfg)

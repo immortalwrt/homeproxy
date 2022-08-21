@@ -156,7 +156,6 @@ return view.extend({
 
 		o = s.option(form.Value, 'dns_server', _('DNS server'),
 			_('You can only have one server set. Custom DNS server format as plain IPv4/IPv6.'));
-		o.value('local', _('Follow system'));
 		o.value('wan', _('Use DNS server from WAN'));
 		o.value('1.1.1.1', _('CloudFlare Public DNS (1.1.1.1)'));
 		o.value('208.67.222.222', _('Cisco Public DNS (208.67.222.222)'));
@@ -469,7 +468,7 @@ return view.extend({
 			delete this.vallist;
 
 			var _this = this;
-			_this.value('local-dns', _('System DNS resolver'));
+			_this.value('default-dns', _('Default DNS (issued by WAN)'));
 			uci.sections(data[0], 'dns_server', function(res) {
 				if (res.enabled === '1')
 					_this.value(res['.name'] + '-dns', res.label);
@@ -477,7 +476,7 @@ return view.extend({
 
 			return this.super('load', section_id);
 		}
-		so.default = 'local-dns';
+		so.default = 'default-dns';
 		so.rmempty = false;
 
 		so = ss.option(form.Flag, 'disable_cache', _('Disable DNS cache'));
@@ -522,7 +521,7 @@ return view.extend({
 
 			var _this = this;
 			_this.value('', _('None'));
-			_this.value('local-dns', _('System DNS resolver'));
+			_this.value('default-dns', _('Default DNS (issued by WAN)'));
 			uci.sections(data[0], 'dns_server', function(res) {
 				if (res['.name'] !== section_id && res.enabled === '1')
 					_this.value(res['.name'] + '-dns', res.label);
@@ -709,7 +708,7 @@ return view.extend({
 			delete this.vallist;
 
 			var _this = this;
-			_this.value('local-dns', _('System DNS resolver'));
+			_this.value('default-dns', _('Default DNS (issued by WAN)'));
 			_this.value('block-dns', _('Block DNS queries'));
 			uci.sections(data[0], 'dns_server', function(res) {
 				if (res.enabled === '1')
