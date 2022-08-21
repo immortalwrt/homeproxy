@@ -92,11 +92,10 @@ start_service() {
 		/etc/init.d/cron restart
 
 		# Hijack DNS
-		uci rename "dhcp.@dnsmasq[0].dns_redirect"="_orig_dns_redirect" 2>"/dev/null"
 		uci rename "dhcp.@dnsmasq[0].noresolv"="_orig_noresolv" 2>"/dev/null"
-		uci rename "dhcp.@dnsmasq[0].nonwildcard"="_orig_nonwildcard" 2>"/dev/null"
 		uci rename "dhcp.@dnsmasq[0].server"="_orig_server" 2>"/dev/null"
-		uci set "dhcp.@dnsmasq[0].nonwildcard"="0" 2>"/dev/null"
+		uci set "dhcp.@dnsmasq[0].noresolv"="1"
+		uci add_list "dhcp.@dnsmasq[0].server"="1.2.4.8"
 		uci commit "dhcp"
 		/etc/init.d/dnsmasq restart
 		touch "$RUN_DIR/.dns_hijacked"
@@ -142,15 +141,14 @@ stop_service() {
 	/etc/init.d/cron restart
 
 	[ ! -e "$RUN_DIR/.dns_hijacked" ] || {
-		uci del "dhcp.@dnsmasq[0].nonwildcard" 2>"/dev/null"
-		uci rename "dhcp.@dnsmasq[0]._orig_dns_redirect"="dns_redirect" 2>"/dev/null"
-		uci rename "dhcp.@dnsmasq[0]._orig_noresolv"="noresolv" 2>"/dev/null"
-		uci rename "dhcp.@dnsmasq[0]._orig_nonwildcard"="nonwildcard" 2>"/dev/null"
-		uci rename "dhcp.@dnsmasq[0]._orig_server"="server" 2>"/dev/null"
+		uci del "dhcp.@dnsmasq[0].noresolv"
+		uci del_list "dhcp.@dnsmasq[0].server"="1.2.4.8"
+		uci rename "dhcp.@dnsmasq[0]._orig_noresolv"="noresolv"
+		uci rename "dhcp.@dnsmasq[0]._orig_server"="server"
 		uci commit "dhcp"
 		/etc/init.d/dnsmasq restart
 		rm -f "$RUN_DIR/.dns_hijacked"
-	}
+	} 2>"/dev/null"
 
 	if [ -e "$RUN_DIR/$CONF.include" ]; then
 		for i in "iptables" "ip6tables"; do
