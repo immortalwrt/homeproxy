@@ -92,6 +92,7 @@ start_service() {
 		/etc/init.d/cron restart
 
 		# Hijack DNS
+		uci rename "dhcp.@dnsmasq[0].dns_redirect"="_orig_dns_redirect" 2>"/dev/null"
 		uci rename "dhcp.@dnsmasq[0].noresolv"="_orig_noresolv" 2>"/dev/null"
 		uci rename "dhcp.@dnsmasq[0].server"="_orig_server" 2>"/dev/null"
 		uci set "dhcp.@dnsmasq[0].noresolv"="1"
@@ -143,6 +144,7 @@ stop_service() {
 	[ ! -e "$RUN_DIR/.dns_hijacked" ] || {
 		uci del "dhcp.@dnsmasq[0].noresolv"
 		uci del_list "dhcp.@dnsmasq[0].server"="1.2.4.8"
+		uci rename "dhcp.@dnsmasq[0]._orig_dns_redirect"="dns_redirect"
 		uci rename "dhcp.@dnsmasq[0]._orig_noresolv"="noresolv"
 		uci rename "dhcp.@dnsmasq[0]._orig_server"="server"
 		uci commit "dhcp"
