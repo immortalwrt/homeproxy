@@ -154,8 +154,7 @@ function parse_share_link(uri) {
 
 			config = {
 				label: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
-				type: 'v2ray',
-				v2ray_protocol: 'trojan',
+				type: 'trojan',
 				address: url.hostname,
 				port: url.port || '80',
 				password: decodeURIComponent(url.username),

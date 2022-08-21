@@ -151,8 +151,8 @@ local function generate_outbound(server)
 			cipher_suites = server.tls_cipher_suites,
 			certificate_path = server.tls_cert_path
 		} or nil,
-		udp_over_tcp = server.udp_over_tcp,
-		tcp_fast_open = server.tcp_fast_open
+		udp_over_tcp = (server.udp_over_tcp == "1") or nil,
+		tcp_fast_open = (server.tcp_fast_open == "1") or nil
 	}
 	return outbound
 end
@@ -170,8 +170,7 @@ local function get_outbound(cfg)
 	end
 
 	if cfg:startswith("cfg") then
-		local node
-		node = uci:get(uciconfig, cfg, "node")
+		local node = uci:get(uciconfig, cfg, "node")
 		if isEmpty(node) then
 			error(cfg  .. "'s node is missing, please check your configuration.")
 		else
@@ -283,8 +282,7 @@ elseif notEmpty(default_outbound) then
 	config.dns.rules = {}
 	uci:foreach(uciconfig, ucidnsrule, function(cfg)
 		if cfg.enabled == "1" then
-			local dns_rule
-			dns_rule = {
+			local dns_rule = {
 				network = cfg.network,
 				protocol = cfg.protocol,
 				domain = cfg.domain,
@@ -359,7 +357,7 @@ if enable_server == "1" then
 
 				listen = "::",
 				listen_port = tonumber(cfg.port),
-				tcp_fast_open = (cfg.tcp_fast_open == "1"),
+				tcp_fast_open = (cfg.tcp_fast_open == "1") or nil,
 				sniff = true,
 				sniff_override_destination = (cfg.sniff_override == "1"),
 				domain_strategy = cfg.domain_strategy,
@@ -538,8 +536,7 @@ if notEmpty(main_server) then
 elseif notEmpty(default_outbound) then
 	uci:foreach(uciconfig, uciroutingrule, function(cfg)
 		if cfg.enabled == "1" then
-			local routing_rule
-			routing_rule = {
+			local routing_rule = {
 				ip_version = cfg.ip_version,
 				network = cfg.network,
 				protocol = cfg.protocol,

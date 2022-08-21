@@ -73,6 +73,7 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'password', _('Password (UUID)'));
+		o.password = true;
 		o.validate = function(section_id, value) {
 			if (section_id) {
 				if (!value)
@@ -178,7 +179,7 @@ return view.extend({
 		o = s.option(form.Flag, 'tls', _('TLS'));
 		o.default = o.disabled;
 		o.depends('type', 'http');
-		o.depends('type', 'naiveproxy');
+		o.depends('type', 'naive');
 		o.depends('type', 'trojan');
 		o.depends('type', 'vmess');
 		o.rmempty = false;
@@ -282,7 +283,7 @@ return view.extend({
 		o.value('tcp', _('TCP'));
 		o.value('udp', _('UDP'));
 		o.value('', _('Both'));
-		o.depends('type', 'naiveproxy');
+		o.depends('type', 'naive');
 		o.depends('type', 'shadowsocks');
 		o.modalonly = true;
 		/* Extra settings end */
