@@ -348,7 +348,7 @@ return view.extend({
 		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
 			_('If set, the requested domain name will be resolved to IP before routing.'));
 		for (var i in hp.dns_strategy)
-			so.value(i, hp.dns_strategy[i])
+			so.value(i, _(hp.dns_strategy[i]))
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'network', _('Network'));
