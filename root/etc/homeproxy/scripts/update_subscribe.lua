@@ -3,11 +3,19 @@
 --
 -- Copyright (C) 2022 ImmortalWrt.org
 
+require "luci.i18n"
 require "luci.jsonc"
 require "luci.model.uci"
 require "luci.sys"
 require "luci.util"
 require "nixio"
+
+-- i18n start
+local syslang = uci:get("luci", "main", "lang") or "auto"
+luci.i18n.setlanguage(syslang)
+local translate = luci.i18n.translate
+local translatef = luci.i18n.translatef
+-- i18n end
 
 -- String helper start
 string.split = luci.util.split
@@ -161,7 +169,7 @@ local function parse_uri(uri)
 		if uri.nodetype == "sip008" then
 			-- https://shadowsocks.org/guide/sip008.html
 			if not table.contains(shadowsocks_encrypt_methods, uri.method) then
-				log("Skipping legacy Shadowsocks node:", b64decode(uri.remarks) or url.server)
+				log(translatef("Skipping legacy Shadowsocks node: %s.", b64decode(uri.remarks) or url.server))
 				return nil
 			end
 
@@ -185,7 +193,7 @@ local function parse_uri(uri)
 			local params = url.query
 
 			if notEmpty(params.protocol) and params.protocol ~= "udp" then
-				log("Skipping unsupported hysteria node:", urldecode(url.fragment, true) or url.host or "NULL")
+				log(translatef("Skipping unsupported hysteria node: %s.", urldecode(url.fragment, true) or url.host or "NULL"))
 				return nil
 			end
 
@@ -231,7 +239,7 @@ local function parse_uri(uri)
 			end
 
 			if not table.contains(shadowsocks_encrypt_methods, userinfo[1]) then
-				log("Skipping legacy Shadowsocks node:", urldecode(url.fragment, true) or url.host or "NULL")
+				log(translatef("Skipping legacy Shadowsocks node: %s.", urldecode(url.fragment, true) or url.host or "NULL"))
 				return nil
 			end
 
@@ -348,7 +356,7 @@ local function parse_uri(uri)
 		elseif uri[1] == "vmess" then
 			if uri[2]:find("&") then
 				-- "Lovely" shadowrocket format
-				log("Skipping unsupported vmess format.")
+				log(translate("Skipping unsupported vmess format."))
 				return nil
 			end
 
@@ -356,11 +364,11 @@ local function parse_uri(uri)
 			uri = JSON.parse(b64decode(uri[2]))
 
 			if uri.v ~= "2" then
-				log("Skipping unsupported vmess format.")
+				log(translate("Skipping unsupported vmess format."))
 				return nil
 			-- https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
 			elseif notEmpty(uri.aid) and tonumber(uri.aid) ~= 0 then
-				log("Skipping outdated VMess node:", uri.ps or uri.add)
+				log(translatef("Skipping outdated VMess node: %s.", uri.ps or uri.add))
 				return nil
 			end
 
@@ -419,7 +427,7 @@ local function parse_uri(uri)
 
 	if notEmpty(config) then
 		if not (validation.host(config.address) and validation.port(config.port)) then
-			log("Skipping invalid", config.type, "node:", config.label or "NULL")
+			log(translatef("Skipping invalid %s node: %s.", config.type, config.label or "NULL"))
 			return nil
 		elseif isEmpty(config.label) then
 			config["label"] = config.address .. ":" .. config.port
@@ -432,7 +440,7 @@ end
 -- Thanks to luci-app-ssr-plus
 local function main()
 	if via_proxy ~= "1" then
-		log("Stopping service...")
+		log(translate("Stopping service..."))
 		sysinit.stop(uciconfig)
 	end
 
@@ -472,9 +480,9 @@ local function main()
 					config.nameHash = md5(label)
 
 					if filter_check(config.label) then
-						log("Skipping blacklist node:", config.label)
+						log(translatef("Skipping blacklist node: %s.", config.label)
 					elseif node_cache[groupHash][config.confHash] or node_cache[groupHash][config.nameHash] then
-						log("Skipping duplicate node:", config.label)
+						log(translatef("Skipping duplicate node: %s.", config.label))
 					else
 						if config.tls == "1" then
 							config["tls_insecure"] = allow_insecure
@@ -493,18 +501,18 @@ local function main()
 				end
 			end
 
-			log("Successfully fetched", count, "nodes of total", #nodes, ".", "From:", url)
+			log(translatef("Successfully fetched %s nodes of total %s from %s.", count, #nodes, url))
 		else
-			log("Failed to fetch resources from", url)
+			log(translatef("Failed to fetch resources from: %s.", url))
 		end
 	end
 
 	if isEmpty(node_result) then
-		log("Failed to update subscriptions: no valid node found.")
+		log(translate("Failed to update subscriptions: no valid node found."))
 		logfile:close()
 
 		if via_proxy ~= "1" then
-			log("Starting service...")
+			log(translate("Starting service..."))
 			sysinit.start(uciconfig)
 		end
 
@@ -542,7 +550,7 @@ local function main()
 				uci:set(uciconfig, ucimain, "main_server", first_server)
 				uci:commit(uciconfig)
 				need_restart = true
-				log("Main node is gone, switching to first node.")
+				log(translate("Main node is gone, switching to first node."))
 			end
 
 			if notEmpty(main_udp_server) and main_udp_server ~= "same" then
@@ -550,7 +558,7 @@ local function main()
 					uci:set(uciconfig, ucimain, "main_udp_server", first_server)
 					uci:commit(uciconfig)
 					need_restart = true
-					log("UDP node is gone, switching to first node.")
+					log(translate("UDP node is gone, switching to first node."))
 				end
 			end
 		else
@@ -558,28 +566,28 @@ local function main()
 			uci:set(uciconfig, ucimain, "main_udp_server", "nil")
 			uci:commit(uciconfig)
 			need_restart = true
-			log("No node available, disable tproxy.")
+			log(translate("No node available, disable tproxy."))
 		end
 	end
 
 	if need_restart then
-		log("Reloading service...")
+		log(translate("Reloading service..."))
 		sysinit.stop(uciconfig)
 		sysinit.start(uciconfig)
 	end
 
-	log(added, "nodes added,", removed, "removed.")
-	log("Successfully updated subscriptions.")
+	log(translatef("%s nodes added, %s removed.", added, removed))
+	log(translate("Successfully updated subscriptions."))
 	logfile:close()
 end
 
 if notEmpty(subscription_urls) then
 	xpcall(main, function(e)
-		log("An error occurred during updating subscriptions:")
+		log(translate("An error occurred during updating subscriptions:"))
 		log(e)
 		log(debug.traceback())
 
-		log("Reloading service...")
+		log(translate("Reloading service..."))
 		sysinit.stop(uciconfig)
 		sysinit.start(uciconfig)
 

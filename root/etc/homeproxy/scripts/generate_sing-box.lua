@@ -3,10 +3,17 @@
 --
 -- Copyright (C) 2022 ImmortalWrt.org
 
+require "luci.i18n"
 require "luci.jsonc"
 require "luci.model.uci"
 require "luci.sys"
 require "luci.util"
+
+-- i18n start
+local syslang = uci:get("luci", "main", "lang") or "auto"
+luci.i18n.setlanguage(syslang)
+local translatef = luci.i18n.translatef
+-- i18n end
 
 -- String helper start
 string.split = luci.util.split
@@ -182,7 +189,7 @@ local function get_outbound(cfg)
 	if cfg:startswith("cfg") then
 		local node = uci:get(uciconfig, cfg, "node")
 		if isEmpty(node) then
-			error(cfg  .. "'s node is missing, please check your configuration.")
+			error(translatef("%s's node is missing, please check your configuration.", cfg))
 		else
 			return node
 		end
