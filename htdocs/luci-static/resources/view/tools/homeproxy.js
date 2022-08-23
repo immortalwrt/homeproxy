@@ -10,6 +10,14 @@
 'require ui';
 
 return baseclass.extend({
+	dns_strategy: {
+		'': 'Default',
+		'prefer_ipv4': 'Prefer IPv4',
+		'prefer_ipv6': 'Prefer IPv6',
+		'ipv4_only': 'IPv4 only',
+		'ipv6_only': 'IPv6 only'
+	},
+
 	native_protocols: [
 		'http',
 		'hysteria',

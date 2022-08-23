@@ -168,8 +168,8 @@ return view.extend({
 
 		/* Shadowsocks config */
 		o = s.option(form.ListValue, 'shadowsocks_encrypt_method', _('Encrypt method'));
-		for (var i in hp.shadowsocks_encrypt_methods)
-			o.value(hp.shadowsocks_encrypt_methods[i]);
+		for (var i of hp.shadowsocks_encrypt_methods)
+			o.value(i);
 		o.default = 'aes-128-gcm';
 		o.depends('type', 'shadowsocks');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
@@ -272,8 +272,8 @@ return view.extend({
 
 		o = s.option(form.ListValue, 'tls_min_version', _('Minimum TLS version'),
 			_('The minimum TLS version that is acceptable.'));
-		for (var i in hp.tls_versions)
-			o.value(hp.tls_versions[i]);
+		for (var i of hp.tls_versions)
+			o.value(i);
 		o.default = '1.0';
 		o.depends('tls', '1');
 		o.rmempty = false;
@@ -281,8 +281,8 @@ return view.extend({
 
 		o = s.option(form.ListValue, 'tls_max_version', _('Maximum TLS version'),
 			_('The maximum TLS version that is acceptable.'));
-		for (var i in hp.tls_versions)
-			o.value(hp.tls_versions[i]);
+		for (var i of hp.tls_versions)
+			o.value(i);
 		o.default = '1.3';
 		o.depends('tls', '1');
 		o.rmempty = false;
@@ -290,8 +290,8 @@ return view.extend({
 
 		o = s.option(form.MultiValue, 'tls_cipher_suites', _('Cipher suites'),
 			_('The elliptic curves that will be used in an ECDHE handshake, in preference order. If empty, the default will be used.'));
-		for (var i in hp.tls_cipher_suites)
-			o.value(hp.tls_cipher_suites[i]);
+		for (var i of hp.tls_cipher_suites)
+			o.value(i);
 		o.depends('tls', '1');
 		o.optional = true;
 		o.modalonly = true;
@@ -347,11 +347,8 @@ return view.extend({
 
 		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
 			_('If set, the requested domain name will be resolved to IP before routing.'));
-		o.value('', _('Disable'));
-		o.value('prefer_ipv4', _('Prefer IPv4'));
-		o.value('prefer_ipv6', _('Prefer IPv6'));
-		o.value('ipv4_only', _('IPv4 only'));
-		o.value('ipv6_only', _('IPv6 only'));
+		for (var i in hp.dns_strategy)
+			so.value(i, hp.dns_strategy[i])
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'network', _('Network'));

@@ -244,11 +244,8 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
 			_('If set, the server domain name will be resolved to IP before connecting.<br/>dns.strategy will be used if empty.'));
-		so.value('', _('Default'));
-		so.value('prefer_ipv4', _('Prefer IPv4'));
-		so.value('prefer_ipv6', _('Prefer IPv6'));
-		so.value('ipv4_only', _('IPv4 only'));
-		so.value('ipv6_only', _('IPv6 only'));
+		for (var i in hp.dns_strategy)
+			so.value(i, hp.dns_strategy[i])
 		so.modalonly = true;
 
 		so = ss.option(widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
@@ -438,10 +435,8 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'dns_strategy', _('DNS strategy'),
 			_('The DNS strategy for resolving the domain name in the address.'));
-		so.value('prefer_ipv4', _('Prefer IPv4'));
-		so.value('prefer_ipv6', _('Prefer IPv6'));
-		so.value('ipv4_only', _('IPv4 only'));
-		so.value('ipv6_only', _('IPv6 only'));
+		for (var i in hp.dns_strategy)
+			if (i) so.value(i, hp.dns_strategy[i])
 		so.default = 'prefer_ipv4';
 		so.rmempty = false;
 
@@ -530,19 +525,14 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'address_strategy', _('Address strategy'),
 			_('The domain strategy for resolving the domain name in the address. dns.strategy will be used if empty.'));
-		so.value('', _('Default'));
-		so.value('prefer_ipv4', _('Prefer IPv4'));
-		so.value('prefer_ipv6', _('Prefer IPv6'));
-		so.value('ipv4_only', _('IPv4 only'));
-		so.value('ipv6_only', _('IPv6 only'));
+		for (var i in hp.dns_strategy)
+			so.value(i, hp.dns_strategy[i])
+		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'resolve_strategy', _('Resolve strategy'),
 			_('Default domain strategy for resolving the domain names.'));
-		so.value('', _('Default'));
-		so.value('prefer_ipv4', _('Prefer IPv4'));
-		so.value('prefer_ipv6', _('Prefer IPv6'));
-		so.value('ipv4_only', _('IPv4 only'));
-		so.value('ipv6_only', _('IPv6 only'));
+		for (var i in hp.dns_strategy)
+			so.value(i, hp.dns_strategy[i])
 
 		so = ss.option(form.ListValue, 'outbound', _('Outbound'),
 			_('Tag of an outbound for connecting to the dns server.'));
