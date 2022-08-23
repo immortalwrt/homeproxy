@@ -175,6 +175,81 @@ return view.extend({
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
 		o.modalonly = true;
 
+		/* Transport config start */
+		o = s.option(form.ListValue, 'transport', _('Transport'),
+			_('No TCP transport, plain HTTP is merged into the HTTP transport.'));
+		o.value('', _('TCP'));
+		o.value('grpc', _('gRPC'));
+		o.value('http', _('HTTP'));
+		o.value('quic', _('QUIC'));
+		o.value('ws', _('WebSocket'));
+		o.onchange = function(ev, section_id, value) {
+			var desc = this.map.findElement('id', 'cbid.homeproxy.%s.transport'.format(section_id)).nextElementSibling;
+			if (value === 'http')
+				desc.innerHTML = _('TLS is not enforced. If TLS is not configured, plain HTTP 1.1 is used.');
+			else if (value === 'quic')
+				desc.innerHTML = _('No additional encryption support: It\'s basically duplicate encryption.');
+			else
+				desc.innerHTML = _('No TCP transport, plain HTTP is merged into the HTTP transport.');
+		}
+		o.depends('type', 'trojan');
+		o.depends('type', 'vmess');
+		o.modalonly = true;
+
+		/* gRPC config */
+		o = s.option(form.Value, 'grpc_servicename', _('gRPC service name'));
+		o.depends({'type': 'trojan', 'transport': 'grpc'});
+		o.depends({'type': 'vmess', 'transport': 'grpc'});
+		o.modalonly = true;
+
+		/* HTTP config start */
+		o = s.option(form.DynamicList, 'http_host', _('Host'));
+		o.depends({'type': 'trojan', 'transport': 'http'});
+		o.depends({'type': 'vmess', 'transport': 'http'});
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'http_path', _('Path'));
+		o.depends({'type': 'trojan', 'transport': 'http'});
+		o.depends({'type': 'vmess', 'transport': 'http'});
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'http_method', _('Method'));
+		o.depends({'type': 'trojan', 'transport': 'http'});
+		o.depends({'type': 'vmess', 'transport': 'http'});
+		o.modalonly = true;
+		/* HTTP config end */
+
+		/* WebSocket config start */
+		o = s.option(form.Value, 'ws_host', _('Host'));
+		o.depends({'type': 'trojan', 'transport': 'ws', 'tls': '0'});
+		o.depends({'type': 'vmess', 'transport': 'ws', 'tls': '0'});
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'ws_path', _('Path'));
+		o.depends({'type': 'trojan', 'transport': 'ws'});
+		o.depends({'type': 'vmess', 'transport': 'ws'});
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'websocket_early_data', _('Early data'),
+			_('Allowed payload size is in the request.'));
+		o.datatype = 'uinteger';
+		o.default = '2048';
+		o.depends({'type': 'trojan', 'transport': 'ws'});
+		o.depends({'type': 'vmess', 'transport': 'ws'});
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'websocket_early_data_header', _('Early data header name'),
+			_('Early data is sent in path instead of header by default.') +
+			'<br/>' +
+			_('To be compatible with Xray-core, set this to <code>Sec-WebSocket-Protocol</code>.'));
+		o.default = 'Sec-WebSocket-Protocol';
+		o.depends({'type': 'trojan', 'transport': 'ws'});
+		o.depends({'type': 'vmess', 'transport': 'ws'});
+		o.modalonly = true;
+		/* WebSocket config end */
+
+		/* Transport config end */
+
 		/* TLS config start */
 		o = s.option(form.Flag, 'tls', _('TLS'));
 		o.default = o.disabled;

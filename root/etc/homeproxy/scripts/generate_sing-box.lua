@@ -151,6 +151,16 @@ local function generate_outbound(server)
 			cipher_suites = server.tls_cipher_suites,
 			certificate_path = server.tls_cert_path
 		} or nil,
+		transport = notEmpty(server.transport) and {
+			type = server.transport,
+			host = server.h2_host or server.ws_host,
+			path = server.h2_path or server.ws_path,
+			method = server.h2_method,
+			max_early_data = server.websocket_early_data,
+			early_data_header_name = server.websocket_early_data_header,
+			service_name = server.grpc_servicename
+
+		} or nil,
 		udp_over_tcp = (server.udp_over_tcp == "1") or nil,
 		tcp_fast_open = (server.tcp_fast_open == "1") or nil
 	}
@@ -397,7 +407,18 @@ if enable_server == "1" then
 					cipher_suites = cfg.tls_cipher_suites,
 					certificate_path = cfg.tls_cert_path,
 					key_path = cfg.tls_key_path
-				} or nil
+				} or nil,
+
+				transport = notEmpty(cfg.transport) and {
+					type = cfg.transport,
+					host = cfg.http_host or cfg.ws_host,
+					path = cfg.http_path or cfg.ws_path,
+					method = cfg.http_method,
+					max_early_data = cfg.websocket_early_data,
+					early_data_header_name = cfg.websocket_early_data_header,
+					service_name = cfg.grpc_servicename
+		
+				} or nil,
 			}
 		end
 	end)

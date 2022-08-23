@@ -798,7 +798,7 @@ return view.extend({
 		o.modalonly = true;
 		/* Socks config end */
 
-		/* V2ray config start */
+		/* VMess config start */
 		o = s.option(form.Value, 'v2ray_uuid', _('UUID'));
 		o.depends('type', 'vmess');
 		o.depends({'type': 'v2ray', 'v2ray_protocol': 'vless'});
@@ -845,8 +845,31 @@ return view.extend({
 		o.default = o.enabled;
 		o.depends('type', 'vmess');
 		o.rmempty = false;
-		o.modalonly = true;	
+		o.modalonly = true;
+		/* VMess config end */
 
+		/* Transport config */
+		o = s.option(form.ListValue, 'transport', _('Transport'),
+			_('No TCP transport, plain HTTP is merged into the HTTP transport.'));
+		o.value('', _('TCP'));
+		o.value('grpc', _('gRPC'));
+		o.value('http', _('HTTP'));
+		o.value('quic', _('QUIC'));
+		o.value('ws', _('WebSocket'));
+		o.onchange = function(ev, section_id, value) {
+			var desc = this.map.findElement('id', 'cbid.homeproxy.%s.transport'.format(section_id)).nextElementSibling;
+			if (value === 'http')
+				desc.innerHTML = _('TLS is not enforced. If TLS is not configured, plain HTTP 1.1 is used.');
+			else if (value === 'quic')
+				desc.innerHTML = _('No additional encryption support: It\'s basically duplicate encryption.');
+			else
+				desc.innerHTML = _('No TCP transport, plain HTTP is merged into the HTTP transport.');
+		}
+		o.depends('type', 'trojan');
+		o.depends('type', 'vmess');
+		o.modalonly = true;
+
+		/* V2ray config start */
 		o = s.option(form.ListValue, 'v2ray_transport', _('Transport'));
 		o.value('grpc', _('gRPC'));
 		o.value('h2', _('HTTP/2'));
@@ -862,6 +885,8 @@ return view.extend({
 		/* gRPC config start */
 		o = s.option(form.Value, 'grpc_servicename', _('gRPC service name'));
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'grpc'});
+		o.depends({'type': 'trojan', 'transport': 'grpc'});
+		o.depends({'type': 'vmess', 'transport': 'grpc'});
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'grpc_mode', _('gRPC mode'));
@@ -900,15 +925,20 @@ return view.extend({
 
 		/* HTTP/2 config start */
 		o = s.option(form.DynamicList, 'h2_host', _('Host'));
+		o.depends({'type': 'trojan', 'transport': 'http'});
+		o.depends({'type': 'vmess', 'transport': 'http'});
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'h2'});
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'h2_path', _('Path'));
+		o.depends({'type': 'trojan', 'transport': 'http'});
+		o.depends({'type': 'vmess', 'transport': 'http'});
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'h2'});
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'h2_method', _('Method'));
-		o.default = 'PUT';
+		o.depends({'type': 'trojan', 'transport': 'http'});
+		o.depends({'type': 'vmess', 'transport': 'http'});
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'h2'});
 		o.modalonly = true;
 		/* HTTP/2 config end */
@@ -1002,21 +1032,30 @@ return view.extend({
 
 		/* WebSocket config start */
 		o = s.option(form.Value, 'ws_host', _('Host'));
+		o.depends({'type': 'trojan', 'transport': 'ws', 'tls': '0'});
+		o.depends({'type': 'vmess', 'transport': 'ws', 'tls': '0'});
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'ws', 'tls': '0'});
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'ws_path', _('Path'));
+		o.depends({'type': 'trojan', 'transport': 'ws'});
+		o.depends({'type': 'vmess', 'transport': 'ws'});
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'ws'});
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'websocket_early_data', _('Early data'));
+		o = s.option(form.Value, 'websocket_early_data', _('Early data'),
+			_('Allowed payload size is in the request.'));
 		o.datatype = 'uinteger';
 		o.default = '2048';
+		o.depends({'type': 'trojan', 'transport': 'ws'});
+		o.depends({'type': 'vmess', 'transport': 'ws'});
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'ws'});
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'websocket_early_data_header', _('Early data header name'));
 		o.default = 'Sec-WebSocket-Protocol';
+		o.depends({'type': 'trojan', 'transport': 'ws'});
+		o.depends({'type': 'vmess', 'transport': 'ws'});
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'ws'});
 		o.modalonly = true;
 		/* WebSocket config end */
