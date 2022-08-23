@@ -178,7 +178,7 @@ return view.extend({
 		/* Transport config start */
 		o = s.option(form.ListValue, 'transport', _('Transport'),
 			_('No TCP transport, plain HTTP is merged into the HTTP transport.'));
-		o.value('', _('TCP'));
+		o.value('', _('None'));
 		o.value('grpc', _('gRPC'));
 		o.value('http', _('HTTP'));
 		o.value('quic', _('QUIC'));

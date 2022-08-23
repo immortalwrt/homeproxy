@@ -240,24 +240,7 @@ return view.extend({
 			else
 				desc.innerHTML = _('Outbound node');
 		}
-		so.validate = function(section_id, value) {
-			if (section_id) {
-				if (value === null || value === '')
-					return _('Expecting: %s').format(_('non-empty value'));
-				else {
-					var duplicate = false;
-					uci.sections(data[0], 'routing_node', function(res) {
-						if (res['.name'] !== section_id)
-							if (res.node === value)
-								duplicate = true
-					});
-					if (duplicate)
-						return _('This node was already taken.');
-				}
-			}
-
-			return true;
-		}
+		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'routing_node', 'node');
 
 		so = ss.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
 			_('If set, the server domain name will be resolved to IP before connecting.<br/>dns.strategy will be used if empty.'));
