@@ -536,6 +536,14 @@ return view.extend({
 		so.value('ipv4_only', _('IPv4 only'));
 		so.value('ipv6_only', _('IPv6 only'));
 
+		so = ss.option(form.ListValue, 'resolve_strategy', _('Resolve strategy'),
+			_('Default domain strategy for resolving the domain names.'));
+		so.value('', _('Default'));
+		so.value('prefer_ipv4', _('Prefer IPv4'));
+		so.value('prefer_ipv6', _('Prefer IPv6'));
+		so.value('ipv4_only', _('IPv4 only'));
+		so.value('ipv6_only', _('IPv6 only'));
+
 		so = ss.option(form.ListValue, 'outbound', _('Outbound'),
 			_('Tag of an outbound for connecting to the dns server.'));
 		so.load = function(section_id) {

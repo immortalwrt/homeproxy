@@ -281,8 +281,9 @@ elseif notEmpty(default_outbound) then
 			config.dns.servers[index] = {
 				tag = cfg[".name"] .. "-dns",
 				address = cfg.address,
-				address_resolver = cfg.address_resolver or nil,
-				address_strategy = cfg.address_strategy or nil,
+				address_resolver = cfg.address_resolver,
+				address_strategy = cfg.address_strategy,
+				strategy = cfg.resolve_strategy,
 				detour = get_outbound(cfg.outbound)
 			}
 		end
