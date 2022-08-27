@@ -67,8 +67,8 @@ local function b64decode(str)
 	local padding = #str % 4
 	str = str .. string.sub("====", padding + 1)
 
-	-- Sometimes it ends with "\0", only God knows why.
 	str = nixio.bin.b64decode(str)
+	-- Sometimes it ends with "\0", only God knows why.
 	return str and str:gsub("%z", "") or nil
 end
 -- String parser end
@@ -77,6 +77,10 @@ end
 local sysinit = luci.sys.init
 
 local function md5(str)
+	if isEmpty(str) then
+		return nil
+	end
+
 	local ret = luci.sys.exec("echo -n " .. luci.util.shellquote(urlencode(str)) .. " | md5sum | awk '{print $1}'")
 	return ret:trim()
 end
@@ -93,18 +97,18 @@ end
 
 -- Common var start
 local node_cache = {}
-local node_result = setmetatable({}, {__index = node_cache})
+local node_result = setmetatable({}, { __index = node_cache })
 
 local shadowsocks_encrypt_methods = {
-	-- plain
+	-- Stream
 	"none",
-	-- aead
+	-- AEAD
 	"aes-128-gcm",
 	"aes-192-gcm",
 	"aes-256-gcm",
 	"chacha20-ietf-poly1305",
 	"xchacha20-ietf-poly1305",
-	-- aead 2022
+	-- AEAD 2022
 	"2022-blake3-aes-128-gcm",
 	"2022-blake3-aes-256-gcm",
 	"2022-blake3-chacha20-poly1305"
@@ -317,40 +321,40 @@ local function parse_uri(uri)
 			}
 
 			if config.v2ray_transport == "grpc" then
-				config["grpc_servicename"] = params.serviceName
-				config["grpc_mode"] = params.mode or "gun"
+				config.grpc_servicename = params.serviceName
+				config.grpc_mode = params.mode or "gun"
 			elseif config.v2ray_transport == "http" then
-				config["v2ray_transport"] = "h2"
-				config["h2_host"] = notEmpty(params.host) and urldecode(params.host, true):split(",")
-				config["h2_path"] = urldecode(params.path, true)
+				config.v2ray_transport = "h2"
+				config.h2_host = notEmpty(params.host) and urldecode(params.host, true):split(",")
+				config.h2_path = urldecode(params.path, true)
 			elseif config.v2ray_transport == "kcp" then
-				config["v2ray_transport"] = "mkcp"
-				config["mkcp_seed"] = params.seed
-				config["mkcp_header"] = params.headerType or "none"
+				config.v2ray_transport = "mkcp"
+				config.mkcp_seed = params.seed
+				config.mkcp_header = params.headerType or "none"
 				-- Default settings from v2rayN
-				config["mkcp_downlink_capacity"] = "100"
-				config["mkcp_uplink_capacity"] = "12"
-				config["mkcp_read_buffer_size"] = "2"
-				config["mkcp_write_buffer_size"] = "2"
-				config["mkcp_mtu"] = "1350"
-				config["mkcp_tti"] = "50"
+				config.mkcp_downlink_capacity = "100"
+				config.mkcp_uplink_capacity = "12"
+				config.mkcp_read_buffer_size = "2"
+				config.mkcp_write_buffer_size = "2"
+				config.mkcp_mtu = "1350"
+				config.mkcp_tti = "50"
 			elseif config.v2ray_transport == "quic" then
-				config["quic_security"] = params.quicSecurity or "none"
-				config["quic_key"] = params.key
-				config["mkcp_header"] = params.headerType or "none"
+				config.quic_security = params.quicSecurity or "none"
+				config.quic_key = params.key
+				config.mkcp_header = params.headerType or "none"
 			elseif config.v2ray_transport == "tcp" then
-				config["tcp_header"] = notEmpty(params.headerType) or "none"
+				config.tcp_header = notEmpty(params.headerType) or "none"
 				if config.tcp_header == "http" then
-					config["tcp_host"] = notEmpty(params.host) and urldecode(params.host, true):split(",") or nil
-					config["tcp_path"] = notEmpty(params.path) and urldecode(params.path, true):split(",") or nil
+					config.tcp_host = notEmpty(params.host) and urldecode(params.host, true):split(",") or nil
+					config.tcp_path = notEmpty(params.path) and urldecode(params.path, true):split(",") or nil
 				end
 			elseif config.v2ray_transport == "ws" then
-				config["ws_host"] = (config.tls ~= "1") and urldecode(params.host, true) or nil
-				config["ws_path"] = urldecode(params.path, true)
+				config.ws_host = (config.tls ~= "1") and urldecode(params.host, true) or nil
+				config.ws_path = urldecode(params.path, true)
 				if config.ws_path and config.ws_path:match("\?ed=") then
-					config["websocket_early_data_header"] = "Sec-WebSocket-Protocol"
-					config["websocket_early_data"] = config.ws_path:split("?ed=")[2]
-					config["ws_path"] = config.ws_path:split("?ed=")[1]
+					config.websocket_early_data_header = "Sec-WebSocket-Protocol"
+					config.websocket_early_data = config.ws_path:split("?ed=")[2]
+					config.ws_path = config.ws_path:split("?ed=")[1]
 				end
 			end
 		elseif uri[1] == "vmess" then
@@ -386,40 +390,40 @@ local function parse_uri(uri)
 				tls_alpn = notEmpty(uri.alpn) and uri.alpn:split(",") or nil
 			}
 			if config.v2ray_transport == "grpc" then
-				config["grpc_servicename"] = uri.path
-				config["grpc_mode"] = "gun"
+				config.grpc_servicename = uri.path
+				config.grpc_mode = "gun"
 			elseif config.v2ray_transport == "h2" then
-				config["h2_host"] = notEmpty(uri.host) and uri.host:split(",") or nil
-				config["h2_path"] = uri.path
+				config.h2_host = notEmpty(uri.host) and uri.host:split(",") or nil
+				config.h2_path = uri.path
 			elseif config.v2ray_transport == "kcp" then
-				config["v2ray_transport"] = "mkcp"
-				config["mkcp_seed"] = uri.path
-				config["mkcp_header"] = notEmpty(uri.type) or "none"
+				config.v2ray_transport = "mkcp"
+				config.mkcp_seed = uri.path
+				config.mkcp_header = notEmpty(uri.type) or "none"
 				-- Default settings from v2rayN
-				config["mkcp_downlink_capacity"] = "100"
-				config["mkcp_uplink_capacity"] = "12"
-				config["mkcp_read_buffer_size"] = "2"
-				config["mkcp_write_buffer_size"] = "2"
-				config["mkcp_mtu"] = "1350"
-				config["mkcp_tti"] = "50"
+				config.mkcp_downlink_capacity = "100"
+				config.mkcp_uplink_capacity = "12"
+				config.mkcp_read_buffer_size = "2"
+				config.mkcp_write_buffer_size = "2"
+				config.mkcp_mtu = "1350"
+				config.mkcp_tti = "50"
 			elseif config.v2ray_transport == "quic" then
-				config["quic_security"] = notEmpty(uri.host) or "none"
-				config["quic_key"] = uri.path
-				config["mkcp_header"] = notEmpty(uri.type) or "none"
+				config.quic_security = notEmpty(uri.host) or "none"
+				config.quic_key = uri.path
+				config.mkcp_header = notEmpty(uri.type) or "none"
 			elseif config.v2ray_transport == "tcp" then
-				config["tcp_header"] = (uri.type == "http") and "http" or "none"
+				config.tcp_header = (uri.type == "http") and "http" or "none"
 				if config.tcp_header == "http" then
-					config["tcp_header"] = uri.type
-					config["tcp_host"] = notEmpty(uri.host) and uri.host:split(",") or nil
-					config["tcp_path"] = notEmpty(uri.path) and uri.path:split(",") or nil
+					config.tcp_header = uri.type
+					config.tcp_host = notEmpty(uri.host) and uri.host:split(",") or nil
+					config.tcp_path = notEmpty(uri.path) and uri.path:split(",") or nil
 				end
 			elseif config.v2ray_transport == "ws" then
-				config["ws_host"] = (config.tls ~= "1") and uri.host or nil
-				config["ws_path"] = uri.path
+				config.ws_host = (config.tls ~= "1") and uri.host or nil
+				config.ws_path = uri.path
 				if notEmpty(config.ws_host) and config.ws_host:match("\?ed=") then
-					config["websocket_early_data_header"] = "Sec-WebSocket-Protocol"
-					config["websocket_early_data"] = config.ws_host:split("?ed=")[2]
-					config["ws_host"] = config.ws_host:split("?ed=")[1]
+					config.websocket_early_data_header = "Sec-WebSocket-Protocol"
+					config.websocket_early_data = config.ws_host:split("?ed=")[2]
+					config.ws_host = config.ws_host:split("?ed=")[1]
 				end
 			end
 		end
@@ -430,7 +434,7 @@ local function parse_uri(uri)
 			log(translatef("Skipping invalid %s node: %s.", config.type, config.label or "NULL"))
 			return nil
 		elseif isEmpty(config.label) then
-			config["label"] = config.address .. ":" .. config.port
+			config.label = config.address .. ":" .. config.port
 		end
 	end
 
@@ -485,13 +489,13 @@ local function main()
 						log(translatef("Skipping duplicate node: %s.", config.label))
 					else
 						if config.tls == "1" then
-							config["tls_insecure"] = allow_insecure
+							config.tls_insecure = allow_insecure
 						end
 						if config.type == "v2ray" and table.contains({"vless", "vmess"}, config.v2ray_protocol) then
-							config["v2ray_packet_encoding"] = packet_encoding
+							config.v2ray_packet_encoding = packet_encoding
 						end
 
-						config["grouphash"] = groupHash
+						config.grouphash = groupHash
 						table.insert(node_result[index], config)
 						node_cache[groupHash][config.confHash] = node_result[index][#node_result[index]]
 						node_cache[groupHash][config.nameHash] = node_result[index][#node_result[index]]

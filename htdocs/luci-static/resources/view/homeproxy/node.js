@@ -189,50 +189,50 @@ function parse_share_link(uri) {
 			};
 			switch (config.v2ray_transport) {
 			case 'grpc':
-				config['grpc_servicename'] = params.get('serviceName');
-				config['grpc_mode'] = params.get('mode') || 'gun';
+				config.grpc_servicename = params.get('serviceName');
+				config.grpc_mode = params.get('mode') || 'gun';
 
 				break;
 			case 'http':
-				config['v2ray_transport'] = 'h2';
-				config['h2_host'] = params.get('host') ? decodeURIComponent(params.get('host')).split(',') : null;
-				config['h2_path'] = params.get('path') ? decodeURIComponent(params.get('path')) : null;
+				config.v2ray_transport = 'h2';
+				config.h2_host = params.get('host') ? decodeURIComponent(params.get('host')).split(',') : null;
+				config.h2_path = params.get('path') ? decodeURIComponent(params.get('path')) : null;
 
 				break;
 			case 'kcp':
-				config['v2ray_transport'] = 'mkcp';
-				config['mkcp_seed'] = params.get('seed');
-				config['mkcp_header'] = params.get('headerType') || 'none';
+				config.v2ray_transport = 'mkcp';
+				config.mkcp_seed = params.get('seed');
+				config.mkcp_header = params.get('headerType') || 'none';
 				/* Default settings from v2rayN */
-				config['mkcp_downlink_capacity'] = '100';
-				config['mkcp_uplink_capacity'] = '12';
-				config['mkcp_read_buffer_size'] = '2';
-				config['mkcp_write_buffer_size'] = '2';
-				config['mkcp_mtu'] = '1350';
-				config['mkcp_tti'] = '50';
+				config.mkcp_downlink_capacity = '100';
+				config.mkcp_uplink_capacity = '12';
+				config.mkcp_read_buffer_size = '2';
+				config.mkcp_write_buffer_size = '2';
+				config.mkcp_mtu = '1350';
+				config.mkcp_tti = '50';
 
 				break;
 			case 'quic':
-				config['quic_security'] = params.get('quicSecurity') || 'none';
-				config['quic_key'] = params.get('key');
-				config['mkcp_header'] = params.get('headerType') || 'none';
+				config.quic_security = params.get('quicSecurity') || 'none';
+				config.quic_key = params.get('key');
+				config.mkcp_header = params.get('headerType') || 'none';
 
 				break;
 			case 'tcp':
-				config['tcp_header'] = params.get('headerType') || 'none';
+				config.tcp_header = params.get('headerType') || 'none';
 				if (config.tcp_header === 'http') {
-					config['tcp_host'] = params.get('host') ? decodeURIComponent(params.get('host')).split(',') : null;
-					config['tcp_path'] = params.get('path') ? decodeURIComponent(params.get('path')).split(',') : null;
+					config.tcp_host = params.get('host') ? decodeURIComponent(params.get('host')).split(',') : null;
+					config.tcp_path = params.get('path') ? decodeURIComponent(params.get('path')).split(',') : null;
 				}
 
 				break;
 			case 'ws':
-				config['ws_host'] = config.tls !== '1' ? (params.get('host') ? decodeURIComponent(params.get('host')) : null) : null;
-				config['ws_path'] = params.get('path') ? decodeURIComponent(params.get('path')) : null;
+				config.ws_host = config.tls !== '1' ? (params.get('host') ? decodeURIComponent(params.get('host')) : null) : null;
+				config.ws_path = params.get('path') ? decodeURIComponent(params.get('path')) : null;
 				if (config.ws_path && config.ws_path.includes('?ed=')) {
-					config['websocket_early_data_header'] = 'Sec-WebSocket-Protocol';
-					config['websocket_early_data'] = config.ws_path.split('?ed=')[1];
-					config['ws_path'] = config.ws_path.split('?ed=')[0];
+					config.websocket_early_data_header = 'Sec-WebSocket-Protocol';
+					config.websocket_early_data = config.ws_path.split('?ed=')[1];
+					config.ws_path = config.ws_path.split('?ed=')[0];
 				}
 
 				break;
@@ -267,49 +267,49 @@ function parse_share_link(uri) {
 			};
 			switch (config.v2ray_transport) {
 			case 'grpc':
-				config['grpc_servicename'] = uri.path;
-				config['grpc_mode'] = 'gun';
+				config.grpc_servicename = uri.path;
+				config.grpc_mode = 'gun';
 				
 				break;
 			case 'h2':
-				config['h2_host'] = uri.host ? uri.host.split(',') : null;
-				config['h2_path'] = uri.path;
+				config.h2_host = uri.host ? uri.host.split(',') : null;
+				config.h2_path = uri.path;
 
 				break;
 			case 'kcp':
-				config['v2ray_transport'] = 'mkcp';
-				config['mkcp_seed'] = uri.path;
-				config['mkcp_header'] = uri.type || 'none';
+				config.v2ray_transport = 'mkcp';
+				config.mkcp_seed = uri.path;
+				config.mkcp_header = uri.type || 'none';
 				/* Default settings from v2rayN */
-				config['mkcp_downlink_capacity'] = '100';
-				config['mkcp_uplink_capacity'] = '12';
-				config['mkcp_read_buffer_size'] = '2';
-				config['mkcp_write_buffer_size'] = '2';
-				config['mkcp_mtu'] = '1350';
-				config['mkcp_tti'] = '50';
+				config.mkcp_downlink_capacity = '100';
+				config.mkcp_uplink_capacity = '12';
+				config.mkcp_read_buffer_size = '2';
+				config.mkcp_write_buffer_size = '2';
+				config.mkcp_mtu = '1350';
+				config.mkcp_tti = '50';
 
 				break;
 			case 'quic':
-				config['quic_security'] = uri.host || 'none';
-				config['quic_key'] = uri.path;
-				config['mkcp_header'] = uri.type || 'none';
+				config.quic_security = uri.host || 'none';
+				config.quic_key = uri.path;
+				config.mkcp_header = uri.type || 'none';
 
 				break;
 			case 'tcp':
-				config['tcp_header'] = uri.type === "http" ? "http" : 'none';
+				config.tcp_header = uri.type === "http" ? "http" : 'none';
 				if (config.tcp_header === 'http') {
-					config['tcp_host'] = uri.host ? uri.host.split(',') : null;
-					config['tcp_path'] = uri.path ? uri.path.split(',') : null;
+					config.tcp_host = uri.host ? uri.host.split(',') : null;
+					config.tcp_path = uri.path ? uri.path.split(',') : null;
 				}
 
 				break;
 			case 'ws':
-				config['ws_host'] = config.tls !== '1' ? uri.host : null;
-				config['ws_path'] = uri.path;
+				config.ws_host = config.tls !== '1' ? uri.host : null;
+				config.ws_path = uri.path;
 				if (config.ws_path && config.ws_path.includes('?ed=')) {
-					config['websocket_early_data_header'] = 'Sec-WebSocket-Protocol';
-					config['websocket_early_data'] = config.ws_path.split('?ed=')[1];
-					config['ws_path'] = config.ws_path.split('?ed=')[0];
+					config.websocket_early_data_header = 'Sec-WebSocket-Protocol';
+					config.websocket_early_data = config.ws_path.split('?ed=')[1];
+					config.ws_path = config.ws_path.split('?ed=')[0];
 				}
 
 				break;
@@ -323,7 +323,7 @@ function parse_share_link(uri) {
 		if (!config.address || !config.port)
 			return null;
 		else if (!config.label)
-			config['label'] = config.address + ':' + config.port;
+			config.label = config.address + ':' + config.port;
 	}
 
 	return config;
@@ -512,9 +512,9 @@ return view.extend({
 									var config = parse_share_link(s);
 									if (config) {
 										if (config.tls === '1')
-											config['tls_insecure'] = allow_insecure
+											config.tls_insecure = allow_insecure
 										if (config.type === 'v2ray' && ['vless', 'vmess'].includes(config.v2ray_protocol))
-											config['v2ray_packet_encoding'] = packet_encoding
+											config.v2ray_packet_encoding = packet_encoding
 
 										var sid = uci.add(data[0], 'node');
 										Object.keys(config).forEach(function(k) {
