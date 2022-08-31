@@ -8,6 +8,7 @@ require "luci.jsonc"
 require "luci.model.uci"
 require "luci.sys"
 require "luci.util"
+require "nixio.fs"
 
 -- i18n start
 local syslang = uci:get("luci", "main", "lang") or "auto"
@@ -610,7 +611,7 @@ elseif notEmpty(default_outbound) then
 end
 -- Routing rules end
 
-luci.sys.call("mkdir -p /var/run/homeproxy/")
+nixio.fs.mkdirr("/var/run/homeproxy")
 local conffile = io.open("/var/run/homeproxy/sing-box.json", "w")
 conffile:write(JSON.dump(config, 1))
 conffile:close()

@@ -139,7 +139,7 @@ end
 -- UCI config end
 
 -- Log start
-luci.sys.call("mkdir -p /var/run/homeproxy/")
+nixio.fs.mkdirr("/var/run/homeproxy")
 
 local logfile = io.open("/var/run/homeproxy/homeproxy.log", "a")
 local function log(...)
