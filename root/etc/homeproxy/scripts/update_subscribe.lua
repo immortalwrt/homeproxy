@@ -124,7 +124,7 @@ local function filter_check(res)
 
 	local ret
 	for _, keyword in ipairs(filter_keywords) do
-		if res:find(keyword, 1, false) then
+		if res:match(keyword) then
 			ret = true
 		end
 	end

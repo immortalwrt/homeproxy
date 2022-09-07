@@ -211,8 +211,8 @@ return view.extend({
 
 		ss = o.subsection;
 		ss.addremove = true;
-		ss.nodescriptions = true;
 		ss.sortable = true;
+		ss.nodescriptions = true;
 		ss.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('Routing node') + ' » ' + label : _('Add a routing node');
@@ -267,6 +267,7 @@ return view.extend({
 
 			this.value('', _('Direct'))
 			uci.sections(data[0], 'routing_node', (res) => {
+				console.log(res)
 				if (res['.name'] !== section_id && res.enabled === '1')
 					this.value(res['.name'], res.label);
 			});
@@ -289,15 +290,14 @@ return view.extend({
 
 			return true;
 		}
-		so.editable = true;
 
 		o = s.option(form.SectionValue, '_routing_rule', form.GridSection, 'routing_rule', _('Routing rules'));
 		o.depends('routing_mode', 'custom');
 
 		ss = o.subsection;
 		ss.addremove = true;
-		ss.nodescriptions = true;
 		ss.sortable = true;
+		ss.nodescriptions = true;
 		ss.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('Routing rule') + ' » ' + label : _('Add a routing rule');
@@ -477,8 +477,8 @@ return view.extend({
 
 		ss = o.subsection;
 		ss.addremove = true;
-		ss.nodescriptions = true;
 		ss.sortable = true;
+		ss.nodescriptions = true;
 		ss.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('DNS server') + ' » ' + label : _('Add a DNS server');
@@ -565,8 +565,8 @@ return view.extend({
 
 		ss = o.subsection;
 		ss.addremove = true;
-		ss.nodescriptions = true;
 		ss.sortable = true;
+		ss.nodescriptions = true;
 		ss.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('DNS rule') + ' » ' + label : _('Add a DNS rule');

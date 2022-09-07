@@ -39,7 +39,7 @@ var hp_dir = '/var/run/homeproxy';
 var hp_geoupdater = '/etc/homeproxy/scripts/update_geodata.sh';
 
 function getInstanceStatus(instance) {
-	return L.resolveDefault(callServiceList('homeproxy'), {}).then(function (res) {
+	return L.resolveDefault(callServiceList('homeproxy'), {}).then((res) => {
 		var isRunning = false;
 		try {
 			isRunning = res['homeproxy']['instances'][instance]['running'];
@@ -53,9 +53,9 @@ return view.extend({
 		return Promise.all([
 			getInstanceStatus('sing-box'),
 			getInstanceStatus('v2ray'),
-			fs.read(hp_dir + '/homeproxy.log', 'text') .then(function(res) {
+			fs.read(hp_dir + '/homeproxy.log', 'text') .then((res) => {
 				return res.trim() || _('Log is clean.');
-			}).catch(function(err) {
+			}).catch((err) => {
 				var log;
 				if (err.toString().includes('NotFoundError'))
 					log = _('Log is not found.');

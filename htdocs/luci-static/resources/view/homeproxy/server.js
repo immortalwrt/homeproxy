@@ -33,8 +33,8 @@ return view.extend({
 
 		s = m.section(form.GridSection, 'server');
 		s.addremove = true;
-		s.nodescriptions = true;
 		s.sortable = true;
+		s.nodescriptions = true;
 		s.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('Server') + ' » ' + label : _('Add a server');

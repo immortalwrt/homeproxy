@@ -471,8 +471,8 @@ return view.extend({
 
 		s = m.section(form.GridSection, 'node');
 		s.addremove = true;
-		s.nodescriptions = true;
 		s.sortable = true;
+		s.nodescriptions = true;
 		s.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label') || uci.get(data[0], section_id, 'address');
 			return label ? _('Node') + ' » ' + label : _('Add a node');
