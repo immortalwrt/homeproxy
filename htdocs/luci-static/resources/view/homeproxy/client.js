@@ -8,7 +8,6 @@
 'require poll';
 'require rpc';
 'require uci';
-'require ui';
 'require validation';
 'require view';
 'require tools.homeproxy as hp';
@@ -218,9 +217,7 @@ return view.extend({
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('Routing node') + ' » ' + label : _('Add a routing node');
 		}
-		ss.sectiontitle = function(section_id) {
-			return uci.get(data[0], section_id, 'label');
-		}
+		ss.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
 		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
 		so = ss.option(form.Value, 'label', _('Label'));
@@ -305,9 +302,7 @@ return view.extend({
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('Routing rule') + ' » ' + label : _('Add a routing rule');
 		}
-		ss.sectiontitle = function(section_id) {
-			return uci.get(data[0], section_id, 'label');
-		}
+		ss.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
 		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
 		so = ss.option(form.Value, 'label', _('Label'));
@@ -488,9 +483,7 @@ return view.extend({
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('DNS server') + ' » ' + label : _('Add a DNS server');
 		}
-		ss.sectiontitle = function(section_id) {
-			return uci.get(data[0], section_id, 'label');
-		}
+		ss.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
 		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
 		so = ss.option(form.Value, 'label', _('Label'));
@@ -578,9 +571,7 @@ return view.extend({
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('DNS rule') + ' » ' + label : _('Add a DNS rule');
 		}
-		ss.sectiontitle = function(section_id) {
-			return uci.get(data[0], section_id, 'label');
-		}
+		ss.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
 		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
 		so = ss.option(form.Value, 'label', _('Label'));

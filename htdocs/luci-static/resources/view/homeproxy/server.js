@@ -39,10 +39,8 @@ return view.extend({
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('Server') + ' » ' + label : _('Add a server');
 		}
-		s.sectiontitle = function(section_id) {
-			return uci.get(data[0], section_id, 'label');
-		}
-		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
+		s.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
+		s.renderSectionAdd = L.bind(hp.renderSectionAdd, this, s);
 
 		o = s.option(form.Value, 'label', _('Label'));
 		o.load = L.bind(hp.loadDefaultLabel, this, data[0]);

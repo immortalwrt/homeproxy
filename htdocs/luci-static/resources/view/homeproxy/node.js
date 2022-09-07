@@ -477,10 +477,8 @@ return view.extend({
 			var label = uci.get(data[0], section_id, 'label') || uci.get(data[0], section_id, 'address');
 			return label ? _('Node') + ' » ' + label : _('Add a node');
 		}
-		s.sectiontitle = function(section_id) {
-			return uci.get(data[0], section_id, 'label');
-		}
-		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
+		s.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
+		s.renderSectionAdd = L.bind(hp.renderSectionAdd, this, s);
 
 		/* Import subscription links start */
 		/* Thanks to luci-app-shadowsocks-libev
@@ -580,10 +578,7 @@ return view.extend({
 		}
 
 		o = s.option(form.Value, 'label', _('Label'));
-		o.load = function(section_id) {
-			return uci.get(data[0], section_id, 'label') || section_id;
-		}
-		 L.bind(hp.loadDefaultLabel, this, data[0]);
+		o.load = L.bind(hp.loadDefaultLabel, this, data[0]);
 		o.validate = L.bind(hp.validateUniqueValue, this, data[0], 'node', 'label');
 		o.modalonly = true;
 
