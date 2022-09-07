@@ -109,10 +109,12 @@ local function generate_outbound(server)
 
 	local outbound = {
 		type = server.type,
-		tag = server[".name"] .. "-out",
+		tag = "cfg-" .. server[".name"] .. "-out",
 
-		server = server.address,
-		server_port = tonumber(server.port),
+		server = (server.type ~= "direct") and server.address or nil,
+		server_port = (server.type ~= "direct") and tonumber(server.port) or nil,
+		override_address = (server.type == "direct") and server.address or nil,
+		override_port = (server.type == "direct") and server.port or nil,
 
 		username = server.username,
 		password = server.password,
@@ -187,15 +189,27 @@ local function get_outbound(cfg)
 		return nil
 	end
 
-	if cfg:startswith("cfg") then
+	if table.contains({"direct-out", "block-out"}, cfg) then
+		return cfg
+	else
 		local node = uci:get(uciconfig, cfg, "node")
 		if isEmpty(node) then
 			error(translatef("%s's node is missing, please check your configuration.", cfg))
 		else
-			return node
+			return "cfg-" .. node .. "-out"
 		end
-	else
+	end
+end
+
+local function get_resolver(cfg)
+	if isEmpty(cfg) then
+		return nil
+	end
+
+	if table.contains({"default-dns", "block-dns"}, cfg) then
 		return cfg
+	else
+		return "cfg-" .. cfg .. "-dns"
 	end
 end
 
@@ -287,9 +301,9 @@ elseif notEmpty(default_outbound) then
 		if cfg.enabled == "1" then
 			local index = #config.dns.servers + 1
 			config.dns.servers[index] = {
-				tag = cfg[".name"] .. "-dns",
+				tag = "cfg-" .. cfg[".name"] .. "-dns",
 				address = cfg.address,
-				address_resolver = cfg.address_resolver,
+				address_resolver = get_resolver(cfg.address_resolver),
 				address_strategy = cfg.address_strategy,
 				strategy = cfg.resolve_strategy,
 				detour = get_outbound(cfg.outbound)
@@ -475,7 +489,7 @@ end
 if notEmpty(default_outbound) then
 	uci:foreach(uciconfig, uciroutingnode, function(cfg)
 		if cfg.enabled == "1" then
-			local outbound = uci:get_all(uciconfig, cfg.node:gsub("-out$", "")) or {}
+			local outbound = uci:get_all(uciconfig, cfg.node) or {}
 			local index = #config.outbounds + 1
 			if table.contains(native_protocols, outbound.type) then
 				config.outbounds[index] = generate_outbound(outbound)

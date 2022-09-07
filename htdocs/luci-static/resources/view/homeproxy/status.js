@@ -76,33 +76,31 @@ return view.extend({
 
 		o = s.option(form.DummyValue, '_service_status', _('Service status'));
 		o.cfgvalue = function() {
-			var _this = this;
 			var strongTemp = '<strong style="color:%s">%s: %s</strong>'
 
 			var res = data[0] ? strongTemp.format('green', 'Sing-box', _('RUNNING')) : strongTemp.format('red', 'Sing-box', _('NOT RUNNING'));
 			res += '<br/>'
 			res += data[1] ? strongTemp.format('green', 'V2ray', _('RUNNING')) : strongTemp.format('red', 'V2ray', _('NOT RUNNING'));
-			_this.default = spanTemp.format(res);
+			this.default = spanTemp.format(res);
 		}
 		o.rawhtml = true;
 
 		o = s.option(form.DummyValue, '_geodata_version', _('GeoData version'));
 		o.cfgvalue = function() {
-			var _this = this;
-			return fs.exec(hp_geoupdater, [ 'get_version' ]).then(function(res) {
+			return fs.exec(hp_geoupdater, [ 'get_version' ]).then((res) => {
 				var errSpanTemp = '<div style="margin-top:13px;margin-left:3px;"><strong style="color:red">%s<strong></div>';
 
 				if (res.stdout.trim())
-					_this.default = spanTemp.format(res.stdout.trim());
+					this.default = spanTemp.format(res.stdout.trim());
 				else {
 					ui.addNotification(null, E('p', [ _('Unknown error: %s').format(res) ]));
-					_this.default = errSpanTemp.format(_('unknown error'));
+					this.default = errSpanTemp.format(_('unknown error'));
 				}
 
 				return null;
-			}).catch(function(err) {
+			}).catch((err) => {
 				ui.addNotification(null, E('p', [ _('Unknown error: %s').format(err) ]));
-				_this.default = errSpanTemp.format(_('unknown error'));
+				this.default = errSpanTemp.format(_('unknown error'));
 
 				return null;
 			});
@@ -112,23 +110,21 @@ return view.extend({
 		o = s.option(form.Button, '_update_geodata', _('Update GeoData'));
 		o.inputstyle = 'action';
 		o.onclick = function() {
-			var _this = this;
-
-			return fs.exec(hp_geoupdater, [ 'update_version' ]).then(function (res) {
+			return fs.exec(hp_geoupdater, [ 'update_version' ]).then((res) => {
 					if (res.code === 0)
-						_this.description = _('Successfully updated');
+						this.description = _('Successfully updated');
 					else if (res.code === 1)
-						_this.description = _('Update failed');
+						this.description = _('Update failed');
 					else if (res.code === 2)
-						_this.description = _('Already in updating');
+						this.description = _('Already in updating');
 					else if (res.code === 3)
-						_this.description = _('Already at the latest version');
+						this.description = _('Already at the latest version');
 
-				return _this.map.reset();
-			}).catch(function (err) {
+				return this.map.reset();
+			}).catch((err) => {
 				ui.addNotification(null, E('p', [ _('Unknown error: %s').format(err) ]));
-				_this.description = _('Update failed');
-				return _this.map.reset();
+				this.description = _('Update failed');
+				return this.map.reset();
 			});
 		}
 

@@ -33,17 +33,22 @@ return view.extend({
 
 		s = m.section(form.GridSection, 'server');
 		s.addremove = true;
-		s.anonymous = true;
 		s.nodescriptions = true;
 		s.sortable = true;
 		s.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('Server') + ' » ' + label : _('Add a server');
 		}
+		s.sectiontitle = function(section_id) {
+			return uci.get(data[0], section_id, 'label');
+		}
+		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
 		o = s.option(form.Value, 'label', _('Label'));
+		o.load = L.bind(hp.loadDefaultLabel, this, data[0]);
 		o.validate = L.bind(hp.validateUniqueValue, this, data[0], 'server', 'label');
 		o.rmempty = false;
+		o.modalonly = true;
 
 		o = s.option(form.Flag, 'enabled', _('Enable'));
 		o.default = o.disabled;
@@ -311,7 +316,7 @@ return view.extend({
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends('tls', '1');
-		o.onclick = L.bind(hp.uploadCertificate, this, 'certificate', 'server_publickey');
+		o.onclick = L.bind(hp.uploadCertificate, this, _('certificate'), 'server_publickey');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'tls_key_path', _('Key path'),
@@ -329,7 +334,7 @@ return view.extend({
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends('tls', '1');
-		o.onclick = L.bind(hp.uploadCertificate, this, 'private key', 'server_privatekey');
+		o.onclick = L.bind(hp.uploadCertificate, this, _('private key'), 'server_privatekey');
 		o.modalonly = true;
 		/* TLS config end */
 
@@ -348,7 +353,7 @@ return view.extend({
 		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
 			_('If set, the requested domain name will be resolved to IP before routing.'));
 		for (var i in hp.dns_strategy)
-			so.value(i, _(hp.dns_strategy[i]))
+			o.value(i, _(hp.dns_strategy[i]))
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'network', _('Network'));

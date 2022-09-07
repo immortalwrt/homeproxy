@@ -8,6 +8,7 @@
 'require poll';
 'require rpc';
 'require uci';
+'require ui';
 'require validation';
 'require view';
 'require tools.homeproxy as hp';
@@ -21,7 +22,7 @@ var callServiceList = rpc.declare({
 });
 
 function getServiceStatus() {
-	return L.resolveDefault(callServiceList('homeproxy'), {}).then(function (res) {
+	return L.resolveDefault(callServiceList('homeproxy'), {}).then((res) => {
 		var isRunning = false;
 		try {
 			isRunning = res['homeproxy']['instances']['sing-box']['running'];
@@ -75,10 +76,9 @@ return view.extend({
 			_('The modern ImmortalWrt proxy platform for ARM64/AMD64.'));
 
 		s = m.section(form.TypedSection);
-		s.anonymous = true;
 		s.render = function () {
 			poll.add(function () {
-				return L.resolveDefault(getServiceStatus()).then(function (res) {
+				return L.resolveDefault(getServiceStatus()).then((res) => {
 					var view = document.getElementById('service_status');
 					view.innerHTML = renderStatus(res);
 				});
@@ -91,7 +91,7 @@ return view.extend({
 
 		/* Cache all configured proxy nodes, they will be called multiple times. */
 		var proxy_nodes = {};
-		uci.sections(data[0], 'node', function(res) {
+		uci.sections(data[0], 'node', (res) => {
 			proxy_nodes[res['.name']] = 
 				String.format('[%s] %s', res.type === 'v2ray' ? res.type + '/' + res.v2ray_protocol : res.type,
 					res.label || res.server + ':' + res.server_port);
@@ -125,7 +125,7 @@ return view.extend({
 		o.default = 'bypass_mainland_china';
 		o.rmempty = false;
 		o.onchange = function(ev, section_id, value) {
-			if (value === 'custom')
+			if (section_id && value === 'custom')
 				this.map.save(null, true);
 		}
 
@@ -167,7 +167,7 @@ return view.extend({
 		o.default = '8.8.8.8';
 		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.validate = function(section_id, value) {
-			if (!['local', 'wan'].includes(value)
+			if (section_id && !['local', 'wan'].includes(value)
 					&& !(validation.parseIPv4(value) || validation.parseIPv6(value)))
 				return _('Expecting: %s').format(_('valid IP address'));
 
@@ -188,13 +188,12 @@ return view.extend({
 			delete this.keylist;
 			delete this.vallist;
 
-			var _this = this;
-			_this.value('nil', _('Disable'));
-			_this.value('direct-out', _('Direct'));
-			_this.value('block-out', _('Block'));
-			uci.sections(data[0], 'routing_node', function(res) {
+			this.value('nil', _('Disable'));
+			this.value('direct-out', _('Direct'));
+			this.value('block-out', _('Block'));
+			uci.sections(data[0], 'routing_node', (res) => {
 				if (res.enabled === '1')
-					_this.value(res['.name'], res.label);
+					this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);
@@ -213,16 +212,21 @@ return view.extend({
 
 		ss = o.subsection;
 		ss.addremove = true;
-		ss.anonymous = true;
 		ss.nodescriptions = true;
 		ss.sortable = true;
 		ss.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('Routing node') + ' » ' + label : _('Add a routing node');
 		}
+		ss.sectiontitle = function(section_id) {
+			return uci.get(data[0], section_id, 'label');
+		}
+		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
 		so = ss.option(form.Value, 'label', _('Label'));
+		so.load = L.bind(hp.loadDefaultLabel, this, data[0]);
 		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'routing_node', 'label');
+		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
 		so.rmempty = false;
@@ -231,16 +235,18 @@ return view.extend({
 		so = ss.option(form.ListValue, 'node', _('Node'),
 			_('Outbound node'));
 		for (var i in proxy_nodes)
-			so.value(i + '-out', proxy_nodes[i]);
+			so.value(i, proxy_nodes[i]);
 		so.onchange = function(ev, section_id, value) {
-			var nodetype = uci.get(data[0], value.replace(/\-out$/, ''), 'type');
+			var nodetype = uci.get(data[0], value, 'type');
 			var desc = this.map.findElement('id', 'cbid.homeproxy.%s.node'.format(section_id)).nextElementSibling;
+
 			if (!hp.native_protocols.includes(nodetype))
 				desc.innerHTML = _('<strong>The node you selected is not natively supported, the fields below are unavailable.</strong>');
 			else
 				desc.innerHTML = _('Outbound node');
 		}
 		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'routing_node', 'node');
+		so.editable = true;
 
 		so = ss.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
 			_('If set, the server domain name will be resolved to IP before connecting.<br/>dns.strategy will be used if empty.'));
@@ -253,6 +259,7 @@ return view.extend({
 		so.multiple = false;
 		so.noaliases = true;
 		so.nobridges = true;
+		so.depends('outbound', '');
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'outbound', _('Outbound'),
@@ -261,12 +268,10 @@ return view.extend({
 			delete this.keylist;
 			delete this.vallist;
 
-			var _this = this;
-			_this.value('', _('Default'))
-			_this.value('direct-out', _('Direct'))
-			uci.sections(data[0], 'routing_node', function(res) {
+			this.value('', _('Direct'))
+			uci.sections(data[0], 'routing_node', (res) => {
 				if (res['.name'] !== section_id && res.enabled === '1')
-					_this.value(res['.name'], res.label);
+					this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);
@@ -276,7 +281,7 @@ return view.extend({
 				var node = this.map.lookupOption('node', section_id)[0].formvalue(section_id);
 
 				var conflict = false;
-				uci.sections(data[0], 'routing_node', function(res) {
+				uci.sections(data[0], 'routing_node', (res) => {
 					if (res['.name'] !== section_id)
 						if (res.outbound === section_id && res['.name'] == value)
 							conflict = true;
@@ -287,22 +292,28 @@ return view.extend({
 
 			return true;
 		}
+		so.editable = true;
 
 		o = s.option(form.SectionValue, '_routing_rule', form.GridSection, 'routing_rule', _('Routing rules'));
 		o.depends('routing_mode', 'custom');
 
 		ss = o.subsection;
 		ss.addremove = true;
-		ss.anonymous = true;
 		ss.nodescriptions = true;
 		ss.sortable = true;
 		ss.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('Routing rule') + ' » ' + label : _('Add a routing rule');
 		}
+		ss.sectiontitle = function(section_id) {
+			return uci.get(data[0], section_id, 'label');
+		}
+		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
 		so = ss.option(form.Value, 'label', _('Label'));
+		so.load = L.bind(hp.loadDefaultLabel, this, data[0]);
 		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'routing_rule', 'label');
+		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
 		so.default = so.disabled;
@@ -416,17 +427,17 @@ return view.extend({
 			delete this.keylist;
 			delete this.vallist;
 
-			var _this = this;
-			_this.value('direct-out', _('Direct'));
-			_this.value('block-out', _('Block'));
-			uci.sections(data[0], 'routing_node', function(res) {
+			this.value('direct-out', _('Direct'));
+			this.value('block-out', _('Block'));
+			uci.sections(data[0], 'routing_node', (res) => {
 				if (res.enabled === '1')
-					_this.value(res['.name'], res.label);
+					this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);
 		}
 		so.rmempty = false;
+		so.editable = true;
 
 		o = s.option(form.SectionValue, '_dns', form.NamedSection, 'dns', 'homeproxy', _('DNS settings'));
 		o.depends('routing_mode', 'custom');
@@ -445,11 +456,11 @@ return view.extend({
 			delete this.keylist;
 			delete this.vallist;
 
-			var _this = this;
-			_this.value('default-dns', _('Default DNS (issued by WAN)'));
-			uci.sections(data[0], 'dns_server', function(res) {
+			this.value('default-dns', _('Default DNS (issued by WAN)'));
+			this.value('block-dns', _('Block DNS queries'));
+			uci.sections(data[0], 'dns_server', (res) => {
 				if (res.enabled === '1')
-					_this.value(res['.name'] + '-dns', res.label);
+					this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);
@@ -471,16 +482,21 @@ return view.extend({
 
 		ss = o.subsection;
 		ss.addremove = true;
-		ss.anonymous = true;
 		ss.nodescriptions = true;
 		ss.sortable = true;
 		ss.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('DNS server') + ' » ' + label : _('Add a DNS server');
 		}
+		ss.sectiontitle = function(section_id) {
+			return uci.get(data[0], section_id, 'label');
+		}
+		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
 		so = ss.option(form.Value, 'label', _('Label'));
+		so.load = L.bind(hp.loadDefaultLabel, this, data[0]);
 		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'dns_server', 'label');
+		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
 		so.default = so.disabled;
@@ -497,12 +513,11 @@ return view.extend({
 			delete this.keylist;
 			delete this.vallist;
 
-			var _this = this;
-			_this.value('', _('None'));
-			_this.value('default-dns', _('Default DNS (issued by WAN)'));
-			uci.sections(data[0], 'dns_server', function(res) {
+			this.value('', _('None'));
+			this.value('default-dns', _('Default DNS (issued by WAN)'));
+			uci.sections(data[0], 'dns_server', (res) => {
 				if (res['.name'] !== section_id && res.enabled === '1')
-					_this.value(res['.name'] + '-dns', res.label);
+					this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);
@@ -510,9 +525,9 @@ return view.extend({
 		so.validate = function(section_id, value) {
 			if (section_id && value) {
 				var conflict = false;
-				uci.sections(data[0], 'dns_server', function(res) {
+				uci.sections(data[0], 'dns_server', (res) => {
 					if (res['.name'] !== section_id)
-						if (res.address_resolver === section_id + '-dns' && res['.name'] + '-dns' == value)
+						if (res.address_resolver === section_id && res['.name'] == value)
 							conflict = true;
 				});
 				if (conflict)
@@ -540,33 +555,38 @@ return view.extend({
 			delete this.keylist;
 			delete this.vallist;
 
-			var _this = this;
-			_this.value('direct-out', _('Direct'));
-			uci.sections(data[0], 'routing_node', function(res) {
+			this.value('direct-out', _('Direct'));
+			uci.sections(data[0], 'routing_node', (res) => {
 				if (res.enabled === '1')
-					_this.value(res['.name'], res.label);
+					this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);
 		}
 		so.default = 'direct-out';
 		so.rmempty = false;
+		so.editable = true;
 
 		o = s.option(form.SectionValue, '_dns_rule', form.GridSection, 'dns_rule', _('DNS rules'));
 		o.depends('routing_mode', 'custom');
 
 		ss = o.subsection;
 		ss.addremove = true;
-		ss.anonymous = true;
 		ss.nodescriptions = true;
 		ss.sortable = true;
 		ss.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label');
 			return label ? _('DNS rule') + ' » ' + label : _('Add a DNS rule');
 		}
+		ss.sectiontitle = function(section_id) {
+			return uci.get(data[0], section_id, 'label');
+		}
+		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
 		so = ss.option(form.Value, 'label', _('Label'));
+		so.load = L.bind(hp.loadDefaultLabel, this, data[0]);
 		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'dns_rule', 'label');
+		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
 		so.default = so.disabled;
@@ -670,12 +690,11 @@ return view.extend({
 			delete this.keylist;
 			delete this.vallist;
 
-			var _this = this;
-			_this.value('direct-out', _('Direct'));
-			_this.value('block-out', _('Block'));
-			uci.sections(data[0], 'routing_node', function(res) {
+			this.value('direct-out', _('Direct'));
+			this.value('block-out', _('Block'));
+			uci.sections(data[0], 'routing_node', (res) => {
 				if (res.enabled === '1')
-					_this.value(res['.name'], res.label);
+					this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);
@@ -688,17 +707,17 @@ return view.extend({
 			delete this.keylist;
 			delete this.vallist;
 
-			var _this = this;
-			_this.value('default-dns', _('Default DNS (issued by WAN)'));
-			_this.value('block-dns', _('Block DNS queries'));
-			uci.sections(data[0], 'dns_server', function(res) {
+			this.value('default-dns', _('Default DNS (issued by WAN)'));
+			this.value('block-dns', _('Block DNS queries'));
+			uci.sections(data[0], 'dns_server', (res) => {
 				if (res.enabled === '1')
-					_this.value(res['.name'] + '-dns', res.label);
+					this.value(res['.name'], res.label);
 			});
 
 			return this.super('load', section_id);
 		}
 		so.rmempty = false;
+		so.editable = true;
 
 		so = ss.option(form.Flag, 'dns_disable_cache', _('Disable dns cache'),
 			_('Disable cache and save cache in this query.'));

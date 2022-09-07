@@ -388,7 +388,7 @@ return view.extend({
 			_('Drop/keep node(s) that contain the specific keywords. <a target="_blank" href="https://www.lua.org/pil/20.2.html">Regex</a> is supported.'));
 		o.depends({'filter_nodes': 'disabled', '!reverse': true});
 
-		o = s.option(form.Flag, 'allow_insecure_in_subs', _('Allow insecure in subscriptions'),
+		o = s.option(form.Flag, 'allow_insecure_in_subs', _('Allow insecure'),
 			_('Allow insecure connection by default when add nodes form subscriptions.') +
 			'<br/>' +
 			_('This is <b>DANGEROUS</b>, your traffic is almost like <b>PLAIN TEXT</b>! Use at your own risk!'));
@@ -423,13 +423,11 @@ return view.extend({
 			}
 		}
 		o.onclick = function() {
-			var _this = this;
-
-			return fs.exec('/etc/homeproxy/scripts/update_subscribe.lua').then(function (res) {
+			return fs.exec('/etc/homeproxy/scripts/update_subscribe.lua').then((res) => {
 				return location.reload();
-			}).catch(function (err) {
+			}).catch((err) => {
 				ui.addNotification(null, E('p', _('An error occurred during updating subscriptions: %s').format(err)));
-				return _this.map.reset();
+				return this.map.reset();
 			});
 		}
 
@@ -437,8 +435,8 @@ return view.extend({
 		o.inputstyle = 'reset';
 		o.inputtitle = function() {
 			var subnodes = [];
-			uci.sections(data[0], 'node', function(res) {
-				if (res.grouphash || res.nameHash)
+			uci.sections(data[0], 'node', (res) => {
+				if (res.grouphash)
 					subnodes = subnodes.concat(res['.name'])
 			});
 
@@ -451,8 +449,8 @@ return view.extend({
 		}
 		o.onclick = function() {
 			var subnodes = [];
-			uci.sections(data[0], 'node', function(res) {
-				if (res.grouphash || res.nameHash)
+			uci.sections(data[0], 'node', (res) => {
+				if (res.grouphash)
 					subnodes = subnodes.concat(res['.name'])
 			});
 
@@ -473,13 +471,16 @@ return view.extend({
 
 		s = m.section(form.GridSection, 'node');
 		s.addremove = true;
-		s.anonymous = true;
 		s.nodescriptions = true;
 		s.sortable = true;
 		s.modaltitle = function(section_id) {
 			var label = uci.get(data[0], section_id, 'label') || uci.get(data[0], section_id, 'address');
 			return label ? _('Node') + ' » ' + label : _('Add a node');
 		}
+		s.sectiontitle = function(section_id) {
+			return uci.get(data[0], section_id, 'label');
+		}
+		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
 		/* Import subscription links start */
 		/* Thanks to luci-app-shadowsocks-libev
@@ -505,10 +506,10 @@ return view.extend({
 								input_links = input_links.reduce((pre, cur) =>
 									(!pre.includes(cur) && pre.push(cur), pre), []);
 
+								var allow_insecure = uci.get(data[0], 'subscription', 'allow_insecure_in_subs') || '0';
+								var packet_encoding = uci.get(data[0], 'subscription', 'default_packet_encoding') || 'xudp';
 								var imported_node = 0;
-								input_links.forEach(function(s) {
-									var allow_insecure = uci.get(data[0], 'subscription', 'allow_insecure_in_subs') || '0';
-									var packet_encoding = uci.get(data[0], 'subscription', 'default_packet_encoding') || 'xudp';
+								input_links.forEach((s) => {
 									var config = parse_share_link(s);
 									if (config) {
 										if (config.tls === '1')
@@ -516,8 +517,9 @@ return view.extend({
 										if (config.type === 'v2ray' && ['vless', 'vmess'].includes(config.v2ray_protocol))
 											config.v2ray_packet_encoding = packet_encoding
 
-										var sid = uci.add(data[0], 'node');
-										Object.keys(config).forEach(function(k) {
+										var nameHash = hp.calcStringMD5(config.label);
+										var sid = uci.add(data[0], 'node', nameHash);
+										Object.keys(config).forEach((k) => {
 											uci.set(data[0], sid, k, config[k]);
 										});
 										imported_node++;
@@ -570,7 +572,7 @@ return view.extend({
 				}
 			}
 		}
-		o.onclick = function(_, section_id) {
+		o.onclick = function(ev, section_id) {
 			uci.set(data[0], 'config', 'main_server', section_id);
 			ui.changes.apply(true);
 
@@ -578,9 +580,15 @@ return view.extend({
 		}
 
 		o = s.option(form.Value, 'label', _('Label'));
+		o.load = function(section_id) {
+			return uci.get(data[0], section_id, 'label') || section_id;
+		}
+		 L.bind(hp.loadDefaultLabel, this, data[0]);
 		o.validate = L.bind(hp.validateUniqueValue, this, data[0], 'node', 'label');
+		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'type', _('Type'));
+		o.value('direct', _('Direct'));
 		o.value('http', _('HTTP'));
 		o.value('hysteria', _('Hysteria'));
 		o.value('shadowsocks', _('Shadowsocks'));
@@ -640,6 +648,15 @@ return view.extend({
 
 			return true;
 		}
+		o.modalonly = true;
+
+		/* Direct config */
+		o = s.option(form.ListValue, 'proxy_protocol', _('Proxy protocol'),
+			_('Write Proxy Protocol in the connection header.'));
+		o.value('', _('Disable'));
+		o.value('1');
+		o.value('2');
+		o.depends('type', 'direct');
 		o.modalonly = true;
 
 		/* Hysteria config start */
@@ -1262,7 +1279,7 @@ return view.extend({
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends('tls_self_sign', '1');
-		o.onclick = L.bind(hp.uploadCertificate, this, 'certificate', 'client_ca');
+		o.onclick = L.bind(hp.uploadCertificate, this, _('certificate'), 'client_ca');
 		o.modalonly = true;
 		/* TLS config end */
 

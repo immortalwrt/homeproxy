@@ -10,6 +10,29 @@ require "luci.sys"
 require "luci.util"
 require "nixio"
 
+-- UCI config start
+local uci = luci.model.uci.cursor()
+
+local uciconfig = "homeproxy"
+local ucimain = "config"
+local ucinode = "node"
+local ucisubscription = "subscription"
+
+local allow_insecure = uci:get(uciconfig, ucisubscription, "allow_insecure_in_subs") or "0"
+local filter_mode = uci:get(uciconfig, ucisubscription, "filter_nodes") or "disabled"
+local filter_keywords = uci:get(uciconfig, ucisubscription, "filter_words") or {}
+local packet_encoding = uci:get(uciconfig, ucisubscription, "default_packet_encoding") or "xudp"
+local subscription_urls = uci:get(uciconfig, ucisubscription, "subscription_url") or {}
+local via_proxy = uci:get(uciconfig, ucisubscription, "update_via_proxy") or "0"
+
+local routing_mode = uci:get(uciconfig, ucimain, "routing_mode") or "bypass_mainland_china"
+local main_server, main_udp_server
+if routing_mode ~= "custom" then
+	main_server = uci:get(uciconfig, ucimain, "main_server") or "nil"
+	main_udp_server = uci:get(uciconfig, ucimain, "main_udp_server") or "nil"
+end
+-- UCI config end
+
 -- i18n start
 local syslang = uci:get("luci", "main", "lang") or "auto"
 luci.i18n.setlanguage(syslang)
@@ -93,6 +116,24 @@ local function curl(url)
 	local stdout = luci.sys.exec("curl -fsL --connect-timeout '10' --retry '3' " .. luci.util.shellquote(url))
 	return stdout:trim()
 end
+
+local function filter_check(res)
+	if isEmpty(res) or filter_mode == "disabled" then
+		return false
+	end
+
+	local ret
+	for _, keyword in ipairs(filter_keywords) do
+		if res:find(keyword, 1, false) then
+			ret = true
+		end
+	end
+	if filter_mode == "whitelist" then
+		ret = not ret
+	end
+
+	return ret
+end
 -- Utilities end
 
 -- Common var start
@@ -115,29 +156,6 @@ local shadowsocks_encrypt_methods = {
 }
 -- Common var end
 
--- UCI config start
-local uci = luci.model.uci.cursor()
-
-local uciconfig = "homeproxy"
-local ucimain = "config"
-local ucinode = "node"
-local ucisubscription = "subscription"
-
-local allow_insecure = uci:get(uciconfig, ucisubscription, "allow_insecure_in_subs") or "0"
-local filter_mode = uci:get(uciconfig, ucisubscription, "filter_nodes") or "disabled"
-local filter_keywords = uci:get(uciconfig, ucisubscription, "filter_words") or {}
-local packet_encoding = uci:get(uciconfig, ucisubscription, "default_packet_encoding") or "xudp"
-local subscription_urls = uci:get(uciconfig, ucisubscription, "subscription_url") or {}
-local via_proxy = uci:get(uciconfig, ucisubscription, "update_via_proxy") or "0"
-
-local routing_mode = uci:get(uciconfig, ucimain, "routing_mode") or "bypass_mainland_china"
-local main_server, main_udp_server
-if routing_mode ~= "custom" then
-	main_server = uci:get(uciconfig, ucimain, "main_server") or "nil"
-	main_udp_server = uci:get(uciconfig, ucimain, "main_udp_server") or "nil"
-end
--- UCI config end
-
 -- Log start
 nixio.fs.mkdirr("/var/run/homeproxy")
 
@@ -146,25 +164,6 @@ local function log(...)
 	logfile:write(os.date("%Y-%m-%d %H:%M:%S [SUBSCRIBE] ") .. table.concat({...}, " ") .. "\n")
 end
 -- Log end
-
-local function filter_check(res)
-	if isEmpty(res) or filter_mode == "disabled" then
-		return false
-	end
-
-	local ret
-	for _, keyword in ipairs(filter_keywords) do
-		if res:find(keyword, 1, false) then
-			ret = true
-		end
-	end
-	if filter_mode == "whitelist" then
-		ret = not ret
-	end
-
-	return ret
-end
--- UCI config end
 
 local function parse_uri(uri)
 	local config
@@ -319,7 +318,6 @@ local function parse_uri(uri)
 				v2ray_xtls = (params.security == "xtls") and "1" or "0",
 				v2ray_xtls_flow = params.flow
 			}
-
 			if config.v2ray_transport == "grpc" then
 				config.grpc_servicename = params.serviceName
 				config.grpc_mode = params.mode or "gun"
@@ -372,7 +370,7 @@ local function parse_uri(uri)
 				return nil
 			-- https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
 			elseif notEmpty(uri.aid) and tonumber(uri.aid) ~= 0 then
-				log(translatef("Skipping outdated VMess node: %s.", uri.ps or uri.add))
+				log(translatef("Skipping legacy VMess node: %s.", notEmpty(uri.ps) or uri.add))
 				return nil
 			end
 
@@ -462,7 +460,7 @@ local function main()
 				nodes = JSON.parse(res).servers or JSON.parse(res)
 				if nodes[1].server and nodes[1].method then
 					for i, _ in ipairs(nodes) do
-						nodes[i].nodetype = "sip008"
+						setmetatable(nodes[i], { __index = {nodetype = "sip008"} })
 					end
 				end
 			else
@@ -479,12 +477,11 @@ local function main()
 				if notEmpty(config) then
 					local label = config.label
 					config.label = nil
-					setmetatable(config, { __index = {confHash = md5(JSON.dump(config))} })
+					setmetatable(config, { __index = {confHash = md5(JSON.dump(config)), nameHash = md5(JSON.dump(label))} })
 					config.label = label
-					config.nameHash = md5(label)
 
 					if filter_check(config.label) then
-						log(translatef("Skipping blacklist node: %s.", config.label)
+						log(translatef("Skipping blacklist node: %s.", config.label))
 					elseif node_cache[groupHash][config.confHash] or node_cache[groupHash][config.nameHash] then
 						log(translatef("Skipping duplicate node: %s.", config.label))
 					else
@@ -525,21 +522,20 @@ local function main()
 
 	local added, removed = 0, 0
 	uci:foreach(uciconfig, ucinode, function(cfg)
-		if cfg.grouphash or cfg.nameHash then
-			if not node_result[cfg.grouphash] or not node_result[cfg.grouphash][cfg.nameHash] then
+		if cfg.grouphash then
+			if not node_result[cfg.grouphash] or not node_result[cfg.grouphash][cfg[".name"]] then
 				uci:delete(uciconfig, cfg[".name"])
 				removed = removed + 1
 			else
-				uci:tset(uciconfig, cfg[".name"], node_result[cfg.grouphash][cfg.nameHash])
-				setmetatable(node_result[cfg.grouphash][cfg.nameHash], { __index = {isExisting = true} })
+				uci:tset(uciconfig, cfg[".name"], node_result[cfg.grouphash][cfg[".name"]])
+				setmetatable(node_result[cfg.grouphash][cfg[".name"]], { __index = {isExisting = true} })
 			end
 		end
 	end)
 	for _, nodes in ipairs(node_result) do
 		for _, node in ipairs(nodes) do
 			if not node.isExisting then
-				local cfgvalue = uci:add(uciconfig, ucinode)
-				uci:tset(uciconfig, cfgvalue, node)
+				uci:section(uciconfig, ucinode, node.nameHash, node)
 				added = added + 1
 			end
 		end
@@ -554,7 +550,7 @@ local function main()
 				uci:set(uciconfig, ucimain, "main_server", first_server)
 				uci:commit(uciconfig)
 				need_restart = true
-				log(translate("Main node is gone, switching to first node."))
+				log(translate("Main node is gone, switching to the first node."))
 			end
 
 			if notEmpty(main_udp_server) and main_udp_server ~= "same" then
@@ -562,7 +558,7 @@ local function main()
 					uci:set(uciconfig, ucimain, "main_udp_server", first_server)
 					uci:commit(uciconfig)
 					need_restart = true
-					log(translate("UDP node is gone, switching to first node."))
+					log(translate("UDP node is gone, switching to the first node."))
 				end
 			end
 		else
