@@ -118,7 +118,7 @@ local function curl(url)
 end
 
 local function filter_check(res)
-	if isEmpty(res) or filter_mode == "disabled" then
+	if isEmpty(res) or filter_mode == "disabled" or isEmpty(filter_words) then
 		return false
 	end
 

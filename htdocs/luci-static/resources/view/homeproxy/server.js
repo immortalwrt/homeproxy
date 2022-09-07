@@ -340,6 +340,7 @@ return view.extend({
 		o = s.option(form.Flag, 'tcp_fast_open', _('TCP fast open'),
 			_('Enable tcp fast open for listener.'));
 		o.default = o.disabled;
+		o.depends({'network': 'udp', '!reverse': true});
 		o.rmempty = false;
 		o.modalonly = true;
 
@@ -352,6 +353,13 @@ return view.extend({
 			_('If set, the requested domain name will be resolved to IP before routing.'));
 		for (var i in hp.dns_strategy)
 			o.value(i, _(hp.dns_strategy[i]))
+		o.modalonly = true;
+
+		o = s.option(form.Flag, 'proxy_protocol', _('Proxy protocol'),
+			_('Parse Proxy Protocol in the connection header.'));
+		o.default = o.disabled;
+		o.depends({'network': 'udp', '!reverse': true});
+		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'network', _('Network'));

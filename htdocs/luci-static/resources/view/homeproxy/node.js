@@ -387,6 +387,7 @@ return view.extend({
 		o = s.option(form.DynamicList, 'filter_words', _('Filter keywords'),
 			_('Drop/keep node(s) that contain the specific keywords. <a target="_blank" href="https://www.lua.org/pil/20.2.html">Regex</a> is supported.'));
 		o.depends({'filter_nodes': 'disabled', '!reverse': true});
+		o.rmempty = false;
 
 		o = s.option(form.Flag, 'allow_insecure_in_subs', _('Allow insecure'),
 			_('Allow insecure connection by default when add nodes form subscriptions.') +
