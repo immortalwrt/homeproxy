@@ -113,8 +113,7 @@ return baseclass.extend({
 			return b;
 		}(e);
 		f = function(b) {
-			var c = b.length;
-			var a = c + 8;
+			var c = b.length, a = c + 8;
 			for (var d = 16 * ((a - a % 64) / 64 + 1), e = Array(d - 1), f = 0, g = 0; g < c;)
 				a = (g - g % 4) / 4, f = g % 4 * 8, e[a] |= b.charCodeAt(g) << f, g++;
 			a = (g - g % 4) / 4; e[a] |= 128 << g % 4 * 8; e[d - 2] = c << 3; e[d - 1] = c >>> 29;
@@ -169,7 +168,7 @@ return baseclass.extend({
 		if (padding)
 			str = str + Array(padding + 1).join('=');
 
-		return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {
+		return decodeURIComponent(Array.prototype.map.call(atob(str), (c) => {
 			return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
 		}).join(''));
 	},
@@ -191,7 +190,7 @@ return baseclass.extend({
 
 			if (!v) {
 				button.disabled = true;
-				return _('Expecting: %s').format(_('non-empty value'));
+				return true;
 			}
 			if (uci.get(uciconfig, v)) {
 				button.disabled = true;
@@ -231,13 +230,13 @@ return baseclass.extend({
 				return _('Expecting: %s').format(_('non-empty value'));
 			else {
 				var duplicate = false;
-				uci.sections(uciconfig, ucisection, function(res) {
+				uci.sections(uciconfig, ucisection, (res) => {
 					if (res['.name'] !== section_id)
 						if (res[ucioption] === value)
 							duplicate = true
 				});
 				if (duplicate)
-					return _('The %s was already taken.').format(_(ucioption));
+					return _('This %s was already taken.').format(_(ucioption));
 			}
 		}
 	

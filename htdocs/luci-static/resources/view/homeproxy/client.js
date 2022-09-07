@@ -142,7 +142,7 @@ return view.extend({
 				var ports = [];
 				for (var i of value.split(',')) {
 					var port = parseInt(i);
-					if (port.toString() == 'NaN' || port.toString() !== i || port < 1 || port > 65535)
+					if (port.toString() == 'NaN' || port.toString() !== i || port < 0 || port > 65535)
 						return _('Expecting: %s').format(_('valid port value'));
 					if (ports.includes(i))
 						return _('Port %s alrealy exists, please enter other ones.').format(port);

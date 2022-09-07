@@ -137,6 +137,7 @@ local function generate_outbound(server)
 		security = server.v2ray_vmess_encrypt,
 		global_padding = server.vmess_global_padding and (server.vmess_global_padding == "1") or nil,
 		authenticated_length = server.vmess_authenticated_length and (server.vmess_authenticated_length == "1") or nil,
+		packet_addr = server.vmess_packet_addr and (server.vmess_packet_addr == "1") or nil,
 		-- WireGuard
 		local_address = server.wireguard_local_address,
 		private_key = server.wireguard_private_key,

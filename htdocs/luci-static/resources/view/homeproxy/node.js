@@ -858,6 +858,12 @@ return view.extend({
 		o.depends('type', 'vmess');
 		o.rmempty = false;
 		o.modalonly = true;
+
+		o = s.option(form.Flag, 'vmess_packet_addr', _('Packet encoding support'));
+		o.default = o.enabled;
+		o.depends('type', 'vmess');
+		o.rmempty = false;
+		o.modalonly = true;
 		/* VMess config end */
 
 		/* Transport config */
