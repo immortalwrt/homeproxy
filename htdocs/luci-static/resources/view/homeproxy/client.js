@@ -141,8 +141,8 @@ return view.extend({
 
 				var ports = [];
 				for (var i of value.split(',')) {
-					var port = parseInt(i);
-					if (port.toString() == 'NaN' || port.toString() !== i || port < 0 || port > 65535)
+					var port = validation.parseInteger(i);
+					if (!port || port.toString() !== i || port < 0 || port > 65535)
 						return _('Expecting: %s').format(_('valid port value'));
 					if (ports.includes(i))
 						return _('Port %s alrealy exists, please enter other ones.').format(port);
@@ -213,10 +213,7 @@ return view.extend({
 		ss.addremove = true;
 		ss.sortable = true;
 		ss.nodescriptions = true;
-		ss.modaltitle = function(section_id) {
-			var label = uci.get(data[0], section_id, 'label');
-			return label ? _('Routing node') + ' » ' + label : _('Add a routing node');
-		}
+		ss.modaltitle = L.bind(hp.loadModalTitle, this, _('Routing node'), _('Add a routing node'), data[0]);
 		ss.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
 		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
@@ -298,10 +295,7 @@ return view.extend({
 		ss.addremove = true;
 		ss.sortable = true;
 		ss.nodescriptions = true;
-		ss.modaltitle = function(section_id) {
-			var label = uci.get(data[0], section_id, 'label');
-			return label ? _('Routing rule') + ' » ' + label : _('Add a routing rule');
-		}
+		ss.modaltitle = L.bind(hp.loadModalTitle, this, _('Routing rule'), _('Add a routing rule'), data[0]);
 		ss.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
 		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
@@ -479,10 +473,7 @@ return view.extend({
 		ss.addremove = true;
 		ss.sortable = true;
 		ss.nodescriptions = true;
-		ss.modaltitle = function(section_id) {
-			var label = uci.get(data[0], section_id, 'label');
-			return label ? _('DNS server') + ' » ' + label : _('Add a DNS server');
-		}
+		ss.modaltitle = L.bind(hp.loadModalTitle, this, _('DNS server'), _('Add a DNS server'), data[0]);
 		ss.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
 		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
@@ -567,10 +558,7 @@ return view.extend({
 		ss.addremove = true;
 		ss.sortable = true;
 		ss.nodescriptions = true;
-		ss.modaltitle = function(section_id) {
-			var label = uci.get(data[0], section_id, 'label');
-			return label ? _('DNS rule') + ' » ' + label : _('Add a DNS rule');
-		}
+		ss.modaltitle = L.bind(hp.loadModalTitle, this, _('DNS rule'), _('Add a DNS rule'), data[0]);
 		ss.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
 		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 

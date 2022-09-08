@@ -181,6 +181,11 @@ return baseclass.extend({
 			return ucisection;
 	},
 
+	loadModalTitle: function(title, addtitle, uciconfig, ucisection) {
+		var label = uci.get(uciconfig, ucisection, 'label');
+		return label ? title + ' » ' + label : addtitle;
+	},
+
 	renderSectionAdd: function(section, extra_class) {
 		var el = form.GridSection.prototype.renderSectionAdd.apply(section, [ extra_class ]),
 			nameEl = el.querySelector('.cbi-section-create-name');
@@ -191,8 +196,7 @@ return baseclass.extend({
 			if (!v) {
 				button.disabled = true;
 				return true;
-			}
-			if (uci.get(uciconfig, v)) {
+			} else if (uci.get(uciconfig, v)) {
 				button.disabled = true;
 				return _('Expecting: %s').format(_('unique UCI identifier'));
 			} else {
@@ -204,7 +208,7 @@ return baseclass.extend({
 		return el;
 	},
 
-	uploadCertificate: function(type, filename, ev) {
+	uploadCertificate: function(option, type, filename, ev) {
 		L.resolveDefault(fs.exec('/bin/mkdir', [ '-p', '/etc/homeproxy/certs/' ]));
 
 		return ui.uploadFile(String.format('/etc/homeproxy/certs/%s.pem', filename), ev.target)
@@ -217,11 +221,11 @@ return baseclass.extend({
 			}
 
 			ui.addNotification(null, E('p', _('Your %s was successfully uploaded. Size: %sB.').format(type, res.size)));
-		}, this, ev.target))
+		}, option, ev.target))
 		.catch(function(e) { ui.addNotification(null, E('p', e.message)) })
 		.finally(L.bind(function(btn, input) {
 			btn.firstChild.data = _('Upload...');
-		}, this, ev.target));
+		}, option, ev.target));
 	},
 
 	validateUniqueValue: function(uciconfig, ucisection, ucioption, section_id, value) {

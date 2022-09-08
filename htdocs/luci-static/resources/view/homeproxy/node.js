@@ -49,12 +49,11 @@ function parse_share_link(uri) {
 			try {
 				/* "Lovely" Shadowrocket format */
 				try {
-					var suri = uri[1].split('#');
-					var slabel = '';
+					var suri = uri[1].split('#'), slabel = '';
 					if (suri.length <= 2) {
 						if (suri.length === 2)
 							slabel = '#' + suri[1];
-						uri = [null, hp.decodeBase64Str(suri[0]) + slabel];
+						uri[1] = hp.decodeBase64Str(suri[0]) + slabel;
 					}
 				} catch(e) { }
 
@@ -96,7 +95,7 @@ function parse_share_link(uri) {
 				if (uri.length < 2)
 					return null;
 				else if (uri.length > 2)
-					uri = [uri.slice(0, -1).join('@'), uri.slice(-1).toString()];
+					uri = [ uri.slice(0, -1).join('@'), uri.slice(-1).toString() ];
 
 				var method = uri[0].split(':')[0];
 				var password = uri[0].split(':').slice(1).join(':');
@@ -240,6 +239,7 @@ function parse_share_link(uri) {
 
 			break;
 		case 'vmess':
+			/* "Lovely" shadowrocket format */
 			if (uri.includes('&'))
 				return null;
 
@@ -474,17 +474,12 @@ return view.extend({
 		s.addremove = true;
 		s.sortable = true;
 		s.nodescriptions = true;
-		s.modaltitle = function(section_id) {
-			var label = uci.get(data[0], section_id, 'label') || uci.get(data[0], section_id, 'address');
-			return label ? _('Node') + ' » ' + label : _('Add a node');
-		}
+		s.modaltitle = L.bind(hp.loadModalTitle, this, _('Node'), _('Add a node'), data[0]);
 		s.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
 		s.renderSectionAdd = L.bind(hp.renderSectionAdd, this, s);
 
 		/* Import subscription links start */
-		/* Thanks to luci-app-shadowsocks-libev
-		 * Yousong Zhou <yszhou4tech@gmail.com>
-		 */
+		/* Thanks to luci-app-shadowsocks-libev */
 		s.handleLinkImport = function() {
 			var textarea = new ui.Textarea();
 			ui.showModal(_('Import share links'), [
@@ -1281,7 +1276,7 @@ return view.extend({
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends('tls_self_sign', '1');
-		o.onclick = L.bind(hp.uploadCertificate, this, _('certificate'), 'client_ca');
+		o.onclick = L.bind(hp.uploadCertificate, this, o, _('certificate'), 'client_ca');
 		o.modalonly = true;
 		/* TLS config end */
 

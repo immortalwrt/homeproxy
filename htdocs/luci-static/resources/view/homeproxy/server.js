@@ -35,10 +35,7 @@ return view.extend({
 		s.addremove = true;
 		s.sortable = true;
 		s.nodescriptions = true;
-		s.modaltitle = function(section_id) {
-			var label = uci.get(data[0], section_id, 'label');
-			return label ? _('Server') + ' » ' + label : _('Add a server');
-		}
+		s.modaltitle = L.bind(hp.loadModalTitle, this, _('Server'), _('Add a server'), data[0]);
 		s.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
 		s.renderSectionAdd = L.bind(hp.renderSectionAdd, this, s);
 
@@ -314,7 +311,7 @@ return view.extend({
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends('tls', '1');
-		o.onclick = L.bind(hp.uploadCertificate, this, _('certificate'), 'server_publickey');
+		o.onclick = L.bind(hp.uploadCertificate, this, o, _('certificate'), 'server_publickey');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'tls_key_path', _('Key path'),
@@ -332,7 +329,7 @@ return view.extend({
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends('tls', '1');
-		o.onclick = L.bind(hp.uploadCertificate, this, _('private key'), 'server_privatekey');
+		o.onclick = L.bind(hp.uploadCertificate, this, o, _('private key'), 'server_privatekey');
 		o.modalonly = true;
 		/* TLS config end */
 
