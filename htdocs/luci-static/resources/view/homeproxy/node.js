@@ -939,6 +939,7 @@ return view.extend({
 
 		/* HTTP/2 config start */
 		o = s.option(form.DynamicList, 'h2_host', _('Host'));
+		o.datatype = 'hostname';
 		o.depends({'type': 'trojan', 'transport': 'http'});
 		o.depends({'type': 'vmess', 'transport': 'http'});
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'h2'});
@@ -1036,6 +1037,7 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.DynamicList, 'tcp_host', _('Host'));
+		o.datatype = 'hostname';
 		o.depends({'type': 'v2ray', 'v2ray_transport': 'tcp', 'tcp_header': 'http'});
 		o.modalonly = true;
 
@@ -1109,6 +1111,7 @@ return view.extend({
 		/* Wireguard config start */
 		o = s.option(form.DynamicList, 'wireguard_local_address', _('Local address'),
 			_('List of IP (v4 or v6) addresses (optionally with CIDR masks) to be assigned to the interface.'));
+		o.datatype = 'cidr';
 		o.depends('type', 'wireguard');
 		o.rmempty = false;
 		o.modalonly = true;

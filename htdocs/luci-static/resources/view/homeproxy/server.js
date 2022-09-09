@@ -204,6 +204,7 @@ return view.extend({
 
 		/* HTTP config start */
 		o = s.option(form.DynamicList, 'http_host', _('Host'));
+		o.datatype = 'hostname';
 		o.depends({'type': 'trojan', 'transport': 'http'});
 		o.depends({'type': 'vmess', 'transport': 'http'});
 		o.modalonly = true;
