@@ -250,6 +250,10 @@ local function parse_uri(uri)
 			if notEmpty(url.query) and url.query.plugin then
 				local plugin_info = url.query.plugin:split(";")
 				plugin = plugin_info[1]
+				if plugin == "simple-obfs" then
+					-- Fix non-standard plugin name
+					plugin = "obfs-local"
+				end
 				if #plugin_info >= 2 then
 					plugin_opts = table.concat(table.splice(plugin_info, 1, 1), ";")
 				end
@@ -273,8 +277,7 @@ local function parse_uri(uri)
 
 			config = {
 				label = b64decode(params.remarks),
-				type = "v2ray",
-				v2ray_protocol = "shadowsocksr",
+				type = "shadowsocksr",
 				address = userinfo[1],
 				port = userinfo[2],
 				shadowsocksr_encrypt_method = userinfo[4],

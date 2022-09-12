@@ -23,6 +23,7 @@ return baseclass.extend({
 		'http',
 		'hysteria',
 		'shadowsocks',
+		'shadowsocksr',
 		'socks',
 		'trojan',
 		'vmess',

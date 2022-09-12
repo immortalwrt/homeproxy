@@ -98,7 +98,7 @@ elseif table.contains({"all", "nil"}, routing_port) then
 else
 	routing_port = routing_port:split(",")
 end
-local native_protocols = { "http", "hysteria", "shadowsocks", "socks", "trojan", "vmess", "wireguard" }
+local native_protocols = { "http", "hysteria", "shadowsocks", "shadowsocksr", "socks", "trojan", "vmess", "wireguard" }
 -- UCI config end
 
 -- Config helper start
@@ -131,9 +131,14 @@ local function generate_outbound(node)
 		recv_window = tonumber(node.hysteria_revc_window),
 		disable_mtu_discovery = (node.hysteria_disable_mtu_discovery == "1") or nil,
 		-- Shadowsocks
-		method = node.shadowsocks_encrypt_method,
+		method = node.shadowsocks_encrypt_method or node.shadowsocksr_encrypt_method,
 		plugin = node.shadowsocks_plugin,
 		plugin_opts = node.shadowsocks_plugin_opts,
+		-- ShadowsocksR
+		protocol = node.shadowsocksr_protocol,
+		protocol_param = node.shadowsocksr_protocol_param,
+		obfs = node.shadowsocksr_obfs,
+		obfs_param = node.shadowsocksr_obfs_param,
 		-- Socks
 		version = node.socks_version,
 		-- VMess
@@ -281,7 +286,6 @@ config.dns = {
 			address = "rcode://name_error"
 		},
 	},
-	final = "default-dns",
 	strategy = dns_strategy,
 	disable_cache = (dns_disable_cache == "1"),
 	disable_expire = (dns_disable_cache_expire == "1")
@@ -313,6 +317,8 @@ if notEmpty(main_node) then
 			}
 		}
 	end
+
+	config.dns.final = "default-dns"
 elseif notEmpty(default_outbound) then
 	-- DNS servers
 	uci:foreach(uciconfig, ucidnsserver, function(cfg)
