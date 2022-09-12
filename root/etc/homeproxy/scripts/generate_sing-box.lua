@@ -132,6 +132,8 @@ local function generate_outbound(node)
 		disable_mtu_discovery = (node.hysteria_disable_mtu_discovery == "1") or nil,
 		-- Shadowsocks
 		method = node.shadowsocks_encrypt_method,
+		plugin = node.shadowsocks_plugin,
+		plugin_opts = node.shadowsocks_plugin_opts,
 		-- Socks
 		version = node.socks_version,
 		-- VMess
@@ -167,8 +169,8 @@ local function generate_outbound(node)
 			certificate_path = node.tls_cert_path,
 			ech = (node.enable_ech == "1") and {
 				enabled = true,
-				pq_signature_schemes_enabled = (node.tls_ech_enable_pqss == "1"),
 				dynamic_record_sizing_disabled = (node.tls_ech_tls_enable_drs ~= "1"),
+				pq_signature_schemes_enabled = (node.tls_ech_enable_pqss == "1"),
 				config = node.tls_ech_config
 			} or nil,
 			utls = notEmpty(node.tls_utls) and {

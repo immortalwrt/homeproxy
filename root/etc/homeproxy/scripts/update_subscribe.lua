@@ -257,8 +257,7 @@ local function parse_uri(uri)
 
 			config = {
 				label = urldecode(url.fragment, true),
-				type = plugin and "v2ray" or "shadowsocks",
-				v2ray_protocol = plugin and "shadowsocks" or nil,
+				type = "shadowsocks",
 				address = url.host,
 				port = url.port,
 				shadowsocks_encrypt_method = userinfo[1],
