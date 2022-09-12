@@ -230,7 +230,7 @@ return baseclass.extend({
 
 	validateUniqueValue: function(uciconfig, ucisection, ucioption, section_id, value) {
 		if (section_id) {
-			if (value === null || value === '')
+			if (!value)
 				return _('Expecting: %s').format(_('non-empty value'));
 			else {
 				var duplicate = false;

@@ -20,7 +20,7 @@ local ucisubscription = "subscription"
 
 local allow_insecure = uci:get(uciconfig, ucisubscription, "allow_insecure_in_subs") or "0"
 local filter_mode = uci:get(uciconfig, ucisubscription, "filter_nodes") or "disabled"
-local filter_keywords = uci:get(uciconfig, ucisubscription, "filter_words") or {}
+local filter_keywords = uci:get(uciconfig, ucisubscription, "filter_keywords") or {}
 local packet_encoding = uci:get(uciconfig, ucisubscription, "default_packet_encoding") or "xudp"
 local subscription_urls = uci:get(uciconfig, ucisubscription, "subscription_url") or {}
 local via_proxy = uci:get(uciconfig, ucisubscription, "update_via_proxy") or "0"
@@ -118,7 +118,7 @@ local function curl(url)
 end
 
 local function filter_check(res)
-	if isEmpty(res) or filter_mode == "disabled" or isEmpty(filter_words) then
+	if isEmpty(res) or filter_mode == "disabled" or isEmpty(filter_keywords) then
 		return false
 	end
 
@@ -178,7 +178,7 @@ local function parse_uri(uri)
 
 			config = {
 				label = uri.remarks,
-				type = notEmpty(uri.plugin) and "v2ray" or "shadowsocks",
+				type = "shadowsocks",
 				v2ray_protocol = notEmpty(uri.plugin) and "shadowsocks" or nil,
 				address = uri.server,
 				port = uri.server_port,

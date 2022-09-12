@@ -361,11 +361,13 @@ return view.extend({
 		o.rmempty = false;
 
 		o = s.option(form.DynamicList, 'subscription_url', _('Subscription URL'),
-			_('Support Hysteria, Shadowsocks(R), Trojan, V2RayN(G), and VLESS online configuration delivery standard.'));
+			_('Support Hysteria, Shadowsocks(R), Trojan, v2rayN (VMess), and XTLS (VLESS) online configuration delivery standard.'));
 		o.validate = function(section_id, value) {
-			if (section_id && value !== null && value !== '') {
+			if (section_id && value) {
 				try {
-					new URL(value);
+					var url = new URL(value);
+					if (!url.hostname)
+						return _('Expecting: %s').format(_('valid URL'));
 				}
 				catch(e) {
 					return _('Expecting: %s').format(_('valid URL'));
@@ -383,7 +385,7 @@ return view.extend({
 		o.default = 'disabled';
 		o.rmempty = false;
 
-		o = s.option(form.DynamicList, 'filter_words', _('Filter keywords'),
+		o = s.option(form.DynamicList, 'filter_keywords', _('Filter keywords'),
 			_('Drop/keep node(s) that contain the specific keywords. <a target="_blank" href="https://www.lua.org/pil/20.2.html">Regex</a> is supported.'));
 		o.depends({'filter_nodes': 'disabled', '!reverse': true});
 		o.rmempty = false;
@@ -481,7 +483,7 @@ return view.extend({
 		s.handleLinkImport = function() {
 			var textarea = new ui.Textarea();
 			ui.showModal(_('Import share links'), [
-				E('p', _('Support Hysteria, Shadowsocks(R), Trojan, V2RayN(G), and VLESS online configuration delivery standard.')),
+				E('p', _('Support Hysteria, Shadowsocks(R), Trojan, v2rayN (VMess), and XTLS (VLESS) online configuration delivery standard.')),
 				textarea.render(),
 				E('div', { class: 'right' }, [
 					E('button', {
@@ -646,12 +648,22 @@ return view.extend({
 		o.depends('v2ray_protocol', 'trojan');
 		o.depends({'v2ray_protocol': 'socks', 'socks_version': '5'});
 		o.validate = function(section_id, value) {
-			if (section_id && (value === null || value === '')) {
-				var required_type = ['shadowsocks', 'shadowsocksr', 'trojan'];
+			if (section_id) {
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
-				var v2ray_protocol = this.map.lookupOption('v2ray_protocol', section_id)[0].formvalue(section_id) || '';
-				if (required_type.includes(type) || required_type.includes(v2ray_protocol))
-					return _('Expecting: %s').format(_('non-empty value'));
+				var v2ray_type = this.map.lookupOption('v2ray_protocol', section_id)[0].formvalue(section_id) || '';
+
+				var required_type = [ 'shadowsocks', 'shadowsocksr', 'trojan' ];
+				if (required_type.includes(type) || required_type.includes(v2ray_type)) {
+					if (!value)
+						return _('Expecting: %s').format(_('non-empty value'));
+					else if (type === 'shadowsocks') {
+						var encmode = this.map.lookupOption('shadowsocks_encrypt_method', section_id)[0].formvalue(section_id);
+						if (encmode === '2022-blake3-aes-128-gcm' && value.length !== 16)
+							return _('Expecting: %s').format(_('password with %d characters')).format(16);
+						else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode) && value.length !== 32)
+							return _('Expecting: %s').format(_('password with %d characters')).format(32);
+					}
+				}
 			}
 
 			return true;
@@ -744,8 +756,7 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'shadowsocks_plugin_opts', _('Plugin opts'));
-		o.depends('type', 'shadowsocks');
-		o.depends('v2ray_protocol', 'shadowsocks');
+		o.depends({'shadowsocks_plugin': null, '!reverse': true});
 		o.modalonly = true;
 		/* Shadowsocks config end */
 
@@ -832,10 +843,10 @@ return view.extend({
 		o.depends('v2ray_protocol', 'vmess');
 		o.validate = function(section_id, value) {
 			if (section_id) {
-				if (value == null || value == '')
+				if (!value)
 					return _('Expecting: %s').format(_('non-empty value'));
 				else if (value.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
-					return _('Expecting: %s').format(_('valid uuid string'));
+					return _('Expecting: %s').format(_('valid uuid'));
 			}
 
 			return true;
