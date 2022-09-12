@@ -240,7 +240,7 @@ return baseclass.extend({
 							duplicate = true
 				});
 				if (duplicate)
-					return _('This %s was already taken.').format(_(ucioption));
+					return _('Expecting: %s').format(_('unique value'));
 			}
 		}
 	

@@ -96,7 +96,7 @@ start_service() {
 		uci rename "dhcp.@dnsmasq[0].noresolv"="_orig_noresolv" 2>"/dev/null"
 		uci rename "dhcp.@dnsmasq[0].server"="_orig_server" 2>"/dev/null"
 		uci set "dhcp.@dnsmasq[0].noresolv"="1"
-		uci add_list "dhcp.@dnsmasq[0].server"="1.2.4.8"
+		uci add_list "dhcp.@dnsmasq[0].server"="8.8.8.8"
 		uci commit "dhcp"
 		/etc/init.d/dnsmasq restart
 		touch "$RUN_DIR/.dns_hijacked"
@@ -143,7 +143,7 @@ stop_service() {
 
 	[ ! -e "$RUN_DIR/.dns_hijacked" ] || {
 		uci del "dhcp.@dnsmasq[0].noresolv"
-		uci del_list "dhcp.@dnsmasq[0].server"="1.2.4.8"
+		uci del_list "dhcp.@dnsmasq[0].server"="8.8.8.8"
 		uci rename "dhcp.@dnsmasq[0]._orig_dns_redirect"="dns_redirect"
 		uci rename "dhcp.@dnsmasq[0]._orig_noresolv"="noresolv"
 		uci rename "dhcp.@dnsmasq[0]._orig_server"="server"

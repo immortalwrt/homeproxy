@@ -72,12 +72,12 @@ end
 
 local enable_server = uci:get(uciconfig, uciserver, "enabled") or "0"
 
-local main_server, main_udp_server, default_outbound
+local main_node, main_udp_node, default_outbound
 local dns_strategy, dns_default_server, dns_disable_cache, dns_disable_cache_expire
 local sniff_override, default_interface
 if routing_mode ~= "custom" then
-	main_server = uci:get(uciconfig, ucimain, "main_server") or "nil"
-	main_udp_server = uci:get(uciconfig, ucimain, "main_udp_server") or "nil"
+	main_node = uci:get(uciconfig, ucimain, "main_node") or "nil"
+	main_udp_node = uci:get(uciconfig, ucimain, "main_udp_node") or "nil"
 else
 	-- DNS settings
 	dns_strategy = uci:get(uciconfig, ucidnssetting, "dns_strategy") or "prefer_ipv4"
@@ -98,88 +98,103 @@ elseif table.contains({"all", "nil"}, routing_port) then
 else
 	routing_port = routing_port:split(",")
 end
-local native_protocols = { "http", "hysteria","shadowsocks", "socks", "trojan", "vmess", "wireguard" }
+local native_protocols = { "http", "hysteria", "shadowsocks", "socks", "trojan", "vmess", "wireguard" }
 -- UCI config end
 
 -- Config helper start
-local function generate_outbound(server)
-	if type(server) ~= "table" or isEmpty(server) then
+local function generate_outbound(node)
+	if type(node) ~= "table" or isEmpty(node) then
 		return nil
 	end
 
 	local outbound = {
-		type = server.type,
-		tag = "cfg-" .. server[".name"] .. "-out",
+		type = node.type,
+		tag = "cfg-" .. node[".name"] .. "-out",
 
-		server = (server.type ~= "direct") and server.address or nil,
-		server_port = (server.type ~= "direct") and tonumber(server.port) or nil,
-		override_address = (server.type == "direct") and server.address or nil,
-		override_port = (server.type == "direct") and server.port or nil,
+		server = (node.type ~= "direct") and node.address or nil,
+		server_port = (node.type ~= "direct") and tonumber(node.port) or nil,
 
-		username = server.username,
-		password = server.password,
+		username = node.username,
+		password = node.password,
 
+		-- Direct
+		override_address = (node.type == "direct") and node.address or nil,
+		override_port = (node.type == "direct") and node.port or nil,
+		proxy_protocol = notEmpty(node.proxy_protocol) or nil,
 		-- Hysteria
-		up_mbps = server.mkcp_uplink_capacity,
-		down_mbps = server.mkcp_downlink_capacity,
-		obfs = server.hysteria_obfs_password,
-		auth = (server.hysteria_auth_type == "base64") and server.hysteria_auth_payload or nil,
-		auth_str = (server.hysteria_auth_type == "string") and server.hysteria_auth_payload or nil,
-		recv_window_conn = tonumber(server.hysteria_recv_window_conn),
-		recv_window = tonumber(server.hysteria_revc_window),
-		disable_mtu_discovery = server.hysteria_disable_mtu_discovery and (server.hysteria_disable_mtu_discovery == "1") or nil,
+		up_mbps = node.mkcp_uplink_capacity,
+		down_mbps = node.mkcp_downlink_capacity,
+		obfs = node.hysteria_obfs_password,
+		auth = (node.hysteria_auth_type == "base64") and node.hysteria_auth_payload or nil,
+		auth_str = (node.hysteria_auth_type == "string") and node.hysteria_auth_payload or nil,
+		recv_window_conn = tonumber(node.hysteria_recv_window_conn),
+		recv_window = tonumber(node.hysteria_revc_window),
+		disable_mtu_discovery = (node.hysteria_disable_mtu_discovery == "1") or nil,
 		-- Shadowsocks
-		method = server.shadowsocks_encrypt_method,
+		method = node.shadowsocks_encrypt_method,
 		-- Socks
-		version = server.socks_version,
+		version = node.socks_version,
 		-- VMess
-		uuid = server.v2ray_uuid,
-		security = server.v2ray_vmess_encrypt,
-		global_padding = server.vmess_global_padding and (server.vmess_global_padding == "1") or nil,
-		authenticated_length = server.vmess_authenticated_length and (server.vmess_authenticated_length == "1") or nil,
-		packet_addr = server.vmess_packet_addr and (server.vmess_packet_addr == "1") or nil,
+		uuid = node.v2ray_uuid,
+		security = node.v2ray_vmess_encrypt,
+		global_padding = node.vmess_global_padding and (node.vmess_global_padding == "1") or nil,
+		authenticated_length = node.vmess_authenticated_length and (node.vmess_authenticated_length == "1") or nil,
+		packet_addr = node.vmess_packet_addr and (node.vmess_packet_addr == "1") or nil,
 		-- WireGuard
-		local_address = server.wireguard_local_address,
-		private_key = server.wireguard_private_key,
-		peer_public_key = server.wireguard_peer_public_key,
-		pre_shared_key = server.wireguard_pre_shared_key,
-		mtu = server.mkcp_mtu,
+		system_interface = (node.type == "wireguard") or nil,
+		interface_name = (node.type == "wireguard") and "emortal-wg-cfg-" .. node[".name"] .. "-out" or nil,
+		local_address = node.wireguard_local_address,
+		private_key = node.wireguard_private_key,
+		peer_public_key = node.wireguard_peer_public_key,
+		pre_shared_key = node.wireguard_pre_shared_key,
+		mtu = node.mkcp_mtu,
 
-		multiplex = (server.multiplex == "1") and {
+		multiplex = (node.multiplex == "1") and {
 			enabled = true,
-			protocol = server.multiplex_protocol,
-			max_connections = server.multiplex_max_connections,
-			min_streams = server.multiplex_min_streams,
-			max_streams = server.multiplex_max_streams
+			protocol = node.multiplex_protocol,
+			max_connections = node.multiplex_max_connections,
+			min_streams = node.multiplex_min_streams,
+			max_streams = node.multiplex_max_streams
 		} or nil,
-		tls = (server.tls == "1") and {
+		tls = (node.tls == "1") and {
 			enabled = true,
-			server_name = server.tls_sni,
-			insecure = (server.tls_insecure == "1"),
-			alpn = server.tls_alpn,
-			min_version = server.tls_min_version,
-			max_version = server.tls_max_version,
-			cipher_suites = server.tls_cipher_suites,
-			certificate_path = server.tls_cert_path
+			server_name = node.tls_sni,
+			insecure = (node.tls_insecure == "1"),
+			alpn = node.tls_alpn,
+			min_version = node.tls_min_version,
+			max_version = node.tls_max_version,
+			cipher_suites = node.tls_cipher_suites,
+			certificate_path = node.tls_cert_path,
+			ech = (node.enable_ech == "1") and {
+				enabled = true,
+				pq_signature_schemes_enabled = (node.tls_ech_enable_pqss == "1"),
+				dynamic_record_sizing_disabled = (node.tls_ech_tls_disable_drs == "1"),
+				config = node.tls_ech_config
+			} or nil,
+			utls = notEmpty(node.tls_utls) and {
+				enabled = true,
+				fingerprint = node.tls_utls
+			} or nil
 		} or nil,
-		transport = notEmpty(server.transport) and {
-			type = server.transport,
-			host = server.h2_host or server.ws_host,
-			path = server.h2_path or server.ws_path,
-			method = server.h2_method,
-			max_early_data = server.websocket_early_data,
-			early_data_header_name = server.websocket_early_data_header,
-			service_name = server.grpc_servicename
+		transport = notEmpty(node.transport) and {
+			type = node.transport,
+			host = node.h2_host or node.ws_host,
+			path = node.h2_path or node.ws_path,
+			method = node.h2_method,
+			max_early_data = node.websocket_early_data,
+			early_data_header_name = node.websocket_early_data_header,
+			service_name = node.grpc_servicename
 
 		} or nil,
-		udp_over_tcp = (server.udp_over_tcp == "1") or nil,
-		tcp_fast_open = (server.tcp_fast_open == "1") or nil
+		udp_over_tcp = (node.udp_over_tcp == "1") or nil,
+		tcp_fast_open = (node.tcp_fast_open == "1") or nil,
+		udp_fragment = (node.udp_fragment == "1") or nil
 	}
 	return outbound
 end
 
-local function generate_external_outbound(server)
-	if type(server) ~= "table" or isEmpty(server) then
+local function generate_external_outbound(node)
+	if type(node) ~= "table" or isEmpty(node) then
 		return nil
 	end
 	-- todo
@@ -270,7 +285,7 @@ config.dns = {
 	disable_expire = (dns_disable_cache_expire == "1")
 }
 
-if notEmpty(main_server) then
+if notEmpty(main_node) then
 	-- Main DNS
 	if dns_server ~= wan_dns then
 		config.dns.servers[3] = {
@@ -364,15 +379,15 @@ end
 
 -- Inbound start
 config.inbounds = {}
-if notEmpty(main_server) or notEmpty(default_outbound) then
+if notEmpty(main_node) or notEmpty(default_outbound) then
 	config.inbounds[1] = {
 		type = "tun",
 		tag = "tun-in",
 
 		interface_name = "emortal-singbox",
 		inet4_address = "172.19.0.1/30",
-		inet6_address = "fdfe:dcba:9876::1/128",
-		mtu = 1500,
+		inet6_address = "fdfe:dcba:9876::1/126",
+		mtu = 9000,
 		auto_route = true,
 		endpoint_independent_nat = true,
 		stack = "gvisor",
@@ -392,9 +407,12 @@ if enable_server == "1" then
 				listen = "::",
 				listen_port = tonumber(cfg.port),
 				tcp_fast_open = (cfg.tcp_fast_open == "1") or nil,
+				udp_fragment = (cfg.udp_fragment == "1") or nil,
 				sniff = true,
 				sniff_override_destination = (cfg.sniff_override == "1"),
 				domain_strategy = cfg.domain_strategy,
+				proxy_protocol = (cfg.proxy_protocol == "1") or nil,
+				proxy_protocol_accept_no_header = (cfg.proxy_protocol_accept_no_header == "1") or nil,
 				network = cfg.network,
 
 				-- Hysteria
@@ -467,21 +485,21 @@ config.outbounds = {
 }
 
 -- Main outbounds
-if notEmpty(main_server) then
-	local main_server_cfg = uci:get_all(uciconfig, main_server) or {}
-	if table.contains(native_protocols, main_server_cfg.type) then
-		config.outbounds[4] = generate_outbound(main_server_cfg)
+if notEmpty(main_node) then
+	local main_node_cfg = uci:get_all(uciconfig, main_node) or {}
+	if table.contains(native_protocols, main_node_cfg.type) then
+		config.outbounds[4] = generate_outbound(main_node_cfg)
 	else
-		config.outbounds[4] = generate_external_outbound(main_server_cfg)
+		config.outbounds[4] = generate_external_outbound(main_node_cfg)
 	end
 	config.outbounds[4].tag = "main-out"
 
-	if notEmpty(main_udp_server) and main_udp_server ~= "same" and main_udp_server ~= main_server then
-		local main_udp_server_cfg = uci:get_all(uciconfig, main_udp_server) or {}
-		if table.contains(native_protocols, main_udp_server_cfg.type) then
-			config.outbounds[5] = generate_outbound(main_udp_server_cfg)
+	if notEmpty(main_udp_node) and main_udp_node ~= "same" and main_udp_node ~= main_node then
+		local main_udp_node_cfg = uci:get_all(uciconfig, main_udp_node) or {}
+		if table.contains(native_protocols, main_udp_node_cfg.type) then
+			config.outbounds[5] = generate_outbound(main_udp_node_cfg)
 		else
-			config.outbounds[5] = generate_external_outbound(main_udp_server_cfg)
+			config.outbounds[5] = generate_external_outbound(main_udp_node_cfg)
 		end
 		config.outbounds[5].tag = "main-udp-out"
 	end
@@ -508,17 +526,17 @@ end
 
 -- Routing rules start
 -- Default settings
-if notEmpty(main_server) or notEmpty(default_outbound) then
+if notEmpty(main_node) or notEmpty(default_outbound) then
 	config.route = {
 		geoip = {
 			path = "/etc/homeproxy/resources/geoip.db",
 			download_url = "https://github.com/1715173329/sing-geoip/releases/latest/download/geoip.db",
-			download_detour = get_outbound(default_outbound) or (routing_mode ~= "proxy_mainland_china" and notEmpty(main_server)) and "main-out" or "direct-out"
+			download_detour = get_outbound(default_outbound) or (routing_mode ~= "proxy_mainland_china" and notEmpty(main_node)) and "main-out" or "direct-out"
 		},
 		geosite = {
 			path = "/etc/homeproxy/resources/geosite.db",
 			download_url = "https://github.com/1715173329/sing-geosite/releases/latest/download/geosite.db",
-			download_detour = get_outbound(default_outbound) or (routing_mode ~= "proxy_mainland_china" and notEmpty(main_server)) and "main-out" or "direct-out"
+			download_detour = get_outbound(default_outbound) or (routing_mode ~= "proxy_mainland_china" and notEmpty(main_node)) and "main-out" or "direct-out"
 		},
 		rules = {
 			{
@@ -531,7 +549,7 @@ if notEmpty(main_server) or notEmpty(default_outbound) then
 	}
 end
 
-if notEmpty(main_server) then
+if notEmpty(main_node) then
 	-- Routing ports
 	if parse_port(routing_port) then
 		config.route.rules[2] = {
@@ -564,9 +582,9 @@ if notEmpty(main_server) then
 	}
 
 	-- Main UDP out
-	if isEmpty(main_udp_server) then
+	if isEmpty(main_udp_node) then
 		config.route.rules[#config.route.rules].network = "tcp"
-	elseif main_udp_server ~= "same" and main_udp_server ~= main_server then
+	elseif main_udp_node ~= "same" and main_udp_node ~= main_node then
 		config.route.rules[#config.route.rules].network = "tcp"
 		config.route.rules[#config.route.rules+1] = {
 			geosite = routing_geosite,

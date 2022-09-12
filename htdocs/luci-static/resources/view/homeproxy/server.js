@@ -275,7 +275,7 @@ return view.extend({
 			_('The minimum TLS version that is acceptable.'));
 		for (var i of hp.tls_versions)
 			o.value(i);
-		o.default = '1.0';
+		o.default = '1.2';
 		o.depends('tls', '1');
 		o.rmempty = false;
 		o.modalonly = true;
@@ -299,37 +299,31 @@ return view.extend({
 
 		o = s.option(form.Value, 'tls_cert_path', _('Certificate path'),
 			_('The server public key, in PEM format.'));
-		o.default = '/etc/homeproxy/certs/server_publickey.pem';
+		o.value('/etc/homeproxy/certs/server_publickey.pem');
 		o.depends('tls', '1');
 		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Button, '_upload_cert', _('Upload certificate'),
-			_('Your %s will be saved to "/etc/homeproxy/certs/%s.pem".')
-			.format(_('certificate'), 'server_publickey') +
-			'<br/>' +
 			_('<strong>Save your configuration before uploading files!</strong>'));
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
-		o.depends('tls', '1');
+		o.depends({'tls': '1', 'tls_key_path': '/etc/homeproxy/certs/server_publickey.pem'});
 		o.onclick = L.bind(hp.uploadCertificate, this, o, _('certificate'), 'server_publickey');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'tls_key_path', _('Key path'),
 			_('The server private key, in PEM format.'));
-		o.default = '/etc/homeproxy/certs/server_privatekey.pem';
+		o.value('/etc/homeproxy/certs/server_privatekey.pem');
 		o.depends('tls', '1');
 		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Button, '_upload_key', _('Upload key'),
-			_('Your %s will be saved to "/etc/homeproxy/certs/%s.pem".')
-			.format(_('private'), 'server_privatekey') +
-			'<br/>' +
 			_('<strong>Save your configuration before uploading files!</strong>'));
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
-		o.depends('tls', '1');
+		o.depends({'tls': '1', 'tls_key_path': '/etc/homeproxy/certs/server_privatekey.pem'});
 		o.onclick = L.bind(hp.uploadCertificate, this, o, _('private key'), 'server_privatekey');
 		o.modalonly = true;
 		/* TLS config end */
@@ -339,6 +333,13 @@ return view.extend({
 			_('Enable tcp fast open for listener.'));
 		o.default = o.disabled;
 		o.depends({'network': 'udp', '!reverse': true});
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.Flag, 'udp_fragment', _('UDP Fragment'),
+			_('Enable UDP fragmentation.'));
+		o.default = o.disabled;
+		o.depends({'network': 'tcp', '!reverse': true});
 		o.rmempty = false;
 		o.modalonly = true;
 
@@ -355,6 +356,13 @@ return view.extend({
 
 		o = s.option(form.Flag, 'proxy_protocol', _('Proxy protocol'),
 			_('Parse Proxy Protocol in the connection header.'));
+		o.default = o.disabled;
+		o.depends({'network': 'udp', '!reverse': true});
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.Flag, 'proxy_protocol_accept_no_header', _('Accept no header'),
+			_('Accept connections without Proxy Protocol header.'));
 		o.default = o.disabled;
 		o.depends({'network': 'udp', '!reverse': true});
 		o.rmempty = false;

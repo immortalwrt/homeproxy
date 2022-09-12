@@ -98,7 +98,7 @@ return view.extend({
 
 		s = m.section(form.NamedSection, 'config', 'homeproxy');
 
-		o = s.option(form.ListValue, 'main_server', _('Main server'));
+		o = s.option(form.ListValue, 'main_node', _('Main node'));
 		o.value('nil', _('Disable'));
 		for (var i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
@@ -106,9 +106,9 @@ return view.extend({
 		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.rmempty = false;
 
-		o = s.option(form.ListValue, 'main_udp_server', _('Main UDP server'));
+		o = s.option(form.ListValue, 'main_udp_node', _('Main UDP node'));
 		o.value('nil', _('Disable'));
-		o.value('same', _('Same as main server'));
+		o.value('same', _('Same as main node'));
 		for (var i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
 		o.default = 'nil';

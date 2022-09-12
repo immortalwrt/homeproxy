@@ -26,10 +26,10 @@ local subscription_urls = uci:get(uciconfig, ucisubscription, "subscription_url"
 local via_proxy = uci:get(uciconfig, ucisubscription, "update_via_proxy") or "0"
 
 local routing_mode = uci:get(uciconfig, ucimain, "routing_mode") or "bypass_mainland_china"
-local main_server, main_udp_server
+local main_node, main_udp_node
 if routing_mode ~= "custom" then
-	main_server = uci:get(uciconfig, ucimain, "main_server") or "nil"
-	main_udp_server = uci:get(uciconfig, ucimain, "main_udp_server") or "nil"
+	main_node = uci:get(uciconfig, ucimain, "main_node") or "nil"
+	main_udp_node = uci:get(uciconfig, ucimain, "main_udp_node") or "nil"
 end
 -- UCI config end
 
@@ -212,7 +212,7 @@ local function parse_uri(uri)
 				mkcp_downlink_capacity = params.downmbps,
 				mkcp_uplink_capacity = params.upmbps,
 				tls = "1",
-				tls_insecure = params.insecure or "0",
+				tls_insecure = table.contains({"true", "1"}, params.insecure) and "1" or "0",
 				tls_sni = params.peer,
 				tls_alpn = params.alpn
 			}
@@ -477,7 +477,7 @@ local function main()
 				if notEmpty(config) then
 					local label = config.label
 					config.label = nil
-					setmetatable(config, { __index = {confHash = md5(JSON.dump(config)), nameHash = md5(JSON.dump(label))} })
+					setmetatable(config, { __index = {confHash = md5(JSON.dump(config)), nameHash = md5(label)} })
 					config.label = label
 
 					if filter_check(config.label) then
@@ -510,13 +510,13 @@ local function main()
 
 	if isEmpty(node_result) then
 		log(translate("Failed to update subscriptions: no valid node found."))
-		logfile:close()
 
 		if via_proxy ~= "1" then
 			log(translate("Starting service..."))
 			sysinit.start(uciconfig)
 		end
 
+		logfile:close()
 		return false
 	end
 
@@ -543,27 +543,27 @@ local function main()
 	uci:commit(uciconfig)
 
 	local need_restart = (via_proxy ~= "1")
-	if notEmpty(main_server) then
+	if notEmpty(main_node) then
 		local first_server = uci:get_first(uciconfig, ucinode)
 		if first_server then
-			if not uci:get(uciconfig, main_server) then
-				uci:set(uciconfig, ucimain, "main_server", first_server)
+			if not uci:get(uciconfig, main_node) then
+				uci:set(uciconfig, ucimain, "main_node", first_server)
 				uci:commit(uciconfig)
 				need_restart = true
 				log(translate("Main node is gone, switching to the first node."))
 			end
 
-			if notEmpty(main_udp_server) and main_udp_server ~= "same" then
-				if not uci:get(uciconfig, main_udp_server) then
-					uci:set(uciconfig, ucimain, "main_udp_server", first_server)
+			if notEmpty(main_udp_node) and main_udp_node ~= "same" then
+				if not uci:get(uciconfig, main_udp_node) then
+					uci:set(uciconfig, ucimain, "main_udp_node", first_server)
 					uci:commit(uciconfig)
 					need_restart = true
-					log(translate("UDP node is gone, switching to the first node."))
+					log(translate("Main UDP node is gone, switching to the first node."))
 				end
 			end
 		else
-			uci:set(uciconfig, ucimain, "main_server", "nil")
-			uci:set(uciconfig, ucimain, "main_udp_server", "nil")
+			uci:set(uciconfig, ucimain, "main_node", "nil")
+			uci:set(uciconfig, ucimain, "main_udp_node", "nil")
 			uci:commit(uciconfig)
 			need_restart = true
 			log(translate("No node available, disable tproxy."))
