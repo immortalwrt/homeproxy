@@ -206,6 +206,20 @@ return view.extend({
 		so.noaliases = true;
 		so.nobridges = true;
 
+		so = ss.option(form.ListValue, 'default_tun_stack', _('Default TUN stack'),
+			_('TCP/IP stack.'));
+		so.value('gvisor', _('gVisor'));
+		so.value('system', _('System'));
+		so.default = 'gvisor';
+		so.rmempty = false;
+		so.onchange = function(ev, section_id, value) {
+			var desc = this.map.findElement('id', 'cbid.homeproxy.%s.default_tun_stack'.format(section_id)).nextElementSibling;
+			if (value === 'gvisor')
+				desc.innerHTML = _('Based on google/gvisor (recommended).');
+			else
+				desc.innerHTML = _('Less compatibility and sometimes better performance.');
+		}
+
 		o = s.option(form.SectionValue, '_routing_node', form.GridSection, 'routing_node', _('Routing nodes'));
 		o.depends('routing_mode', 'custom');
 

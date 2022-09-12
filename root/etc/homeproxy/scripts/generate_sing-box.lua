@@ -75,20 +75,22 @@ local enable_server = uci:get(uciconfig, uciserver, "enabled") or "0"
 local main_node, main_udp_node, default_outbound
 local dns_strategy, dns_default_server, dns_disable_cache, dns_disable_cache_expire
 local sniff_override, default_interface
+local default_tun_stack = "gvisor"
 if routing_mode ~= "custom" then
 	main_node = uci:get(uciconfig, ucimain, "main_node") or "nil"
 	main_udp_node = uci:get(uciconfig, ucimain, "main_udp_node") or "nil"
 else
 	-- DNS settings
-	dns_strategy = uci:get(uciconfig, ucidnssetting, "dns_strategy") or "prefer_ipv4"
-	dns_default_server = uci:get(uciconfig, ucidnssetting, "default_server") or "local-out"
-	dns_disable_cache = uci:get(uciconfig, ucidnssetting, "disable_cache") or "0"
-	dns_disable_cache_expire = uci:get(uciconfig, ucidnssetting, "disable_cache_expire") or "0"
+	dns_strategy = uci:get(uciconfig, ucidnssetting, "dns_strategy")
+	dns_default_server = uci:get(uciconfig, ucidnssetting, "default_server")
+	dns_disable_cache = uci:get(uciconfig, ucidnssetting, "disable_cache")
+	dns_disable_cache_expire = uci:get(uciconfig, ucidnssetting, "disable_cache_expire")
 
 	-- Routing settings
-	sniff_override = uci:get(uciconfig, uciroutingsetting, "sniff_override") or "1"
-	default_outbound = uci:get(uciconfig, uciroutingsetting, "default_outbound") or "nil"
+	sniff_override = uci:get(uciconfig, uciroutingsetting, "sniff_override")
+	default_outbound = uci:get(uciconfig, uciroutingsetting, "default_outbound")
 	default_interface = uci:get(uciconfig, uciroutingsetting, "default_interface")
+	default_tun_stack = uci:get(uciconfig, uciroutingnode, "default_tun_stack")
 end
 
 if routing_port == "common" then
@@ -398,7 +400,7 @@ if notEmpty(main_node) or notEmpty(default_outbound) then
 		mtu = 9000,
 		auto_route = true,
 		endpoint_independent_nat = true,
-		stack = "gvisor",
+		stack = default_tun_stack,
 		sniff = true,
 		sniff_override_destination = (sniff_override == "1"),
 		domain_strategy = dns_strategy
