@@ -1295,13 +1295,13 @@ return view.extend({
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.Flag, 'tls_ech_enable_pqss', _('Enable PQ signature schemes'));
+		o = s.option(form.Flag, 'tls_ech_tls_enable_drs', _('Enable dynamic record sizing'));
 		o.depends('tls_ech', '1');
-		o.default = o.disabled;
+		o.default = o.enabled;
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.Flag, 'tls_ech_tls_disable_drs', _('Disable dynamic record sizing'));
+		o = s.option(form.Flag, 'tls_ech_enable_pqss', _('Enable PQ signature schemes'));
 		o.depends('tls_ech', '1');
 		o.default = o.disabled;
 		o.rmempty = false;

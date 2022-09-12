@@ -168,7 +168,7 @@ local function generate_outbound(node)
 			ech = (node.enable_ech == "1") and {
 				enabled = true,
 				pq_signature_schemes_enabled = (node.tls_ech_enable_pqss == "1"),
-				dynamic_record_sizing_disabled = (node.tls_ech_tls_disable_drs == "1"),
+				dynamic_record_sizing_disabled = (node.tls_ech_tls_enable_drs ~= "1"),
 				config = node.tls_ech_config
 			} or nil,
 			utls = notEmpty(node.tls_utls) and {
