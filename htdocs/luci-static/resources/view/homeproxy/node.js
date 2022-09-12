@@ -378,7 +378,7 @@ return view.extend({
 		}
 
 		o = s.option(form.ListValue, 'filter_nodes', _('Filter nodes'),
-			_('Drop/keep specific node(s) from subscriptions.'));
+			_('Drop/keep specific nodes from subscriptions.'));
 		o.value('disabled', _('Disable'));
 		o.value('blacklist', _('Blacklist mode'));
 		o.value('whitelist', _('Whitelist mode'));
@@ -386,7 +386,7 @@ return view.extend({
 		o.rmempty = false;
 
 		o = s.option(form.DynamicList, 'filter_keywords', _('Filter keywords'),
-			_('Drop/keep node(s) that contain the specific keywords. <a target="_blank" href="https://www.lua.org/pil/20.2.html">Regex</a> is supported.'));
+			_('Drop/keep nodes that contain the specific keywords. <a target="_blank" href="https://www.lua.org/pil/20.2.html">Regex</a> is supported.'));
 		o.depends({'filter_nodes': 'disabled', '!reverse': true});
 		o.rmempty = false;
 
@@ -418,7 +418,7 @@ return view.extend({
 		o.inputtitle = function(section_id) {
 			var sublist = uci.get(data[0], section_id, 'subscription_url') || [];
 			if (sublist.length > 0)
-				return _('Update %s subscription(s)').format(sublist.length);
+				return _('Update %s %s').format(sublist.length, sublist.length === 1 ? _('subscription') : _('subscriptions'));
 			else {
 				this.readonly = true;
 				return _('No subscription available')
@@ -443,7 +443,7 @@ return view.extend({
 			});
 
 			if (subnodes.length > 0) {
-				return _('Remove %s node(s)').format(subnodes.length);
+				return _('Remove %s %s').format(subnodes.length, subnodes.length === 1 ? _('node') : _('nodes'));
 			} else {
 				this.readonly = true;
 				return _('No subscription node');
@@ -465,7 +465,7 @@ return view.extend({
 			if (subnodes.includes(uci.get(data[0], 'config', 'main_udp_server')))
 				uci.set(data[0], 'config', 'main_udp_server', 'nil');
 
-			this.inputtitle = _('%s node(s) removed').format(subnodes.length);
+			this.inputtitle = _('%s %s removed').format(subnodes.length, subnodes.length === 1 ? _('node') : _('nodes'));
 			this.readonly = true;
 
 			return this.map.save(null, true);
@@ -523,7 +523,8 @@ return view.extend({
 								if (imported_node === 0)
 									ui.addNotification(null, E('p', _('No valid share link found.')));
 								else
-									ui.addNotification(null, E('p', _('Successfully imported %s node(s) of total %s.').format(imported_node, input_links.length)));
+									ui.addNotification(null, E('p', _('Successfully imported %s %s of total %s.').format(
+										imported_node, imported_node === 1 ? _('node') : _('nodes'), input_links.length)));
 
 								return uci.save()
 									.then(L.bind(this.map.load, this.map))

@@ -88,7 +88,7 @@ return view.extend({
 						return _('Expecting: %s').format(_('password with %d characters')).format(32);
 				} else if (type === 'vmess')
 					if (value.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
-						return _('Expecting: %s').format(_('valid uuid string'));
+						return _('Expecting: %s').format(_('valid uuid'));
 			}
 
 			return true;
