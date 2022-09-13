@@ -26,6 +26,7 @@ return baseclass.extend({
 		'shadowsocksr',
 		'socks',
 		'trojan',
+		'vless',
 		'vmess',
 		'wireguard'
 	],

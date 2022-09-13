@@ -100,7 +100,7 @@ elseif table.contains({"all", "nil"}, routing_port) then
 else
 	routing_port = routing_port:split(",")
 end
-local native_protocols = { "http", "hysteria", "shadowsocks", "shadowsocksr", "socks", "trojan", "vmess", "wireguard" }
+local native_protocols = { "http", "hysteria", "shadowsocks", "shadowsocksr", "socks", "trojan", "vless", "vmess", "wireguard" }
 -- UCI config end
 
 -- Config helper start

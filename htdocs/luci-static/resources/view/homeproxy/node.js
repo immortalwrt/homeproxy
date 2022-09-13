@@ -12,6 +12,18 @@
 'require tools.homeproxy as hp';
 'require tools.widgets as widgets';
 
+function validateWGBase64Key(section_id, value) {
+	/* Thanks to luci-proto-wireguard */
+	if (section_id) {
+		if (!value)
+			return _('Expecting: %s').format('non-empty value');
+		else if (value.length !== 44 || !value.match(/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/) || value[43] !== '=')
+			return _('Expecting: %s').format(_('valid base64 key'));
+	}
+
+	return true;
+}
+
 function parse_share_link(uri) {
 	var config;
 
@@ -607,6 +619,7 @@ return view.extend({
 		o.value('trojan', _('Trojan'));
 		o.value('v2ray', _('V2ray'));
 		o.value('wireguard', _('WireGuard'));
+		o.value('vless', _('VLESS'));
 		o.value('vmess', _('VMess'));
 		o.rmempty = false;
 
@@ -838,6 +851,7 @@ return view.extend({
 
 		/* VMess config start */
 		o = s.option(form.Value, 'v2ray_uuid', _('UUID'));
+		o.depends('type', 'vless');
 		o.depends('type', 'vmess');
 		o.depends('v2ray_protocol', 'vless');
 		o.depends('v2ray_protocol', 'vmess');
@@ -855,6 +869,7 @@ return view.extend({
 
 		o = s.option(form.Value, 'v2ray_vless_encrypt', _('Encrypt method'));
 		o.default = 'none';
+		o.depends('type', 'vless');
 		o.depends('v2ray_protocol', 'vless');
 		o.rmempty = false;
 		o.modalonly = true;
@@ -865,7 +880,7 @@ return view.extend({
 		o.value('zero');
 		o.value('aes-128-gcm');
 		o.value('chacha20-poly1305');
-		o.default = 'aes-128-gcm';
+		o.default = 'auto';
 		o.depends('type', 'vmess');
 		o.depends('v2ray_protocol', 'vmess');
 		o.rmempty = false;
@@ -910,6 +925,7 @@ return view.extend({
 				desc.innerHTML = _('No TCP transport, plain HTTP is merged into the HTTP transport.');
 		}
 		o.depends('type', 'trojan');
+		o.depends('type', 'vless');
 		o.depends('type', 'vmess');
 		o.modalonly = true;
 
@@ -1119,13 +1135,13 @@ return view.extend({
 		/* XTLS config end */
 
 		o = s.option(form.ListValue, 'v2ray_packet_encoding', _('Packet encoding'));
-		o.value('none', _('None'));
+		o.value('', _('None'));
 		o.value('packet', _('packet (v2ray-core v5+)'));
 		o.value('xudp', _('Xudp (Xray-core)'));
 		o.default = 'xudp';
+		o.depends('type', 'vless');
 		o.depends('v2ray_protocol', 'vless');
 		o.depends('v2ray_protocol', 'vmess');
-		o.rmempty = false;
 		o.modalonly = true;
 		/* V2ray config end */
 
@@ -1141,20 +1157,20 @@ return view.extend({
 			_('WireGuard requires base64-encoded private keys.'));
 		o.password = true;
 		o.depends('type', 'wireguard');
-		o.rmempty = false;
+		o.validate = validateWGBase64Key;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'wireguard_peer_public_key', _('Peer pubkic key'),
 			_('WireGuard peer public key.'));
 		o.depends('type', 'wireguard');
-		o.rmempty = false;
+		o.validate = validateWGBase64Key;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'wireguard_pre_shared_key', _('Pre-shared key'),
 			_('WireGuard pre-shared key.'));
 		o.password = true;
 		o.depends('type', 'wireguard');
-		o.rmempty = false;
+		o.validate = validateWGBase64Key;
 		o.modalonly = true;
 		/* Wireguard config end */
 
