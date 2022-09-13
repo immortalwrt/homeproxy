@@ -12,19 +12,7 @@
 'require tools.homeproxy as hp';
 'require tools.widgets as widgets';
 
-function validateWGBase64Key(section_id, value) {
-	/* Thanks to luci-proto-wireguard */
-	if (section_id) {
-		if (!value)
-			return _('Expecting: %s').format('non-empty value');
-		else if (value.length !== 44 || !value.match(/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/) || value[43] !== '=')
-			return _('Expecting: %s').format(_('valid base64 key'));
-	}
-
-	return true;
-}
-
-function parse_share_link(uri) {
+function parseShareLink(uri) {
 	var config;
 
 	uri = uri.split('://');
@@ -108,15 +96,12 @@ function parse_share_link(uri) {
 				else if (uri.length > 2)
 					uri = [ uri.slice(0, -1).join('@'), uri.slice(-1).toString() ];
 
-				var method = uri[0].split(':')[0];
-				var password = uri[0].split(':').slice(1).join(':');
-
 				config = {
 					type: 'shadowsocks',
 					address: uri[1].split(':')[0],
 					port: uri[1].split(':')[1],
-					shadowsocks_encrypt_method: method,
-					password: password
+					shadowsocks_encrypt_method: uri[0].split(':')[0],
+					password: uri[0].split(':').slice(1).join(':')
 				};
 			}
 
@@ -306,7 +291,7 @@ function parse_share_link(uri) {
 
 				break;
 			case 'tcp':
-				config.tcp_header = uri.type === "http" ? "http" : 'none';
+				config.tcp_header = uri.type === 'http' ? 'http' : 'none';
 				if (config.tcp_header === 'http') {
 					config.tcp_host = uri.host ? uri.host.split(',') : null;
 					config.tcp_path = uri.path ? uri.path.split(',') : null;
@@ -337,6 +322,18 @@ function parse_share_link(uri) {
 	}
 
 	return config;
+}
+
+function validateWGBase64Key(section_id, value) {
+	/* Thanks to luci-proto-wireguard */
+	if (section_id) {
+		if (!value)
+			return _('Expecting: %s').format('non-empty value');
+		else if (value.length !== 44 || !value.match(/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/) || value[43] !== '=')
+			return _('Expecting: %s').format(_('valid base64 key'));
+	}
+
+	return true;
 }
 
 return view.extend({
@@ -515,11 +512,11 @@ return view.extend({
 								var packet_encoding = uci.get(data[0], 'subscription', 'default_packet_encoding') || 'xudp';
 								var imported_node = 0;
 								input_links.forEach((s) => {
-									var config = parse_share_link(s);
+									var config = parseShareLink(s);
 									if (config) {
 										if (config.tls === '1')
 											config.tls_insecure = allow_insecure
-										if (config.type === 'v2ray' && ['vless', 'vmess'].includes(config.v2ray_protocol))
+										if (config.type == 'vless' || (config.type === 'v2ray' && ['vless', 'vmess'].includes(config.v2ray_protocol)))
 											config.v2ray_packet_encoding = packet_encoding
 
 										var nameHash = hp.calcStringMD5(config.label);

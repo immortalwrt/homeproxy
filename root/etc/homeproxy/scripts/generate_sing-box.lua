@@ -142,13 +142,14 @@ local function generate_outbound(node)
 		obfs = node.shadowsocksr_obfs,
 		obfs_param = node.shadowsocksr_obfs_param,
 		-- Socks
-		version = node.socks_version,
-		-- VMess
+		version = node.socks_version,		
+		-- VLESS / VMess
 		uuid = node.v2ray_uuid,
 		security = node.v2ray_vmess_encrypt,
 		global_padding = node.vmess_global_padding and (node.vmess_global_padding == "1") or nil,
 		authenticated_length = node.vmess_authenticated_length and (node.vmess_authenticated_length == "1") or nil,
 		packet_addr = node.vmess_packet_addr and (node.vmess_packet_addr == "1") or nil,
+		packet_encoding = node.v2ray_packet_encoding,
 		-- WireGuard
 		system_interface = (node.type == "wireguard") or nil,
 		interface_name = (node.type == "wireguard") and "emortal-wg-cfg-" .. node[".name"] .. "-out" or nil,
