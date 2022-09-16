@@ -230,16 +230,16 @@ return baseclass.extend({
 			btn.firstChild.data = _('Checking %s...').format(type);
 
 			if (res.size <= 0) {
-				ui.addNotification(null, E('p', _('The uploaded %s is empty.').format(tyupe)));
+				ui.addNotification(null, E('p', _('The uploaded %s is empty.').format(type)));
 				return fs.remove(String.format('/etc/homeproxy/certs/%s.pem', filename));
 			}
 
 			ui.addNotification(null, E('p', _('Your %s was successfully uploaded. Size: %sB.').format(type, res.size)));
-		}, option, ev.target))
+		}, this, ev.target))
 		.catch(function(e) { ui.addNotification(null, E('p', e.message)) })
 		.finally(L.bind(function(btn, input) {
 			btn.firstChild.data = _('Upload...');
-		}, option, ev.target));
+		}, this, ev.target));
 	},
 
 	validateBase64Key: function(length, section_id, value) {
@@ -258,16 +258,15 @@ return baseclass.extend({
 		if (section_id) {
 			if (!value)
 				return _('Expecting: %s').format(_('non-empty value'));
-			else {
-				var duplicate = false;
-				uci.sections(uciconfig, ucisection, (res) => {
-					if (res['.name'] !== section_id)
-						if (res[ucioption] === value)
-							duplicate = true
-				});
-				if (duplicate)
-					return _('Expecting: %s').format(_('unique value'));
-			}
+
+			var duplicate = false;
+			uci.sections(uciconfig, ucisection, (res) => {
+				if (res['.name'] !== section_id)
+					if (res[ucioption] === value)
+						duplicate = true
+			});
+			if (duplicate)
+				return _('Expecting: %s').format(_('unique value'));
 		}
 	
 		return true;

@@ -1292,7 +1292,7 @@ return view.extend({
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends({'tls_self_sign': '1', 'tls_cert_path': '/etc/homeproxy/certs/client_ca.pem'});
-		o.onclick = L.bind(hp.uploadCertificate, this, o, _('certificate'), 'client_ca');
+		o.onclick = L.bind(hp.uploadCertificate, this, _('certificate'), 'client_ca');
 		o.modalonly = true;
 
 		if (data[1].with_ech) {

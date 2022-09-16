@@ -396,8 +396,8 @@ return view.extend({
 			_('<strong>Save your configuration before uploading files!</strong>'));
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
-		o.depends({'tls': '1', 'tls_key_path': '/etc/homeproxy/certs/server_publickey.pem'});
-		o.onclick = L.bind(hp.uploadCertificate, this, o, _('certificate'), 'server_publickey');
+		o.depends({'tls': '1', 'tls_cert_path': '/etc/homeproxy/certs/server_publickey.pem'});
+		o.onclick = L.bind(hp.uploadCertificate, this, _('certificate'), 'server_publickey');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'tls_key_path', _('Key path'),
@@ -413,7 +413,7 @@ return view.extend({
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
 		o.depends({'tls': '1', 'tls_key_path': '/etc/homeproxy/certs/server_privatekey.pem'});
-		o.onclick = L.bind(hp.uploadCertificate, this, o, _('private key'), 'server_privatekey');
+		o.onclick = L.bind(hp.uploadCertificate, this, _('private key'), 'server_privatekey');
 		o.modalonly = true;
 		/* TLS config end */
 

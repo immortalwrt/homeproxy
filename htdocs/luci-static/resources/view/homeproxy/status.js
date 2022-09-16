@@ -58,7 +58,7 @@ return view.extend({
 			}).catch((err) => {
 				var log;
 				if (err.toString().includes('NotFoundError'))
-					log = _('Log is not found.');
+					log = _('Log file does not exist.');
 				else
 					log = _('Unknown error: %s').format(err);
 				return log;
