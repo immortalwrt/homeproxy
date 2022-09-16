@@ -661,9 +661,9 @@ return view.extend({
 					else if (type === 'shadowsocks') {
 						var encmode = this.map.lookupOption('shadowsocks_encrypt_method', section_id)[0].formvalue(section_id);
 						if (encmode === '2022-blake3-aes-128-gcm')
-							return hp.validateBase64Key(16, arguments);
+							return hp.validateBase64Key(24, section_id, value);
 						else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode))
-							return hp.validateBase64Key(32, arguments);
+							return hp.validateBase64Key(45, section_id, value);
 					}
 				}
 			}

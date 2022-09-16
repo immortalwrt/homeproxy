@@ -176,7 +176,7 @@ return baseclass.extend({
 	},
 
 	getBuiltinFeatures: function() {
-		return L.resolveDefault(fs.exec('/usr/bin/sing-box version').then((res) => {
+		return L.resolveDefault(fs.exec('/usr/bin/sing-box', [ 'version' ]).then((res) => {
 			var features = {};
 
 			if(res.code === 0 && res.stdout.trim().match(/Tags: (.*)/))

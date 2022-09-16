@@ -13,7 +13,7 @@ return view.extend({
 	load: function() {
 		return Promise.all([
 			uci.load('homeproxy'),
-			lp.getBuiltinFeatures()
+			hp.getBuiltinFeatures()
 		]);
 	},
 
@@ -86,11 +86,11 @@ return view.extend({
 				if (type === 'shadowsocks') {
 					var encmode = this.map.lookupOption('shadowsocks_encrypt_method', section_id)[0].formvalue(section_id);
 					if (encmode === '2022-blake3-aes-128-gcm')
-						return hp.validateBase64Key(16, arguments);
+						return hp.validateBase64Key(24, section_id, value);
 					else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode))
-						return hp.validateBase64Key(32, arguments);
+						return hp.validateBase64Key(45, section_id, value);
 				} else if (type === 'vmess')
-					return hp.validateUUID(arguments);
+					return hp.validateUUID(section_id, value);
 			}
 
 			return true;
@@ -304,26 +304,19 @@ return view.extend({
 			o.default = o.disabled;
 			o.depends('tls', '1');
 			o.rmempty = false;
+			o.modalonly = true;
 
 			o = s.option(form.DynamicList, 'tls_acme_domain', _('Domains'));
 			o.datatype = 'hostname';
 			o.depends('tls_acme', '1');
 			o.rmempty = false;
+			o.modalonly = true;
 
-			o = s.option(form.ListValue, 'tls_acme_dsn', _('Default server name'),
+			o = s.option(form.Value, 'tls_acme_dsn', _('Default server name'),
 				_('Server name to use when choosing a certificate if the ClientHello\'s ServerName field is empty.'));
-			o.load = function(section_id) {
-				delete this.keylist;
-				delete this.vallist;
-
-				var domains = this.map.lookupOption('tls_acme_domain', section_id)[0].formvalue(section_id);
-				for (var i of domains)
-					this.value(i);
-
-				return this.super('load', section_id);
-			}
 			o.depends('tls_acme', '1');
 			o.rmempty = false;
+			o.modalonly = true;
 
 			o = s.option(form.Value, 'tls_acme_email', _('Email'),
 				_('The email address to use when creating or selecting an existing ACME server account.'));
@@ -338,6 +331,7 @@ return view.extend({
 
 				return true;
 			}
+			o.modalonly = true;
 
 			o = s.option(form.Value, 'tls_acme_provider', _('CA provider'),
 				_('The ACME CA provider to use.'));
@@ -345,43 +339,49 @@ return view.extend({
 			o.value('zerossl', _('ZeroSSL'));
 			o.depends('tls_acme', '1');
 			o.rmempty = false;
+			o.modalonly = true;
 
 			o = s.option(form.Flag, 'tls_acme_dhc', _('Disable HTTP challenge'));
 			o.default = o.disabled;
 			o.depends('tls_acme', '1');
 			o.rmempty = false;
+			o.modalonly = true;
 
 			o = s.option(form.Flag, 'tls_acme_dtac', _('Disable TLS ALPN challenge'));
 			o.default = o.disabled;
 			o.depends('tls_acme', '1');
 			o.rmempty = false;
+			o.modalonly = true;
 
 			o = s.option(form.Value, 'tls_acme_ahp', _('Alternative HTTP port'),
 				_('The alternate port to use for the ACME HTTP challenge; if non-empty, this port will be used instead of 80 to spin up a listener for the HTTP challenge.'));
 			o.datatype = 'port';
 			o.depends('tls_acme', '1');
-			o.rmempty = false;
+			o.modalonly = true;
 
 			o = s.option(form.Value, 'tls_acme_atp', _('Alternative TLS port'),
 				_('The alternate port to use for the ACME TLS-ALPN challenge; the system must forward 443 to this port for challenge to succeed.'));
 			o.datatype = 'port';
 			o.depends('tls_acme', '1');
-			o.rmempty = false;
+			o.modalonly = true;
 
 			o = s.option(form.Flag, 'tls_acme_external_account', _('External Account Binding'),
 				_('EAB (External Account Binding) contains information necessary to bind or map an ACME account to some other account known by the CA.' +
 				'<br/>External account bindings are "used to associate an ACME account with an existing account in a non-ACME system, such as a CA customer database.'));
 			o.default = o.disabled;
-			o.depends('tls_acme', '1');
 			o.rmempty = false;
+			o.depends('tls_acme', '1');
+			o.modalonly = true;
 
 			o = s.option(form.Value, 'tls_acme_ea_keyid', _('External account key ID'));
 			o.depends('tls_acme_external_account', '1');
 			o.rmempty = false;
+			o.modalonly = true;
 
 			o = s.option(form.Value, 'tls_acme_ea_mackey', _('External account MAC key'));
 			o.depends('tls_acme_external_account', '1');
 			o.rmempty = false;
+			o.modalonly = true;
 		}
 
 		o = s.option(form.Value, 'tls_cert_path', _('Certificate path'),
