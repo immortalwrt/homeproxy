@@ -104,8 +104,8 @@ local function md5(str)
 		return nil
 	end
 
-	local ret = luci.sys.exec("echo -n " .. luci.util.shellquote(urlencode(str)) .. " | md5sum | awk '{print $1}'")
-	return ret:trim()
+	local stdout = luci.sys.exec("echo -n " .. luci.util.shellquote(urlencode(str)) .. " | md5sum | awk '{print $1}'")
+	return stdout:trim()
 end
 
 local function curl(url)
@@ -154,6 +154,14 @@ local shadowsocks_encrypt_methods = {
 	"2022-blake3-aes-256-gcm",
 	"2022-blake3-chacha20-poly1305"
 }
+
+local sing_features = {}
+local sing_features_stdout = luci.sys.exec("/usr/bin/sing-box version"):trim()
+if notEmpty(sing_features_stdout) and sing_features_stdout:match("Tags: ([a-z,_]+)") then
+	for _, v in ipairs(sing_features_stdout:match("Tags: ([a-z,_]+)"):split(',')) do
+		sing_features[v] = true
+	end
+end
 -- Common var end
 
 -- Log start
@@ -172,7 +180,7 @@ local function parse_uri(uri)
 		if uri.nodetype == "sip008" then
 			-- https://shadowsocks.org/guide/sip008.html
 			if not table.contains(shadowsocks_encrypt_methods, uri.method) then
-				log(translatef("Skipping legacy Shadowsocks node: %s.", b64decode(uri.remarks) or url.server))
+				log(translatef("Skipping unsupported node: %s.", "Shadowsocks", b64decode(uri.remarks) or url.server))
 				return nil
 			end
 
@@ -195,8 +203,8 @@ local function parse_uri(uri)
 			local url = URL.parse("http://" .. uri[2])
 			local params = url.query
 
-			if notEmpty(params.protocol) and params.protocol ~= "udp" then
-				log(translatef("Skipping unsupported hysteria node: %s.", urldecode(url.fragment, true) or url.host or "NULL"))
+			if (not sing_features.with_quic) notEmpty(params.protocol) and params.protocol ~= "udp" then
+				log(translatef("Skipping unsupported %s node: %s.", "hysteria", urldecode(url.fragment, true) or url.host or "NULL"))
 				return nil
 			end
 
@@ -242,7 +250,7 @@ local function parse_uri(uri)
 			end
 
 			if not table.contains(shadowsocks_encrypt_methods, userinfo[1]) then
-				log(translatef("Skipping legacy Shadowsocks node: %s.", urldecode(url.fragment, true) or url.host or "NULL"))
+				log(translatef("Skipping unsupported %s node: %s.", "Shadowsocks", urldecode(url.fragment, true) or url.host or "NULL"))
 				return nil
 			end
 
@@ -274,6 +282,10 @@ local function parse_uri(uri)
 			uri = b64decode(uri[2]):split("/")
 			local userinfo = uri[1]:split(":")
 			local params = URL.parseQuery(uri[2]:gsub("^\?", ""))
+
+			if not sing_features.with_shadowsocksr then
+				log(translatef("Skipping unsupported %s node: %s.", "ShadowsocksR", b64decode(params.remarks) or userinfo[1] or "NULL"))
+			end
 
 			config = {
 				label = b64decode(params.remarks),
@@ -360,7 +372,7 @@ local function parse_uri(uri)
 		elseif uri[1] == "vmess" then
 			if uri[2]:find("&") then
 				-- "Lovely" shadowrocket format
-				log(translate("Skipping unsupported vmess format."))
+				log(translatef("Skipping unsupported %s format.", "vmess"))
 				return nil
 			end
 
@@ -368,7 +380,7 @@ local function parse_uri(uri)
 			uri = JSON.parse(b64decode(uri[2]))
 
 			if uri.v ~= "2" then
-				log(translate("Skipping unsupported vmess format."))
+				log(translatef("Skipping unsupported %s format.", "vmess"))
 				return nil
 			-- https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
 			elseif notEmpty(uri.aid) and tonumber(uri.aid) ~= 0 then

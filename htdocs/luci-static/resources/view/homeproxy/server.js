@@ -12,7 +12,8 @@
 return view.extend({
 	load: function() {
 		return Promise.all([
-			uci.load('homeproxy')
+			uci.load('homeproxy'),
+			lp.getBuiltinFeatures()
 		]);
 	},
 
@@ -52,8 +53,10 @@ return view.extend({
 
 		o = s.option(form.ListValue, 'type', _('Type'));
 		o.value('http', _('HTTP'));
-		o.value('hysteria', _('Hysteria'));
-		o.value('naive', _('NaïveProxy'));
+		if (data[1].with_quic) {
+			o.value('hysteria', _('Hysteria'));
+			o.value('naive', _('NaïveProxy'));
+		}
 		o.value('shadowsocks', _('Shadowsocks'));
 		o.value('socks', _('Socks'));
 		o.value('trojan', _('Trojan'));
@@ -82,13 +85,12 @@ return view.extend({
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
 				if (type === 'shadowsocks') {
 					var encmode = this.map.lookupOption('shadowsocks_encrypt_method', section_id)[0].formvalue(section_id);
-					if (encmode === '2022-blake3-aes-128-gcm' && value.length !== 16)
-						return _('Expecting: %s').format(_('password with %d characters')).format(16);
-					else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode) && value.length !== 32)
-						return _('Expecting: %s').format(_('password with %d characters')).format(32);
+					if (encmode === '2022-blake3-aes-128-gcm')
+						return hp.validateBase64Key(16, arguments);
+					else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode))
+						return hp.validateBase64Key(32, arguments);
 				} else if (type === 'vmess')
-					if (value.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
-						return _('Expecting: %s').format(_('valid uuid'));
+					return hp.validateUUID(arguments);
 			}
 
 			return true;
@@ -172,7 +174,6 @@ return view.extend({
 			o.value(i);
 		o.default = 'aes-128-gcm';
 		o.depends('type', 'shadowsocks');
-		o.depends({'type': 'v2ray', 'v2ray_protocol': 'shadowsocks'});
 		o.modalonly = true;
 
 		/* Transport config start */
@@ -297,10 +298,97 @@ return view.extend({
 		o.optional = true;
 		o.modalonly = true;
 
+		if (data[1].with_acme) {
+			o = s.option(form.Flag, 'tls_acme', _('Enable ACME'),
+				_('Use ACME TLS certificate issuer.'));
+			o.default = o.disabled;
+			o.depends('tls', '1');
+			o.rmempty = false;
+
+			o = s.option(form.DynamicList, 'tls_acme_domain', _('Domains'));
+			o.datatype = 'hostname';
+			o.depends('tls_acme', '1');
+			o.rmempty = false;
+
+			o = s.option(form.ListValue, 'tls_acme_dsn', _('Default server name'),
+				_('Server name to use when choosing a certificate if the ClientHello\'s ServerName field is empty.'));
+			o.load = function(section_id) {
+				delete this.keylist;
+				delete this.vallist;
+
+				var domains = this.map.lookupOption('tls_acme_domain', section_id)[0].formvalue(section_id);
+				for (var i of domains)
+					this.value(i);
+
+				return this.super('load', section_id);
+			}
+			o.depends('tls_acme', '1');
+			o.rmempty = false;
+
+			o = s.option(form.Value, 'tls_acme_email', _('Email'),
+				_('The email address to use when creating or selecting an existing ACME server account.'));
+			o.depends('tls_acme', '1');
+			o.validate = function(section_id, value) {
+				if (section_id) {
+					if (!value)
+						return _('Expecting: %s').format('non-empty value');
+					else if (!value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
+						return _('Expecting: %s').format('valid email address');
+				}
+
+				return true;
+			}
+
+			o = s.option(form.Value, 'tls_acme_provider', _('CA provider'),
+				_('The ACME CA provider to use.'));
+			o.value('letsencrypt', _('Let\'s Encrypt'));
+			o.value('zerossl', _('ZeroSSL'));
+			o.depends('tls_acme', '1');
+			o.rmempty = false;
+
+			o = s.option(form.Flag, 'tls_acme_dhc', _('Disable HTTP challenge'));
+			o.default = o.disabled;
+			o.depends('tls_acme', '1');
+			o.rmempty = false;
+
+			o = s.option(form.Flag, 'tls_acme_dtac', _('Disable TLS ALPN challenge'));
+			o.default = o.disabled;
+			o.depends('tls_acme', '1');
+			o.rmempty = false;
+
+			o = s.option(form.Value, 'tls_acme_ahp', _('Alternative HTTP port'),
+				_('The alternate port to use for the ACME HTTP challenge; if non-empty, this port will be used instead of 80 to spin up a listener for the HTTP challenge.'));
+			o.datatype = 'port';
+			o.depends('tls_acme', '1');
+			o.rmempty = false;
+
+			o = s.option(form.Value, 'tls_acme_atp', _('Alternative TLS port'),
+				_('The alternate port to use for the ACME TLS-ALPN challenge; the system must forward 443 to this port for challenge to succeed.'));
+			o.datatype = 'port';
+			o.depends('tls_acme', '1');
+			o.rmempty = false;
+
+			o = s.option(form.Flag, 'tls_acme_external_account', _('External Account Binding'),
+				_('EAB (External Account Binding) contains information necessary to bind or map an ACME account to some other account known by the CA.' +
+				'<br/>External account bindings are "used to associate an ACME account with an existing account in a non-ACME system, such as a CA customer database.'));
+			o.default = o.disabled;
+			o.depends('tls_acme', '1');
+			o.rmempty = false;
+
+			o = s.option(form.Value, 'tls_acme_ea_keyid', _('External account key ID'));
+			o.depends('tls_acme_external_account', '1');
+			o.rmempty = false;
+
+			o = s.option(form.Value, 'tls_acme_ea_mackey', _('External account MAC key'));
+			o.depends('tls_acme_external_account', '1');
+			o.rmempty = false;
+		}
+
 		o = s.option(form.Value, 'tls_cert_path', _('Certificate path'),
 			_('The server public key, in PEM format.'));
 		o.value('/etc/homeproxy/certs/server_publickey.pem');
-		o.depends('tls', '1');
+		o.depends({'tls': '1', 'tls_acme': null});
+		o.depends({'tls': '1', 'tls_acme': '0'});
 		o.rmempty = false;
 		o.modalonly = true;
 
@@ -315,7 +403,8 @@ return view.extend({
 		o = s.option(form.Value, 'tls_key_path', _('Key path'),
 			_('The server private key, in PEM format.'));
 		o.value('/etc/homeproxy/certs/server_privatekey.pem');
-		o.depends('tls', '1');
+		o.depends({'tls': '1', 'tls_acme': null});
+		o.depends({'tls': '1', 'tls_acme': '0'});
 		o.rmempty = false;
 		o.modalonly = true;
 

@@ -12,7 +12,7 @@
 'require tools.homeproxy as hp';
 'require tools.widgets as widgets';
 
-function parseShareLink(uri) {
+function parseShareLink(uri, features) {
 	var config;
 
 	uri = uri.split('://');
@@ -24,7 +24,7 @@ function parseShareLink(uri) {
 			var params = url.searchParams;
 
 			/* WeChat-Video / FakeTCP are unsupported by sing-box currently */
-			if (params.get('protocol') && params.get('protocol') !== 'udp')
+			if (!features.with_quic || (params.get('protocol') && params.get('protocol') !== 'udp'))
 				return null;
 
 			config = {
@@ -116,7 +116,7 @@ function parseShareLink(uri) {
 			var userinfo = uri[0].split(':')
 
 			/* Check if method and password exist */
-			if (!userinfo[3] || !userinfo[5])
+			if (!features.with_shadowsocksr || !userinfo[3] || !userinfo[5])
 				return null;
 
 			var params = new URLSearchParams(uri[1]);
@@ -324,22 +324,11 @@ function parseShareLink(uri) {
 	return config;
 }
 
-function validateWGBase64Key(section_id, value) {
-	/* Thanks to luci-proto-wireguard */
-	if (section_id) {
-		if (!value)
-			return _('Expecting: %s').format('non-empty value');
-		else if (value.length !== 44 || !value.match(/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/) || value[43] !== '=')
-			return _('Expecting: %s').format(_('valid base64 key'));
-	}
-
-	return true;
-}
-
 return view.extend({
 	load: function() {
 		return Promise.all([
-			uci.load('homeproxy')
+			uci.load('homeproxy'),
+			hp.getBuiltinFeatures()
 		]);
 	},
 
@@ -512,7 +501,7 @@ return view.extend({
 								var packet_encoding = uci.get(data[0], 'subscription', 'default_packet_encoding') || 'xudp';
 								var imported_node = 0;
 								input_links.forEach((s) => {
-									var config = parseShareLink(s);
+									var config = parseShareLink(s, data[1]);
 									if (config) {
 										if (config.tls === '1')
 											config.tls_insecure = allow_insecure
@@ -609,13 +598,16 @@ return view.extend({
 		o = s.option(form.ListValue, 'type', _('Type'));
 		o.value('direct', _('Direct'));
 		o.value('http', _('HTTP'));
-		o.value('hysteria', _('Hysteria'));
+		if (data[1].with_quic)
+			o.value('hysteria', _('Hysteria'));
 		o.value('shadowsocks', _('Shadowsocks'));
-		o.value('shadowsocksr', _('ShadowsocksR'));
+		if (data[1].with_shadowsocksr)
+			o.value('shadowsocksr', _('ShadowsocksR'));
 		o.value('socks', _('Socks'));
 		o.value('trojan', _('Trojan'));
 		o.value('v2ray', _('V2ray'));
-		o.value('wireguard', _('WireGuard'));
+		if (data[1].with_wireguard)
+			o.value('wireguard', _('WireGuard'));
 		o.value('vless', _('VLESS'));
 		o.value('vmess', _('VMess'));
 		o.rmempty = false;
@@ -652,10 +644,10 @@ return view.extend({
 		o.depends('type', 'shadowsocks');
 		o.depends('type', 'shadowsocksr');
 		o.depends('type', 'trojan');
-		o.depends({'type': 'socks', 'socks_version': '5'});
 		o.depends('v2ray_protocol', 'http');
 		o.depends('v2ray_protocol', 'shadowsocks');
 		o.depends('v2ray_protocol', 'trojan');
+		o.depends({'type': 'socks', 'socks_version': '5'});
 		o.depends({'v2ray_protocol': 'socks', 'socks_version': '5'});
 		o.validate = function(section_id, value) {
 			if (section_id) {
@@ -668,10 +660,10 @@ return view.extend({
 						return _('Expecting: %s').format(_('non-empty value'));
 					else if (type === 'shadowsocks') {
 						var encmode = this.map.lookupOption('shadowsocks_encrypt_method', section_id)[0].formvalue(section_id);
-						if (encmode === '2022-blake3-aes-128-gcm' && value.length !== 16)
-							return _('Expecting: %s').format(_('password with %d characters')).format(16);
-						else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode) && value.length !== 32)
-							return _('Expecting: %s').format(_('password with %d characters')).format(32);
+						if (encmode === '2022-blake3-aes-128-gcm')
+							return hp.validateBase64Key(16, arguments);
+						else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode))
+							return hp.validateBase64Key(32, arguments);
 					}
 				}
 			}
@@ -763,6 +755,7 @@ return view.extend({
 		o.value('v2ray-plugin');
 		o.depends('type', 'shadowsocks');
 		o.depends('v2ray_protocol', 'shadowsocks');
+		/* TODO: sing-box only support simple-obfs & v2ray-plugin */
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'shadowsocks_plugin_opts', _('Plugin opts'));
@@ -852,16 +845,7 @@ return view.extend({
 		o.depends('type', 'vmess');
 		o.depends('v2ray_protocol', 'vless');
 		o.depends('v2ray_protocol', 'vmess');
-		o.validate = function(section_id, value) {
-			if (section_id) {
-				if (!value)
-					return _('Expecting: %s').format(_('non-empty value'));
-				else if (value.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
-					return _('Expecting: %s').format(_('valid uuid'));
-			}
-
-			return true;
-		}
+		o.validate = hp.validateUUID;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'v2ray_vless_encrypt', _('Encrypt method'));
@@ -1154,20 +1138,20 @@ return view.extend({
 			_('WireGuard requires base64-encoded private keys.'));
 		o.password = true;
 		o.depends('type', 'wireguard');
-		o.validate = validateWGBase64Key;
+		o.validate = L.bind(hp.validateBase64Key, this, 44);
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'wireguard_peer_public_key', _('Peer pubkic key'),
 			_('WireGuard peer public key.'));
 		o.depends('type', 'wireguard');
-		o.validate = validateWGBase64Key;
+		o.validate = L.bind(hp.validateBase64Key, this, 44);;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'wireguard_pre_shared_key', _('Pre-shared key'),
 			_('WireGuard pre-shared key.'));
 		o.password = true;
 		o.depends('type', 'wireguard');
-		o.validate = validateWGBase64Key;
+		o.validate = L.bind(hp.validateBase64Key, this, 44);;
 		o.modalonly = true;
 		/* Wireguard config end */
 
@@ -1311,43 +1295,47 @@ return view.extend({
 		o.onclick = L.bind(hp.uploadCertificate, this, o, _('certificate'), 'client_ca');
 		o.modalonly = true;
 
-		o = s.option(form.Flag, 'tls_ech', _('Enable ECH'),
-			_('ECH (Encrypted Client Hello) is a TLS extension that allows a client to encrypt the first part of its ClientHello message.'));
-		o.depends({'type': 'http', 'tls': '1'});
-		o.depends({'type': 'trojan', 'tls': '1'});
-		o.depends({'type': 'vmess', 'tls': '1'});
-		o.default = o.disabled;
-		o.rmempty = false;
-		o.modalonly = true;
+		if (data[1].with_ech) {
+			o = s.option(form.Flag, 'tls_ech', _('Enable ECH'),
+				_('ECH (Encrypted Client Hello) is a TLS extension that allows a client to encrypt the first part of its ClientHello message.'));
+			o.depends({'type': 'http', 'tls': '1'});
+			o.depends({'type': 'trojan', 'tls': '1'});
+			o.depends({'type': 'vmess', 'tls': '1'});
+			o.default = o.disabled;
+			o.rmempty = false;
+			o.modalonly = true;
 
-		o = s.option(form.Flag, 'tls_ech_tls_enable_drs', _('Enable dynamic record sizing'));
-		o.depends('tls_ech', '1');
-		o.default = o.enabled;
-		o.rmempty = false;
-		o.modalonly = true;
+			o = s.option(form.Flag, 'tls_ech_tls_enable_drs', _('Enable dynamic record sizing'));
+			o.depends('tls_ech', '1');
+			o.default = o.enabled;
+			o.rmempty = false;
+			o.modalonly = true;
 
-		o = s.option(form.Flag, 'tls_ech_enable_pqss', _('Enable PQ signature schemes'));
-		o.depends('tls_ech', '1');
-		o.default = o.disabled;
-		o.rmempty = false;
-		o.modalonly = true;
+			o = s.option(form.Flag, 'tls_ech_enable_pqss', _('Enable PQ signature schemes'));
+			o.depends('tls_ech', '1');
+			o.default = o.disabled;
+			o.rmempty = false;
+			o.modalonly = true;
 
-		o = s.option(form.Value, 'tls_ech_config', _('ECH config'));
-		o.depends('tls_ech', '1');
-		o.modalonly = true;
+			o = s.option(form.Value, 'tls_ech_config', _('ECH config'));
+			o.depends('tls_ech', '1');
+			o.modalonly = true;
+		}
 
-		o = s.option(form.ListValue, 'tls_utls', _('uTLS fingerprint'),
-			_('uTLS is a fork of "crypto/tls", which provides ClientHello fingerprinting resistance.'));
-		o.value('', _('Disable'));
-		o.value('android', _('Android'));
-		o.value('chrome', _('Chrome'));
-		o.value('firefox', _('Firefox'));
-		o.value('ios', _('iOS'));
-		o.value('random', _('Random'));
-		o.depends({'type': 'http', 'tls': '1'});
-		o.depends({'type': 'trojan', 'tls': '1'});
-		o.depends({'type': 'vmess', 'tls': '1'});
-		o.modalonly = true;
+		if (data[1].with_utls) {
+			o = s.option(form.ListValue, 'tls_utls', _('uTLS fingerprint'),
+				_('uTLS is a fork of "crypto/tls", which provides ClientHello fingerprinting resistance.'));
+			o.value('', _('Disable'));
+			o.value('android', _('Android'));
+			o.value('chrome', _('Chrome'));
+			o.value('firefox', _('Firefox'));
+			o.value('ios', _('iOS'));
+			o.value('random', _('Random'));
+			o.depends({'type': 'http', 'tls': '1'});
+			o.depends({'type': 'trojan', 'tls': '1'});
+			o.depends({'type': 'vmess', 'tls': '1'});
+			o.modalonly = true;
+		}
 		/* TLS config end */
 
 		/* Extra settings start */

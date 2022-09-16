@@ -100,7 +100,6 @@ elseif table.contains({"all", "nil"}, routing_port) then
 else
 	routing_port = routing_port:split(",")
 end
-local native_protocols = { "http", "hysteria", "shadowsocks", "shadowsocksr", "socks", "trojan", "vless", "vmess", "wireguard" }
 -- UCI config end
 
 -- Config helper start
@@ -142,7 +141,7 @@ local function generate_outbound(node)
 		obfs = node.shadowsocksr_obfs,
 		obfs_param = node.shadowsocksr_obfs_param,
 		-- Socks
-		version = node.socks_version,		
+		version = node.socks_version,
 		-- VLESS / VMess
 		uuid = node.v2ray_uuid,
 		security = node.v2ray_vmess_encrypt,
@@ -441,9 +440,10 @@ if enable_server == "1" then
 				method = (cfg.type == "shadowsocks") and cfg.shadowsocks_encrypt_method or nil,
 				password = (cfg.type == "shadowsocks") and cfg.password or nil,
 
+				-- HTTP / Socks / Trojan / VMess
 				users = (cfg.type ~= "shadowsocks") and {
 					{
-						name = table.contains({"trojan", "vmess"}, cfg.type) and cfg[".name"] .. "-server" or nil,
+						name = table.contains({"trojan", "vmess"}, cfg.type) and "cfg-" .. cfg[".name"] .. "-server" or nil,
 						username = cfg.username,
 						password = (cfg.type ~= "vmess") and cfg.password or nil,
 						uuid = (cfg.type == "vmess") and cfg.password or nil
@@ -459,7 +459,22 @@ if enable_server == "1" then
 					max_version = cfg.tls_max_version,
 					cipher_suites = cfg.tls_cipher_suites,
 					certificate_path = cfg.tls_cert_path,
-					key_path = cfg.tls_key_path
+					key_path = cfg.tls_key_path,
+					acme = (cfg.tls_acme == "1") and {
+						domain = cfg.tls_acme_domains,
+						data_directory = "/etc/homeproxy/certs",
+						default_server_name = cfg.tls_acme_dsn,
+						email = cfg.tls_acme_email,
+						provider = cfg.tls_acme_provider,
+						disable_http_challenge = (cfg.tls_acme_dhc == "1"),
+						disable_tls_alpn_challenge = (cfg.tls_acme_dtac == "1"),
+						alternative_http_port = tonumber(cfg.tls_acme_ahp),
+						alternative_tls_port = tonumber(cfg.tls_acme_atp),
+						external_account = (cfg.tls_acme_external_account == "1") and {
+							key_id = cfg.tls_acme_ea_keyid,
+							mac_key = cfg.tls_acme_ea_mackey
+						} or nil
+					} or nil
 				} or nil,
 
 				transport = notEmpty(cfg.transport) and {
@@ -498,19 +513,19 @@ config.outbounds = {
 -- Main outbounds
 if notEmpty(main_node) then
 	local main_node_cfg = uci:get_all(uciconfig, main_node) or {}
-	if table.contains(native_protocols, main_node_cfg.type) then
-		config.outbounds[4] = generate_outbound(main_node_cfg)
-	else
+	if main_node_cfg.type == "v2ray" then
 		config.outbounds[4] = generate_external_outbound(main_node_cfg)
+	else
+		config.outbounds[4] = generate_outbound(main_node_cfg)
 	end
 	config.outbounds[4].tag = "main-out"
 
 	if notEmpty(main_udp_node) and main_udp_node ~= "same" and main_udp_node ~= main_node then
 		local main_udp_node_cfg = uci:get_all(uciconfig, main_udp_node) or {}
-		if table.contains(native_protocols, main_udp_node_cfg.type) then
-			config.outbounds[5] = generate_outbound(main_udp_node_cfg)
-		else
+		if main_udp_node_cfg.type == "v2ray" then
 			config.outbounds[5] = generate_external_outbound(main_udp_node_cfg)
+		else
+			config.outbounds[5] = generate_outbound(main_udp_node_cfg)
 		end
 		config.outbounds[5].tag = "main-udp-out"
 	end
@@ -521,13 +536,13 @@ if notEmpty(default_outbound) then
 		if cfg.enabled == "1" then
 			local outbound = uci:get_all(uciconfig, cfg.node) or {}
 			local index = #config.outbounds + 1
-			if table.contains(native_protocols, outbound.type) then
+			if outbound.type == "v2ray" then
+				config.outbounds[index] = generate_external_outbound(outbound)
+			else
 				config.outbounds[index] = generate_outbound(outbound)
 				config.outbounds[index].domain_strategy = cfg.domain_strategy
 				config.outbounds[index].bind_interface = cfg.bind_interface
 				config.outbounds[index].detour = get_outbound(cfg.outbound)
-			else
-				config.outbounds[index] = generate_external_outbound(outbound)
 			end
 			
 		end

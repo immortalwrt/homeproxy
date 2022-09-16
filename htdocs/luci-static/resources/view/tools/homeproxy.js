@@ -175,6 +175,18 @@ return baseclass.extend({
 		}).join(''));
 	},
 
+	getBuiltinFeatures: function() {
+		return L.resolveDefault(fs.exec('/usr/bin/sing-box version').then((res) => {
+			var features = {};
+
+			if(res.code === 0 && res.stdout.trim().match(/Tags: (.*)/))
+				for (var i of RegExp.$1.split(','))
+					features[i] = true;
+
+			return features;
+		}), {});
+	},
+
 	loadDefaultLabel: function(uciconfig, ucisection) {
 		var label = uci.get(uciconfig, ucisection, 'label');
 		if (label)
@@ -230,6 +242,18 @@ return baseclass.extend({
 		}, option, ev.target));
 	},
 
+	validateBase64Key: function(length, section_id, value) {
+		/* Thanks to luci-proto-wireguard */
+		if (section_id) {
+			if (!value)
+				return _('Expecting: %s').format('non-empty value');
+			else if (value.length !== length || !value.match(/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/) || value[length-1] !== '=')
+				return _('Expecting: %s').format(_('valid base64 key with %d characters').format(length));
+		}
+	
+		return true;
+	},
+
 	validateUniqueValue: function(uciconfig, ucisection, ucioption, section_id, value) {
 		if (section_id) {
 			if (!value)
@@ -246,6 +270,17 @@ return baseclass.extend({
 			}
 		}
 	
+		return true;
+	},
+
+	validateUUID: function(section_id, value) {
+		if (section_id) {
+			if (!value)
+				return _('Expecting: %s').format(_('non-empty value'));
+			else if (value.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') === null)
+				return _('Expecting: %s').format(_('valid uuid'));
+		}
+
 		return true;
 	}
 });
