@@ -341,16 +341,9 @@ return view.extend({
 			'<code>(source_geoip || source_ip_cidr)</code> &&<br/>' +
 			'<code>other fields</code>.'));
 		so.value('default', _('Default'));
-		so.value('and', _('And'));
-		so.value('or', _('Or'));
 		so.default = 'default';
+		so.readonly = true;
 		so.rmempty = false;
-
-		so = ss.option(form.Flag, 'invert', _('Invert'),
-			_('Invert match result.'));
-		so.default = so.disabled;
-		so.rmempty = false;
-		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'network', _('Network'));
 		so.value('tcp', _('TCP'));
@@ -601,16 +594,9 @@ return view.extend({
 			'<code>(source_geoip || source_ip_cidr)</code> &&<br/>' +
 			'<code>other fields</code>.'));
 		so.value('default', _('Default'));
-		so.value('and', _('And'));
-		so.value('or', _('Or'));
 		so.default = 'default';
+		so.readonly = true;
 		so.rmempty = false;
-
-		so = ss.option(form.Flag, 'invert', _('Invert'),
-			_('Invert match result.'));
-		so.default = so.disabled;
-		so.rmempty = false;
-		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'network', _('Network'));
 		so.value('tcp', _('TCP'));

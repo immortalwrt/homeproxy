@@ -241,19 +241,6 @@ local function parse_port(strport)
 	end
 	return ports
 end
-
-local function split_routing_rules(rules)
-	if type(rules) ~= "table" or isEmpty(rules) then
-		return nil
-	end
-
-	local splited = {}
-	for i, v in pairs(rules) do
-		splited[#splited+1] = {}
-		splited[#splited][i] = v
-	end
-	return splited
-end
 -- Config helper end
 
 local config = {}
@@ -333,7 +320,7 @@ elseif notEmpty(default_outbound) then
 	config.dns.rules = {}
 	uci:foreach(uciconfig, ucidnsrule, function(cfg)
 		if cfg.enabled == "1" then
-			local dns_rule = {
+			config.dns.rules[#config.dns.rules] = {
 				network = cfg.network,
 				protocol = cfg.protocol,
 				domain = cfg.domain,
@@ -354,26 +341,11 @@ elseif notEmpty(default_outbound) then
 				server = cfg.server,
 				disable_cache = (cfg.disable_cache == "1")
 			}
-
-			local index = #config.dns.rules + 1
-			if cfg.mode == "default" then
-				config.dns.rules[index] = dns_rule
-			else
-				dns_rule.invert = nil
-				dns_rule.server = nil
-				dns_rule.disable_cache = nil
-
-				config.dns.rules[index] = {
-					type = "logical",
-					mode = cfg.mode,
-					rules = split_routing_rules(dns_rule),
-					invert = (cfg.invert == "1"),
-					server = cfg.server,
-					disable_cache = (cfg.disable_cache == "1")
-				}
-			end
 		end
 	end)
+	if isEmpty(config.dns.rules) then
+		config.dns.rules = nil
+	end
 
 	config.dns.final = dns_default_server
 end
@@ -605,7 +577,7 @@ if notEmpty(main_node) then
 elseif notEmpty(default_outbound) then
 	uci:foreach(uciconfig, uciroutingrule, function(cfg)
 		if cfg.enabled == "1" then
-			local routing_rule = {
+			config.route.rules[#config.route.rules + 1] = {
 				ip_version = cfg.ip_version,
 				network = cfg.network,
 				protocol = cfg.protocol,
@@ -627,22 +599,6 @@ elseif notEmpty(default_outbound) then
 				invert = (cfg.invert == "1"),
 				outbound = get_outbound(cfg.outbound)
 			}
-
-			local index = #config.route.rules + 1
-			if cfg.mode == "default" then
-				config.route.rules[index] = routing_rule
-			else
-				routing_rule.invert = nil
-				routing_rule.outbound = nil
-
-				config.route.rules[index] = {
-					type = "logical",
-					mode = cfg.mode,
-					rules = split_routing_rules(routing_rule),
-					invert = (cfg.invert == "1"),
-					outbound = get_outbound(cfg.outbound)
-				}
-			end
 		end
 	end)
 
