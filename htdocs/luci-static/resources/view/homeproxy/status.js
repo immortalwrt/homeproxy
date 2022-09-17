@@ -55,9 +55,9 @@ return view.extend({
 
 		o = s.option(form.DummyValue, '_geodata_version', _('GeoData version'));
 		o.cfgvalue = function() {
+			var errSpanTemp = '<div style="margin-top:5px"><strong style="color:red">%s<strong></div>';
 			return fs.exec(hp_geoupdater, [ 'get_version' ]).then((res) => {
-				var errSpanTemp = '<div style="margin-top:13px;margin-left:3px;"><strong style="color:red">%s<strong></div>';
-
+				var spanTemp = '<div style="margin-top:5px;">%s</div>';
 				if (res.stdout.trim())
 					this.default = spanTemp.format(res.stdout.trim());
 				else {

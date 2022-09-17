@@ -453,7 +453,7 @@ return view.extend({
 		o = s.option(form.Flag, 'proxy_protocol_accept_no_header', _('Accept no header'),
 			_('Accept connections without Proxy Protocol header.'));
 		o.default = o.disabled;
-		o.depends({'network': 'udp', '!reverse': true});
+		o.depends('proxy_protocol', '1');
 		o.rmempty = false;
 		o.modalonly = true;
 

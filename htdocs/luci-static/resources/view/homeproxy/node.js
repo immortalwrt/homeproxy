@@ -670,13 +670,14 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'shadowsocks_plugin', _('Plugin'));
+		o.value('', _('none'));
 		o.value('obfs-local');
 		o.value('v2ray-plugin');
 		o.depends('type', 'shadowsocks');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'shadowsocks_plugin_opts', _('Plugin opts'));
-		o.depends({'shadowsocks_plugin': null, '!reverse': true});
+		o.depends({'shadowsocks_plugin': '', '!reverse': true});
 		o.modalonly = true;
 		/* Shadowsocks config end */
 
