@@ -50,7 +50,7 @@ return view.extend({
 
 		m = new form.Map('homeproxy');
 
-		s = m.section(form.NamedSection, 'config', 'homeproxy', _('Service information'));
+		s = m.section(form.NamedSection, 'config', 'homeproxy', _('Resources management'));
 		s.anonymous = true;
 
 		o = s.option(form.DummyValue, '_geodata_version', _('GeoData version'));
@@ -132,7 +132,7 @@ return view.extend({
 				}).catch(function(err) {
 					if (err.toString().includes('NotFoundError'))
 						var log = E('pre', { 'wrap': 'pre' }, [
-							_('Log not found.')
+							_('Log file does not exist.')
 						]);
 					else
 						var log = E('pre', { 'wrap': 'pre' }, [
