@@ -316,6 +316,7 @@ local function parse_uri(uri)
 			local url = URL.parse("http://" .. uri[2])
 			local params = url.query
 
+			-- Unsupported protocols
 			if (params.security == "xtls" or params.type == "kcp") then
 				log(translatef("Skipping unsupported %s node: %s.", "VLESS", urldecode(url.fragment, true) or url.host))
 			end
@@ -359,8 +360,12 @@ local function parse_uri(uri)
 			if uri.v ~= "2" then
 				log(translatef("Skipping unsupported %s format.", "vmess"))
 				return nil
+			-- Unsupported protocols
+			elseif params.type == "kcp" then
+				log(translatef("Skipping unsupported %s node: %s.", "VMess", notEmpty(uri.ps) or uri.add))
+				return nil
 			-- https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
-			elseif (notEmpty(uri.aid) and tonumber(uri.aid) ~= 0) or params.type == "kcp" then
+			elseif notEmpty(uri.aid) and tonumber(uri.aid) ~= 0 then
 				log(translatef("Skipping unsupported %s node: %s.", "VMess", notEmpty(uri.ps) or uri.add))
 				return nil
 			end
@@ -456,7 +461,7 @@ local function main()
 						if config.tls == "1" then
 							config.tls_insecure = allow_insecure
 						end
-						if table.contains({"vless", "vmess"}, config.type) then
+						if config.type == "vless" then
 							config.packet_encoding = packet_encoding
 						end
 

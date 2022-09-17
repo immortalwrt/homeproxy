@@ -162,8 +162,11 @@ function parseShareLink(uri, features) {
 			var url = new URL('http://' + uri[1]);
 			var params = url.searchParams;
 
+			/* Unsupported protocols */
+			if (params.get('type') === 'kcp' || params.get('security') === 'xtls')
+				return null;
 			/* Check if uuid and type exist */
-			if (!url.username || !params.get('type') || params.get('type') === 'kcp' || params.get('security') === 'xtls')
+			else if (!url.username || !params.get('type'))
 				return null;
 
 			config = {
@@ -211,8 +214,11 @@ function parseShareLink(uri, features) {
 
 			if (uri.v !== '2')
 				return null;
+			/* Unsupported protocols */
+			else if (uri.net === 'kcp')
+				return null;
 			/* https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6 */
-			else if ((uri.aid && parseInt(uri.aid) !== 0) || uri.net === 'kcp')
+			else if (uri.aid && parseInt(uri.aid) !== 0)
 				return null;
 
 			config = {
@@ -445,8 +451,8 @@ return view.extend({
 									if (config) {
 										if (config.tls === '1')
 											config.tls_insecure = allow_insecure
-										if (config.type == 'vless' || (config.type === 'v2ray' && ['vless', 'vmess'].includes(config.v2ray_protocol)))
-											config.v2ray_packet_encoding = packet_encoding
+										if (config.type == 'vless')
+											config.packet_encoding = packet_encoding
 
 										var nameHash = hp.calcStringMD5(config.label);
 										var sid = uci.add(data[0], 'node', nameHash);
