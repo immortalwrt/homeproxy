@@ -175,7 +175,6 @@ function parseShareLink(uri, features) {
 				address: url.hostname,
 				port: url.port || '80',
 				uuid: url.username,
-				vless_encrypt: params.get('encryption') || 'none',
 				transport: params.get('type') !== 'tcp' ? params.get('type') : null,
 				tls: params.get('security') === 'tls' ? '1' : '0',
 				tls_sni: params.get('sni'),
@@ -451,7 +450,7 @@ return view.extend({
 									if (config) {
 										if (config.tls === '1')
 											config.tls_insecure = allow_insecure
-										if (config.type == 'vless')
+										if (['vless', 'vmess'].includes(config.type))
 											config.packet_encoding = packet_encoding
 
 										var nameHash = hp.calcStringMD5(config.label);
@@ -763,12 +762,6 @@ return view.extend({
 		o.validate = hp.validateUUID;
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'vless_encrypt', _('Encrypt method'));
-		o.default = 'none';
-		o.depends('type', 'vless');
-		o.rmempty = false;
-		o.modalonly = true;
-
 		o = s.option(form.ListValue, 'vmess_encrypt', _('Encrypt method'));
 		o.value('auto');
 		o.value('none');
@@ -789,12 +782,6 @@ return view.extend({
 
 		o = s.option(form.Flag, 'vmess_authenticated_length', _('Authenticated length'),
 			_('Protocol parameter. Enable length block encryption.'));
-		o.default = o.enabled;
-		o.depends('type', 'vmess');
-		o.rmempty = false;
-		o.modalonly = true;
-
-		o = s.option(form.Flag, 'vmess_packet_addr', _('Packet encoding support'));
 		o.default = o.enabled;
 		o.depends('type', 'vmess');
 		o.rmempty = false;
@@ -868,11 +855,12 @@ return view.extend({
 		/* WebSocket config end */
 
 		o = s.option(form.ListValue, 'packet_encoding', _('Packet encoding'));
-		o.value('', _('None'));
 		o.value('packet', _('packet (v2ray-core v5+)'));
 		o.value('xudp', _('Xudp (Xray-core)'));
 		o.default = 'xudp';
 		o.depends('type', 'vless');
+		o.depends('type', 'vmess');
+		o.rmempty = false;
 		o.modalonly = true;
 		/* Transport config end */
 

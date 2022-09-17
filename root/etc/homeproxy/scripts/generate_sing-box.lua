@@ -147,7 +147,6 @@ local function generate_outbound(node)
 		security = node.vmess_encrypt,
 		global_padding = node.vmess_global_padding and (node.vmess_global_padding == "1") or nil,
 		authenticated_length = node.vmess_authenticated_length and (node.vmess_authenticated_length == "1") or nil,
-		packet_addr = node.vmess_packet_addr and (node.vmess_packet_addr == "1") or nil,
 		packet_encoding = node.packet_encoding,
 		-- WireGuard
 		system_interface = (node.type == "wireguard") or nil,

@@ -327,7 +327,6 @@ local function parse_uri(uri)
 				address = url.host,
 				port = url.port,
 				uuid = url.user,
-				vless_encrypt = params.encryption or "none",
 				transport = (params.type ~= "tcp") and params.type or nil,
 				tls = (params.security == "tls") and "1" or "0",
 				tls_sni = params.sni,
@@ -461,7 +460,7 @@ local function main()
 						if config.tls == "1" then
 							config.tls_insecure = allow_insecure
 						end
-						if config.type == "vless" then
+						if table.contains({"vless", "vmess"}, config.type) then
 							config.packet_encoding = packet_encoding
 						end
 
