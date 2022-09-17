@@ -8,16 +8,8 @@
 'require form';
 'require fs';
 'require poll';
-'require rpc';
 'require ui';
 'require view';
-
-var callServiceList = rpc.declare({
-	object: 'service',
-	method: 'list',
-	params: ['name'],
-	expect: { '': {} }
-});
 
 /* Thanks to luci-app-aria2 */
 var css = '				\
@@ -33,26 +25,13 @@ var css = '				\
 .description {				\
 	background-color: #33ccff;	\
 }';
-var spanTemp = '<div style="margin-top:7px;margin-left:3px;">%s</div>';
 
 var hp_dir = '/var/run/homeproxy';
 var hp_geoupdater = '/etc/homeproxy/scripts/update_geodata.sh';
 
-function getInstanceStatus(instance) {
-	return L.resolveDefault(callServiceList('homeproxy'), {}).then((res) => {
-		var isRunning = false;
-		try {
-			isRunning = res['homeproxy']['instances'][instance]['running'];
-		} catch (e) { }
-		return isRunning;
-	});
-}
-
 return view.extend({
 	load: function() {
 		return Promise.all([
-			getInstanceStatus('sing-box'),
-			getInstanceStatus('v2ray'),
 			fs.read(hp_dir + '/homeproxy.log', 'text') .then((res) => {
 				return res.trim() || _('Log is clean.');
 			}).catch((err) => {
@@ -73,17 +52,6 @@ return view.extend({
 
 		s = m.section(form.NamedSection, 'config', 'homeproxy', _('Service information'));
 		s.anonymous = true;
-
-		o = s.option(form.DummyValue, '_service_status', _('Service status'));
-		o.cfgvalue = function() {
-			var strongTemp = '<strong style="color:%s">%s: %s</strong>'
-
-			var res = data[0] ? strongTemp.format('green', 'Sing-box', _('RUNNING')) : strongTemp.format('red', 'Sing-box', _('NOT RUNNING'));
-			res += '<br/>'
-			res += data[1] ? strongTemp.format('green', 'V2ray', _('RUNNING')) : strongTemp.format('red', 'V2ray', _('NOT RUNNING'));
-			this.default = spanTemp.format(res);
-		}
-		o.rawhtml = true;
 
 		o = s.option(form.DummyValue, '_geodata_version', _('GeoData version'));
 		o.cfgvalue = function() {
@@ -136,7 +104,7 @@ return view.extend({
 					E('h3', {'name': 'content'}, _('HomeProxy log')),
 					E('div', {'class': 'cbi-section'}, [
 						E('div', { 'id': 'log_textarea' },
-							E('pre', { 'wrap': 'pre' }, [ data[2] ])
+							E('pre', { 'wrap': 'pre' }, [ data[0] ])
 						)
 					])
 				])

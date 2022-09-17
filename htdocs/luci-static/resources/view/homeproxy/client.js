@@ -61,6 +61,19 @@ function validatePortRange(section_id, value) {
 	return true;
 }
 
+var stubValidator = {
+	factory: validation,
+	apply: function(type, value, args) {
+		if (value != null)
+			this.value = value;
+
+		return validation.types[type].apply(this, args);
+	},
+	assert: function(condition) {
+		return !!condition;
+	}
+};
+
 return view.extend({
 	load: function() {
 		return Promise.all([
@@ -135,13 +148,12 @@ return view.extend({
 		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.validate = function(section_id, value) {
 			if (section_id && value !== 'all' && value !== 'common') {
-				if (value === null || value === '')
+				if (!value)
 					return _('Expecting: %s').format(_('valid port value'));
 
 				var ports = [];
 				for (var i of value.split(',')) {
-					var port = validation.parseInteger(i);
-					if (!port || port.toString() !== i || port < 0 || port > 65535)
+					if (!stubValidator.apply('port', i))
 						return _('Expecting: %s').format(_('valid port value'));
 					if (ports.includes(i))
 						return _('Port %s alrealy exists, please enter other ones.').format(port);
@@ -165,9 +177,12 @@ return view.extend({
 		o.default = '8.8.8.8';
 		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.validate = function(section_id, value) {
-			if (section_id && !['local', 'wan'].includes(value)
-					&& !(validation.parseIPv4(value) || validation.parseIPv6(value)))
-				return _('Expecting: %s').format(_('valid IP address'));
+			if (section_id && !['local', 'wan'].includes(value)) {
+				if (!value)
+					return _('Expecting: %s').fomrat(_('non-empty value'));
+				else if (!stubValidator.apply('ipaddr', value))
+					return _('Expecting: %s').format(_('valid IP address'));
+			}
 
 			return true;
 		}
