@@ -163,62 +163,31 @@ function parseShareLink(uri, features) {
 			var params = url.searchParams;
 
 			/* Check if uuid and type exist */
-			if (!url.username || !params.get('type'))
+			if (!url.username || !params.get('type') || params.get('type') === 'kcp' || params.get('security') === 'xtls')
 				return null;
 
 			config = {
 				label: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
-				type: 'v2ray',
-				v2ray_protocol: 'vless',
+				type: 'vless',
 				address: url.hostname,
 				port: url.port || '80',
-				v2ray_uuid: url.username,
-				v2ray_vless_encrypt: params.get('encryption') || 'none',
-				v2ray_transport: params.get('type') || 'tcp',
+				uuid: url.username,
+				vless_encrypt: params.get('encryption') || 'none',
+				transport: params.get('type') !== 'tcp' ? params.get('type') : null,
 				tls: params.get('security') === 'tls' ? '1' : '0',
 				tls_sni: params.get('sni'),
-				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')).split(',') : null,
-				v2ray_xtls: params.get('security') === 'xtls' ? '1' : '0',
-				v2ray_xtls_flow: params.get('flow')
+				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')).split(',') : null
 			};
-			switch (config.v2ray_transport) {
+			switch (config.transport) {
 			case 'grpc':
 				config.grpc_servicename = params.get('serviceName');
-				config.grpc_mode = params.get('mode') || 'gun';
-
 				break;
 			case 'http':
-				config.v2ray_transport = 'h2';
-				config.h2_host = params.get('host') ? decodeURIComponent(params.get('host')).split(',') : null;
-				config.h2_path = params.get('path') ? decodeURIComponent(params.get('path')) : null;
-
-				break;
-			case 'kcp':
-				config.v2ray_transport = 'mkcp';
-				config.mkcp_seed = params.get('seed');
-				config.mkcp_header = params.get('headerType') || 'none';
-				/* Default settings from v2rayN */
-				config.mkcp_downlink_capacity = '100';
-				config.mkcp_uplink_capacity = '12';
-				config.mkcp_read_buffer_size = '2';
-				config.mkcp_write_buffer_size = '2';
-				config.mkcp_mtu = '1350';
-				config.mkcp_tti = '50';
-
-				break;
-			case 'quic':
-				config.quic_security = params.get('quicSecurity') || 'none';
-				config.quic_key = params.get('key');
-				config.mkcp_header = params.get('headerType') || 'none';
-
-				break;
 			case 'tcp':
-				config.tcp_header = params.get('headerType') || 'none';
-				if (config.tcp_header === 'http') {
-					config.tcp_host = params.get('host') ? decodeURIComponent(params.get('host')).split(',') : null;
-					config.tcp_path = params.get('path') ? decodeURIComponent(params.get('path')).split(',') : null;
+				if (config.transport === 'http' || params.get('headerType') === 'http') {
+					config.http_host = params.get('host') ? decodeURIComponent(params.get('host')).split(',') : null;
+					config.http_path = params.get('path') ? decodeURIComponent(params.get('path')) : null;
 				}
-
 				break;
 			case 'ws':
 				config.ws_host = config.tls !== '1' ? (params.get('host') ? decodeURIComponent(params.get('host')) : null) : null;
@@ -228,7 +197,6 @@ function parseShareLink(uri, features) {
 					config.websocket_early_data = config.ws_path.split('?ed=')[1];
 					config.ws_path = config.ws_path.split('?ed=')[0];
 				}
-
 				break;
 			}
 
@@ -244,59 +212,32 @@ function parseShareLink(uri, features) {
 			if (uri.v !== '2')
 				return null;
 			/* https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6 */
-			else if (uri.aid && parseInt(uri.aid) !== 0)
+			else if ((uri.aid && parseInt(uri.aid) !== 0) || uri.net === 'kcp')
 				return null;
 
 			config = {
 				label: uri.ps,
-				type: 'v2ray',
-				v2ray_protocol: 'vmess',
+				type: 'vmess',
 				address: uri.add,
 				port: uri.port,
-				v2ray_uuid: uri.id,
-				v2ray_vmess_encrypt: uri.scy || 'auto',
-				v2ray_transport: uri.net,
+				uuid: uri.id,
+				vmess_encrypt: uri.scy || 'auto',
+				transport: uri.net,
 				tls: uri.tls === 'tls' ? '1' : '0',
 				tls_sni: uri.sni || uri.host,
 				tls_alpn: uri.alpn ? uri.alpn.split(',') : null
 			};
-			switch (config.v2ray_transport) {
+			switch (config.transport) {
 			case 'grpc':
 				config.grpc_servicename = uri.path;
-				config.grpc_mode = 'gun';
-				
 				break;
 			case 'h2':
-				config.h2_host = uri.host ? uri.host.split(',') : null;
-				config.h2_path = uri.path;
-
-				break;
-			case 'kcp':
-				config.v2ray_transport = 'mkcp';
-				config.mkcp_seed = uri.path;
-				config.mkcp_header = uri.type || 'none';
-				/* Default settings from v2rayN */
-				config.mkcp_downlink_capacity = '100';
-				config.mkcp_uplink_capacity = '12';
-				config.mkcp_read_buffer_size = '2';
-				config.mkcp_write_buffer_size = '2';
-				config.mkcp_mtu = '1350';
-				config.mkcp_tti = '50';
-
-				break;
-			case 'quic':
-				config.quic_security = uri.host || 'none';
-				config.quic_key = uri.path;
-				config.mkcp_header = uri.type || 'none';
-
-				break;
 			case 'tcp':
-				config.tcp_header = uri.type === 'http' ? 'http' : 'none';
-				if (config.tcp_header === 'http') {
-					config.tcp_host = uri.host ? uri.host.split(',') : null;
-					config.tcp_path = uri.path ? uri.path.split(',') : null;
+				if (config.transport === 'h2' || uri.type === 'http') {
+					config.transport = 'http';
+					config.http_host = uri.host ? uri.host.split(',') : null;
+					config.http_path = uri.path;
 				}
-
 				break;
 			case 'ws':
 				config.ws_host = config.tls !== '1' ? uri.host : null;
@@ -306,7 +247,6 @@ function parseShareLink(uri, features) {
 					config.websocket_early_data = config.ws_path.split('?ed=')[1];
 					config.ws_path = config.ws_path.split('?ed=')[0];
 				}
-
 				break;
 			}
 
@@ -605,23 +545,11 @@ return view.extend({
 			o.value('shadowsocksr', _('ShadowsocksR'));
 		o.value('socks', _('Socks'));
 		o.value('trojan', _('Trojan'));
-		o.value('v2ray', _('V2ray'));
 		if (data[1].with_wireguard)
 			o.value('wireguard', _('WireGuard'));
 		o.value('vless', _('VLESS'));
 		o.value('vmess', _('VMess'));
 		o.rmempty = false;
-
-		o = s.option(form.ListValue, 'v2ray_protocol', _('V2ray protocol'));
-		o.value('http', _('HTTP'));
-		o.value('shadowsocks', _('Shadowsocks'));
-		o.value('socks', _('Socks'));
-		o.value('trojan', _('Trojan'));
-		o.value('vless', _('VLESS'));
-		o.value('vmess', _('VMess'));
-		o.depends('type', 'v2ray');
-		o.rmempty = false;
-		o.modalonly = true;
 
 		o = s.option(form.Value, 'address', _('Address'));
 		o.datatype = 'host';
@@ -634,8 +562,6 @@ return view.extend({
 		o = s.option(form.Value, 'username', _('Username'));
 		o.depends('type', 'http');
 		o.depends('type', 'socks');
-		o.depends('v2ray_protocol', 'http');
-		o.depends('v2ray_protocol', 'socks');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'password', _('Password'));
@@ -644,18 +570,13 @@ return view.extend({
 		o.depends('type', 'shadowsocks');
 		o.depends('type', 'shadowsocksr');
 		o.depends('type', 'trojan');
-		o.depends('v2ray_protocol', 'http');
-		o.depends('v2ray_protocol', 'shadowsocks');
-		o.depends('v2ray_protocol', 'trojan');
 		o.depends({'type': 'socks', 'socks_version': '5'});
-		o.depends({'v2ray_protocol': 'socks', 'socks_version': '5'});
 		o.validate = function(section_id, value) {
 			if (section_id) {
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
-				var v2ray_type = this.map.lookupOption('v2ray_protocol', section_id)[0].formvalue(section_id) || '';
-
 				var required_type = [ 'shadowsocks', 'shadowsocksr', 'trojan' ];
-				if (required_type.includes(type) || required_type.includes(v2ray_type)) {
+
+				if (required_type.includes(type)) {
 					if (!value)
 						return _('Expecting: %s').format(_('non-empty value'));
 					else if (type === 'shadowsocks') {
@@ -740,22 +661,13 @@ return view.extend({
 			o.value(i);
 		o.default = 'aes-128-gcm';
 		o.depends('type', 'shadowsocks');
-		o.depends('v2ray_protocol', 'shadowsocks');
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.Flag, 'shadowsocks_ivcheck', _('Bloom filter'));
-		o.default = o.disabled;
-		o.depends('v2ray_protocol', 'shadowsocks');
-		o.rmempty = false;
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'shadowsocks_plugin', _('Plugin'));
+		o = s.option(form.ListValue, 'shadowsocks_plugin', _('Plugin'));
 		o.value('obfs-local');
 		o.value('v2ray-plugin');
 		o.depends('type', 'shadowsocks');
-		o.depends('v2ray_protocol', 'shadowsocks');
-		/* TODO: sing-box only support simple-obfs & v2ray-plugin */
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'shadowsocks_plugin_opts', _('Plugin opts'));
@@ -834,28 +746,24 @@ return view.extend({
 		o.value('5', _('Socks5'));
 		o.default = '5';
 		o.depends('type', 'socks');
-		o.depends('v2ray_protocol', 'socks');
 		o.rmempty = false;
 		o.modalonly = true;
 		/* Socks config end */
 
 		/* VMess config start */
-		o = s.option(form.Value, 'v2ray_uuid', _('UUID'));
+		o = s.option(form.Value, 'uuid', _('UUID'));
 		o.depends('type', 'vless');
 		o.depends('type', 'vmess');
-		o.depends('v2ray_protocol', 'vless');
-		o.depends('v2ray_protocol', 'vmess');
 		o.validate = hp.validateUUID;
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'v2ray_vless_encrypt', _('Encrypt method'));
+		o = s.option(form.Value, 'vless_encrypt', _('Encrypt method'));
 		o.default = 'none';
 		o.depends('type', 'vless');
-		o.depends('v2ray_protocol', 'vless');
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.ListValue, 'v2ray_vmess_encrypt', _('Encrypt method'));
+		o = s.option(form.ListValue, 'vmess_encrypt', _('Encrypt method'));
 		o.value('auto');
 		o.value('none');
 		o.value('zero');
@@ -863,7 +771,6 @@ return view.extend({
 		o.value('chacha20-poly1305');
 		o.default = 'auto';
 		o.depends('type', 'vmess');
-		o.depends('v2ray_protocol', 'vmess');
 		o.rmempty = false;
 		o.modalonly = true;
 
@@ -888,7 +795,7 @@ return view.extend({
 		o.modalonly = true;
 		/* VMess config end */
 
-		/* Transport config */
+		/* Transport config start */
 		o = s.option(form.ListValue, 'transport', _('Transport'),
 			_('No TCP transport, plain HTTP is merged into the HTTP transport.'));
 		o.value('', _('None'));
@@ -910,176 +817,35 @@ return view.extend({
 		o.depends('type', 'vmess');
 		o.modalonly = true;
 
-		/* V2ray config start */
-		o = s.option(form.ListValue, 'v2ray_transport', _('Transport'));
-		o.value('grpc', _('gRPC'));
-		o.value('h2', _('HTTP/2'));
-		o.value('mkcp', _('mKCP'));
-		o.value('quic', _('QUIC'));
-		o.value('tcp', _('TCP'));
-		o.value('ws', _('WebSocket'));
-		o.default = 'tcp';
-		for (var i of hp.v2ray_native_protocols)
-			o.depends('v2ray_protocol', i);
-		o.modalonly = true;
-
-		/* gRPC config start */
+		/* gRPC config */
 		o = s.option(form.Value, 'grpc_servicename', _('gRPC service name'));
 		o.depends('transport', 'grpc');
-		o.depends('v2ray_transport', 'grpc');
 		o.modalonly = true;
 
-		o = s.option(form.ListValue, 'grpc_mode', _('gRPC mode'));
-		o.value('gun');
-		o.value('multi');
-		o.value('raw');
-		o.depends('v2ray_transport', 'grpc');
-		o.modalonly = true;
-
-		o = s.option(form.Flag, 'grpc_health_check', _('Health check'));
-		o.default = o.disabled;
-		o.depends('v2ray_transport', 'grpc');
-		o.modalonly = true;
-
-		o = s.option(form.Flag, 'grpc_health_check_timeout', _('Health check timeout'));
-		o.datatype = 'uintger';
-		o.default = '20';
-		o.depends('grpc_health_check', '1');
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'grpc_idle_timeout', _('Idle timeout'));
-		o.datatype = 'uinteger';
-		o.default = '60';
-		o.depends('v2ray_transport', 'grpc');
-		o.modalonly = true;
-
-		o = s.option(form.Flag, 'grpc_permit_without_stream', _('Permit without stream'));
-		o.default = o.disabled;
-		o.depends('v2ray_transport', 'grpc');
-		o.modalonly = true;
-
-		o = s.option(form.Flag, 'grpc_health_check', _('Health check'));
-		o.depends('v2ray_transport', 'grpc');
-		o.modalonly = true;
-		/* gRPC config end */
-
-		/* HTTP/2 config start */
-		o = s.option(form.DynamicList, 'h2_host', _('Host'));
+		/* HTTP config start */
+		o = s.option(form.DynamicList, 'http_host', _('Host'));
 		o.datatype = 'hostname';
 		o.depends('transport', 'http');
-		o.depends('v2ray_transport', 'h2');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'h2_path', _('Path'));
+		o = s.option(form.Value, 'http_path', _('Path'));
 		o.depends('transport', 'http');
-		o.depends('v2ray_transport', 'h2');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'h2_method', _('Method'));
+		o = s.option(form.Value, 'http_method', _('Method'));
 		o.value('get', _('GET'));
 		o.value('put', _('PUT'));
 		o.depends('transport', 'http');
-		o.depends('v2ray_transport', 'h2');
 		o.modalonly = true;
-		/* HTTP/2 config end */
-
-		/* mKCP config start */
-		o = s.option(form.Value, 'mkcp_seed', _('mKCP seed'));
-		o.depends('v2ray_transport', 'mkcp');
-		o.modalonly = true;
-
-		o = s.option(form.Flag, 'mkcp_congestion', _('Congestion'));
-		o.default = o.disabled;
-		o.depends('v2ray_transport', 'mkcp');
-		o.modalonly = true;
-
-		o = s.option(form.ListValue, 'mkcp_header', _('Header type'));
-		o.value('none', _('None'));
-		o.value('dtls', _('DTLS 1.2'));
-		o.value('srtp', _('Video call (SRTP)'));
-		o.value('utp', _('BitTorrent (utp)'));
-		o.value('wechat-video', _('Wechat video call'));
-		o.value('wireguard', _('WireGuard'));
-		o.depends('v2ray_transport', 'mkcp');
-		o.depends('v2ray_transport', 'quic');
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'mkcp_downlink_capacity', _('Downlink capacity'));
-		o.datatype = 'uinteger';
-		o.depends('type', 'hysteria');
-		o.depends('v2ray_transport', 'mkcp');
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'mkcp_uplink_capacity', _('Uplink capacity'));
-		o.datatype = 'uinteger';
-		o.depends('type', 'hysteria');
-		o.depends('v2ray_transport', 'mkcp');
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'mkcp_read_buffer_size', _('Read buffer size'));
-		o.datatype = 'uinteger';
-		o.depends('v2ray_transport', 'mkcp');
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'mkcp_write_buffer_size', _('Write buffer size'));
-		o.datatype = 'uinteger';
-		o.depends('v2ray_transport', 'mkcp');
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'mkcp_mtu', _('MTU'));
-		o.datatype = 'range(0,9000)';
-		o.depends('type', 'wireguard');
-		o.depends('v2ray_transport', 'mkcp');
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'mkcp_tti', _('TTI'));
-		o.datatype = 'uinteger';
-		o.depends('v2ray_transport', 'mkcp');
-		o.modalonly = true;
-		/* mKCP config end */
-
-		/* QUIC config start */
-		o = s.option(form.ListValue, 'quic_security', _('QUIC security'));
-		o.value('none');
-		o.value('aes-128-gcm');
-		o.value('chacha20-poly1305');
-		o.depends('v2ray_transport', 'quic');
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'quic_key', _('QUIC key'));
-		o.password = true;
-		o.depends('v2ray_transport', 'quic');
-		o.modalonly = true;
-		/* QUIC config end */
-
-		/* TCP config start */
-		o = s.option(form.ListValue, 'tcp_header', _('Header type'));
-		o.value('none');
-		o.value('http');
-		o.default = 'none';
-		o.depends('v2ray_transport', 'tcp');
-		o.rmempty = false;
-		o.modalonly = true;
-
-		o = s.option(form.DynamicList, 'tcp_host', _('Host'));
-		o.datatype = 'hostname';
-		o.depends({'v2ray_transport': 'tcp', 'tcp_header': 'http'});
-		o.modalonly = true;
-
-		o = s.option(form.DynamicList, 'tcp_path', _('Path'));
-		o.depends({'v2ray_transport': 'tcp', 'tcp_header': 'http'});
-		o.modalonly = true;
-		/* TCP config end */
+		/* HTTP config end */
 
 		/* WebSocket config start */
 		o = s.option(form.Value, 'ws_host', _('Host'));
 		o.depends('transport', 'ws');
-		o.depends('v2ray_transport', 'ws');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'ws_path', _('Path'));
 		o.depends('transport', 'ws');
-		o.depends('v2ray_transport', 'ws');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'websocket_early_data', _('Early data'),
@@ -1087,44 +853,22 @@ return view.extend({
 		o.datatype = 'uinteger';
 		o.default = '2048';
 		o.depends('transport', 'ws');
-		o.depends('v2ray_transport', 'ws');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'websocket_early_data_header', _('Early data header name'));
 		o.default = 'Sec-WebSocket-Protocol';
 		o.depends('transport', 'ws');
-		o.depends('v2ray_transport', 'ws');
 		o.modalonly = true;
 		/* WebSocket config end */
 
-		/* XTLS config start */
-		o = s.option(form.Flag, 'v2ray_xtls', _('XTLS'));
-		o.default = o.disabled;
-		o.depends({'v2ray_protocol': /^(trojan|vless)$/, 'v2ray_transport': /^(tcp|mkcp)$/, 'multiplex': '0', 'tls': '0'});
-		o.modalonly = true;
-
-		o = s.option(form.ListValue, 'v2ray_xtls_flow', _('Flow'));
-		o.value('xtls-rprx-origin');
-		o.value('xtls-rprx-origin-udp443');
-		o.value('xtls-rprx-direct');
-		o.value('xtls-rprx-direct-udp443');
-		o.value('xtls-rprx-splice');
-		o.value('xtls-rprx-splice-udp443');
-		o.default = 'xtls-rprx-direct';
-		o.depends('v2ray_xtls', '1');
-		o.modalonly = true;
-		/* XTLS config end */
-
-		o = s.option(form.ListValue, 'v2ray_packet_encoding', _('Packet encoding'));
+		o = s.option(form.ListValue, 'packet_encoding', _('Packet encoding'));
 		o.value('', _('None'));
 		o.value('packet', _('packet (v2ray-core v5+)'));
 		o.value('xudp', _('Xudp (Xray-core)'));
 		o.default = 'xudp';
 		o.depends('type', 'vless');
-		o.depends('v2ray_protocol', 'vless');
-		o.depends('v2ray_protocol', 'vmess');
 		o.modalonly = true;
-		/* V2ray config end */
+		/* Transport config end */
 
 		/* Wireguard config start */
 		o = s.option(form.DynamicList, 'wireguard_local_address', _('Local address'),
@@ -1144,14 +888,21 @@ return view.extend({
 		o = s.option(form.Value, 'wireguard_peer_public_key', _('Peer pubkic key'),
 			_('WireGuard peer public key.'));
 		o.depends('type', 'wireguard');
-		o.validate = L.bind(hp.validateBase64Key, this, 44);;
+		o.validate = L.bind(hp.validateBase64Key, this, 44);
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'wireguard_pre_shared_key', _('Pre-shared key'),
 			_('WireGuard pre-shared key.'));
 		o.password = true;
 		o.depends('type', 'wireguard');
-		o.validate = L.bind(hp.validateBase64Key, this, 44);;
+		o.validate = L.bind(hp.validateBase64Key, this, 44);
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'wireguard_mtu', _('MTU'));
+		o.datatype = 'range(0,9000)';
+		o.default = '1408';
+		o.depends('type', 'wireguard');
+		o.rmempty = false;
 		o.modalonly = true;
 		/* Wireguard config end */
 
@@ -1161,16 +912,6 @@ return view.extend({
 		o.depends('type', 'shadowsocks');
 		o.depends('type', 'trojan');
 		o.depends('type', 'vmess');
-		for (var i of hp.v2ray_native_protocols)
-			o.depends('v2ray_protocol', i);
-		o.rmempty = false;
-		o.modalonly = true;
-
-		o = s.option(form.Value, 'v2ray_concurrency', _('Concurrency'));
-		o.datatype = 'range(0,1024)';
-		o.default = '4';
-		for (var i of hp.v2ray_native_protocols)
-			o.depends({'v2ray_protocol': i, 'multiplex': '1'});
 		o.rmempty = false;
 		o.modalonly = true;
 
@@ -1214,22 +955,18 @@ return view.extend({
 		o.depends('type', 'http');
 		o.depends('type', 'trojan');
 		o.depends('type', 'vmess');
-		for (var i of hp.v2ray_native_protocols)
-			o.depends('v2ray_protocol', i);
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'tls_sni', _('TLS SNI'),
 			_('Used to verify the hostname on the returned certificates unless insecure is given.'));
 		o.depends('type', 'hysteria');
 		o.depends('tls', '1');
-		o.depends('v2ray_xtls', '1');
 		o.modalonly = true;
 
 		o = s.option(form.DynamicList, 'tls_alpn', _('TLS ALPN'),
 			_('List of supported application level protocols, in order of preference.'));
 		o.depends('type', 'hysteria');
 		o.depends('tls', '1');
-		o.depends('v2ray_xtls', '1');
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'tls_insecure', _('Allow insecure'),
@@ -1239,7 +976,6 @@ return view.extend({
 		o.default = o.disabled;
 		o.depends('type', 'hysteria');
 		o.depends('tls', '1');
-		o.depends('v2ray_xtls', '1');
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'tls_min_version', _('Minimum TLS version'),
@@ -1343,8 +1079,6 @@ return view.extend({
 		o.default = o.disabled;
 		for (var i of hp.native_protocols)
 			o.depends('type', i)
-		for (var i of hp.v2ray_native_protocols)
-			o.depends('v2ray_protocol', i);
 		o.rmempty = false;
 		o.modalonly = true;
 
@@ -1361,7 +1095,6 @@ return view.extend({
 		o.default = o.disabled;
 		o.depends('type', 'socks');
 		o.depends({'type': 'shadowsocks', 'multiplex': '0'});
-		o.depends({'v2ray_protocol': 'shadowsocks', 'multiplex': '0'});
 		o.rmempty = false;
 		o.modalonly = true;
 		/* Extra settings end */

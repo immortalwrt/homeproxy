@@ -143,12 +143,12 @@ local function generate_outbound(node)
 		-- Socks
 		version = node.socks_version,
 		-- VLESS / VMess
-		uuid = node.v2ray_uuid,
-		security = node.v2ray_vmess_encrypt,
+		uuid = node.uuid,
+		security = node.vmess_encrypt,
 		global_padding = node.vmess_global_padding and (node.vmess_global_padding == "1") or nil,
 		authenticated_length = node.vmess_authenticated_length and (node.vmess_authenticated_length == "1") or nil,
 		packet_addr = node.vmess_packet_addr and (node.vmess_packet_addr == "1") or nil,
-		packet_encoding = node.v2ray_packet_encoding,
+		packet_encoding = node.packet_encoding,
 		-- WireGuard
 		system_interface = (node.type == "wireguard") or nil,
 		interface_name = (node.type == "wireguard") and "emortal-wg-cfg-" .. node[".name"] .. "-out" or nil,
@@ -156,7 +156,7 @@ local function generate_outbound(node)
 		private_key = node.wireguard_private_key,
 		peer_public_key = node.wireguard_peer_public_key,
 		pre_shared_key = node.wireguard_pre_shared_key,
-		mtu = node.mkcp_mtu,
+		mtu = node.wireguard_mtu,
 
 		multiplex = (node.multiplex == "1") and {
 			enabled = true,
@@ -187,9 +187,9 @@ local function generate_outbound(node)
 		} or nil,
 		transport = notEmpty(node.transport) and {
 			type = node.transport,
-			host = node.h2_host or node.ws_host,
-			path = node.h2_path or node.ws_path,
-			method = node.h2_method,
+			host = node.http_host or node.ws_host,
+			path = node.http_path or node.ws_path,
+			method = node.http_method,
 			max_early_data = node.websocket_early_data,
 			early_data_header_name = node.websocket_early_data_header,
 			service_name = node.grpc_servicename
@@ -200,13 +200,6 @@ local function generate_outbound(node)
 		udp_fragment = (node.udp_fragment == "1") or nil
 	}
 	return outbound
-end
-
-local function generate_external_outbound(node)
-	if type(node) ~= "table" or isEmpty(node) then
-		return nil
-	end
-	-- todo
 end
 
 local function get_outbound(cfg)
@@ -513,20 +506,12 @@ config.outbounds = {
 -- Main outbounds
 if notEmpty(main_node) then
 	local main_node_cfg = uci:get_all(uciconfig, main_node) or {}
-	if main_node_cfg.type == "v2ray" then
-		config.outbounds[4] = generate_external_outbound(main_node_cfg)
-	else
-		config.outbounds[4] = generate_outbound(main_node_cfg)
-	end
+	config.outbounds[4] = generate_outbound(main_node_cfg)
 	config.outbounds[4].tag = "main-out"
 
 	if notEmpty(main_udp_node) and main_udp_node ~= "same" and main_udp_node ~= main_node then
 		local main_udp_node_cfg = uci:get_all(uciconfig, main_udp_node) or {}
-		if main_udp_node_cfg.type == "v2ray" then
-			config.outbounds[5] = generate_external_outbound(main_udp_node_cfg)
-		else
-			config.outbounds[5] = generate_outbound(main_udp_node_cfg)
-		end
+		config.outbounds[5] = generate_outbound(main_udp_node_cfg)
 		config.outbounds[5].tag = "main-udp-out"
 	end
 end
@@ -536,14 +521,10 @@ if notEmpty(default_outbound) then
 		if cfg.enabled == "1" then
 			local outbound = uci:get_all(uciconfig, cfg.node) or {}
 			local index = #config.outbounds + 1
-			if outbound.type == "v2ray" then
-				config.outbounds[index] = generate_external_outbound(outbound)
-			else
-				config.outbounds[index] = generate_outbound(outbound)
-				config.outbounds[index].domain_strategy = cfg.domain_strategy
-				config.outbounds[index].bind_interface = cfg.bind_interface
-				config.outbounds[index].detour = get_outbound(cfg.outbound)
-			end
+			config.outbounds[index] = generate_outbound(outbound)
+			config.outbounds[index].domain_strategy = cfg.domain_strategy
+			config.outbounds[index].bind_interface = cfg.bind_interface
+			config.outbounds[index].detour = get_outbound(cfg.outbound)
 			
 		end
 	end)

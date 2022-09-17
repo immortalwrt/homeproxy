@@ -92,8 +92,7 @@ return view.extend({
 		var proxy_nodes = {};
 		uci.sections(data[0], 'node', (res) => {
 			proxy_nodes[res['.name']] = 
-				String.format('[%s] %s', res.type === 'v2ray' ? res.type + '/' + res.v2ray_protocol : res.type,
-					res.label || res.server + ':' + res.server_port);
+				String.format('[%s] %s', res.type, res.label || res.server + ':' + res.server_port);
 		});
 
 		s = m.section(form.NamedSection, 'config', 'homeproxy');
@@ -244,15 +243,6 @@ return view.extend({
 			_('Outbound node'));
 		for (var i in proxy_nodes)
 			so.value(i, proxy_nodes[i]);
-		so.onchange = function(ev, section_id, value) {
-			var nodetype = uci.get(data[0], value, 'type');
-			var desc = this.map.findElement('id', 'cbid.homeproxy.%s.node'.format(section_id)).nextElementSibling;
-
-			if (!hp.native_protocols.includes(nodetype))
-				desc.innerHTML = _('<strong>The node you selected is not natively supported, the fields below are unavailable.</strong>');
-			else
-				desc.innerHTML = _('Outbound node');
-		}
 		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'routing_node', 'node');
 		so.editable = true;
 

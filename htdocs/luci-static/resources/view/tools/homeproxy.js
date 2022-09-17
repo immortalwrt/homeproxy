@@ -31,15 +31,6 @@ return baseclass.extend({
 		'wireguard'
 	],
 
-	v2ray_native_protocols: [
-		'http',
-		'shadowsocks',
-		'socks',
-		'trojan',
-		'vless',
-		'vmess'
-	],
-
 	shadowsocks_encrypt_methods: [
 		/* Stream */
 		'none',

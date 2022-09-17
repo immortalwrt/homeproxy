@@ -187,7 +187,6 @@ local function parse_uri(uri)
 			config = {
 				label = uri.remarks,
 				type = "shadowsocks",
-				v2ray_protocol = notEmpty(uri.plugin) and "shadowsocks" or nil,
 				address = uri.server,
 				port = uri.server_port,
 				shadowsocks_encrypt_method = uri.method,
@@ -204,7 +203,7 @@ local function parse_uri(uri)
 			local params = url.query
 
 			if (not sing_features.with_quic) notEmpty(params.protocol) and params.protocol ~= "udp" then
-				log(translatef("Skipping unsupported %s node: %s.", "hysteria", urldecode(url.fragment, true) or url.host or "NULL"))
+				log(translatef("Skipping unsupported %s node: %s.", "hysteria", urldecode(url.fragment, true) or url.host))
 				return nil
 			end
 
@@ -250,7 +249,7 @@ local function parse_uri(uri)
 			end
 
 			if not table.contains(shadowsocks_encrypt_methods, userinfo[1]) then
-				log(translatef("Skipping unsupported %s node: %s.", "Shadowsocks", urldecode(url.fragment, true) or url.host or "NULL"))
+				log(translatef("Skipping unsupported %s node: %s.", "Shadowsocks", urldecode(url.fragment, true) or url.host))
 				return nil
 			end
 
@@ -284,7 +283,7 @@ local function parse_uri(uri)
 			local params = URL.parseQuery(uri[2]:gsub("^\?", ""))
 
 			if not sing_features.with_shadowsocksr then
-				log(translatef("Skipping unsupported %s node: %s.", "ShadowsocksR", b64decode(params.remarks) or userinfo[1] or "NULL"))
+				log(translatef("Skipping unsupported %s node: %s.", "ShadowsocksR", b64decode(params.remarks) or userinfo[1]))
 			end
 
 			config = {
@@ -317,50 +316,28 @@ local function parse_uri(uri)
 			local url = URL.parse("http://" .. uri[2])
 			local params = url.query
 
+			if (params.security == "xtls" or params.type == "kcp") then
+				log(translatef("Skipping unsupported %s node: %s.", "VLESS", urldecode(url.fragment, true) or url.host))
+			end
+
 			config = {
 				label = urldecode(url.fragment, true),
-				type = "v2ray",
-				v2ray_protocol = "vless",
+				type = "vless",
 				address = url.host,
 				port = url.port,
-				v2ray_uuid = url.user,
-				v2ray_vless_encrypt = params.encryption or "none",
-				v2ray_transport = params.type or "tcp",
+				uuid = url.user,
+				vless_encrypt = params.encryption or "none",
+				transport = (params.type ~= "tcp") and params.type or nil,
 				tls = (params.security == "tls") and "1" or "0",
 				tls_sni = params.sni,
-				tls_alpn = params.alpn and urldecode(params.alpn, true):split(",") or nil,
-				v2ray_xtls = (params.security == "xtls") and "1" or "0",
-				v2ray_xtls_flow = params.flow
+				tls_alpn = params.alpn and urldecode(params.alpn, true):split(",") or nil
 			}
-			if config.v2ray_transport == "grpc" then
+			if config.transport == "grpc" then
 				config.grpc_servicename = params.serviceName
-				config.grpc_mode = params.mode or "gun"
-			elseif config.v2ray_transport == "http" then
-				config.v2ray_transport = "h2"
-				config.h2_host = notEmpty(params.host) and urldecode(params.host, true):split(",")
-				config.h2_path = urldecode(params.path, true)
-			elseif config.v2ray_transport == "kcp" then
-				config.v2ray_transport = "mkcp"
-				config.mkcp_seed = params.seed
-				config.mkcp_header = params.headerType or "none"
-				-- Default settings from v2rayN
-				config.mkcp_downlink_capacity = "100"
-				config.mkcp_uplink_capacity = "12"
-				config.mkcp_read_buffer_size = "2"
-				config.mkcp_write_buffer_size = "2"
-				config.mkcp_mtu = "1350"
-				config.mkcp_tti = "50"
-			elseif config.v2ray_transport == "quic" then
-				config.quic_security = params.quicSecurity or "none"
-				config.quic_key = params.key
-				config.mkcp_header = params.headerType or "none"
-			elseif config.v2ray_transport == "tcp" then
-				config.tcp_header = notEmpty(params.headerType) or "none"
-				if config.tcp_header == "http" then
-					config.tcp_host = notEmpty(params.host) and urldecode(params.host, true):split(",") or nil
-					config.tcp_path = notEmpty(params.path) and urldecode(params.path, true):split(",") or nil
-				end
-			elseif config.v2ray_transport == "ws" then
+			elseif config.transport == "http" or params.headerType == "http" then
+				config.http_host = notEmpty(params.host) and urldecode(params.host, true):split(",") or nil
+				config.http_path = urldecode(params.path, true)
+			elseif config.transport == "ws" then
 				config.ws_host = (config.tls ~= "1") and urldecode(params.host, true) or nil
 				config.ws_path = urldecode(params.path, true)
 				if config.ws_path and config.ws_path:match("\?ed=") then
@@ -383,53 +360,30 @@ local function parse_uri(uri)
 				log(translatef("Skipping unsupported %s format.", "vmess"))
 				return nil
 			-- https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
-			elseif notEmpty(uri.aid) and tonumber(uri.aid) ~= 0 then
-				log(translatef("Skipping legacy VMess node: %s.", notEmpty(uri.ps) or uri.add))
+			elseif (notEmpty(uri.aid) and tonumber(uri.aid) ~= 0) or params.type == "kcp" then
+				log(translatef("Skipping unsupported %s node: %s.", "VMess", notEmpty(uri.ps) or uri.add))
 				return nil
 			end
 
 			config = {
 				label = uri.ps,
-				type = "v2ray",
-				v2ray_protocol = "vmess",
+				type = "vmess",
 				address = uri.add,
 				port = uri.port,
-				v2ray_uuid = uri.id,
-				v2ray_vmess_encrypt = notEmpty(uri.scy) or "auto",
-				v2ray_transport = uri.net,
+				uuid = uri.id,
+				vmess_encrypt = notEmpty(uri.scy) or "auto",
+				transport = (uri.net ~= "tcp") and uri.net or nil,
 				tls = (uri.tls == "tls") and "1" or "0",
 				tls_sni = notEmpty(uri.sni) or uri.host,
 				tls_alpn = notEmpty(uri.alpn) and uri.alpn:split(",") or nil
 			}
-			if config.v2ray_transport == "grpc" then
+			if config.transport == "grpc" then
 				config.grpc_servicename = uri.path
-				config.grpc_mode = "gun"
-			elseif config.v2ray_transport == "h2" then
-				config.h2_host = notEmpty(uri.host) and uri.host:split(",") or nil
-				config.h2_path = uri.path
-			elseif config.v2ray_transport == "kcp" then
-				config.v2ray_transport = "mkcp"
-				config.mkcp_seed = uri.path
-				config.mkcp_header = notEmpty(uri.type) or "none"
-				-- Default settings from v2rayN
-				config.mkcp_downlink_capacity = "100"
-				config.mkcp_uplink_capacity = "12"
-				config.mkcp_read_buffer_size = "2"
-				config.mkcp_write_buffer_size = "2"
-				config.mkcp_mtu = "1350"
-				config.mkcp_tti = "50"
-			elseif config.v2ray_transport == "quic" then
-				config.quic_security = notEmpty(uri.host) or "none"
-				config.quic_key = uri.path
-				config.mkcp_header = notEmpty(uri.type) or "none"
-			elseif config.v2ray_transport == "tcp" then
-				config.tcp_header = (uri.type == "http") and "http" or "none"
-				if config.tcp_header == "http" then
-					config.tcp_header = uri.type
-					config.tcp_host = notEmpty(uri.host) and uri.host:split(",") or nil
-					config.tcp_path = notEmpty(uri.path) and uri.path:split(",") or nil
-				end
-			elseif config.v2ray_transport == "ws" then
+			elseif config.transport == "h2" or uri.type == "http" then
+				config.transport == "http"
+				config.http_host = notEmpty(uri.host) and uri.host:split(",") or nil
+				config.http_path = uri.path
+			elseif config.transport == "ws" then
 				config.ws_host = (config.tls ~= "1") and uri.host or nil
 				config.ws_path = uri.path
 				if notEmpty(config.ws_host) and config.ws_host:match("\?ed=") then
@@ -502,8 +456,8 @@ local function main()
 						if config.tls == "1" then
 							config.tls_insecure = allow_insecure
 						end
-						if config.type == "v2ray" and table.contains({"vless", "vmess"}, config.v2ray_protocol) then
-							config.v2ray_packet_encoding = packet_encoding
+						if table.contains({"vless", "vmess"}, config.type) then
+							config.packet_encoding = packet_encoding
 						end
 
 						config.grouphash = groupHash

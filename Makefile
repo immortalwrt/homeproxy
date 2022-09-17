@@ -10,7 +10,6 @@ LUCI_TITLE:=The modern ImmortalWrt proxy platform for ARM64/AMD64
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:= \
 	+sing-box \
-	+sagernet-core \
 	+curl \
 	+lua-neturl \
 	+kmod-inet-diag \
