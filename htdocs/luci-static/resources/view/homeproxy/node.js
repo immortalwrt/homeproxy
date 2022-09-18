@@ -12,6 +12,11 @@
 'require tools.homeproxy as hp';
 'require tools.widgets as widgets';
 
+function allowInsecureConfirm(ev, section_id, value) {
+	if (value === '1' && !confirm(_('Are you sure to allow insecure?')))
+		ev.target.firstElementChild.checked = null;
+}
+
 function parseShareLink(uri, features) {
 	var config;
 
@@ -318,14 +323,14 @@ return view.extend({
 								input_links = input_links.reduce((pre, cur) =>
 									(!pre.includes(cur) && pre.push(cur), pre), []);
 
-								var allow_insecure = uci.get(data[0], 'subscription', 'allow_insecure_in_subs') || '0';
-								var packet_encoding = uci.get(data[0], 'subscription', 'default_packet_encoding') || 'xudp';
+								var allow_insecure = uci.get(data[0], 'subscription', 'allow_insecure');
+								var packet_encoding = uci.get(data[0], 'subscription', 'packet_encoding');
 								var imported_node = 0;
 								input_links.forEach((l) => {
 									var config = parseShareLink(l, data[1]);
 									if (config) {
-										if (config.tls === '1')
-											config.tls_insecure = allow_insecure
+										if (config.tls === '1' && allow_insecure === '1')
+											config.tls_insecure = '1'
 										if (['vless', 'vmess'].includes(config.type))
 											config.packet_encoding = packet_encoding
 
@@ -672,6 +677,9 @@ return view.extend({
 		so.value('http', _('HTTP'));
 		so.value('quic', _('QUIC'));
 		so.value('ws', _('WebSocket'));
+		so.depends('type', 'trojan');
+		so.depends('type', 'vless');
+		so.depends('type', 'vmess');
 		so.onchange = function(ev, section_id, value) {
 			var desc = this.map.findElement('id', 'cbid.homeproxy.%s.transport'.format(section_id)).nextElementSibling;
 			if (value === 'http')
@@ -681,9 +689,6 @@ return view.extend({
 			else
 				desc.innerHTML = _('No TCP transport, plain HTTP is merged into the HTTP transport.');
 		}
-		so.depends('type', 'trojan');
-		so.depends('type', 'vless');
-		so.depends('type', 'vmess');
 		so.modalonly = true;
 
 		/* gRPC config */
@@ -731,12 +736,12 @@ return view.extend({
 		/* WebSocket config end */
 
 		so = ss.option(form.ListValue, 'packet_encoding', _('Packet encoding'));
+		so.value('', _('none'));
 		so.value('packet', _('packet (v2ray-core v5+)'));
 		so.value('xudp', _('Xudp (Xray-core)'));
 		so.default = 'xudp';
 		so.depends('type', 'vless');
 		so.depends('type', 'vmess');
-		so.rmempty = false;
 		so.modalonly = true;
 		/* Transport config end */
 
@@ -846,6 +851,7 @@ return view.extend({
 		so.default = so.disabled;
 		so.depends('type', 'hysteria');
 		so.depends('tls', '1');
+		so.onchange = allowInsecureConfirm;
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'tls_min_version', _('Minimum TLS version'),
@@ -1019,22 +1025,22 @@ return view.extend({
 		o.depends({'filter_nodes': 'disabled', '!reverse': true});
 		o.rmempty = false;
 
-		o = s.taboption('subscription', form.Flag, 'allow_insecure_in_subs', _('Allow insecure'),
+		o = s.taboption('subscription', form.Flag, 'allow_insecure', _('Allow insecure'),
 			_('Allow insecure connection by default when add nodes form subscriptions.') +
 			'<br/>' +
 			_('This is <b>DANGEROUS</b>, your traffic is almost like <b>PLAIN TEXT</b>! Use at your own risk!'));
 		o.default = o.disabled;
 		o.rmempty = false;
+		o.onchange = allowInsecureConfirm;
 
-		o = s.taboption('subscription', form.ListValue, 'default_packet_encoding', _('Default packet encoding'));
-		o.value('none', _('None'));
+		o = s.taboption('subscription', form.ListValue, 'packet_encoding', _('Default packet encoding'));
+		o.value('', _('None'));
 		o.value('packet', _('packet (v2ray-core v5+)'));
 		o.value('xudp', _('Xudp (Xray-core)'));
 		o.default = 'xudp';
-		o.rmempty = false;
 
 		o = s.taboption('subscription', form.Button, '_save_subscriptions', _('Save subscriptions settings'),
-			_('Save settings before updating subscriptions.'));
+			_('NOTE: Save current settings before updating subscriptions.'));
 		o.inputstyle = 'apply';
 		o.inputtitle = _('Save current settings');
 		o.onclick = function() {

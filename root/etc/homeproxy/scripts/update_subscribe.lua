@@ -18,12 +18,12 @@ local ucimain = "config"
 local ucinode = "node"
 local ucisubscription = "subscription"
 
-local allow_insecure = uci:get(uciconfig, ucisubscription, "allow_insecure_in_subs") or "0"
+local allow_insecure = uci:get(uciconfig, ucisubscription, "allow_insecure")
 local filter_mode = uci:get(uciconfig, ucisubscription, "filter_nodes") or "disabled"
 local filter_keywords = uci:get(uciconfig, ucisubscription, "filter_keywords") or {}
-local packet_encoding = uci:get(uciconfig, ucisubscription, "default_packet_encoding") or "xudp"
+local packet_encoding = uci:get(uciconfig, ucisubscription, "packet_encoding")
 local subscription_urls = uci:get(uciconfig, ucisubscription, "subscription_url") or {}
-local via_proxy = uci:get(uciconfig, ucisubscription, "update_via_proxy") or "0"
+local via_proxy = uci:get(uciconfig, ucisubscription, "update_via_proxy")
 
 local routing_mode = uci:get(uciconfig, ucimain, "routing_mode") or "bypass_mainland_china"
 local main_node, main_udp_node
@@ -457,8 +457,8 @@ local function main()
 					elseif node_cache[groupHash][config.confHash] or node_cache[groupHash][config.nameHash] then
 						log(translatef("Skipping duplicate node: %s.", config.label))
 					else
-						if config.tls == "1" then
-							config.tls_insecure = allow_insecure
+						if config.tls == "1" and allow_insecure == "1" then
+							config.tls_insecure = "1"
 						end
 						if table.contains({"vless", "vmess"}, config.type) then
 							config.packet_encoding = packet_encoding
