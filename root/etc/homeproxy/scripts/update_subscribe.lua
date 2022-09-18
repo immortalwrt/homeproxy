@@ -316,8 +316,8 @@ local function parse_uri(uri)
 			local url = URL.parse("http://" .. uri[2])
 			local params = url.query
 
-			-- Unsupported protocols
-			if (params.security == "xtls" or params.type == "kcp") then
+			-- Unsupported protocol
+			if params.type == "kcp" then
 				log(translatef("Skipping unsupported %s node: %s.", "VLESS", urldecode(url.fragment, true) or url.host))
 			end
 
@@ -328,7 +328,7 @@ local function parse_uri(uri)
 				port = url.port,
 				uuid = url.user,
 				transport = (params.type ~= "tcp") and params.type or nil,
-				tls = (params.security == "tls") and "1" or "0",
+				tls = notEmpty(params.security) and "1" or "0",
 				tls_sni = params.sni,
 				tls_alpn = params.alpn and urldecode(params.alpn, true):split(",") or nil
 			}

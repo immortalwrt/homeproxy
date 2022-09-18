@@ -162,11 +162,11 @@ function parseShareLink(uri, features) {
 			var url = new URL('http://' + uri[1]);
 			var params = url.searchParams;
 
-			/* Unsupported protocols */
-			if (params.get('type') === 'kcp' || params.get('security') === 'xtls')
+			/* Unsupported protocol */
+			if (params.get('type') === 'kcp')
 				return null;
 			/* Check if uuid and type exist */
-			else if (!url.username || !params.get('type'))
+			if (!url.username || !params.get('type'))
 				return null;
 
 			config = {
@@ -176,7 +176,7 @@ function parseShareLink(uri, features) {
 				port: url.port || '80',
 				uuid: url.username,
 				transport: params.get('type') !== 'tcp' ? params.get('type') : null,
-				tls: params.get('security') === 'tls' ? '1' : '0',
+				tls: params.get('security') ? '1' : '0',
 				tls_sni: params.get('sni'),
 				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')).split(',') : null
 			};
