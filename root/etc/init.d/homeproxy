@@ -10,7 +10,7 @@ STOP=10
 
 CONF="homeproxy"
 PROG="/usr/bin/sing-box"
-TUNNAME="emortal-singbox"
+TUNNAME="emortal-singtun0"
 
 HP_DIR="/etc/homeproxy"
 RUN_DIR="/var/run/homeproxy"
