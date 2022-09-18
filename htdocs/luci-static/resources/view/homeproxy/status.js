@@ -26,8 +26,8 @@ var css = '				\
 	background-color: #33ccff;	\
 }';
 
-var hp_dir = '/var/run/homeproxy';
-var hp_geoupdater = '/etc/homeproxy/scripts/update_geodata.sh';
+var hp_dir = '/var/run/homeproxy',
+    hp_geoupdater = '/etc/homeproxy/scripts/update_geodata.sh';
 
 return view.extend({
 	load: function() {
@@ -121,21 +121,22 @@ return view.extend({
 				}, _('Collecting data...'))
 			);
 
+			var log;
 			poll.add(L.bind(function() {
 				return fs.read_direct(hp_dir + '/sing-box.log', 'text')
 				.then(function(res) {
-					var log = E('pre', { 'wrap': 'pre' }, [
+					log = E('pre', { 'wrap': 'pre' }, [
 						res.trim() || _('Log is clean.')
 					]);
 
 					dom.content(log_textarea, log);
 				}).catch(function(err) {
 					if (err.toString().includes('NotFoundError'))
-						var log = E('pre', { 'wrap': 'pre' }, [
+						log = E('pre', { 'wrap': 'pre' }, [
 							_('Log file does not exist.')
 						]);
 					else
-						var log = E('pre', { 'wrap': 'pre' }, [
+						log = E('pre', { 'wrap': 'pre' }, [
 							_('Unknown error: %s').format(err)
 						]);
 

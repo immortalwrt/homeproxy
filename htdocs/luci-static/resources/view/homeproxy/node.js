@@ -279,7 +279,7 @@ return view.extend({
 
 	render: function(data) {
 		var m, s, o, ss, so;
-
+		var main_server = uci.get(data[0], 'config', 'main_server');
 		var routing_mode = uci.get(data[0], 'config', 'routing_mode');
 
 		m = new form.Map('homeproxy', _('Edit nodes'));
@@ -394,7 +394,6 @@ return view.extend({
 			if (routing_mode === 'custom')
 				this.readonly = true;
 			else {
-				var main_server = uci.get(data[0], 'config', 'main_server');
 				if (main_server == section_id) {
 					this.readonly = true;
 					return _('Applied');
