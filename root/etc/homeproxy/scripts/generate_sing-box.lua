@@ -144,6 +144,7 @@ local function generate_outbound(node)
 		version = node.socks_version,
 		-- VLESS / VMess
 		uuid = node.uuid,
+		alter_id = node.vmess_alterid,
 		security = node.vmess_encrypt,
 		global_padding = node.vmess_global_padding and (node.vmess_global_padding == "1") or nil,
 		authenticated_length = node.vmess_authenticated_length and (node.vmess_authenticated_length == "1") or nil,
@@ -409,9 +410,8 @@ if enable_server == "1" then
 					{
 						name = table.contains({"trojan", "vmess"}, cfg.type) and "cfg-" .. cfg[".name"] .. "-server" or nil,
 						username = cfg.username,
-						password = (cfg.type ~= "vmess") and cfg.password or nil,
-						uuid = (cfg.type == "vmess") and cfg.password or nil
-						
+						password = cfg.password,
+						uuid = cfg.uuid
 					}
 				} or nil,
 
@@ -449,7 +449,6 @@ if enable_server == "1" then
 					max_early_data = cfg.websocket_early_data,
 					early_data_header_name = cfg.websocket_early_data_header,
 					service_name = cfg.grpc_servicename
-		
 				} or nil,
 			}
 		end

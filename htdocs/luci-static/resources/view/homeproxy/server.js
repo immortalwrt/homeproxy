@@ -75,8 +75,13 @@ return view.extend({
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'password', _('Password (UUID)'));
+		o = s.option(form.Value, 'password', _('Password'));
 		o.password = true;
+		o.depends('type', 'http');
+		o.depends('type', 'naive');
+		o.depends('type', 'shadowsocks');
+		o.depends('type', 'socks');
+		o.depends('type', 'trojan');
 		o.validate = function(section_id, value) {
 			if (section_id) {
 				if (!value)
@@ -89,13 +94,17 @@ return view.extend({
 						return hp.validateBase64Key(24, section_id, value);
 					else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode))
 						return hp.validateBase64Key(45, section_id, value);
-				} else if (type === 'vmess')
-					return hp.validateUUID(section_id, value);
+				}
 			}
 
 			return true;
 		}
-		o.depends({'type': 'hysteria', '!reverse': true});
+		o.modalonly = true;
+
+		/* VMess config */
+		o = s.option(form.Value, 'uuid', _('UUID'));
+		o.depends('type', 'vmess');
+		o.validate = hp.validateUUID;
 		o.modalonly = true;
 
 		/* Hysteria config start */

@@ -221,9 +221,10 @@ function parseShareLink(uri, features) {
 			/* Unsupported protocols */
 			else if (uri.net === 'kcp')
 				return null;
-			/* https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6 */
-			else if (uri.aid && parseInt(uri.aid) !== 0)
-				return null;
+			/* https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
+			 * else if (uri.aid && parseInt(uri.aid) !== 0)
+			 * 	return null;
+			 */
 
 			config = {
 				label: uri.ps,
@@ -231,6 +232,7 @@ function parseShareLink(uri, features) {
 				address: uri.add,
 				port: uri.port,
 				uuid: uri.id,
+				vmess_alterid: uri.aid,
 				vmess_encrypt: uri.scy || 'auto',
 				transport: uri.net,
 				tls: uri.tls === 'tls' ? '1' : '0',
@@ -643,6 +645,12 @@ return view.extend({
 		so.validate = hp.validateUUID;
 		so.modalonly = true;
 
+		so = ss.option(form.Value, 'vmess_alterid', _('Alter ID'),
+			_('Deprecated configuration. You should avoid using it.'));
+		so.datatype = 'uinteger';
+		so.depends('type', 'vmess');
+		so.modalonly = true;
+
 		so = ss.option(form.ListValue, 'vmess_encrypt', _('Encrypt method'));
 		so.value('auto');
 		so.value('none');
@@ -1034,7 +1042,7 @@ return view.extend({
 		o.onchange = allowInsecureConfirm;
 
 		o = s.taboption('subscription', form.ListValue, 'packet_encoding', _('Default packet encoding'));
-		o.value('', _('None'));
+		o.value('', _('none'));
 		o.value('packet', _('packet (v2ray-core v5+)'));
 		o.value('xudp', _('Xudp (Xray-core)'));
 		o.default = 'xudp';

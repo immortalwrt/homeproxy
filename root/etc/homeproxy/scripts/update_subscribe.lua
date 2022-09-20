@@ -363,10 +363,10 @@ local function parse_uri(uri)
 			elseif params.type == "kcp" then
 				log(translatef("Skipping unsupported %s node: %s.", "VMess", notEmpty(uri.ps) or uri.add))
 				return nil
-			-- https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
+			--[[ https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
 			elseif notEmpty(uri.aid) and tonumber(uri.aid) ~= 0 then
 				log(translatef("Skipping unsupported %s node: %s.", "VMess", notEmpty(uri.ps) or uri.add))
-				return nil
+				return nil ]]
 			end
 
 			config = {
@@ -375,6 +375,7 @@ local function parse_uri(uri)
 				address = uri.add,
 				port = uri.port,
 				uuid = uri.id,
+				vmess_alterid = uri.aid,
 				vmess_encrypt = notEmpty(uri.scy) or "auto",
 				transport = (uri.net ~= "tcp") and uri.net or nil,
 				tls = (uri.tls == "tls") and "1" or "0",
