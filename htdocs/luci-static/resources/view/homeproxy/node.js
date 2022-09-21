@@ -437,6 +437,18 @@ return view.extend({
 		so.value('vless', _('VLESS'));
 		so.value('vmess', _('VMess'));
 		so.rmempty = false;
+		so.onchange = function(ev, section_id, value) {
+			var tls_element = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
+			if (value === 'hysteria') {
+				var event = document.createEvent('HTMLEvents');
+				event.initEvent('change', true, true);
+
+				tls_element.checked = true;
+				tls_element.dispatchEvent(event);
+				tls_element.disabled = true;
+			} else
+				tls_element.disabled = null;
+		}
 
 		so = ss.option(form.Value, 'address', _('Address'));
 		so.datatype = 'host';
@@ -493,9 +505,9 @@ return view.extend({
 		so = ss.option(form.ListValue, 'hysteria_protocol', _('Protocol'));
 		so.value('udp');
 		/* WeChat-Video / FakeTCP are unsupported by sing-box currently
-		   so.value('wechat-video');
-		   so.value('faketcp');
-		*/
+		 * so.value('wechat-video');
+		 * so.value('faketcp');
+		 */
 		so.default = 'udp';
 		so.depends('type', 'hysteria');
 		so.rmempty = false;
@@ -836,19 +848,18 @@ return view.extend({
 		so = ss.option(form.Flag, 'tls', _('TLS'));
 		so.default = so.disabled;
 		so.depends('type', 'http');
+		so.depends('type', 'hysteria');
 		so.depends('type', 'trojan');
 		so.depends('type', 'vmess');
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'tls_sni', _('TLS SNI'),
 			_('Used to verify the hostname on the returned certificates unless insecure is given.'));
-		so.depends('type', 'hysteria');
 		so.depends('tls', '1');
 		so.modalonly = true;
 
 		so = ss.option(form.DynamicList, 'tls_alpn', _('TLS ALPN'),
 			_('List of supported application level protocols, in order of preference.'));
-		so.depends('type', 'hysteria');
 		so.depends('tls', '1');
 		so.modalonly = true;
 
@@ -857,7 +868,6 @@ return view.extend({
 			'<br/>' +
 			_('This is <b>DANGEROUS</b>, your traffic is almost like <b>PLAIN TEXT</b>! Use at your own risk!'));
 		so.default = so.disabled;
-		so.depends('type', 'hysteria');
 		so.depends('tls', '1');
 		so.onchange = allowInsecureConfirm;
 		so.modalonly = true;
@@ -867,9 +877,7 @@ return view.extend({
 		for (var i of hp.tls_versions)
 			so.value(i);
 		so.default = '1.2';
-		so.depends({'type': 'http', 'tls': '1'});
-		so.depends({'type': 'trojan', 'tls': '1'});
-		so.depends({'type': 'vmess', 'tls': '1'});
+		so.depends('tls', '1');
 		so.rmempty = false;
 		so.modalonly = true;
 
@@ -878,9 +886,7 @@ return view.extend({
 		for (var i of hp.tls_versions)
 			so.value(i);
 		so.default = '1.3';
-		so.depends({'type': 'http', 'tls': '1'});
-		so.depends({'type': 'trojan', 'tls': '1'});
-		so.depends({'type': 'vmess', 'tls': '1'});
+		so.depends('tls', '1');
 		so.rmempty = false;
 		so.modalonly = true;
 
@@ -888,9 +894,7 @@ return view.extend({
 			_('The elliptic curves that will be used in an ECDHE handshake, in preference order. If empty, the default will be used.'));
 		for (var i of hp.tls_cipher_suites)
 			so.value(i);
-		so.depends({'type': 'http', 'tls': '1'});
-		so.depends({'type': 'trojan', 'tls': '1'});
-		so.depends({'type': 'vmess', 'tls': '1'});
+		so.depends('tls', '1');
 		so.optional = true;
 		so.modalonly = true;
 
@@ -918,9 +922,7 @@ return view.extend({
 		if (data[1].with_ech) {
 			so = ss.option(form.Flag, 'tls_ech', _('Enable ECH'),
 				_('ECH (Encrypted Client Hello) is a TLS extension that allows a client to encrypt the first part of its ClientHello message.'));
-			so.depends({'type': 'http', 'tls': '1'});
-			so.depends({'type': 'trojan', 'tls': '1'});
-			so.depends({'type': 'vmess', 'tls': '1'});
+			so.depends('tls', '1');
 			so.default = so.disabled;
 			so.rmempty = false;
 			so.modalonly = true;
@@ -951,9 +953,7 @@ return view.extend({
 			so.value('firefox', _('Firefox'));
 			so.value('ios', _('iOS'));
 			so.value('random', _('Random'));
-			so.depends({'type': 'http', 'tls': '1'});
-			so.depends({'type': 'trojan', 'tls': '1'});
-			so.depends({'type': 'vmess', 'tls': '1'});
+			so.depends('tls', '1');
 			so.modalonly = true;
 		}
 		/* TLS config end */

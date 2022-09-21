@@ -227,7 +227,7 @@ return view.extend({
 		so.default = 'gvisor';
 		so.rmempty = false;
 		so.onchange = function(ev, section_id, value) {
-			var desc = this.map.findElement('id', 'cbid.homeproxy.%s.default_tun_stack'.format(section_id)).nextElementSibling;
+			var desc = ev.target.nextElementSibling;
 			if (value === 'gvisor')
 				desc.innerHTML = _('Based on google/gvisor (recommended).');
 			else
@@ -283,7 +283,6 @@ return view.extend({
 
 			this.value('', _('Direct'))
 			uci.sections(data[0], 'routing_node', (res) => {
-				console.log(res)
 				if (res['.name'] !== section_id && res.enabled === '1')
 					this.value(res['.name'], res.label);
 			});

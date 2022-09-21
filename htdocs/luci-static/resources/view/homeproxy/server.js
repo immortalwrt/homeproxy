@@ -62,6 +62,18 @@ return view.extend({
 		o.value('trojan', _('Trojan'));
 		o.value('vmess', _('VMess'));
 		o.rmempty = false;
+		o.onchange = function(ev, section_id, value) {
+			var tls_element = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
+			if (value === 'hysteria') {
+				var event = document.createEvent('HTMLEvents');
+				event.initEvent('change', true, true);
+
+				tls_element.checked = true;
+				tls_element.dispatchEvent(event);
+				tls_element.disabled = true;
+			} else
+				tls_element.disabled = null;
+		}
 
 		o = s.option(form.Value, 'port', _('Port'),
 			_('The port must be unique.'));
@@ -265,6 +277,7 @@ return view.extend({
 		o = s.option(form.Flag, 'tls', _('TLS'));
 		o.default = o.disabled;
 		o.depends('type', 'http');
+		o.depends('type', 'hysteria');
 		o.depends('type', 'naive');
 		o.depends('type', 'trojan');
 		o.depends('type', 'vmess');
