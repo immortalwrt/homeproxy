@@ -204,6 +204,9 @@ local function parse_uri(uri)
 
 			if (not sing_features.with_quic) notEmpty(params.protocol) and params.protocol ~= "udp" then
 				log(translatef("Skipping unsupported %s node: %s.", "hysteria", urldecode(url.fragment, true) or url.host))
+				if (not sing_features.with_quic) then
+					log(translatef("Please rebuild sing-box with %s support!", "QUIC"))
+				end
 				return nil
 			end
 
@@ -284,6 +287,8 @@ local function parse_uri(uri)
 
 			if not sing_features.with_shadowsocksr then
 				log(translatef("Skipping unsupported %s node: %s.", "ShadowsocksR", b64decode(params.remarks) or userinfo[1]))
+				log(translatef("Please rebuild sing-box with %s support!", "ShadowsocksR"))
+				return nil
 			end
 
 			config = {
@@ -317,8 +322,12 @@ local function parse_uri(uri)
 			local params = url.query
 
 			-- Unsupported protocol
-			if params.type == "kcp" then
+			if params.type == "kcp" or (params.type == "quic" and (not sing_features.with_quic or params.quicSecurity or params.key)) then
 				log(translatef("Skipping unsupported %s node: %s.", "VLESS", urldecode(url.fragment, true) or url.host))
+				if params.type == "quic" and not sing_features.with_quic then
+					log(translatef("Please rebuild sing-box with %s support!", "QUIC"))
+				end
+				return nil
 			end
 
 			config = {
@@ -360,8 +369,11 @@ local function parse_uri(uri)
 				log(translatef("Skipping unsupported %s format.", "vmess"))
 				return nil
 			-- Unsupported protocols
-			elseif params.type == "kcp" then
+			elseif params.net == "kcp" or (params.net == "quic" and (not sing_features.with_quic or notEmpty(params.type) or notEmpty(params.path))) then
 				log(translatef("Skipping unsupported %s node: %s.", "VMess", notEmpty(uri.ps) or uri.add))
+				if params.net == "quic" and not sing_features.with_quic then
+					log(translatef("Please rebuild sing-box with %s support!", "QUIC"))
+				end
 				return nil
 			--[[ https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
 			elseif notEmpty(uri.aid) and tonumber(uri.aid) ~= 0 then

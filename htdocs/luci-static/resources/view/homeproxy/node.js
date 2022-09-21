@@ -909,6 +909,7 @@ return view.extend({
 			_('The path to the server certificate, in PEM format.'));
 		so.value('/etc/homeproxy/certs/client_ca.pem');
 		so.depends('tls_self_sign', '1');
+		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.Button, '_upload_cert', _('Upload certificate'),
