@@ -125,9 +125,9 @@ function parseShareLink(uri, features) {
 				return null;
 
 			var params = new URLSearchParams(uri[1]);
-			var protoparam = params.get('protoparam') ? hp.decodeBase64Str(params.get('protoparam')) : null;
-			var obfsparam = params.get('obfsparam') ? hp.decodeBase64Str(params.get('obfsparam')) : null;
-			var remarks = params.get('remarks') ? hp.decodeBase64Str(params.get('remarks')) : null;
+			var protoparam = hp.decodeBase64Str(params.get('protoparam'));
+			var obfsparam = hp.decodeBase64Str(params.get('obfsparam'));
+			var remarks = hp.decodeBase64Str(params.get('remarks'));
 
 			config = {
 				label: remarks,

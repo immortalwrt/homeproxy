@@ -155,6 +155,9 @@ return baseclass.extend({
 	},
 
 	decodeBase64Str: function(str) {
+		if (!str)
+			return null;
+
 		/* Thanks to luci-app-ssr-plus */
 		str = str.replace(/-/g, '+').replace(/_/g, '/');
 		var padding = (4 - str.length % 4) % 4;
