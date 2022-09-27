@@ -426,6 +426,7 @@ return view.extend({
 		so.value('shadowsocks', _('Shadowsocks'));
 		if (data[1].with_shadowsocksr)
 			so.value('shadowsocksr', _('ShadowsocksR'));
+		so.value('shadowtls', _('ShadowTLS'));
 		so.value('socks', _('Socks'));
 		so.value('trojan', _('Trojan'));
 		if (data[1].with_wireguard)
@@ -857,6 +858,7 @@ return view.extend({
 		so.default = so.disabled;
 		so.depends('type', 'http');
 		so.depends('type', 'hysteria');
+		so.depends('type', 'shadowtls');
 		so.depends('type', 'trojan');
 		so.depends('type', 'vmess');
 		so.modalonly = true;
@@ -970,16 +972,12 @@ return view.extend({
 		/* Extra settings start */
 		so = ss.option(form.Flag, 'tcp_fast_open', _('TCP fast open'));
 		so.default = so.disabled;
-		for (var i of hp.native_protocols)
-			so.depends('type', i)
 		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'udp_fragment', _('UDP Fragment'),
 			_('Enable UDP fragmentation.'));
 		so.default = so.disabled;
-		for (var i of hp.native_protocols)
-			so.depends('type', i)
 		so.rmempty = false;
 		so.modalonly = true;
 

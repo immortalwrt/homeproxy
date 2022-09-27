@@ -19,18 +19,6 @@ return baseclass.extend({
 		'ipv6_only': 'IPv6 only'
 	},
 
-	native_protocols: [
-		'http',
-		'hysteria',
-		'shadowsocks',
-		'shadowsocksr',
-		'socks',
-		'trojan',
-		'vless',
-		'vmess',
-		'wireguard'
-	],
-
 	shadowsocks_encrypt_methods: [
 		/* Stream */
 		'none',
