@@ -140,21 +140,6 @@ end
 local node_cache = {}
 local node_result = setmetatable({}, { __index = node_cache })
 
-local shadowsocks_encrypt_methods = {
-	-- Stream
-	"none",
-	-- AEAD
-	"aes-128-gcm",
-	"aes-192-gcm",
-	"aes-256-gcm",
-	"chacha20-ietf-poly1305",
-	"xchacha20-ietf-poly1305",
-	-- AEAD 2022
-	"2022-blake3-aes-128-gcm",
-	"2022-blake3-aes-256-gcm",
-	"2022-blake3-chacha20-poly1305"
-}
-
 local sing_features = {}
 local sing_features_stdout = luci.sys.exec("/usr/bin/sing-box version"):trim()
 if notEmpty(sing_features_stdout) and sing_features_stdout:match("Tags: ([a-z,_]+)") then
@@ -179,11 +164,6 @@ local function parse_uri(uri)
 	if type(uri) == "table" then
 		if uri.nodetype == "sip008" then
 			-- https://shadowsocks.org/guide/sip008.html
-			if not table.contains(shadowsocks_encrypt_methods, uri.method) then
-				log(translatef("Skipping unsupported node: %s.", "Shadowsocks", b64decode(uri.remarks) or url.server))
-				return nil
-			end
-
 			config = {
 				label = uri.remarks,
 				type = "shadowsocks",
@@ -249,11 +229,6 @@ local function parse_uri(uri)
 			elseif url.user then
 				-- User info encoded with base64
 				userinfo = b64decode(url.user):split(":")
-			end
-
-			if not table.contains(shadowsocks_encrypt_methods, userinfo[1]) then
-				log(translatef("Skipping unsupported %s node: %s.", "Shadowsocks", urldecode(url.fragment, true) or url.host))
-				return nil
 			end
 
 			local plugin, plugin_opts

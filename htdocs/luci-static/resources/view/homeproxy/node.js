@@ -110,10 +110,6 @@ function parseShareLink(uri, features) {
 				};
 			}
 
-			/* Check if method and password exist */
-			if (!config.shadowsocks_encrypt_method || !config.password)
-				return null;
-
 			break;
 		case 'ssr':
 			/* https://coderschool.cn/2498.html */
@@ -476,15 +472,17 @@ return view.extend({
 				var required_type = [ 'shadowsocks', 'shadowsocksr', 'trojan' ];
 
 				if (required_type.includes(type)) {
-					if (!value)
-						return _('Expecting: %s').format(_('non-empty value'));
-					else if (type === 'shadowsocks') {
+					if (type === 'shadowsocks') {
 						var encmode = this.map.lookupOption('shadowsocks_encrypt_method', section_id)[0].formvalue(section_id);
-						if (encmode === '2022-blake3-aes-128-gcm')
+						if (encmode === 'none')
+							return true;
+						else if (encmode === '2022-blake3-aes-128-gcm')
 							return hp.validateBase64Key(24, section_id, value);
 						else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode))
 							return hp.validateBase64Key(45, section_id, value);
 					}
+					if (!value)
+						return _('Expecting: %s').format(_('non-empty value'));
 				}
 			}
 
@@ -558,6 +556,16 @@ return view.extend({
 		so = ss.option(form.ListValue, 'shadowsocks_encrypt_method', _('Encrypt method'));
 		for (var i of hp.shadowsocks_encrypt_methods)
 			so.value(i);
+		/* Stream ciphers */
+		so.value('aes-128-ctr');
+		so.value('aes-192-ctr');
+		so.value('aes-256-ctr');
+		so.value('aes-128-cfb');
+		so.value('aes-192-cfb');
+		so.value('aes-256-cfb');
+		so.value('chacha20');
+		so.value('chacha20-ietf');
+		so.value('rc4-md5');
 		so.default = 'aes-128-gcm';
 		so.depends('type', 'shadowsocks');
 		so.rmempty = false;
