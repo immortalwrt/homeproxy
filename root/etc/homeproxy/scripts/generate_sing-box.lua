@@ -411,7 +411,8 @@ if enable_server == "1" then
 						name = table.contains({"trojan", "vmess"}, cfg.type) and "cfg-" .. cfg[".name"] .. "-server" or nil,
 						username = cfg.username,
 						password = cfg.password,
-						uuid = cfg.uuid
+						uuid = cfg.uuid,
+						alterId = tonumber(cfg.vmess_alterid)
 					}
 				} or nil,
 

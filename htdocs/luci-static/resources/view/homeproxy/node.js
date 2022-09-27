@@ -666,7 +666,7 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'vmess_alterid', _('Alter ID'),
-			_('Deprecated configuration. You should avoid using it.'));
+			_('Legacy protocol support (VMess MD5 Authentication) is provided for compatibility purposes only, use of alterId > 1 is not recommended.'));
 		so.datatype = 'uinteger';
 		so.depends('type', 'vmess');
 		so.modalonly = true;

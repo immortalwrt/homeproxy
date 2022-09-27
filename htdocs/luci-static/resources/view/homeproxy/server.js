@@ -114,11 +114,18 @@ return view.extend({
 		}
 		o.modalonly = true;
 
-		/* VMess config */
+		/* VMess config start */
 		o = s.option(form.Value, 'uuid', _('UUID'));
 		o.depends('type', 'vmess');
 		o.validate = hp.validateUUID;
 		o.modalonly = true;
+
+		o = ss.option(form.Value, 'vmess_alterid', _('Alter ID'),
+			_('Legacy protocol support (VMess MD5 Authentication) is provided for compatibility purposes only, use of alterId > 1 is not recommended.'));
+		o.datatype = 'uinteger';
+		o.depends('type', 'vmess');
+		o.modalonly = true;
+		/* VMess config end */
 
 		/* Hysteria config start */
 		o = s.option(form.ListValue, 'hysteria_protocol', _('Protocol'));
