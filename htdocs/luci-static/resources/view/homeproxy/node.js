@@ -436,7 +436,7 @@ return view.extend({
 		so.rmempty = false;
 		so.onchange = function(ev, section_id, value) {
 			var tls_element = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
-			if (value === 'hysteria') {
+			if (['hysteria', 'shadowtls'].includes(value)) {
 				var event = document.createEvent('HTMLEvents');
 				event.initEvent('change', true, true);
 
