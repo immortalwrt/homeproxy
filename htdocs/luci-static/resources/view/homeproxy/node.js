@@ -181,7 +181,7 @@ function parseShareLink(uri, features) {
 				tls_sni: params.get('sni'),
 				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')).split(',') : null
 			};
-			switch (config.transport) {
+			switch (params.get('type')) {
 			case 'grpc':
 				config.grpc_servicename = params.get('serviceName');
 				break;
@@ -230,12 +230,12 @@ function parseShareLink(uri, features) {
 				uuid: uri.id,
 				vmess_alterid: uri.aid,
 				vmess_encrypt: uri.scy || 'auto',
-				transport: uri.net,
+				transport: (uri.net !== 'tcp') ? uri.net : null,
 				tls: uri.tls === 'tls' ? '1' : '0',
 				tls_sni: uri.sni || uri.host,
 				tls_alpn: uri.alpn ? uri.alpn.split(',') : null
 			};
-			switch (config.transport) {
+			switch (uri.net) {
 			case 'grpc':
 				config.grpc_servicename = uri.path;
 				break;
