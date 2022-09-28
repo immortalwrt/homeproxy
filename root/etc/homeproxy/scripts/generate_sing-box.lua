@@ -10,12 +10,6 @@ require "luci.sys"
 require "luci.util"
 require "nixio.fs"
 
--- i18n start
-local syslang = uci:get("luci", "main", "lang") or "auto"
-luci.i18n.setlanguage(syslang)
-local translatef = luci.i18n.translatef
--- i18n end
-
 -- String helper start
 string.split = luci.util.split
 string.trim = luci.util.trim
@@ -101,6 +95,13 @@ else
 	routing_port = routing_port:split(",")
 end
 -- UCI config end
+
+-- i18n start
+local uci = luci.model.uci.cursor()
+local syslang = uci:get("luci", "main", "lang") or "auto"
+luci.i18n.setlanguage(syslang)
+local translatef = luci.i18n.translatef
+-- i18n end
 
 -- Config helper start
 local function generate_outbound(node)

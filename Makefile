@@ -2,6 +2,8 @@
 #
 # Copyright (C) 2022 ImmortalWrt.org
 
+include $(TOPDIR)/rules.mk
+
 PKG_NAME:=luci-app-homeproxy
 PKG_VERSION:=1.0
 PKG_RELEASE:=$(AUTORELEASE)

@@ -120,7 +120,7 @@ return view.extend({
 		o.validate = hp.validateUUID;
 		o.modalonly = true;
 
-		o = ss.option(form.Value, 'vmess_alterid', _('Alter ID'),
+		o = s.option(form.Value, 'vmess_alterid', _('Alter ID'),
 			_('Legacy protocol support (VMess MD5 Authentication) is provided for compatibility purposes only, use of alterId > 1 is not recommended.'));
 		o.datatype = 'uinteger';
 		o.depends('type', 'vmess');
