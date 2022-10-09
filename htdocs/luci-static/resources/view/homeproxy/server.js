@@ -470,7 +470,7 @@ return view.extend({
 		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
 			_('If set, the requested domain name will be resolved to IP before routing.'));
 		for (var i in hp.dns_strategy)
-			o.value(i, _(hp.dns_strategy[i]))
+			o.value(i, hp.dns_strategy[i])
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'proxy_protocol', _('Proxy protocol'),

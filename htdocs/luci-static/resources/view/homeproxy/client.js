@@ -264,7 +264,7 @@ return view.extend({
 		so = ss.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
 			_('If set, the server domain name will be resolved to IP before connecting.<br/>dns.strategy will be used if empty.'));
 		for (var i in hp.dns_strategy)
-			so.value(i, _(hp.dns_strategy[i]))
+			so.value(i, hp.dns_strategy[i])
 		so.modalonly = true;
 
 		so = ss.option(widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
@@ -451,7 +451,7 @@ return view.extend({
 		so = ss.option(form.ListValue, 'dns_strategy', _('DNS strategy'),
 			_('The DNS strategy for resolving the domain name in the address.'));
 		for (var i in hp.dns_strategy)
-			if (i) so.value(i, _(hp.dns_strategy[i]))
+			if (i) so.value(i, hp.dns_strategy[i])
 		so.default = 'prefer_ipv4';
 		so.rmempty = false;
 
@@ -540,13 +540,13 @@ return view.extend({
 		so = ss.option(form.ListValue, 'address_strategy', _('Address strategy'),
 			_('The domain strategy for resolving the domain name in the address. dns.strategy will be used if empty.'));
 		for (var i in hp.dns_strategy)
-			so.value(i, _(hp.dns_strategy[i]))
+			so.value(i, hp.dns_strategy[i])
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'resolve_strategy', _('Resolve strategy'),
 			_('Default domain strategy for resolving the domain names.'));
 		for (var i in hp.dns_strategy)
-			so.value(i, _(hp.dns_strategy[i]))
+			so.value(i, hp.dns_strategy[i])
 
 		so = ss.option(form.ListValue, 'outbound', _('Outbound'),
 			_('Tag of an outbound for connecting to the dns server.'));

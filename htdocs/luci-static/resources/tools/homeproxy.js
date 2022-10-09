@@ -13,10 +13,10 @@
 return baseclass.extend({
 	dns_strategy: {
 		'': 'Default',
-		'prefer_ipv4': 'Prefer IPv4',
-		'prefer_ipv6': 'Prefer IPv6',
-		'ipv4_only': 'IPv4 only',
-		'ipv6_only': 'IPv6 only'
+		'prefer_ipv4': _('Prefer IPv4'),
+		'prefer_ipv6': _('Prefer IPv6'),
+		'ipv4_only': _('IPv4 only'),
+		'ipv6_only': _('IPv6 only')
 	},
 
 	shadowsocks_encrypt_methods: [
