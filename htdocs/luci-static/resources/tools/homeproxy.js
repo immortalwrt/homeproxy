@@ -12,7 +12,7 @@
 
 return baseclass.extend({
 	dns_strategy: {
-		'': 'Default',
+		'': _('Default'),
 		'prefer_ipv4': _('Prefer IPv4'),
 		'prefer_ipv6': _('Prefer IPv6'),
 		'ipv4_only': _('IPv4 only'),

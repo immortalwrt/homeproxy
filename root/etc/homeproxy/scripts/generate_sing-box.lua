@@ -141,8 +141,8 @@ local function generate_outbound(node)
 		protocol_param = node.shadowsocksr_protocol_param,
 		obfs = node.shadowsocksr_obfs,
 		obfs_param = node.shadowsocksr_obfs_param,
-		-- Socks
-		version = node.socks_version,
+		-- ShadowTLS / Socks
+		version = (node.type == "shadowtls") and tonumber(node.shadowtls_version) or (node.type == "socks") and node.socks_version or nil,
 		-- VLESS / VMess
 		uuid = node.uuid,
 		alter_id = node.vmess_alterid,
@@ -404,7 +404,10 @@ if enable_server == "1" then
 
 				-- Shadowsocks
 				method = (cfg.type == "shadowsocks") and cfg.shadowsocks_encrypt_method or nil,
-				password = (cfg.type == "shadowsocks") and cfg.password or nil,
+				password = table.contains({"shadowsocks", "shadowtls"}, cfg.type) and cfg.password or nil,
+
+				-- ShadowTLS
+				version = (cfg.type == "shadowtls") and tonumber(cfg.shadowtls_version) or nil,
 
 				-- HTTP / Socks / Trojan / VMess
 				users = (cfg.type ~= "shadowsocks") and {

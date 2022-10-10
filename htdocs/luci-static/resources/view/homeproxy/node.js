@@ -466,11 +466,12 @@ return view.extend({
 		so.depends('type', 'shadowsocks');
 		so.depends('type', 'shadowsocksr');
 		so.depends('type', 'trojan');
+		so.depends({'type': 'shadowtls', 'shadowtls_version': '2'});
 		so.depends({'type': 'socks', 'socks_version': '5'});
 		so.validate = function(section_id, value) {
 			if (section_id) {
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
-				var required_type = [ 'shadowsocks', 'shadowsocksr', 'trojan' ];
+				var required_type = [ 'shadowsocks', 'shadowsocksr', 'shadowtls', 'trojan' ];
 
 				if (required_type.includes(type)) {
 					if (type === 'shadowsocks') {
@@ -648,7 +649,16 @@ return view.extend({
 		so.modalonly = true;
 		/* ShadowsocksR config end */
 
-		/* Socks config start */
+		/* ShadowTLS config */
+		so = ss.option(form.ListValue, 'shadowtls_version', _('ShadowTLS version'));
+		so.value('1', _('v1'));
+		so.value('2', _('v2'));
+		so.default = '1';
+		so.depends('type', 'shadowtls');
+		so.rmempty = false;
+		so.modalonly = true;
+
+		/* Socks config */
 		so = ss.option(form.ListValue, 'socks_version', _('Socks version'));
 		so.value('4', _('Socks4'));
 		so.value('4a', _('Socks4A'));
@@ -657,7 +667,6 @@ return view.extend({
 		so.depends('type', 'socks');
 		so.rmempty = false;
 		so.modalonly = true;
-		/* Socks config end */
 
 		/* VMess config start */
 		so = ss.option(form.Value, 'uuid', _('UUID'));
