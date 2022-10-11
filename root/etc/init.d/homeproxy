@@ -33,6 +33,7 @@ setup_server_firewall() {
 	local port
 	config_get port "$cfg" "port"
 
+	# TODO: support nftables based firewall4
 	if [ -z "$FW4" ]; then
 		for i in "iptables" "ip6tables"; do
 			[ -n "$(command -v "$i")" ] || continue
@@ -67,7 +68,7 @@ start_service() {
 	mkdir -p "$RUN_DIR"
 	"$HP_DIR"/scripts/generate_sing-box.lua 2>>"$LOG_PATH"
 
-	local inbounds="$(jsonfilter -i "$RUN_DIR/sing-box.json" -e "@.inbounds")"
+	local inbounds="$(jsonfilter -i "$RUN_DIR/sing-box.json" -e "@.inbounds" 2>"/dev/null")"
 	if [ ! -e "$RUN_DIR/sing-box.json" ]; then
 		log "Error: failed to generate configuration."
 		exit 1
@@ -92,37 +93,40 @@ start_service() {
 		/etc/init.d/cron restart
 
 		# Hijack DNS
-		uci rename "dhcp.@dnsmasq[0].dns_redirect"="_orig_dns_redirect" 2>"/dev/null"
-		uci rename "dhcp.@dnsmasq[0].noresolv"="_orig_noresolv" 2>"/dev/null"
-		uci rename "dhcp.@dnsmasq[0].server"="_orig_server" 2>"/dev/null"
-		uci set "dhcp.@dnsmasq[0].noresolv"="1"
-		uci add_list "dhcp.@dnsmasq[0].server"="8.8.8.8"
-		uci commit "dhcp"
+		uci -q rename "dhcp.@dnsmasq[0].dns_redirect"="_orig_dns_redirect"
+		uci -q rename "dhcp.@dnsmasq[0].noresolv"="_orig_noresolv"
+		uci -q rename "dhcp.@dnsmasq[0].server"="_orig_server"
+		uci -q set "dhcp.@dnsmasq[0].noresolv"="1"
+		uci -q add_list "dhcp.@dnsmasq[0].server"="8.8.8.8"
+		uci -q commit "dhcp"
 		/etc/init.d/dnsmasq restart
 		touch "$RUN_DIR/.dns_hijacked"
 	fi
 
 	# Set firewall
-	if [ -z "$FW4" ]; then
-		if [ "$main_server" != "nil" ] || [ "$default_outbound" != "nil" ]; then
-			# Allow FORWARD
+	# TODO: support nftables based firewall4
+	if [ "$main_server" != "nil" ] || [ "$default_outbound" != "nil" ]; then
+		# Allow FORWARD
+		if [ -z "$FW4" ]; then
 			for i in "iptables" "ip6tables"; do
 				[ -n "$(command -v "$i")" ] || continue
 				echo -e "$i -I FORWARD -m comment --comment 'Forward HomeProxy TUN' -o '$TUNNAME' -j ACCEPT" >> "$RUN_DIR/$CONF.include"
 			done
 		fi
-
-		local server_auto_firewall
-		config_get_bool server_auto_firewall "server" "auto_firewall" "0"
-		if [ "$server_auto_firewall" = "1" ]; then
+	fi
+	local server_auto_firewall
+	config_get_bool server_auto_firewall "server" "auto_firewall" "0"
+	if [ "$server_auto_firewall" = "1" ]; then
+		if [ -z "$FW4" ]; then
 			for i in "iptables" "ip6tables"; do
 				[ -n "$(command -v "$i")" ] || continue
 				echo -e "$i -N $IPT_RULE_NAME" >> "$RUN_DIR/$CONF.include"
 				echo -e "$i -t filter -I INPUT -j $IPT_RULE_NAME" >> "$RUN_DIR/$CONF.include"
 			done
-			config_foreach setup_server_firewall "server"
 		fi
-
+		config_foreach setup_server_firewall "server"
+	fi
+	if [ -z "$FW4" ]; then
 		sh "$RUN_DIR/$CONF.include"
 	fi
 
@@ -142,17 +146,18 @@ stop_service() {
 	/etc/init.d/cron restart
 
 	[ ! -e "$RUN_DIR/.dns_hijacked" ] || {
-		uci del "dhcp.@dnsmasq[0].noresolv"
-		uci del_list "dhcp.@dnsmasq[0].server"="8.8.8.8"
-		uci rename "dhcp.@dnsmasq[0]._orig_dns_redirect"="dns_redirect"
-		uci rename "dhcp.@dnsmasq[0]._orig_noresolv"="noresolv"
-		uci rename "dhcp.@dnsmasq[0]._orig_server"="server"
-		uci commit "dhcp"
+		uci -q del "dhcp.@dnsmasq[0].noresolv"
+		uci -q del_list "dhcp.@dnsmasq[0].server"="8.8.8.8"
+		uci -q rename "dhcp.@dnsmasq[0]._orig_dns_redirect"="dns_redirect"
+		uci -q rename "dhcp.@dnsmasq[0]._orig_noresolv"="noresolv"
+		uci -q rename "dhcp.@dnsmasq[0]._orig_server"="server"
+		uci -q commit "dhcp"
 		/etc/init.d/dnsmasq restart
 		rm -f "$RUN_DIR/.dns_hijacked"
-	} 2>"/dev/null"
+	}
 
-	if [ -s "$RUN_DIR/$CONF.include" ]; then
+	# TODO: support nftables based firewall4
+	if [ -z "$FW4" ] && [ -s "$RUN_DIR/$CONF.include" ]; then
 		for i in "iptables" "ip6tables"; do
 			[ -n "$(command -v "$i")" ] || continue
 			"$i" -D FORWARD -m comment --comment "Forward HomeProxy TUN" -o "$TUNNAME" -j ACCEPT

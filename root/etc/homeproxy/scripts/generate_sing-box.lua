@@ -194,7 +194,6 @@ local function generate_outbound(node)
 			max_early_data = node.websocket_early_data,
 			early_data_header_name = node.websocket_early_data_header,
 			service_name = node.grpc_servicename
-
 		} or nil,
 		udp_over_tcp = (node.udp_over_tcp == "1") or nil,
 		tcp_fast_open = (node.tcp_fast_open == "1") or nil,
