@@ -322,6 +322,7 @@ elseif notEmpty(default_outbound) then
 	uci:foreach(uciconfig, ucidnsrule, function(cfg)
 		if cfg.enabled == "1" then
 			config.dns.rules[#config.dns.rules] = {
+				invert = cfg.invert,
 				network = cfg.network,
 				protocol = cfg.protocol,
 				domain = cfg.domain,
@@ -581,6 +582,7 @@ elseif notEmpty(default_outbound) then
 	uci:foreach(uciconfig, uciroutingrule, function(cfg)
 		if cfg.enabled == "1" then
 			config.route.rules[#config.route.rules + 1] = {
+				invert = cfg.invert,
 				ip_version = cfg.ip_version,
 				network = cfg.network,
 				protocol = cfg.protocol,

@@ -341,8 +341,14 @@ return view.extend({
 			'<code>other fields</code>.'));
 		so.value('default', _('Default'));
 		so.default = 'default';
-		so.readonly = true;
 		so.rmempty = false;
+		so.readonly = true;
+
+		so = ss.option(form.Flag, 'invert', _('Invert'),
+			_('Invert match result.'));
+		so.default = so.disabled;
+		so.rmempty = false;
+		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'network', _('Network'));
 		so.value('tcp', _('TCP'));
@@ -594,8 +600,14 @@ return view.extend({
 			'<code>other fields</code>.'));
 		so.value('default', _('Default'));
 		so.default = 'default';
-		so.readonly = true;
 		so.rmempty = false;
+		so.readonly = true;
+
+		so = ss.option(form.Flag, 'invert', _('Invert'),
+			_('Invert match result.'));
+		so.default = so.disabled;
+		so.rmempty = false;
+		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'network', _('Network'));
 		so.value('tcp', _('TCP'));
