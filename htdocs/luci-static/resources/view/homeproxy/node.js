@@ -41,8 +41,8 @@ function parseShareLink(uri, features) {
 				hysteria_auth_type: params.get('auth') ? 'string' : null,
 				hysteria_auth_payload: params.get('auth'),
 				hysteria_obfs_password: params.get('obfsParam'),
-				mkcp_downlink_capacity: params.get('downmbps'),
-				mkcp_uplink_capacity: params.get('upmbps'),
+				hysteria_down_mbps: params.get('downmbps'),
+				hysteria_up_mbps: params.get('upmbps'),
 				tls: '1',
 				tls_sni: params.get('peer'),
 				tls_alpn: params.get('alpn'),
@@ -529,6 +529,18 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'hysteria_obfs_password', _('Obfuscate password'));
+		so.depends('type', 'hysteria');
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'hysteria_down_mbps', _('Max download speed'),
+			_('Max download speed in Mbps.'));
+		so.datatype = 'uinteger';
+		so.depends('type', 'hysteria');
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'hysteria_up_mbps', _('Max upload speed'),
+			_('Max upload speed in Mbps.'));
+		so.datatype = 'uinteger';
 		so.depends('type', 'hysteria');
 		so.modalonly = true;
 

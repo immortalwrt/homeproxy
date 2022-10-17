@@ -124,8 +124,8 @@ local function generate_outbound(node)
 		override_port = (node.type == "direct") and node.port or nil,
 		proxy_protocol = notEmpty(node.proxy_protocol) or nil,
 		-- Hysteria
-		up_mbps = node.mkcp_uplink_capacity,
-		down_mbps = node.mkcp_downlink_capacity,
+		up_mbps = node.hysteria_down_mbps,
+		down_mbps = node.hysteria_up_mbps,
 		obfs = node.hysteria_obfs_password,
 		auth = (node.hysteria_auth_type == "base64") and node.hysteria_auth_payload or nil,
 		auth_str = (node.hysteria_auth_type == "string") and node.hysteria_auth_payload or nil,
