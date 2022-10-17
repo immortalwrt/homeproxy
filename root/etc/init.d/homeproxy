@@ -62,7 +62,7 @@ start_service() {
 	config_get_bool server_enabled "server" "enabled" "0"
 
 	if [ "$main_server" = "nil" ] && [ "$default_outbound" = "nil" ] && [ "$server_enabled" = "0" ]; then
-		exit 1
+		return 1
 	fi
 
 	mkdir -p "$RUN_DIR"
