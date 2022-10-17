@@ -14,9 +14,7 @@ LUCI_DEPENDS:= \
 	+sing-box \
 	+@SING_BOX_BUILD_GVISOR \
 	+curl \
-	+lua-neturl \
-	+kmod-inet-diag \
-	+kmod-netlink-diag
+	+lua-neturl
 
 define Package/luci-app-homeproxy/conffiles
 /etc/config/homeproxy
