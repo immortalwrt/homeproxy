@@ -127,12 +127,14 @@ return view.extend({
 		o.rmempty = false;
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'hysteria_downlink_capacity', _('Downlink capacity'));
+		o = s.option(form.Value, 'hysteria_down_mbps', _('Max download speed'),
+			_('Max download speed in Mbps.'));
 		o.datatype = 'uinteger';
 		o.depends('type', 'hysteria');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'hysteria_uplink_capacity', _('Uplink capacity'));
+		o = s.option(form.Value, 'hysteria_up_mbps', _('Max upload speed'),
+			_('Max upload speed in Mbps.'));
 		o.datatype = 'uinteger';
 		o.depends('type', 'hysteria');
 		o.modalonly = true;

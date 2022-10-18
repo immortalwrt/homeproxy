@@ -124,8 +124,8 @@ local function generate_outbound(node)
 		override_port = (node.type == "direct") and node.port or nil,
 		proxy_protocol = notEmpty(node.proxy_protocol) or nil,
 		-- Hysteria
-		up_mbps = node.hysteria_down_mbps,
-		down_mbps = node.hysteria_up_mbps,
+		up_mbps = tonumber(node.hysteria_down_mbps),
+		down_mbps = tonumber(node.hysteria_up_mbps),
 		obfs = node.hysteria_obfs_password,
 		auth = (node.hysteria_auth_type == "base64") and node.hysteria_auth_payload or nil,
 		auth_str = (node.hysteria_auth_type == "string") and node.hysteria_auth_payload or nil,
@@ -392,8 +392,8 @@ if enable_server == "1" then
 				network = cfg.network,
 
 				-- Hysteria
-				up_mbps = cfg.hysteria_uplink_capacity,
-				down_mbps = cfg.hysteria_downlink_capacity,
+				up_mbps = tonumber(cfg.hysteria_up_mbps),
+				down_mbps = tonumber(cfg.hysteria_down_mbps),
 				obfs = cfg.hysteria_obfs_password,
 				auth = (cfg.hysteria_auth_type == "base64") and cfg.hysteria_auth_payload or nil,
 				auth_str = (cfg.hysteria_auth_type == "string") and cfg.hysteria_auth_payload or nil,
