@@ -196,7 +196,7 @@ return view.extend({
 		o.modalonly = true;
 
 		/* ShadowTLS config */
-		o = ss.option(form.ListValue, 'shadowtls_version', _('ShadowTLS version'));
+		o = s.option(form.ListValue, 'shadowtls_version', _('ShadowTLS version'));
 		o.value('1', _('v1'));
 		o.value('2', _('v2'));
 		o.default = '1';
