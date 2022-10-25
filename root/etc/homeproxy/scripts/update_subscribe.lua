@@ -182,7 +182,7 @@ local function parse_uri(uri)
 			local url = URL.parse("http://" .. uri[2])
 			local params = url.query
 
-			if (not sing_features.with_quic) notEmpty(params.protocol) and params.protocol ~= "udp" then
+			if (not sing_features.with_quic) or (notEmpty(params.protocol) and params.protocol ~= "udp") then
 				log(translatef("Skipping unsupported %s node: %s.", "hysteria", urldecode(url.fragment, true) or url.host))
 				if (not sing_features.with_quic) then
 					log(translatef("Please rebuild sing-box with %s support!", "QUIC"))
