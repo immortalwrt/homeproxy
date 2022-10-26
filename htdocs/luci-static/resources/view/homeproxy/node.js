@@ -282,7 +282,7 @@ return view.extend({
 
 	render: function(data) {
 		var m, s, o, ss, so;
-		var main_server = uci.get(data[0], 'config', 'main_server');
+		var main_node = uci.get(data[0], 'config', 'main_node');
 		var routing_mode = uci.get(data[0], 'config', 'routing_mode');
 
 		m = new form.Map('homeproxy', _('Edit nodes'));
@@ -397,7 +397,7 @@ return view.extend({
 			if (routing_mode === 'custom')
 				this.readonly = true;
 			else {
-				if (main_server == section_id) {
+				if (main_node == section_id) {
 					this.readonly = true;
 					return _('Applied');
 				} else {
@@ -407,7 +407,7 @@ return view.extend({
 			}
 		}
 		so.onclick = function(ev, section_id) {
-			uci.set(data[0], 'config', 'main_server', section_id);
+			uci.set(data[0], 'config', 'main_node', section_id);
 			ui.changes.apply(true);
 
 			return this.map.save(null, true);
@@ -1130,11 +1130,11 @@ return view.extend({
 			for (var i in subnodes)
 				uci.remove(data[0], subnodes[i]);
 
-			if (subnodes.includes(uci.get(data[0], 'config', 'main_server')))
-				uci.set(data[0], 'config', 'main_server', 'nil');
+			if (subnodes.includes(uci.get(data[0], 'config', 'main_node')))
+				uci.set(data[0], 'config', 'main_node', 'nil');
 
-			if (subnodes.includes(uci.get(data[0], 'config', 'main_udp_server')))
-				uci.set(data[0], 'config', 'main_udp_server', 'nil');
+			if (subnodes.includes(uci.get(data[0], 'config', 'main_udp_node')))
+				uci.set(data[0], 'config', 'main_udp_node', 'nil');
 
 			this.inputtitle = _('%s %s removed').format(subnodes.length, subnodes.length === 1 ? _('node') : _('nodes'));
 			this.readonly = true;

@@ -1,7 +1,7 @@
 
 config homeproxy 'config'
-	option main_server 'nil'
-	option main_udp_server 'same'
+	option main_node 'nil'
+	option main_udp_node 'same'
 	option routing_mode 'gfwlist'
 	option routing_port 'common'
 	option dns_server '8.8.8.8'

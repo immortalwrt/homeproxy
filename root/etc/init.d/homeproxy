@@ -50,10 +50,10 @@ start_service() {
 	local routing_mode
 	config_get routing_mode "config" "routing_mode" "bypass_mainland_china"
 
-	local main_server="nil"
+	local main_node="nil"
 	local default_outbound="nil"
 	if [ "$routing_mode" != "custom" ]; then
-		config_get main_server "config" "main_server" "nil"
+		config_get main_node "config" "main_node" "nil"
 	else
 		config_get default_outbound "routing" "default_outbound" "nil"
 	fi
@@ -61,7 +61,7 @@ start_service() {
 	local server_enabled
 	config_get_bool server_enabled "server" "enabled" "0"
 
-	if [ "$main_server" = "nil" ] && [ "$default_outbound" = "nil" ] && [ "$server_enabled" = "0" ]; then
+	if [ "$main_node" = "nil" ] && [ "$default_outbound" = "nil" ] && [ "$server_enabled" = "0" ]; then
 		return 1
 	fi
 
@@ -80,7 +80,7 @@ start_service() {
 		exit 1
 	fi
 
-	if [ "$main_server" != "nil" ] || [ "$default_outbound" != "nil" ]; then
+	if [ "$main_node" != "nil" ] || [ "$default_outbound" != "nil" ]; then
 		# Auto update
 		local auto_update auto_update_time
 		config_get_bool auto_update "subscription" "auto_update" "0"
@@ -104,7 +104,7 @@ start_service() {
 
 	# Set firewall
 	# TODO: support nftables based firewall4
-	if [ "$main_server" != "nil" ] || [ "$default_outbound" != "nil" ]; then
+	if [ "$main_node" != "nil" ] || [ "$default_outbound" != "nil" ]; then
 		# Allow FORWARD
 		if [ -z "$FW4" ]; then
 			for i in "iptables" "ip6tables"; do
