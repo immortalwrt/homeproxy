@@ -15,6 +15,7 @@ TUNNAME="emortal-singbox"
 HP_DIR="/etc/homeproxy"
 RUN_DIR="/var/run/homeproxy"
 LOG_PATH="$RUN_DIR/homeproxy.log"
+DNSMASQ_DIR="/tmp/dnsmasq.d"
 
 FW4="$(command -v fw4)"
 IPT_RULE_NAME="homeproxy_input_rule"
@@ -93,12 +94,12 @@ start_service() {
 		/etc/init.d/cron restart
 
 		# Hijack DNS
-		uci -q rename "dhcp.@dnsmasq[0].noresolv"="_orig_noresolv"
-		uci -q rename "dhcp.@dnsmasq[0].server"="_orig_server"
-		uci -q set "dhcp.@dnsmasq[0].noresolv"="1"
-		uci -q add_list "dhcp.@dnsmasq[0].server"="8.8.8.8"
-		uci -q set "dhcp.@dnsmasq[0]._unused_homeproxy_changed"="1"
-		uci -q commit "dhcp"
+		mkdir -p "$DNSMASQ_DIR"
+		cat <<-EOF >> "$DNSMASQ_DIR/dnsmasq-homeproxy.conf"
+			no-poll
+			no-resolv
+			server=8.8.8.8
+		EOF
 		/etc/init.d/dnsmasq restart
 	fi
 
@@ -144,6 +145,9 @@ stop_service() {
 	sed -i "/$CONF/d" "/etc/crontabs/root"
 	/etc/init.d/cron restart
 
+	# Revert DNS hijack
+	rm -f "$DNSMASQ_DIR/dnsmasq-homeproxy.conf"
+	# For backward compatibility only
 	[ "$(uci -q get "dhcp.@dnsmasq[0]._unused_homeproxy_changed")" != "1" ] || {
 		uci -q del "dhcp.@dnsmasq[0].noresolv"
 		uci -q del_list "dhcp.@dnsmasq[0].server"="8.8.8.8"
@@ -151,8 +155,8 @@ stop_service() {
 		uci -q rename "dhcp.@dnsmasq[0]._orig_server"="server"
 		uci -q del "dhcp.@dnsmasq[0]._unused_homeproxy_changed"
 		uci -q commit "dhcp"
-		/etc/init.d/dnsmasq restart
 	}
+	/etc/init.d/dnsmasq restart
 
 	# TODO: support nftables based firewall4
 	if [ -z "$FW4" ] && [ -s "$RUN_DIR/$CONF.include" ]; then
