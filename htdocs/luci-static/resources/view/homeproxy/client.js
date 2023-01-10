@@ -104,7 +104,7 @@ return view.extend({
 		/* Cache all configured proxy nodes, they will be called multiple times. */
 		var proxy_nodes = {};
 		uci.sections(data[0], 'node', (res) => {
-			proxy_nodes[res['.name']] = 
+			proxy_nodes[res['.name']] =
 				String.format('[%s] %s', res.type, res.label || res.server + ':' + res.server_port);
 		});
 
@@ -145,6 +145,7 @@ return view.extend({
 		o.value('all', _('All ports'));
 		o.value('common', _('Common ports only (bypass P2P traffic)'));
 		o.default = 'common';
+		o.rmempty = false;
 		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.validate = function(section_id, value) {
 			if (section_id && value !== 'all' && value !== 'common') {
@@ -156,7 +157,7 @@ return view.extend({
 					if (!stubValidator.apply('port', i))
 						return _('Expecting: %s').format(_('valid port value'));
 					if (ports.includes(i))
-						return _('Port %s alrealy exists, please enter other ones.').format(port);
+						return _('Port %s alrealy exists!').format(i);
 					ports = ports.concat(i);
 				}
 			}
@@ -175,11 +176,12 @@ return view.extend({
 		o.value('119.29.29.29', _('Tencent Public DNS (119.29.29.29)'));
 		o.value('114.114.114.114', _('Xinfeng Public DNS (114.114.114.114)'));
 		o.default = '8.8.8.8';
+		o.rmempty = false;
 		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.validate = function(section_id, value) {
 			if (section_id && !['local', 'wan'].includes(value)) {
 				if (!value)
-					return _('Expecting: %s').fomrat(_('non-empty value'));
+					return _('Expecting: %s').format(_('non-empty value'));
 				else if (!stubValidator.apply('ipaddr', value))
 					return _('Expecting: %s').format(_('valid IP address'));
 			}
