@@ -17,9 +17,6 @@ RUN_DIR="/var/run/homeproxy"
 LOG_PATH="$RUN_DIR/homeproxy.log"
 DNSMASQ_DIR="/tmp/dnsmasq.d"
 
-FW4="$(command -v fw4)"
-IPT_RULE_NAME="homeproxy_input_rule"
-
 log() {
 	echo -e "$(date "+%Y-%m-%d %H:%M:%S") [DAEMON] $*" >> "$LOG_PATH"
 }
@@ -31,18 +28,18 @@ setup_server_firewall() {
 	config_get_bool enabled "$cfg" "enabled"
 	[ "$enabled" = "1" ] || return 1
 
-	local port
+	local port network
 	config_get port "$cfg" "port"
+	config_get network "$cfg" "network"
 
-	# TODO: support nftables based firewall4
-	if [ -z "$FW4" ]; then
-		for i in "iptables" "ip6tables"; do
-			[ -n "$(command -v "$i")" ] || continue
-			for v in "tcp" "udp"; do
-				echo -e "$i -t filter -A $IPT_RULE_NAME -p $v --dport $port -j ACCEPT" >> "$RUN_DIR/$CONF.include"
-			done
-		done
-	fi
+	json_add_object ""
+	json_add_string type "rule"
+	json_add_string name "Allow-access-$CONF-$cfg-at-$port"
+	json_add_string src "*"
+	json_add_string dest_port "$port"
+	[ -z "$network" ] || json_add_string proto "$network"
+	json_add_string target "ACCEPT"
+	json_close_object
 }
 
 start_service() {
@@ -103,77 +100,71 @@ start_service() {
 		/etc/init.d/dnsmasq restart
 	fi
 
+	procd_open_instance "sing-box"
+
+	procd_set_param command "$PROG"
+	procd_append_param command run --config "$RUN_DIR/sing-box.json"
+
+	procd_set_param stderr 1
+	procd_set_param respawn
+
 	# Set firewall
-	# TODO: support nftables based firewall4
+	local firewall_configured
 	if [ "$main_node" != "nil" ] || [ "$default_outbound" != "nil" ]; then
-		# Allow FORWARD
-		if [ -z "$FW4" ]; then
-			for i in "iptables" "ip6tables"; do
-				[ -n "$(command -v "$i")" ] || continue
-				echo -e "$i -I FORWARD -m comment --comment 'Forward HomeProxy TUN' -o '$TUNNAME' -j ACCEPT" >> "$RUN_DIR/$CONF.include"
-			done
-		fi
+		firewall_configured=1
+		procd_open_data
+
+		json_add_array firewall
+		json_add_object ""
+		json_add_string type "rule"
+		json_add_string name "Allow-Forward-HomeProxy-TUN"
+		json_add_string src "*"
+		json_add_string dest "*"
+		json_add_string direction "out"
+		json_add_string device "$TUNNAME"
+		json_add_string proto "all"
+		json_add_string target "ACCEPT"
+		json_close_object
 	fi
 	local server_auto_firewall
 	config_get_bool server_auto_firewall "server" "auto_firewall" "0"
 	if [ "$server_auto_firewall" = "1" ]; then
-		if [ -z "$FW4" ]; then
-			for i in "iptables" "ip6tables"; do
-				[ -n "$(command -v "$i")" ] || continue
-				echo -e "$i -N $IPT_RULE_NAME" >> "$RUN_DIR/$CONF.include"
-				echo -e "$i -t filter -I INPUT -j $IPT_RULE_NAME" >> "$RUN_DIR/$CONF.include"
-			done
-		fi
+		[ -z "$firewall_configured" ] || {
+			firewall_configured=1
+			procd_open_data
+			json_add_array firewall
+		}
 		config_foreach setup_server_firewall "server"
 	fi
-	if [ -z "$FW4" ]; then
-		sh "$RUN_DIR/$CONF.include"
-	fi
 
-	procd_open_instance "sing-box"
-	procd_set_param command "$PROG"
-	procd_append_param command run --config "$RUN_DIR/sing-box.json"
-	procd_set_param stderr 1
-	procd_set_param respawn
+	[ -z "$firewall_configured" ] || {
+		json_close_array
+		procd_close_data
+	}
+
 	procd_close_instance
 
 	echo > "$RUN_DIR/sing-box.log"
 	log "$(sing-box version | awk 'NR==1{print $1,$3}') started."
 }
 
-stop_service() {
+service_started() {
+	procd_set_config_changed firewall
+}
+
+service_stopped() {
 	sed -i "/$CONF/d" "/etc/crontabs/root"
 	/etc/init.d/cron restart
 
 	# Revert DNS hijack
 	rm -f "$DNSMASQ_DIR/dnsmasq-homeproxy.conf"
-	# For backward compatibility only
-	[ "$(uci -q get "dhcp.@dnsmasq[0]._unused_homeproxy_changed")" != "1" ] || {
-		uci -q del "dhcp.@dnsmasq[0].noresolv"
-		uci -q del_list "dhcp.@dnsmasq[0].server"="8.8.8.8"
-		uci -q rename "dhcp.@dnsmasq[0]._orig_noresolv"="noresolv"
-		uci -q rename "dhcp.@dnsmasq[0]._orig_server"="server"
-		uci -q del "dhcp.@dnsmasq[0]._unused_homeproxy_changed"
-		uci -q commit "dhcp"
-	}
 	/etc/init.d/dnsmasq restart
-
-	# TODO: support nftables based firewall4
-	if [ -z "$FW4" ] && [ -s "$RUN_DIR/$CONF.include" ]; then
-		for i in "iptables" "ip6tables"; do
-			[ -n "$(command -v "$i")" ] || continue
-			"$i" -D FORWARD -m comment --comment "Forward HomeProxy TUN" -o "$TUNNAME" -j ACCEPT
-			"$i" -F "$IPT_RULE_NAME"
-			"$i" -t filter -D INPUT -j "$IPT_RULE_NAME"
-			"$i" -X "$IPT_RULE_NAME"
-		done 2>"/dev/null"
-
-		echo > "$RUN_DIR/$CONF.include"
-	fi
 
 	rm -f "$RUN_DIR/sing-box.json" "$RUN_DIR/sing-box.log"
 
 	log "Service stopped."
+
+	procd_set_config_changed firewall
 }
 
 reload_service() {

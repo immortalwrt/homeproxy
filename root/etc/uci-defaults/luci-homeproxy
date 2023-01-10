@@ -3,10 +3,6 @@
 [ -e "$(command -v fw4)" ] || {
 	uci -q batch <<-EOF >/dev/null
 		delete firewall.homeproxy
-		set firewall.homeproxy=include
-		set firewall.homeproxy.type=script
-		set firewall.homeproxy.path=/var/run/homeproxy/homeproxy.include
-		set firewall.homeproxy.reload=1
 		commit firewall
 	EOF
 }
