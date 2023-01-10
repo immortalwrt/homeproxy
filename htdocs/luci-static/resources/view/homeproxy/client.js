@@ -222,7 +222,7 @@ return view.extend({
 		so.noaliases = true;
 		so.nobridges = true;
 
-		so = ss.option(form.ListValue, 'default_tun_stack', _('Default TUN stack'),
+		so = ss.option(form.ListValue, 'tcpip_stack', _('TCP/IP stack'),
 			_('TCP/IP stack.'));
 		so.value('gvisor', _('gVisor'));
 		so.value('system', _('System'));
