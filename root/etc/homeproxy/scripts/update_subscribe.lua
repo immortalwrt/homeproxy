@@ -372,7 +372,7 @@ local function parse_uri(uri)
 			if config.transport == "grpc" then
 				config.grpc_servicename = uri.path
 			elseif config.transport == "h2" or uri.type == "http" then
-				config.transport == "http"
+				config.transport = "http"
 				config.http_host = notEmpty(uri.host) and uri.host:split(",") or nil
 				config.http_path = uri.path
 			elseif config.transport == "ws" then
