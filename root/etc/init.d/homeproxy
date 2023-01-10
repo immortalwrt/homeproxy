@@ -129,7 +129,7 @@ start_service() {
 	local server_auto_firewall
 	config_get_bool server_auto_firewall "server" "auto_firewall" "0"
 	if [ "$server_auto_firewall" = "1" ]; then
-		[ -z "$firewall_configured" ] || {
+		[ -n "$firewall_configured" ] || {
 			firewall_configured=1
 			procd_open_data
 			json_add_array firewall
@@ -153,12 +153,12 @@ service_started() {
 }
 
 service_stopped() {
-	sed -i "/$CONF/d" "/etc/crontabs/root"
+	sed -i "/$CONF/d" "/etc/crontabs/root" 2>"/dev/null"
 	/etc/init.d/cron restart
 
 	# Revert DNS hijack
 	rm -f "$DNSMASQ_DIR/dnsmasq-homeproxy.conf"
-	/etc/init.d/dnsmasq restart
+	/etc/init.d/dnsmasq restart >"/dev/null" 2>&1
 
 	rm -f "$RUN_DIR/sing-box.json" "$RUN_DIR/sing-box.log"
 
