@@ -389,14 +389,12 @@ return view.extend({
 		}
 		/* Import subscription links end */
 
-		so = ss.option(form.Button, '_apply', _('Apply'));
-		so.editable = true;
-		so.modalonly = false;
-		so.inputstyle = 'apply';
-		so.inputtitle = function(section_id) {
-			if (routing_mode === 'custom')
-				this.readonly = true;
-			else {
+		if (routing_mode !== 'custom') {
+			so = ss.option(form.Button, '_apply', _('Apply'));
+			so.editable = true;
+			so.modalonly = false;
+			so.inputstyle = 'apply';
+			so.inputtitle = function(section_id) {
 				if (main_node == section_id) {
 					this.readonly = true;
 					return _('Applied');
@@ -405,12 +403,12 @@ return view.extend({
 					return _('Apply');
 				}
 			}
-		}
-		so.onclick = function(ev, section_id) {
-			uci.set(data[0], 'config', 'main_node', section_id);
-			ui.changes.apply(true);
+			so.onclick = function(ev, section_id) {
+				uci.set(data[0], 'config', 'main_node', section_id);
+				ui.changes.apply(true);
 
-			return this.map.save(null, true);
+				return this.map.save(null, true);
+			}
 		}
 
 		so = ss.option(form.Value, 'label', _('Label'));
