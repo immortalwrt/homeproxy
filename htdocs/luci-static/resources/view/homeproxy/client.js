@@ -386,12 +386,10 @@ return view.extend({
 
 		so = ss.option(form.DynamicList, 'source_geoip', _('Source GeoIP'),
 			_('Match source geoip.'));
-		so.datatype = 'ipaddr("nomask")';
 		so.modalonly = true;
 
 		so = ss.option(form.DynamicList, 'geoip', _('GeoIP'),
 			_('Match geoip.'));
-		so.datatype = 'ipaddr("nomask")';
 		so.modalonly = true;
 
 		so = ss.option(form.DynamicList, 'source_ip_cidr', _('Source IP CIDR'),
