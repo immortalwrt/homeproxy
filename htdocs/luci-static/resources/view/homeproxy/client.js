@@ -236,6 +236,12 @@ return view.extend({
 				desc.innerHTML = _('Less compatibility and sometimes better performance.');
 		}
 
+		so = ss.option(form.Flag, 'endpoint_independent_nat', _('Enable endpoint-independent NAT'),
+			_('Performance may degrade slightly, so it is not recommended to enable on when it is not needed.'));
+		so.default = so.enabled;
+		so.depends('tcpip_stack', 'gvisor');
+		so.rmempty = false;
+
 		o = s.option(form.SectionValue, '_routing_node', form.GridSection, 'routing_node', _('Routing nodes'));
 		o.depends('routing_mode', 'custom');
 

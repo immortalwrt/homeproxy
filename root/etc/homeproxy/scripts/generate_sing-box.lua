@@ -70,6 +70,7 @@ local main_node, main_udp_node, default_outbound
 local dns_strategy, dns_default_server, dns_disable_cache, dns_disable_cache_expire
 local sniff_override, default_interface
 local tcpip_stack = "gvisor"
+local endpoint_independent_nat = "1"
 if routing_mode ~= "custom" then
 	main_node = uci:get(uciconfig, ucimain, "main_node") or "nil"
 	main_udp_node = uci:get(uciconfig, ucimain, "main_udp_node") or "nil"
@@ -85,6 +86,7 @@ else
 	default_outbound = uci:get(uciconfig, uciroutingsetting, "default_outbound")
 	default_interface = uci:get(uciconfig, uciroutingsetting, "default_interface")
 	tcpip_stack = uci:get(uciconfig, uciroutingsetting, "tcpip_stack")
+	endpoint_independent_nat = uci:get(uciconfig, uciroutingsetting, "endpoint_independent_nat")
 end
 
 if routing_port == "common" then
@@ -365,7 +367,7 @@ if notEmpty(main_node) or notEmpty(default_outbound) then
 		inet6_address = "fdfe:dcba:9876::1/126",
 		mtu = 9000,
 		auto_route = true,
-		endpoint_independent_nat = true,
+		endpoint_independent_nat = (endpoint_independent_nat == "1") or nil,
 		stack = tcpip_stack,
 		sniff = true,
 		sniff_override_destination = (sniff_override == "1"),
