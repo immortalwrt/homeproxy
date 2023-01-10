@@ -84,11 +84,11 @@ else
 	sniff_override = uci:get(uciconfig, uciroutingsetting, "sniff_override")
 	default_outbound = uci:get(uciconfig, uciroutingsetting, "default_outbound")
 	default_interface = uci:get(uciconfig, uciroutingsetting, "default_interface")
-	default_tun_stack = uci:get(uciconfig, uciroutingnode, "default_tun_stack")
+	default_tun_stack = uci:get(uciconfig, uciroutingsetting, "default_tun_stack")
 end
 
 if routing_port == "common" then
-	routing_port = { 22, 53, 80, 143, 443, 465, 587, 853, 995, 993, 8080, 8443, 9418 }
+	routing_port = { 22, 53, 80, 143, 443, 465, 587, 853, 993, 995, 8080, 8443, 9418 }
 elseif table.contains({"all", "nil"}, routing_port) then
 	routing_port = nil
 else
@@ -321,7 +321,7 @@ elseif notEmpty(default_outbound) then
 	config.dns.rules = {}
 	uci:foreach(uciconfig, ucidnsrule, function(cfg)
 		if cfg.enabled == "1" then
-			config.dns.rules[#config.dns.rules] = {
+			config.dns.rules[#config.dns.rules+1] = {
 				invert = cfg.invert,
 				network = cfg.network,
 				protocol = cfg.protocol,
@@ -340,7 +340,7 @@ elseif notEmpty(default_outbound) then
 				user = cfg.user,
 				invert = (cfg.invert == "1"),
 				outbound = get_outbound(cfg.outbound),
-				server = cfg.server,
+				server = get_resolver(cfg.server),
 				disable_cache = (cfg.disable_cache == "1")
 			}
 		end
@@ -349,7 +349,7 @@ elseif notEmpty(default_outbound) then
 		config.dns.rules = nil
 	end
 
-	config.dns.final = dns_default_server
+	config.dns.final = get_resolver(dns_default_server)
 end
 -- DNS end
 
