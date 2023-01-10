@@ -46,7 +46,7 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'enabled', _('Enable'));
-		o.default = o.disabled;
+		o.default = o.enabled;
 		o.rmempty = false;
 		o.editable = true;
 

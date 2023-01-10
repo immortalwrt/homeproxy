@@ -253,6 +253,7 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
+		so.default = so.enabled;
 		so.rmempty = false;
 		so.editable = true;
 
@@ -325,7 +326,7 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
-		so.default = so.disabled;
+		so.default = so.enabled;
 		so.rmempty = false;
 		so.editable = true;
 
@@ -501,7 +502,7 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
-		so.default = so.disabled;
+		so.default = so.enabled;
 		so.rmempty = false;
 		so.editable = true;
 
@@ -586,7 +587,7 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
-		so.default = so.disabled;
+		so.default = so.enabled;
 		so.rmempty = false;
 		so.editable = true;
 
