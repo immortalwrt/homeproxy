@@ -593,7 +593,8 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'shadowsocks_plugin_opts', _('Plugin opts'));
-		so.depends({'shadowsocks_plugin': '', '!reverse': true});
+		so.depends('shadowsocks_plugin', 'obfs-local');
+		so.depends('shadowsocks_plugin', 'v2ray-plugin');
 		so.modalonly = true;
 		/* Shadowsocks config end */
 
@@ -881,6 +882,7 @@ return view.extend({
 		so.depends('type', 'hysteria');
 		so.depends('type', 'shadowtls');
 		so.depends('type', 'trojan');
+		so.depends('type', 'vless');
 		so.depends('type', 'vmess');
 		so.modalonly = true;
 
