@@ -177,7 +177,7 @@ local function generate_outbound(node)
 			certificate_path = node.tls_cert_path,
 			ech = (node.enable_ech == "1") and {
 				enabled = true,
-				dynamic_record_sizing_disabled = (node.tls_ech_tls_enable_drs ~= "1"),
+				dynamic_record_sizing_disabled = (node.tls_ech_tls_disable_drs == "1"),
 				pq_signature_schemes_enabled = (node.tls_ech_enable_pqss == "1"),
 				config = node.tls_ech_config
 			} or nil,
@@ -400,7 +400,7 @@ if enable_server == "1" then
 				recv_window_conn = tonumber(cfg.hysteria_recv_window_conn),
 				recv_window_client = tonumber(cfg.hysteria_revc_window_client),
 				max_conn_client = tonumber(cfg.hysteria_max_conn_client),
-				disable_mtu_discovery = cfg.hysteria_disable_mtu_discovery and (cfg.hysteria_disable_mtu_discovery == "1") or nil,
+				disable_mtu_discovery = (cfg.hysteria_disable_mtu_discovery == "1") or nil,
 
 				-- Shadowsocks
 				method = (cfg.type == "shadowsocks") and cfg.shadowsocks_encrypt_method or nil,
@@ -500,7 +500,7 @@ if notEmpty(default_outbound) then
 			config.outbounds[index].domain_strategy = cfg.domain_strategy
 			config.outbounds[index].bind_interface = cfg.bind_interface
 			config.outbounds[index].detour = get_outbound(cfg.outbound)
-			
+
 		end
 	end)
 end

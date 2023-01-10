@@ -30,7 +30,6 @@ return view.extend({
 
 		o = s.option(form.Flag, 'auto_firewall', _('Auto configure firewall'));
 		o.default = o.enabled;
-		o.rmempty = false;
 
 		s = m.section(form.GridSection, 'server');
 		s.addremove = true;
@@ -183,7 +182,6 @@ return view.extend({
 			_('Disables Path MTU Discovery (RFC 8899). Packets will then be at most 1252 (IPv4) / 1232 (IPv6) bytes in size.'));
 		o.default = o.disabled;
 		o.depends('type', 'hysteria');
-		o.rmempty = false;
 		o.modalonly = true;
 		/* Hysteria config end */
 
@@ -316,20 +314,18 @@ return view.extend({
 
 		o = s.option(form.ListValue, 'tls_min_version', _('Minimum TLS version'),
 			_('The minimum TLS version that is acceptable.'));
+		o.value('', _('default'));
 		for (var i of hp.tls_versions)
 			o.value(i);
-		o.default = '1.2';
 		o.depends('tls', '1');
-		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'tls_max_version', _('Maximum TLS version'),
 			_('The maximum TLS version that is acceptable.'));
+		o.value('', _('default'));
 		for (var i of hp.tls_versions)
 			o.value(i);
-		o.default = '1.3';
 		o.depends('tls', '1');
-		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.MultiValue, 'tls_cipher_suites', _('Cipher suites'),
@@ -345,7 +341,6 @@ return view.extend({
 				_('Use ACME TLS certificate issuer.'));
 			o.default = o.disabled;
 			o.depends('tls', '1');
-			o.rmempty = false;
 			o.modalonly = true;
 
 			o = s.option(form.DynamicList, 'tls_acme_domain', _('Domains'));
@@ -386,13 +381,11 @@ return view.extend({
 			o = s.option(form.Flag, 'tls_acme_dhc', _('Disable HTTP challenge'));
 			o.default = o.disabled;
 			o.depends('tls_acme', '1');
-			o.rmempty = false;
 			o.modalonly = true;
 
 			o = s.option(form.Flag, 'tls_acme_dtac', _('Disable TLS ALPN challenge'));
 			o.default = o.disabled;
 			o.depends('tls_acme', '1');
-			o.rmempty = false;
 			o.modalonly = true;
 
 			o = s.option(form.Value, 'tls_acme_ahp', _('Alternative HTTP port'),
@@ -411,7 +404,6 @@ return view.extend({
 				_('EAB (External Account Binding) contains information necessary to bind or map an ACME account to some other account known by the CA.' +
 				'<br/>External account bindings are "used to associate an ACME account with an existing account in a non-ACME system, such as a CA customer database.'));
 			o.default = o.disabled;
-			o.rmempty = false;
 			o.depends('tls_acme', '1');
 			o.modalonly = true;
 
@@ -464,19 +456,16 @@ return view.extend({
 			_('Enable tcp fast open for listener.'));
 		o.default = o.disabled;
 		o.depends({'network': 'udp', '!reverse': true});
-		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'udp_fragment', _('UDP Fragment'),
 			_('Enable UDP fragmentation.'));
 		o.default = o.disabled;
 		o.depends({'network': 'tcp', '!reverse': true});
-		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'sniff_override', _('Override destination'),
 			_('Override the connection destination address with the sniffed domain.'));
-		o.default = o.enabled;
 		o.rmempty = false;
 
 		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
@@ -489,14 +478,12 @@ return view.extend({
 			_('Parse Proxy Protocol in the connection header.'));
 		o.default = o.disabled;
 		o.depends({'network': 'udp', '!reverse': true});
-		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'proxy_protocol_accept_no_header', _('Accept no header'),
 			_('Accept connections without Proxy Protocol header.'));
 		o.default = o.disabled;
 		o.depends('proxy_protocol', '1');
-		o.rmempty = false;
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'network', _('Network'));

@@ -349,7 +349,6 @@ return view.extend({
 		so = ss.option(form.Flag, 'invert', _('Invert'),
 			_('Invert match result.'));
 		so.default = so.disabled;
-		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'network', _('Network'));
@@ -482,12 +481,10 @@ return view.extend({
 
 		so = ss.option(form.Flag, 'disable_cache', _('Disable DNS cache'));
 		so.default = so.disabled;
-		so.rmempty = false;
 
 		so = ss.option(form.Flag, 'disable_cache_expire', _('Disable cache expire'));
 		so.default = so.disabled;
 		so.depends('disable_cache', '0');
-		so.rmempty = false;
 
 		o = s.option(form.SectionValue, '_dns_server', form.GridSection, 'dns_server', _('DNS servers'));
 		o.depends('routing_mode', 'custom');
@@ -608,7 +605,6 @@ return view.extend({
 		so = ss.option(form.Flag, 'invert', _('Invert'),
 			_('Invert match result.'));
 		so.default = so.disabled;
-		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'network', _('Network'));
@@ -726,7 +722,6 @@ return view.extend({
 		so = ss.option(form.Flag, 'dns_disable_cache', _('Disable dns cache'),
 			_('Disable cache and save cache in this query.'));
 		so.default = so.disabled;
-		so.rmempty = false;
 		so.modalonly = true;
 
 		return m.render();
