@@ -1,0 +1,4 @@
+TODO:
+- Redirect/Tproxy rules based on fw4 (and fw3?)
+- Rewrite existing lua scripts into ucode (?)
+- Any other improvements
