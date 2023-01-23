@@ -48,18 +48,17 @@ start_service() {
 	local routing_mode
 	config_get routing_mode "config" "routing_mode" "bypass_mainland_china"
 
-	local main_node="nil"
-	local default_outbound="nil"
+	local outbound_node
 	if [ "$routing_mode" != "custom" ]; then
-		config_get main_node "config" "main_node" "nil"
+		config_get outbound_node "config" "main_node" "nil"
 	else
-		config_get default_outbound "routing" "default_outbound" "nil"
+		config_get outbound_node "routing" "default_outbound" "nil"
 	fi
 
 	local server_enabled
 	config_get_bool server_enabled "server" "enabled" "0"
 
-	if [ "$main_node" = "nil" ] && [ "$default_outbound" = "nil" ] && [ "$server_enabled" = "0" ]; then
+	if [ "$outbound_node" = "nil" ] && [ "$server_enabled" = "0" ]; then
 		return 1
 	fi
 
@@ -78,7 +77,7 @@ start_service() {
 		exit 1
 	fi
 
-	if [ "$main_node" != "nil" ] || [ "$default_outbound" != "nil" ]; then
+	if [ "$outbound_node" != "nil" ]; then
 		# Auto update
 		local auto_update auto_update_time
 		config_get_bool auto_update "subscription" "auto_update" "0"
@@ -112,7 +111,7 @@ start_service() {
 
 	# Set firewall
 	local firewall_configured
-	if [ "$main_node" != "nil" ] || [ "$default_outbound" != "nil" ]; then
+	if [ "$outbound_node" != "nil" ]; then
 		firewall_configured=1
 		procd_open_data
 
