@@ -256,9 +256,9 @@ local function parse_uri(uri)
 			}
 		elseif uri[1] == "ssr" then
 			-- https://coderschool.cn/2498.html
-			uri = b64decode(uri[2]):split("/")
+			uri = b64decode(uri[2]):split("/?")
 			local userinfo = uri[1]:split(":")
-			local params = URL.parseQuery(uri[2]:gsub("^\?", ""))
+			local params = URL.parseQuery(uri[2])
 
 			if not sing_features.with_shadowsocksr then
 				log(translatef("Skipping unsupported %s node: %s.", "ShadowsocksR", b64decode(params.remarks) or userinfo[1]))
