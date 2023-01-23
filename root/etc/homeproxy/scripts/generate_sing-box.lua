@@ -362,11 +362,11 @@ if notEmpty(main_node) or notEmpty(default_outbound) then
 		type = "tun",
 		tag = "tun-in",
 
-		interface_name = "emortal-singbox",
+		interface_name = "singtun0",
 		inet4_address = "172.19.0.1/30",
 		inet6_address = "fdfe:dcba:9876::1/126",
 		mtu = 9000,
-		auto_route = true,
+		auto_route = false,
 		endpoint_independent_nat = (endpoint_independent_nat == "1") or nil,
 		stack = tcpip_stack,
 		sniff = true,
