@@ -88,12 +88,11 @@ start_service() {
 
 		ip -6 route replace default dev "$TUNNAME" table 100 2>"/dev/null"
 		ip -6 rule add fwmark 0x64 lookup 100 2>"/dev/null"
-
-		# TODO: add support for iptables based fw3
-		if [ -n "$FW4" ]; then
-			utpl -S "$HP_DIR/scripts/firewall_nftables.uc" > "$RUN_DIR/fw4.nft"
-			fw4 reload >"/dev/null" 2>&1
-		fi
+	fi
+	# TODO: add support for iptables based fw3
+	if [ -n "$FW4" ]; then
+		utpl -S "$HP_DIR/scripts/firewall_nftables.uc" > "$RUN_DIR/fw4.nft"
+		fw4 reload >"/dev/null" 2>&1
 	fi
 
 	procd_open_instance "sing-box"
@@ -114,7 +113,7 @@ start_service() {
 
 stop_service() {
 	sed -i "/$CONF/d" "/etc/crontabs/root" 2>"/dev/null"
-	/etc/init.d/cron restart
+	/etc/init.d/cron restart >"/dev/null" 2>&1
 
 	# Setup firewall
 	ip link set "$TUNNAME" down 2>"/dev/null"
@@ -135,6 +134,8 @@ stop_service() {
 			nft flush set inet fw4 "$i" 2>"/dev/null"
 			nft delete set inet fw4 "$i" 2>"/dev/null"
 		done
+
+		echo > "$RUN_DIR/fw4.nft"
 		fw4 reload >"/dev/null" 2>&1
 	fi
 
