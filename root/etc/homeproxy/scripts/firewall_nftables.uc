@@ -4,6 +4,7 @@
 {%
 	/* Common var start */
 	const tunname = 'singtun0';
+	const proxy_mark = '0x64';
 	/* Common var end */
 
 	/* UCI config start */
@@ -105,7 +106,7 @@ chain homeproxy_mangle_output {
 	meta l4proto { tcp, udp } iifname {{ tunname }} counter return
 	ip daddr @homeproxy_localaddr_v4 counter return
 	ip6 daddr @homeproxy_localaddr_v6 counter return
-	meta l4proto { tcp, udp } th dport { 0-65535 } mark set 0x64
+	meta l4proto { tcp, udp } th dport { 0-65535 } mark set {{ proxy_mark }}
 }
 
 chain mangle_prerouting {

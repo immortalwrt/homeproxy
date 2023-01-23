@@ -17,6 +17,8 @@ RUN_DIR="/var/run/homeproxy"
 LOG_PATH="$RUN_DIR/homeproxy.log"
 DNSMASQ_DIR="/tmp/dnsmasq.d"
 
+IP_TABLE="100"
+IP_FWMARK="0x64"
 FW4="$(command -v fw4)"
 
 log() {
@@ -83,11 +85,11 @@ start_service() {
 		ip tuntap add mode tun user root name "$TUNNAME" 2>"/dev/null"
 		ip link set "$TUNNAME" up 2>"/dev/null"
 
-		ip route replace default dev "$TUNNAME" table 100 2>"/dev/null"
-		ip rule add fwmark 0x64 lookup 100 2>"/dev/null"
+		ip route replace default dev "$TUNNAME" table "$IP_TABLE" 2>"/dev/null"
+		ip rule add fwmark "$IP_FWMARK" lookup "$IP_TABLE" 2>"/dev/null"
 
-		ip -6 route replace default dev "$TUNNAME" table 100 2>"/dev/null"
-		ip -6 rule add fwmark 0x64 lookup 100 2>"/dev/null"
+		ip -6 route replace default dev "$TUNNAME" table "$IP_TABLE" 2>"/dev/null"
+		ip -6 rule add fwmark "$IP_FWMARK" lookup "$IP_TABLE" 2>"/dev/null"
 	fi
 	# TODO: add support for iptables based fw3
 	if [ -n "$FW4" ]; then
@@ -119,11 +121,11 @@ stop_service() {
 	ip link set "$TUNNAME" down 2>"/dev/null"
 	ip tuntap del mode tun name "$TUNNAME" 2>"/dev/null"
 
-	ip route del default dev "$TUNNAME" table 100 2>"/dev/null"
-	ip rule del fwmark 0x64 table 100 2>"/dev/null"
+	ip route del default dev "$TUNNAME" table "$IP_TABLE" 2>"/dev/null"
+	ip rule del fwmark "$IP_FWMARK" table "$IP_TABLE" 2>"/dev/null"
 
-	ip -6 route del default dev "$TUNNAME" table 100 2>"/dev/null"
-	ip -6 rule del fwmark 0x64 table 100 2>"/dev/null"
+	ip -6 route del default dev "$TUNNAME" table "$IP_TABLE" 2>"/dev/null"
+	ip -6 rule del fwmark "$IP_FWMARK" table "$IP_TABLE" 2>"/dev/null"
 	# TODO: add support for iptables based fw3
 	if [ -n "$FW4" ]; then
 		for i in "homeproxy_mangle_output"; do
