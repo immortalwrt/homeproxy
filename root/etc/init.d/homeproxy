@@ -93,7 +93,7 @@ start_service() {
 	fi
 	# TODO: add support for iptables based fw3
 	if [ -n "$FW4" ]; then
-		utpl -S "$HP_DIR/scripts/firewall_nftables.uc" > "$RUN_DIR/fw4.nft"
+		utpl -S "$HP_DIR/scripts/firewall_nftables.ut" > "$RUN_DIR/fw4.nft"
 		fw4 reload >"/dev/null" 2>&1
 	fi
 
