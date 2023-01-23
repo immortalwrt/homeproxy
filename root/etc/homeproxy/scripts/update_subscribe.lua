@@ -152,9 +152,10 @@ end
 -- Log start
 nixio.fs.mkdirr("/var/run/homeproxy")
 
-local logfile = io.open("/var/run/homeproxy/homeproxy.log", "a")
 local function log(...)
+	local logfile = io.open("/var/run/homeproxy/homeproxy.log", "a")
 	logfile:write(os.date("%Y-%m-%d %H:%M:%S [SUBSCRIBE] ") .. table.concat({...}, " ") .. "\n")
+	logfile:close()
 end
 -- Log end
 
@@ -476,7 +477,6 @@ local function main()
 			sysinit.start(uciconfig)
 		end
 
-		logfile:close()
 		return false
 	end
 
@@ -538,7 +538,6 @@ local function main()
 
 	log(translatef("%s nodes added, %s removed.", added, removed))
 	log(translate("Successfully updated subscriptions."))
-	logfile:close()
 end
 
 if notEmpty(subscription_urls) then
@@ -550,7 +549,5 @@ if notEmpty(subscription_urls) then
 		log(translate("Reloading service..."))
 		sysinit.stop(uciconfig)
 		sysinit.start(uciconfig)
-
-		logfile:close()
 	end)
 end
