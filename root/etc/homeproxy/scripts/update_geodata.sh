@@ -5,10 +5,10 @@
 
 NAME="homeproxy"
 
-GEODATA_DIR="/etc/$NAME/resources"
+RESOURCES_DIR="/etc/$NAME/resources"
 GEOIP_REPO="1715173329/sing-geoip"
 GEOSITE_REPO="1715173329/sing-geosite"
-mkdir -p "$GEODATA_DIR"
+mkdir -p "$RESOURCES_DIR"
 
 RUN_DIR="/var/run/$NAME"
 LOG_PATH="$RUN_DIR/$NAME.log"
@@ -39,7 +39,7 @@ check_update() {
 		return 1
 	fi
 
-	local_geodata_ver="$(cat "$GEODATA_DIR/$geotype.db.ver" 2>"/dev/null" || echo "NOT FOUND")"
+	local_geodata_ver="$(cat "$RESOURCES_DIR/$geotype.db.ver" 2>"/dev/null" || echo "NOT FOUND")"
 	if [ "$local_geodata_ver" = "$geodata_ver" ]; then
 		log "[$geotypeupper] Current version: $geodata_ver."
 		log "[$geotypeupper] You're already at the latest version."
@@ -53,8 +53,8 @@ check_update() {
 			geodata_hash="$(curl --connect-timeout 5 -fsSL "https://github.com/$georepo/releases/download/$geodata_ver/$geotype.db.sha256sum")"; then
 		[ -z "$geodata_hash" ] || geodata_hash="$(echo "$geodata_hash" | awk '{print $1}')"
 		if validate_sha256sum "$RUN_DIR/$geotype.db" "$geodata_hash"; then
-			mv -f "$RUN_DIR/$geotype.db" "$GEODATA_DIR/$geotype.db"
-			echo -e "$geodata_ver" > "$GEODATA_DIR/$geotype.db.ver"
+			mv -f "$RUN_DIR/$geotype.db" "$RESOURCES_DIR/$geotype.db"
+			echo -e "$geodata_ver" > "$RESOURCES_DIR/$geotype.db.ver"
 			log "[$geotypeupper] Successfully updated."
 			return 0
 		fi
@@ -88,10 +88,10 @@ validate_sha256sum() {
 case "$1" in
 "get_version")
 	for i in "geoip" "geosite"; do
-		if [ ! -s "$GEODATA_DIR/$i.db.ver" ]; then
+		if [ ! -s "$RESOURCES_DIR/$i.db.ver" ]; then
 			info="${info:+$info<br/>}<strong style=\"color:red\">$(to_upper "$i"): NOT FOUND</strong>"
 		else
-			info="${info:+$info<br/>}<strong style=\"color:green\">$(to_upper "$i"): $(cat $GEODATA_DIR/$i.db.ver)</strong>"
+			info="${info:+$info<br/>}<strong style=\"color:green\">$(to_upper "$i"): $(cat $RESOURCES_DIR/$i.db.ver)</strong>"
 		fi
 	done
 	echo -e "$info"
@@ -105,7 +105,7 @@ case "$1" in
 	ret2="$?"
 
 	if [ "$2" = "update_subscription" ]; then
-		lua "$GEODATA_DIR/../scripts/update_subscribe.lua"
+		lua "$RESOURCES_DIR/../scripts/update_subscribe.lua"
 	fi
 
 	rm -f "$LOCK"

@@ -358,7 +358,14 @@ end
 -- Inbound start
 config.inbounds = {}
 if notEmpty(main_node) or notEmpty(default_outbound) then
-	config.inbounds[1] = {
+	config.inbounds[#config.inbounds+1] = {
+		type = "direct",
+		tag = "dns-in",
+		listen = "::",
+		listen_port = 5333
+	}
+
+	config.inbounds[#config.inbounds+1] = {
 		type = "tun",
 		tag = "tun-in",
 
@@ -524,6 +531,10 @@ if notEmpty(main_node) or notEmpty(default_outbound) then
 		},
 		rules = {
 			{
+				inbound = "dns-in",
+				outbound = "dns-out"
+			},
+			{
 				protocol = "dns",
 				outbound = "dns-out"
 			}
@@ -536,7 +547,7 @@ end
 if notEmpty(main_node) then
 	-- Routing ports
 	if parse_port(routing_port) then
-		config.route.rules[2] = {
+		config.route.rules[#config.route.rules+1] = {
 			port = parse_port(routing_port),
 			outbound = "direct-out",
 			invert = true
@@ -583,7 +594,7 @@ if notEmpty(main_node) then
 elseif notEmpty(default_outbound) then
 	uci:foreach(uciconfig, uciroutingrule, function(cfg)
 		if cfg.enabled == "1" then
-			config.route.rules[#config.route.rules + 1] = {
+			config.route.rules[#config.route.rules+1] = {
 				invert = cfg.invert,
 				ip_version = cfg.ip_version,
 				network = cfg.network,
