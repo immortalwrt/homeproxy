@@ -1,4 +1,6 @@
 TODO:
-- Redirect/Tproxy rules based on fw4 (and fw3?)
-- Rewrite existing lua scripts into ucode (?)
+- Support ACL for regular mode
+- UDP does not work perfectly, maybe ask sing-box?
+- Rewrite existing lua scripts into ucode
 - Any other improvements
+- fw3 support, maybe never
