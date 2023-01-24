@@ -39,6 +39,7 @@ local JSON = { parse = luci.jsonc.parse, dump = luci.jsonc.stringify }
 local uci = luci.model.uci.cursor()
 
 local uciconfig = "homeproxy"
+local uciinfra = "infra"
 local ucimain = "config"
 
 local ucidnssetting = "dns"
@@ -63,17 +64,20 @@ local dns_server = uci:get(uciconfig, ucimain, "dns_server")
 if isEmpty(dns_server) or dns_server == "wan" then
 	dns_server = wan_dns
 end
+local dns_port = uci:get(uciconfig, uciinfra, "dns_port") or "5333"
 
 local enable_server = uci:get(uciconfig, uciserver, "enabled") or "0"
 
-local main_node, main_udp_node, default_outbound
+local main_node, main_udp_node, default_outbound, default_interface
 local dns_strategy, dns_default_server, dns_disable_cache, dns_disable_cache_expire
-local sniff_override, default_interface
-local tcpip_stack = "gvisor"
-local endpoint_independent_nat = "1"
+local redirect_port, tproxy_port, self_mark
+local sniff_override, tun_name, tcpip_stack, endpoint_independent_nat
 if routing_mode ~= "custom" then
 	main_node = uci:get(uciconfig, ucimain, "main_node") or "nil"
 	main_udp_node = uci:get(uciconfig, ucimain, "main_udp_node") or "nil"
+	redirect_port = uci:get(uciconfig, uciinfra, "redirect_port") or "5331"
+	tproxy_port = uci:get(uciconfig, uciinfra, "tproxy_port") or "5332"
+	self_mark = uci:get(uciconfig, uciinfra, "self_mark") or "100"
 else
 	-- DNS settings
 	dns_strategy = uci:get(uciconfig, ucidnssetting, "dns_strategy")
@@ -82,10 +86,11 @@ else
 	dns_disable_cache_expire = uci:get(uciconfig, ucidnssetting, "disable_cache_expire")
 
 	-- Routing settings
-	sniff_override = uci:get(uciconfig, uciroutingsetting, "sniff_override")
-	default_outbound = uci:get(uciconfig, uciroutingsetting, "default_outbound")
+	default_outbound = uci:get(uciconfig, uciroutingsetting, "default_outbound") or "nil"
 	default_interface = uci:get(uciconfig, uciroutingsetting, "default_interface")
-	tcpip_stack = uci:get(uciconfig, uciroutingsetting, "tcpip_stack")
+	sniff_override = uci:get(uciconfig, uciroutingsetting, "sniff_override")
+	tun_name = uci:get(uciconfig, uciinfra, "tun_name") or "singtun0"
+	tcpip_stack = uci:get(uciconfig, uciroutingsetting, "tcpip_stack") or "gvisor"
 	endpoint_independent_nat = uci:get(uciconfig, uciroutingsetting, "endpoint_independent_nat")
 end
 
@@ -362,24 +367,49 @@ if notEmpty(main_node) or notEmpty(default_outbound) then
 		type = "direct",
 		tag = "dns-in",
 		listen = "::",
-		listen_port = 5333
+		listen_port = tonumber(dns_port)
 	}
 
-	config.inbounds[#config.inbounds+1] = {
-		type = "tun",
-		tag = "tun-in",
+	if (routing_mode ~= "custom") then
+		config.inbounds[#config.inbounds+1] = {
+			type = "redirect",
+			tag = "redirect-in",
 
-		interface_name = "singtun0",
-		inet4_address = "172.19.0.1/30",
-		inet6_address = "fdfe:dcba:9876::1/126",
-		mtu = 9000,
-		auto_route = false,
-		endpoint_independent_nat = (endpoint_independent_nat == "1") or nil,
-		stack = tcpip_stack,
-		sniff = true,
-		sniff_override_destination = (sniff_override == "1"),
-		domain_strategy = dns_strategy
-	}
+			listen = "::",
+			listen_port = tonumber(redirect_port),
+			sniff = true,
+			sniff_override_destination = true
+		}
+
+		if notEmpty(main_udp_node) then
+			config.inbounds[#config.inbounds+1] = {
+				type = "tproxy",
+				tag = "tproxy-in",
+
+				listen = "::",
+				listen_port = tonumber(tproxy_port),
+				network = "udp",
+				sniff = true,
+				sniff_override_destination = true
+			}
+		end
+	else
+		config.inbounds[#config.inbounds+1] = {
+			type = "tun",
+			tag = "tun-in",
+
+			interface_name = tun_name,
+			inet4_address = "172.19.0.1/30",
+			inet6_address = "fdfe:dcba:9876::1/126",
+			mtu = 9000,
+			auto_route = false,
+			endpoint_independent_nat = (endpoint_independent_nat == "1") or nil,
+			stack = tcpip_stack,
+			sniff = true,
+			sniff_override_destination = (sniff_override == "1"),
+			domain_strategy = dns_strategy
+		}
+	end
 end
 if enable_server == "1" then
 	uci:foreach(uciconfig, uciserver, function(cfg)
@@ -489,14 +519,18 @@ config.outbounds = {
 
 -- Main outbounds
 if notEmpty(main_node) then
+	config.outbounds[1].routing_mark = tonumber(self_mark)
+
 	local main_node_cfg = uci:get_all(uciconfig, main_node) or {}
-	config.outbounds[4] = generate_outbound(main_node_cfg)
-	config.outbounds[4].tag = "main-out"
+	config.outbounds[#config.outbounds+1] = generate_outbound(main_node_cfg)
+	config.outbounds[#config.outbounds].routing_mark = tonumber(self_mark)
+	config.outbounds[#config.outbounds].tag = "main-out"
 
 	if notEmpty(main_udp_node) and main_udp_node ~= "same" and main_udp_node ~= main_node then
 		local main_udp_node_cfg = uci:get_all(uciconfig, main_udp_node) or {}
-		config.outbounds[5] = generate_outbound(main_udp_node_cfg)
-		config.outbounds[5].tag = "main-udp-out"
+		config.outbounds[#config.outbounds+1] = generate_outbound(main_udp_node_cfg)
+		config.outbounds[#config.outbounds].routing_mark = tonumber(self_mark)
+		config.outbounds[#config.outbounds].tag = "main-udp-out"
 	end
 end
 

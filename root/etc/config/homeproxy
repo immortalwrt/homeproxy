@@ -1,4 +1,15 @@
 
+config homeproxy 'infra'
+	option 'redirect_port' '5331'
+	option 'tproxy_port' '5332'
+	option 'dns_port' '5333'
+	option 'tun_name' 'singtun0'
+
+	option 'table_mark' '100'
+	option 'self_mark' '100'
+	option 'tproxy_mark' '101'
+	option 'tun_mark' '102'
+
 config homeproxy 'config'
 	option main_node 'nil'
 	option main_udp_node 'same'

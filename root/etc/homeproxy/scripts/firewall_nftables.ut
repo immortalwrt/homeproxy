@@ -1,12 +1,6 @@
 #!/usr/bin/utpl -S
 #!/usr/sbin/nft -f
-
 {%
-	/* Common var start */
-	const tunname = 'singtun0';
-	const proxy_mark = '0x64';
-	/* Common var end */
-
 	/* UCI config start */
 	import { cursor } from 'uci';
 
@@ -15,14 +9,30 @@
 	uci.load(cfgname);
 
 	/* Client config start */
-	let routing_mode = uci.get(cfgname, 'config', 'routing_mode') || 'bypass_mainland_china';
+	const table_mark = uci.get(cfgname, 'infra', 'table_mark') || '100';
+	const routing_mode = uci.get(cfgname, 'config', 'routing_mode') || 'bypass_mainland_china';
+
 	let outbound_node, outbound_udp_node;
+	let self_mark, redirect_port, tproxy_port, tproxy_mark;
+	let tun_name, tun_mark;
+
 	if (routing_mode !== 'custom') {
 		outbound_node = uci.get(cfgname, 'config', 'main_node') || 'nil';
-		if (outbound_node !== 'nil')
+		if (outbound_node !== 'nil') {
+			self_mark = uci.get(cfgname, 'infra', 'self_mark') || '100';
+			redirect_port = uci.get(cfgname, 'infra', 'redirect_port') || '5331';
+
 			outbound_udp_node = uci.get(cfgname, 'config', 'main_udp_node') || 'nil';
-	} else
+			if (outbound_udp_node !== 'nil') {
+				tproxy_port = uci.get(cfgname, 'infra', 'tproxy_port') || '5332';
+				tproxy_mark = uci.get(cfgname, 'infra', 'tproxy_mark') || '101';
+			}
+		}
+	} else {
+		tun_name = uci.get(cfgname, 'infra', 'tun_name') || 'singtun0';
+		tun_mark = uci.get(cfgname, 'infra', 'tun_mark') || '102';
 		outbound_node = uci.get(cfgname, 'routing', 'default_outbound') || 'nil';
+	}
 	/* Client config end */
 
 	/* Server config start */
@@ -34,6 +44,7 @@
 	/* UCI config end */
 %}
 
+{# Reserved addresses #}
 {% if (outbound_node !== 'nil'): %}
 set homeproxy_localaddr_v4 {
 	type ipv4_addr
@@ -60,6 +71,7 @@ set homeproxy_localaddr_v4 {
 		240.0.0.0/4
 	}
 }
+
 set homeproxy_localaddr_v6 {
 	type ipv6_addr
 	flags interval
@@ -82,40 +94,77 @@ set homeproxy_localaddr_v6 {
 }
 {% endif %}
 
+{# Regular mode #}
 {%
-if (auto_firewall === '1') {
-	print('chain input_wan {', '\n');
+if (outbound_node !== 'nil' && routing_mode !== 'custom') {
+	/* TCP redirect start */
+	/* DSTNAT rule */
+	print('chain dstnat {', '\n');
+	print('	meta nfproto { ipv4, ipv6 } meta l4proto tcp jump homeproxy_redirect', '\n');
+	print('}', '\n');
 
-	uci.foreach(cfgname, 'server', (s) => {
-		if (s.enabled !== '1')
-			return;
+	/* Output rule */
+	print('\n', 'chain homeproxy_outredir {', '\n');
+	print('	type nat hook output priority filter -105; policy accept', '\n');
+	print('	meta nfproto { ipv4, ipv6 } meta l4proto tcp jump homeproxy_redirect', '\n');
+	print('}', '\n');
 
-		let proto = s.network || '{ tcp, udp }';
-		printf('	meta l4proto %s th dport %s counter accept comment "Allow-access-%s-%s-at-%s"\n',
-			proto, s.port, cfgname, s['.name'], s.port);
-	});
+	/* Redirect rule */
+	print('\n', 'chain homeproxy_redirect {', '\n');
+
+	/* Avoid loop */
+	printf('	meta mark %s counter return\n', self_mark);
+
+	/* Bypass reserved address */
+	print('	ip daddr @homeproxy_localaddr_v4 counter return', '\n');
+	print('	ip6 daddr @homeproxy_localaddr_v6 counter return', '\n');
+
+	/* Redirect traffic */
+	printf('	meta l4proto tcp counter redirect to :%s\n', redirect_port);
 
 	print('}', '\n');
+	/* TCP redirect end */
+
+	if (outbound_udp_node !== 'nil') {
+		/* UDP tproxy start */
+		print('\n', 'chain homeproxy_mangle {', '\n');
+
+		/* Avoid loop */
+		printf('	meta mark %s counter return\n', self_mark);
+
+		/* Bypass reserved address */
+		print('	ip daddr @homeproxy_localaddr_v4 counter return', '\n');
+		print('	ip6 daddr @homeproxy_localaddr_v6 counter return', '\n');
+
+		printf('	meta l4proto udp mark set %s tproxy ip to 127.0.0.1:%s counter accept\n',
+			tproxy_mark, tproxy_port);
+		printf('	meta l4proto udp mark set %s tproxy ip6 to [::1]:%s counter accept\n',
+			tproxy_mark, tproxy_port);
+
+		print('}', '\n');
+
+		print('\n', 'chain mangle_prerouting {', '\n');
+		print('	meta l4proto udp counter jump homeproxy_mangle', '\n');
+		print('}', '\n');
+		/* UDP tproxy end */
+	}
 }
 %}
 
-{% if (outbound_node !== 'nil'): %}
-chain forward {
-	meta l4proto { tcp, udp } oifname {{ tunname }} counter accept comment "Forward HomeProxy TUN"
-}
-
-chain homeproxy_mangle_output {
-	meta l4proto { tcp, udp } iifname {{ tunname }} counter return
+{# TUN mode #}
+{% if (outbound_node !== 'nil' && routing_mode === 'custom'): %}
+chain homeproxy_mangle {
+	meta l4proto { tcp, udp } iifname {{ tun_name }} counter return
 	ip daddr @homeproxy_localaddr_v4 counter return
 	ip6 daddr @homeproxy_localaddr_v6 counter return
-	meta l4proto { tcp, udp } th dport { 0-65535 } mark set {{ proxy_mark }}
+	meta l4proto { tcp, udp } counter mark set {{ tun_mark }}
 }
 
 chain mangle_prerouting {
-	meta nfproto { ipv4, ipv6 } jump homeproxy_mangle_output
+	meta nfproto { ipv4, ipv6 } jump homeproxy_mangle
 }
 
 chain mangle_output {
-	meta nfproto { ipv4, ipv6 } jump homeproxy_mangle_output
+	meta nfproto { ipv4, ipv6 } jump homeproxy_mangle
 }
 {% endif %}

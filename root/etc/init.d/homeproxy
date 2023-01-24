@@ -10,19 +10,37 @@ STOP=10
 
 CONF="homeproxy"
 PROG="/usr/bin/sing-box"
-TUNNAME="singtun0"
 
 HP_DIR="/etc/homeproxy"
 RUN_DIR="/var/run/homeproxy"
 LOG_PATH="$RUN_DIR/homeproxy.log"
 DNSMASQ_DIR="/tmp/dnsmasq.d"
 
-IP_TABLE="100"
-IP_FWMARK="0x64"
 FW4="$(command -v fw4)"
 
 log() {
 	echo -e "$(date "+%Y-%m-%d %H:%M:%S") [DAEMON] $*" >> "$LOG_PATH"
+}
+
+setup_server_firewall() {
+	local cfg="$1"
+
+	local enabled
+	config_get_bool enabled "$cfg" "enabled"
+	[ "$enabled" = "1" ] || return 1
+
+	local port network
+	config_get port "$cfg" "port"
+	config_get network "$cfg" "network"
+
+	json_add_object ""
+	json_add_string type "rule"
+	json_add_string name "Allow-access-$CONF-$cfg-on-$port"
+	json_add_string src "*"
+	json_add_string dest_port "$port"
+	[ -z "$network" ] || json_add_string proto "$network"
+	json_add_string target "ACCEPT"
+	json_close_object
 }
 
 start_service() {
@@ -73,28 +91,50 @@ start_service() {
 		/etc/init.d/cron restart
 
 		# Hijack DNS
+		local dns_port
+		config_get dns_port "infra" "dns_port" "5333"
 		mkdir -p "$DNSMASQ_DIR"
 		cat <<-EOF >> "$DNSMASQ_DIR/dnsmasq-homeproxy.conf"
 			no-poll
 			no-resolv
-			server=127.0.0.1#5333
+			server=127.0.0.1#$dns_port
 		EOF
 		/etc/init.d/dnsmasq restart >"/dev/null" 2>&1
 
 		# Setup firewall
-		ip tuntap add mode tun user root name "$TUNNAME" 2>"/dev/null"
-		ip link set "$TUNNAME" up 2>"/dev/null"
+		local table_mark
+		config_get table_mark "infra" "table_mark" "100"
+		if [ "$routing_mode" != "custom" ]; then
+			local outbound_udp_node
+			config_get outbound_udp_node "config" "main_udp_node" "nil"
+			if [ "$outbound_udp_node" != "nil" ]; then
+				local tproxy_mark
+				config_get tproxy_mark "infra" "tproxy_mark" "101"
 
-		ip route replace default dev "$TUNNAME" table "$IP_TABLE" 2>"/dev/null"
-		ip rule add fwmark "$IP_FWMARK" lookup "$IP_TABLE" 2>"/dev/null"
+				ip rule add fwmark "$tproxy_mark" table "$table_mark"
+				ip route add local 0.0.0.0/0 dev lo table "$table_mark"
 
-		ip -6 route replace default dev "$TUNNAME" table "$IP_TABLE" 2>"/dev/null"
-		ip -6 rule add fwmark "$IP_FWMARK" lookup "$IP_TABLE" 2>"/dev/null"
+				ip -6 rule add fwmark "$tproxy_mark" table "$table_mark"
+				ip -6 route add local ::/0 dev lo table "$table_mark"
+			fi
+		else
+			local tun_name tun_mark
+			config_get tun_name "infra" "tun_name" "singtun0"
+			config_get tun_mark "infra" "tun_mark" "102"
+
+			ip tuntap add mode tun user root name "$tun_name"
+			ip link set "$tun_name" up
+
+			ip route replace default dev "$tun_name" table "$table_mark"
+			ip rule add fwmark "$tun_mark" lookup "$table_mark"
+
+			ip -6 route replace default dev "$tun_name" table "$table_mark"
+			ip -6 rule add fwmark "$tun_mark" lookup "$table_mark"
+		fi
 	fi
 	# TODO: add support for iptables based fw3
 	if [ -n "$FW4" ]; then
 		utpl -S "$HP_DIR/scripts/firewall_nftables.ut" > "$RUN_DIR/fw4.nft"
-		fw4 reload >"/dev/null" 2>&1
 	fi
 
 	procd_open_instance "sing-box"
@@ -107,28 +147,79 @@ start_service() {
 	procd_set_param stderr 1
 	procd_set_param respawn
 
+	# Setup firewall
+	local firewall_configured
+	if [ "$outbound_node" != "nil" ]; then
+		firewall_configured=1
+		procd_open_data
+
+		json_add_array firewall
+		json_add_object ""
+		json_add_string type "rule"
+		json_add_string name "Allow-Forward-HomeProxy-TUN"
+		json_add_string src "*"
+		json_add_string dest "*"
+		json_add_string direction "out"
+		json_add_string device "$tun_name"
+		json_add_string proto "all"
+		json_add_string target "ACCEPT"
+		json_close_object
+	fi
+	local server_auto_firewall
+	config_get_bool server_auto_firewall "server" "auto_firewall" "0"
+	if [ "$server_auto_firewall" = "1" ]; then
+		[ -n "$firewall_configured" ] || {
+			firewall_configured=1
+			procd_open_data
+			json_add_array firewall
+		}
+		config_foreach setup_server_firewall "server"
+	fi
+	[ -z "$firewall_configured" ] || {
+		json_close_array
+		procd_close_data
+	}
+
 	procd_close_instance
 
 	echo > "$RUN_DIR/sing-box.log"
 	log "$(sing-box version | awk 'NR==1{print $1,$3}') started."
 }
 
-stop_service() {
+service_started() {
+	procd_set_config_changed firewall
+}
+
+service_stopped() {
 	sed -i "/$CONF/d" "/etc/crontabs/root" 2>"/dev/null"
 	/etc/init.d/cron restart >"/dev/null" 2>&1
 
 	# Setup firewall
-	ip link set "$TUNNAME" down 2>"/dev/null"
-	ip tuntap del mode tun name "$TUNNAME" 2>"/dev/null"
+	config_load "$CONF"
+	local table_mark tproxy_mark tun_mark tun_name
+	config_get table_mark "infra" "table_mark" "100"
+	config_get tproxy_mark "infra" "tproxy_mark" "101"
+	config_get tun_mark "infra" "tun_mark" "102"
+	config_get tun_name "infra" "tun_name" "singtun0"
 
-	ip route del default dev "$TUNNAME" table "$IP_TABLE" 2>"/dev/null"
-	ip rule del fwmark "$IP_FWMARK" table "$IP_TABLE" 2>"/dev/null"
+	# Tproxy
+	ip rule del fwmark "$tproxy_mark" table "$table_mark" 2>"/dev/null"
+	ip route del local 0.0.0.0/0 dev lo table "$table_mark" 2>"/dev/null"
+	ip -6 rule del fwmark "$tproxy_mark" table "$table_mark" 2>"/dev/null"
+	ip -6 route del local ::/0 dev lo table "$table_mark" 2>"/dev/null"
 
-	ip -6 route del default dev "$TUNNAME" table "$IP_TABLE" 2>"/dev/null"
-	ip -6 rule del fwmark "$IP_FWMARK" table "$IP_TABLE" 2>"/dev/null"
+	# TUN
+	ip link set "$tun_name" down 2>"/dev/null"
+	ip tuntap del mode tun name "$tun_name" 2>"/dev/null"
+
+	ip route del default dev "$tun_name" table "$table_mark" 2>"/dev/null"
+	ip rule del fwmark "$tun_mark" table "$table_mark" 2>"/dev/null"
+
+	ip -6 route del default dev "$tun_name" table "$table_mark" 2>"/dev/null"
+	ip -6 rule del fwmark "$tun_mark" table "$table_mark" 2>"/dev/null"
 	# TODO: add support for iptables based fw3
 	if [ -n "$FW4" ]; then
-		for i in "homeproxy_mangle_output"; do
+		for i in "homeproxy_outredir" "homeproxy_redirect" "homeproxy_mangle"; do
 			nft flush chain inet fw4 "$i" 2>"/dev/null"
 			nft delete chain inet fw4 "$i" 2>"/dev/null"
 		done
@@ -138,8 +229,8 @@ stop_service() {
 		done
 
 		echo > "$RUN_DIR/fw4.nft"
-		fw4 reload >"/dev/null" 2>&1
 	fi
+	procd_set_config_changed firewall
 
 	# Remove DNS hijack
 	rm -f "$DNSMASQ_DIR/dnsmasq-homeproxy.conf"
