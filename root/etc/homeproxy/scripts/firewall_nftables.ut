@@ -16,10 +16,12 @@
 
 	/* Client config start */
 	let routing_mode = uci.get(cfgname, 'config', 'routing_mode') || 'bypass_mainland_china';
-	let outbound_node;
-	if (routing_mode !== 'custom')
+	let outbound_node, outbound_udp_node;
+	if (routing_mode !== 'custom') {
 		outbound_node = uci.get(cfgname, 'config', 'main_node') || 'nil';
-	else
+		if (outbound_node !== 'nil')
+			outbound_udp_node = uci.get(cfgname, 'config', 'main_udp_node') || 'nil';
+	} else
 		outbound_node = uci.get(cfgname, 'routing', 'default_outbound') || 'nil';
 	/* Client config end */
 
