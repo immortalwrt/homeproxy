@@ -34,18 +34,9 @@
 		outbound_node = uci.get(cfgname, 'routing', 'default_outbound') || 'nil';
 	}
 	/* Client config end */
-
-	/* Server config start */
-	const server_enabled = uci.get(cfgname, 'server', 'enabled');
-	let auto_firewall = '0';
-	if (server_enabled === '1')
-		auto_firewall = uci.get(cfgname, 'server', 'auto_firewall');
-	/* Server config end */
-	/* UCI config end */
 %}
 
 {# Reserved addresses #}
-{% if (outbound_node !== 'nil'): %}
 set homeproxy_localaddr_v4 {
 	type ipv4_addr
 	flags interval
@@ -92,13 +83,12 @@ set homeproxy_localaddr_v6 {
 		ff00::/8
 	}
 }
-{% endif %}
 
 {# Regular mode #}
 {%
-if (outbound_node !== 'nil' && routing_mode !== 'custom') {
+if (routing_mode !== 'custom') {
 	/* TCP redirect start */
-	/* DSTNAT rule */
+	/* DST NAT rule */
 	print('chain dstnat {', '\n');
 	print('	meta nfproto { ipv4, ipv6 } meta l4proto tcp jump homeproxy_redirect', '\n');
 	print('}', '\n');
@@ -152,7 +142,7 @@ if (outbound_node !== 'nil' && routing_mode !== 'custom') {
 %}
 
 {# TUN mode #}
-{% if (outbound_node !== 'nil' && routing_mode === 'custom'): %}
+{% if (routing_mode === 'custom'): %}
 chain homeproxy_mangle {
 	meta l4proto { tcp, udp } iifname {{ tun_name }} counter return
 	ip daddr @homeproxy_localaddr_v4 counter return

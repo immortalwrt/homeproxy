@@ -131,10 +131,11 @@ start_service() {
 			ip -6 route replace default dev "$tun_name" table "$table_mark"
 			ip -6 rule add fwmark "$tun_mark" lookup "$table_mark"
 		fi
-	fi
-	# TODO: add support for iptables based fw3
-	if [ -n "$FW4" ]; then
-		utpl -S "$HP_DIR/scripts/firewall_nftables.ut" > "$RUN_DIR/fw4.nft"
+
+		# TODO: add support for iptables based fw3
+		if [ -n "$FW4" ]; then
+			utpl -S "$HP_DIR/scripts/firewall_nftables.ut" > "$RUN_DIR/fw4.nft"
+		fi
 	fi
 
 	procd_open_instance "sing-box"
