@@ -6,7 +6,7 @@ if [ -e "$(command -v fw4)" ]; then
 		set firewall.homeproxy=include
 		set firewall.homeproxy.type=nftables
 		set firewall.homeproxy.path="/var/run/homeproxy/fw4.nft"
-		set firewall.homeproxy.position="table-pre"
+		set firewall.homeproxy.position="table-post"
 		commit firewall
 	EOF
 else
