@@ -16,8 +16,6 @@ RUN_DIR="/var/run/homeproxy"
 LOG_PATH="$RUN_DIR/homeproxy.log"
 DNSMASQ_DIR="/tmp/dnsmasq.d"
 
-FW4="$(command -v fw4)"
-
 log() {
 	echo -e "$(date "+%Y-%m-%d %H:%M:%S") [DAEMON] $*" >> "$LOG_PATH"
 }
@@ -132,10 +130,7 @@ start_service() {
 			ip -6 rule add fwmark "$tun_mark" lookup "$table_mark"
 		fi
 
-		# TODO: add support for iptables based fw3
-		if [ -n "$FW4" ]; then
-			utpl -S "$HP_DIR/scripts/firewall_nftables.ut" > "$RUN_DIR/fw4.nft"
-		fi
+		utpl -S "$HP_DIR/scripts/firewall_nftables.ut" > "$RUN_DIR/fw4.nft"
 	fi
 
 	procd_open_instance "sing-box"
@@ -218,19 +213,17 @@ service_stopped() {
 
 	ip -6 route del default dev "$tun_name" table "$table_mark" 2>"/dev/null"
 	ip -6 rule del fwmark "$tun_mark" table "$table_mark" 2>"/dev/null"
-	# TODO: add support for iptables based fw3
-	if [ -n "$FW4" ]; then
-		for i in "homeproxy_outredir" "homeproxy_redirect" "homeproxy_mangle"; do
-			nft flush chain inet fw4 "$i" 2>"/dev/null"
-			nft delete chain inet fw4 "$i" 2>"/dev/null"
-		done
-		for i in "homeproxy_localaddr_v4" "homeproxy_localaddr_v6"; do
-			nft flush set inet fw4 "$i" 2>"/dev/null"
-			nft delete set inet fw4 "$i" 2>"/dev/null"
-		done
 
-		echo > "$RUN_DIR/fw4.nft"
-	fi
+	for i in "homeproxy_outredir" "homeproxy_redirect" "homeproxy_mangle"; do
+		nft flush chain inet fw4 "$i" 2>"/dev/null"
+		nft delete chain inet fw4 "$i" 2>"/dev/null"
+	done
+	for i in "homeproxy_localaddr_v4" "homeproxy_localaddr_v6"; do
+		nft flush set inet fw4 "$i" 2>"/dev/null"
+		nft delete set inet fw4 "$i" 2>"/dev/null"
+	done
+	echo > "$RUN_DIR/fw4.nft"
+
 	procd_set_config_changed firewall
 
 	# Remove DNS hijack

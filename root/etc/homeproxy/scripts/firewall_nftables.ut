@@ -1,7 +1,6 @@
 #!/usr/bin/utpl -S
-#!/usr/sbin/nft -f
 
-{%
+{%-
 	/* UCI config start */
 	import { cursor } from 'uci';
 
@@ -107,10 +106,9 @@ chain homeproxy_redirect {
 	ip6 daddr @homeproxy_localaddr_v6 counter return
 
 	{% if (routing_port !== 'all'): %}
-	tcp dport { {{ routing_port }} } counter redirect to :{{ redirect_port }}
-	{% else %}
-	meta l4proto tcp counter redirect to :{{ redirect_port }}
+	tcp dport != { {{ routing_port }} } counter return
 	{% endif %}
+	meta l4proto tcp counter redirect to :{{ redirect_port }}
 }
 {% if (outbound_udp_node !== 'nil'): %}
 {# UDP tproxy #}
@@ -120,12 +118,11 @@ chain homeproxy_mangle {
 	ip6 daddr @homeproxy_localaddr_v6 counter return
 
 	{% if (routing_port !== 'all'): %}
-	udp dport { {{ routing_port }} } mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
-	udp dport { {{ routing_port }} } mark set {{ tproxy_mark }} tproxy ip6 to [::1]:{{ tproxy_port }} counter accept
-	{% else %}
+	udp dport != { {{ routing_port }} } counter return
+	udp dport != { {{ routing_port }} } counter return
+	{% endif %}
 	meta l4proto udp mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
 	meta l4proto udp mark set {{ tproxy_mark }} tproxy ip6 to [::1]:{{ tproxy_port }} counter accept
-	{% endif %}
 }
 
 chain mangle_prerouting {
