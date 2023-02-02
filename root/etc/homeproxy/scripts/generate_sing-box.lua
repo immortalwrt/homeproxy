@@ -570,42 +570,27 @@ end
 
 if notEmpty(main_node) then
 	-- Routing rules
-	local routing_geosite, routing_geosite, routing_invert
-	if routing_mode == "bypass_mainland_china" then
-		routing_geosite = { "cn" }
-		routing_geoip = { "cn", "private" }
-		routing_invert = true
-	elseif routing_mode == "proxy_mainland_china" then
-		routing_geosite = { "cn" }
-		routing_geoip = { "cn" }
-	elseif routing_mode == "gfwlist" then
+	local routing_geosite, routing_geosite, final_node
+	if routing_mode == "gfwlist" then
 		routing_geosite = { "gfw" }
 		routing_geoip = { "telegram" }
+		final_node = "direct-out"
+	else
+		final_node = "main-out"
 	end
 
-	-- Main out
-	config.route.rules[#config.route.rules+1] = {
-		geosite = routing_geosite and table.clone(routing_geosite) or nil,
-		geoip = routing_geoip and table.clone(routing_geoip) or nil,
-		outbound = "main-out",
-		invert = routing_invert
-	}
-
 	-- Main UDP out
-	if isEmpty(main_udp_node) then
-		config.route.rules[#config.route.rules].network = "tcp"
-	elseif main_udp_node ~= "same" and main_udp_node ~= main_node then
-		config.route.rules[#config.route.rules].network = "tcp"
+	if notEmpty(main_udp_node) and main_udp_node ~= "same" and main_udp_node ~= main_node then
 		config.route.rules[#config.route.rules+1] = {
 			geosite = routing_geosite,
 			geoip = routing_geoip,
 			network = "udp",
 			outbound = "main-udp-out",
-			invert = routing_invert
 		}
 	end
 
-	config.route.final = "direct-out"
+	-- Main out
+	config.route.final = final_node
 elseif notEmpty(default_outbound) then
 	uci:foreach(uciconfig, uciroutingrule, function(cfg)
 		if cfg.enabled == "1" then

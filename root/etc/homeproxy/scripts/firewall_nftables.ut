@@ -1,6 +1,12 @@
 #!/usr/bin/utpl -S
 
 {%-
+	/* Utilities config start */
+	import { readfile } from 'fs';
+
+	const resources_dir = '/etc/homeproxy/resources';
+	/* Utilities config end */
+
 	/* UCI config start */
 	import { cursor } from 'uci';
 
@@ -38,6 +44,7 @@
 		outbound_node = uci.get(cfgname, 'routing', 'default_outbound') || 'nil';
 	}
 	/* Client config end */
+	/* UCI config end */
 -%}
 
 {# Reserved addresses -#}
@@ -88,6 +95,30 @@ set homeproxy_localaddr_v6 {
 	}
 }
 
+{% if (routing_mode in ['bypass_mainland_china', 'proxy_mainland_china']): -%}
+set homeproxy_mainland_addr_v4 {
+	type ipv4_addr
+	flags interval
+	auto-merge
+	elements = {
+		{% for (let ip4 in split(trim(readfile(resources_dir + '/china.txt')), '\n')): %}
+		{{ ip4 }},
+		{% endfor %}
+	}
+}
+
+set homeproxy_mainland_addr_v6 {
+	type ipv6_addr
+	flags interval
+	auto-merge
+	elements = {
+		{% for (let ip6 in split(trim(readfile(resources_dir + '/china6.txt')), '\n')): %}
+		{{ ip6 }},
+		{% endfor %}
+	}
+}
+{% endif %}
+
 {% if (routing_mode !== 'custom'): %}
 {# Regular mode -#}
 {# TCP redirect -#}
@@ -104,6 +135,13 @@ chain homeproxy_redirect {
 	meta mark {{ self_mark }} counter return
 	ip daddr @homeproxy_localaddr_v4 counter return
 	ip6 daddr @homeproxy_localaddr_v6 counter return
+	{% if (routing_mode === 'bypass_mainland_china'): %}
+	ip daddr @homeproxy_mainland_addr_v4 counter return
+	ip6 daddr @homeproxy_mainland_addr_v6 counter return
+	{% elif (routing_mode === 'proxy_mainland_china'): %}
+	ip daddr != @homeproxy_mainland_addr_v4 counter return
+	ip6 daddr != @homeproxy_mainland_addr_v6 counter return
+	{% endif %}
 
 	{% if (routing_port !== 'all'): %}
 	tcp dport != { {{ routing_port }} } counter return
@@ -116,6 +154,14 @@ chain homeproxy_mangle {
 	meta mark {{ self_mark }} counter return
 	ip daddr @homeproxy_localaddr_v4 counter return
 	ip6 daddr @homeproxy_localaddr_v6 counter return
+	{% if (routing_mode === 'bypass_mainland_china'): %}
+	ip daddr @homeproxy_mainland_addr_v4 counter return
+	ip6 daddr @homeproxy_mainland_addr_v6 counter return
+	udp dport { 80, 443 } counter reject comment "!homeproxy: Fuck you QUIC"
+	{% elif (routing_mode === 'proxy_mainland_china'): %}
+	ip daddr != @homeproxy_mainland_addr_v4 counter return
+	ip6 daddr != @homeproxy_mainland_addr_v6 counter return
+	{% endif %}
 
 	{% if (routing_port !== 'all'): %}
 	udp dport != { {{ routing_port }} } counter return
