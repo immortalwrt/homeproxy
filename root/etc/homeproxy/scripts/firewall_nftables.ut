@@ -1,5 +1,6 @@
 #!/usr/bin/utpl -S
 #!/usr/sbin/nft -f
+
 {%
 	/* UCI config start */
 	import { cursor } from 'uci';
@@ -12,7 +13,7 @@
 	const table_mark = uci.get(cfgname, 'infra', 'table_mark') || '100';
 	const routing_mode = uci.get(cfgname, 'config', 'routing_mode') || 'bypass_mainland_china';
 
-	let outbound_node, outbound_udp_node;
+	let outbound_node, outbound_udp_node, routing_port;
 	let self_mark, redirect_port, tproxy_port, tproxy_mark;
 	let tun_name, tun_mark;
 
@@ -28,13 +29,17 @@
 				tproxy_mark = uci.get(cfgname, 'infra', 'tproxy_mark') || '101';
 			}
 		}
+
+		routing_port = uci.get(cfgname, 'config', 'routing_port') || 'common';
+		if (routing_port === 'common')
+			routing_port = uci.get(cfgname, 'infra', 'common_port') || '22,53,80,143,443,465,587,853,993,995,8080,8443,9418'
 	} else {
 		tun_name = uci.get(cfgname, 'infra', 'tun_name') || 'singtun0';
 		tun_mark = uci.get(cfgname, 'infra', 'tun_mark') || '102';
 		outbound_node = uci.get(cfgname, 'routing', 'default_outbound') || 'nil';
 	}
 	/* Client config end */
-%}
+-%}
 
 {# Reserved addresses -#}
 set homeproxy_localaddr_v4 {
@@ -84,8 +89,8 @@ set homeproxy_localaddr_v6 {
 	}
 }
 
-{# Regular mode -#}
 {% if (routing_mode !== 'custom'): %}
+{# Regular mode -#}
 {# TCP redirect -#}
 chain dstnat {
 	meta nfproto { ipv4, ipv6 } meta l4proto tcp jump homeproxy_redirect
@@ -100,7 +105,12 @@ chain homeproxy_redirect {
 	meta mark {{ self_mark }} counter return
 	ip daddr @homeproxy_localaddr_v4 counter return
 	ip6 daddr @homeproxy_localaddr_v6 counter return
+
+	{% if (routing_port !== 'all'): %}
+	tcp dport { {{ routing_port }} } counter redirect to :{{ redirect_port }}
+	{% else %}
 	meta l4proto tcp counter redirect to :{{ redirect_port }}
+	{% endif %}
 }
 {% if (outbound_udp_node !== 'nil'): %}
 {# UDP tproxy #}
@@ -109,18 +119,21 @@ chain homeproxy_mangle {
 	ip daddr @homeproxy_localaddr_v4 counter return
 	ip6 daddr @homeproxy_localaddr_v6 counter return
 
+	{% if (routing_port !== 'all'): %}
+	udp dport { {{ routing_port }} } mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
+	udp dport { {{ routing_port }} } mark set {{ tproxy_mark }} tproxy ip6 to [::1]:{{ tproxy_port }} counter accept
+	{% else %}
 	meta l4proto udp mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
 	meta l4proto udp mark set {{ tproxy_mark }} tproxy ip6 to [::1]:{{ tproxy_port }} counter accept
+	{% endif %}
 }
 
 chain mangle_prerouting {
 	meta l4proto udp counter jump homeproxy_mangle
 }
 {% endif %}
-{% endif %}
-
-{#- TUN mode -#}
-{% if (routing_mode === 'custom'): %}
+{% else %}
+{# TUN mode -#}
 chain homeproxy_mangle {
 	meta l4proto { tcp, udp } iifname {{ tun_name }} counter return
 	ip daddr @homeproxy_localaddr_v4 counter return

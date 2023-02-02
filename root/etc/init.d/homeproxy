@@ -150,7 +150,7 @@ start_service() {
 
 	# Setup firewall
 	local firewall_configured
-	if [ "$outbound_node" != "nil" ]; then
+	if [ "$outbound_node" != "nil" ] && [ "$routing_mode" = "custom" ]; then
 		firewall_configured=1
 		procd_open_data
 

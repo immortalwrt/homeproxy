@@ -54,7 +54,6 @@ local ucinode = "node"
 local uciserver = "server"
 
 local routing_mode = uci:get(uciconfig, ucimain, "routing_mode") or "bypass_mainland_china"
-local routing_port = uci:get(uciconfig, ucimain, "routing_port") or "nil"
 
 local wan_dns = luci.sys.exec("ifstatus wan | jsonfilter -e '@[\"dns-server\"][0]'"):trim()
 if isEmpty(wan_dns) then
@@ -92,14 +91,6 @@ else
 	tun_name = uci:get(uciconfig, uciinfra, "tun_name") or "singtun0"
 	tcpip_stack = uci:get(uciconfig, uciroutingsetting, "tcpip_stack") or "gvisor"
 	endpoint_independent_nat = uci:get(uciconfig, uciroutingsetting, "endpoint_independent_nat")
-end
-
-if routing_port == "common" then
-	routing_port = { 22, 53, 80, 143, 443, 465, 587, 853, 993, 995, 8080, 8443, 9418 }
-elseif table.contains({"all", "nil"}, routing_port) then
-	routing_port = nil
-else
-	routing_port = routing_port:split(",")
 end
 -- UCI config end
 
@@ -301,7 +292,6 @@ if notEmpty(main_node) then
 		config.dns.rules = {
 			{
 				geosite = dns_geosite,
-				port = parse_port(routing_port),
 				server = "main-dns"
 			}
 		}
@@ -579,15 +569,6 @@ if notEmpty(main_node) or notEmpty(default_outbound) then
 end
 
 if notEmpty(main_node) then
-	-- Routing ports
-	if parse_port(routing_port) then
-		config.route.rules[#config.route.rules+1] = {
-			port = parse_port(routing_port),
-			outbound = "direct-out",
-			invert = true
-		}
-	end
-
 	-- Routing rules
 	local routing_geosite, routing_geosite, routing_invert
 	if routing_mode == "bypass_mainland_china" then
