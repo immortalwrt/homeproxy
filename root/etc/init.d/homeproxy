@@ -121,10 +121,12 @@ start_service() {
 			ip -6 rule add fwmark "$tun_mark" lookup "$table_mark"
 		fi
 
-		utpl -S "$HP_DIR/scripts/firewall_pre.ut" > "$RUN_DIR/fw4_pre.nft"
 		utpl -S "$HP_DIR/scripts/firewall_post.ut" > "$RUN_DIR/fw4_post.nft"
-		fw4 reload >"/dev/null" 2>&1
+
 	fi
+
+	utpl -S "$HP_DIR/scripts/firewall_pre.ut" > "$RUN_DIR/fw4_pre.nft"
+	fw4 reload >"/dev/null" 2>&1
 
 	procd_open_instance "sing-box"
 
