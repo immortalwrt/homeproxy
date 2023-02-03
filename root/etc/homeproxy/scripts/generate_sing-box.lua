@@ -272,6 +272,7 @@ config.dns = {
 }
 
 if notEmpty(main_node) then
+	local default_final_dns = "default-dns"
 	-- Main DNS
 	if dns_server ~= wan_dns then
 		config.dns.servers[3] = {
@@ -279,25 +280,10 @@ if notEmpty(main_node) then
 			address = dns_server,
 			detour = "main-out"
 		}
-
-		local dns_geosite
-		if routing_mode == "bypass_mainland_china" then
-			dns_geosite = { "geolocation-!cn" }
-		elseif routing_mode == "gfwlist" then
-			dns_geosite = { "gfw", "greatfire" }
-		elseif routing_mode == "proxy_mainland_china" then
-			dns_geosite = { "cn" }
-		end
-
-		config.dns.rules = {
-			{
-				geosite = dns_geosite,
-				server = "main-dns"
-			}
-		}
+		default_final_dns = "main-dns"
 	end
 
-	config.dns.final = "default-dns"
+	config.dns.final = default_final_dns
 elseif notEmpty(default_outbound) then
 	-- DNS servers
 	uci:foreach(uciconfig, ucidnsserver, function(cfg)
