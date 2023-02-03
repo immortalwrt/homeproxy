@@ -73,7 +73,7 @@ start_service() {
 		mkdir -p "$DNSMASQ_DIR"
 		echo -e "conf-dir=$DNSMASQ_DIR" > "$DNSMASQ_DIR/../dnsmasq-homeproxy.conf"
 		if [ "$routing_mode" = "gfwlist" ]; then
-			sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#homeproxy_gfwlist_v4\nnftset=\/\1\\/6#inet#fw4#homeproxy_gfwlist_v6/g" \
+			sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#homeproxy_gfwlist_v4,6#inet#fw4#homeproxy_gfwlist_v6/g" \
 				"$HP_DIR/resources/gfw_list.txt" > "$DNSMASQ_DIR/gfw_list.conf"
 		elif [ "$routing_mode" = "bypass_mainland_china" ]; then
 			sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port/g" \

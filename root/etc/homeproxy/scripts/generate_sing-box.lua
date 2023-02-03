@@ -284,7 +284,7 @@ if notEmpty(main_node) then
 		if routing_mode == "bypass_mainland_china" then
 			dns_geosite = { "geolocation-!cn" }
 		elseif routing_mode == "gfwlist" then
-			dns_geosite = { "gfw" }
+			dns_geosite = { "gfw", "greatfire" }
 		elseif routing_mode == "proxy_mainland_china" then
 			dns_geosite = { "cn" }
 		end
@@ -572,7 +572,7 @@ if notEmpty(main_node) then
 	-- Routing rules
 	local routing_geosite, routing_geosite, final_node
 	if routing_mode == "gfwlist" then
-		routing_geosite = { "gfw" }
+		routing_geosite = { "gfw", "greatfire" }
 		routing_geoip = { "telegram" }
 		final_node = "direct-out"
 	else
