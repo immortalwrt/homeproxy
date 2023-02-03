@@ -180,9 +180,19 @@ service_stopped() {
 	# Nftables rules
 	for i in "homeproxy_outredir" "homeproxy_redirect" "homeproxy_mangle"; do
 		nft flush chain inet fw4 "$i" 2>"/dev/null"
+	done
+	for i in "homeproxy_outredir" "homeproxy_redirect" "homeproxy_mangle"; do
 		nft delete chain inet fw4 "$i" 2>"/dev/null"
 	done
-	for i in "homeproxy_localaddr_v4" "homeproxy_localaddr_v6" "homeproxy_mainland_addr_v4" "homeproxy_mainland_addr_v6" "homeproxy_gfwlist_v4" "homeproxy_gfwlist_v6"; do
+	for i in "homeproxy_localaddr_v4" "homeproxy_localaddr_v6"; do
+		nft flush set inet fw4 "$i" 2>"/dev/null"
+		nft delete set inet fw4 "$i" 2>"/dev/null"
+	done
+	for i in "homeproxy_gfwlist_v4" "homeproxy_gfwlist_v6"; do
+		nft flush set inet fw4 "$i" 2>"/dev/null"
+		nft delete set inet fw4 "$i" 2>"/dev/null"
+	done
+	for i in "homeproxy_gfwlist_v4" "homeproxy_gfwlist_v6"; do
 		nft flush set inet fw4 "$i" 2>"/dev/null"
 		nft delete set inet fw4 "$i" 2>"/dev/null"
 	done
