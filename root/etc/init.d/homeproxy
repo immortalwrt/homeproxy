@@ -14,7 +14,7 @@ PROG="/usr/bin/sing-box"
 HP_DIR="/etc/homeproxy"
 RUN_DIR="/var/run/homeproxy"
 LOG_PATH="$RUN_DIR/homeproxy.log"
-DNSMASQ_DIR="/tmp/dnsmasq.d"
+DNSMASQ_DIR="/tmp/dnsmasq.d/dnsmasq-homeproxy.d"
 
 log() {
 	echo -e "$(date "+%Y-%m-%d %H:%M:%S") [DAEMON] $*" >> "$LOG_PATH"
@@ -88,15 +88,27 @@ start_service() {
 		echo -e "*/3 * * * * $HP_DIR/scripts/clean_log.sh" >> "/etc/crontabs/root"
 		/etc/init.d/cron restart
 
-		# Hijack DNS
+		# DNSMasq rules
 		local dns_port
 		config_get dns_port "infra" "dns_port" "5333"
 		mkdir -p "$DNSMASQ_DIR"
-		cat <<-EOF >> "$DNSMASQ_DIR/dnsmasq-homeproxy.conf"
-			no-poll
-			no-resolv
-			server=127.0.0.1#$dns_port
-		EOF
+		echo -e "conf-dir=$DNSMASQ_DIR" > "$DNSMASQ_DIR/../dnsmasq-homeproxy.conf"
+		if [ "$routing_mode" = "gfwlist" ]; then
+			sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#homeproxy_gfwlist_v4\nnftset=\/\1\\/6#inet#fw4#homeproxy_gfwlist_v6/g" \
+				"$HP_DIR/resources/gfw_list.txt" > "$DNSMASQ_DIR/gfw_list.conf"
+		elif [ "$routing_mode" = "bypass_mainland_china" ]; then
+			sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port/g" \
+				"$HP_DIR/resources/gfw_list.txt" > "$DNSMASQ_DIR/gfw_list.conf"
+		elif [ "$routing_mode" = "proxy_mainland_china" ]; then
+			sed -r -e "s/full://g" -e "/:/d" -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port/g" \
+				"$HP_DIR/resources/china_list.txt" > "$DNSMASQ_DIR/china_list.conf"
+		else
+			cat <<-EOF >> "$DNSMASQ_DIR/redirect-dns.conf"
+				no-poll
+				no-resolv
+				server=127.0.0.1#$dns_port
+			EOF
+		fi
 		/etc/init.d/dnsmasq restart >"/dev/null" 2>&1
 
 		# Setup firewall
@@ -220,7 +232,7 @@ service_stopped() {
 		nft flush chain inet fw4 "$i" 2>"/dev/null"
 		nft delete chain inet fw4 "$i" 2>"/dev/null"
 	done
-	for i in "homeproxy_localaddr_v4" "homeproxy_localaddr_v6"; do
+	for i in "homeproxy_localaddr_v4" "homeproxy_localaddr_v6" "homeproxy_mainland_addr_v4" "homeproxy_mainland_addr_v6" "homeproxy_gfwlist_v4" "homeproxy_gfwlist_v6"; do
 		nft flush set inet fw4 "$i" 2>"/dev/null"
 		nft delete set inet fw4 "$i" 2>"/dev/null"
 	done
@@ -229,7 +241,7 @@ service_stopped() {
 	procd_set_config_changed firewall
 
 	# Remove DNS hijack
-	rm -f "$DNSMASQ_DIR/dnsmasq-homeproxy.conf"
+	rm -rf "$DNSMASQ_DIR/../dnsmasq-homeproxy.conf" "$DNSMASQ_DIR"
 	/etc/init.d/dnsmasq restart >"/dev/null" 2>&1
 
 	rm -f "$RUN_DIR/sing-box.json" "$RUN_DIR/sing-box.log"

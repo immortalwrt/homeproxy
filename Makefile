@@ -13,11 +13,8 @@ LUCI_DEPENDS:= \
 	+sing-box \
 	+@SING_BOX_BUILD_GVISOR \
 	+curl \
-	+lua \
-	+lua-neturl \
-	+luci-lib-base \
-	+luci-lib-nixio \
-	+luci-lib-jsonc
+	+luci-lua-runtime \
+	+lua-neturl
 
 define Package/luci-app-homeproxy/conffiles
 /etc/config/homeproxy

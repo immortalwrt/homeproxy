@@ -113,7 +113,7 @@ set homeproxy_mainland_addr_v4 {
 	flags interval
 	auto-merge
 	elements = {
-		{% for (let cnip4 in split(trim(readfile(resources_dir + '/china.txt')), '\n')): %}
+		{% for (let cnip4 in split(trim(readfile(resources_dir + '/china_ip4.txt')), '\n')): %}
 		{{ cnip4 }},
 		{% endfor %}
 	}
@@ -124,7 +124,7 @@ set homeproxy_mainland_addr_v6 {
 	flags interval
 	auto-merge
 	elements = {
-		{% for (let cnip6 in split(trim(readfile(resources_dir + '/china6.txt')), '\n')): %}
+		{% for (let cnip6 in split(trim(readfile(resources_dir + '/china_ip6.txt')), '\n')): %}
 		{{ cnip6 }},
 		{% endfor %}
 	}
