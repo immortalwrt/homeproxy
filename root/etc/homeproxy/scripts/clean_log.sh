@@ -9,9 +9,11 @@ log_max_size="10" #KB
 main_log_file="/var/run/$NAME/$NAME.log"
 sing_log_file="/var/run/$NAME/sing-box.log"
 
-for i in "$main_log_file" "$sing_log_file"; do
-	[ -s "$i" ] || continue
-	[ "$(( $(ls -l "$i" | awk -F ' ' '{print $5}') / 1024 >= log_max_size))" -eq "0" ] || echo "" > "$i"
-done
+while true; do
+	for i in "$main_log_file" "$sing_log_file"; do
+		[ -s "$i" ] || continue
+		[ "$(( $(ls -l "$i" | awk -F ' ' '{print $5}') / 1024 >= log_max_size))" -eq "0" ] || echo "" > "$i"
+	done
 
-exit 0
+	sleep 180
+done

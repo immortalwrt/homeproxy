@@ -1,6 +1,6 @@
 TODO:
 - Support ACL for regular mode
-- UDP does not work perfectly, maybe ask sing-box?
+- Tproxy UDP broken (nat4), need ask sing-box for help
 - Redirect support for IPv6 seems broken, maybe ask sing-box?
 - Rewrite existing lua scripts into ucode
 - Any other improvements
