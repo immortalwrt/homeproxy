@@ -95,14 +95,26 @@ set homeproxy_localaddr_v6 {
 	}
 }
 
-{% if (routing_mode in ['bypass_mainland_china', 'proxy_mainland_china']): -%}
+{% if (routing_mode === 'gfwlist'): %}
+set homeproxy_gfwlist_v4 {
+	type ipv4_addr
+	flags interval
+	auto-merge
+}
+
+set homeproxy_gfwlist_v6 {
+	type ipv6_addr
+	flags interval
+	auto-merge
+}
+{% elif (routing_mode in ['bypass_mainland_china', 'proxy_mainland_china']): %}
 set homeproxy_mainland_addr_v4 {
 	type ipv4_addr
 	flags interval
 	auto-merge
 	elements = {
-		{% for (let ip4 in split(trim(readfile(resources_dir + '/china.txt')), '\n')): %}
-		{{ ip4 }},
+		{% for (let cnip4 in split(trim(readfile(resources_dir + '/china.txt')), '\n')): %}
+		{{ cnip4 }},
 		{% endfor %}
 	}
 }
@@ -112,8 +124,8 @@ set homeproxy_mainland_addr_v6 {
 	flags interval
 	auto-merge
 	elements = {
-		{% for (let ip6 in split(trim(readfile(resources_dir + '/china6.txt')), '\n')): %}
-		{{ ip6 }},
+		{% for (let cnip6 in split(trim(readfile(resources_dir + '/china6.txt')), '\n')): %}
+		{{ cnip6 }},
 		{% endfor %}
 	}
 }
@@ -135,7 +147,11 @@ chain homeproxy_redirect {
 	meta mark {{ self_mark }} counter return
 	ip daddr @homeproxy_localaddr_v4 counter return
 	ip6 daddr @homeproxy_localaddr_v6 counter return
-	{% if (routing_mode === 'bypass_mainland_china'): %}
+
+	{% if (routing_mode === 'gfwlist'): %}
+	ip daddr != @homeproxy_gfwlist_v4 counter return
+	ip6 daddr != @homeproxy_gfwlist_v6 counter return
+	{% elif (routing_mode === 'bypass_mainland_china'): %}
 	ip daddr @homeproxy_mainland_addr_v4 counter return
 	ip6 daddr @homeproxy_mainland_addr_v6 counter return
 	{% elif (routing_mode === 'proxy_mainland_china'): %}
@@ -154,7 +170,11 @@ chain homeproxy_mangle {
 	meta mark {{ self_mark }} counter return
 	ip daddr @homeproxy_localaddr_v4 counter return
 	ip6 daddr @homeproxy_localaddr_v6 counter return
-	{% if (routing_mode === 'bypass_mainland_china'): %}
+
+	{% if (routing_mode === 'gfwlist'): %}
+	ip daddr != @homeproxy_gfwlist_v4 counter return
+	ip6 daddr != @homeproxy_gfwlist_v6 counter return
+	{% elif (routing_mode === 'bypass_mainland_china'): %}
 	ip daddr @homeproxy_mainland_addr_v4 counter return
 	ip6 daddr @homeproxy_mainland_addr_v6 counter return
 	udp dport { 80, 443 } counter reject comment "!homeproxy: Fuck you QUIC"
