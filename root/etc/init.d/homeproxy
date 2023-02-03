@@ -20,27 +20,6 @@ log() {
 	echo -e "$(date "+%Y-%m-%d %H:%M:%S") [DAEMON] $*" >> "$LOG_PATH"
 }
 
-setup_server_firewall() {
-	local cfg="$1"
-
-	local enabled
-	config_get_bool enabled "$cfg" "enabled"
-	[ "$enabled" = "1" ] || return 1
-
-	local port network
-	config_get port "$cfg" "port"
-	config_get network "$cfg" "network"
-
-	json_add_object ""
-	json_add_string type "rule"
-	json_add_string name "Allow-access-$CONF-$cfg-on-$port"
-	json_add_string src "*"
-	json_add_string dest_port "$port"
-	[ -z "$network" ] || json_add_string proto "$network"
-	json_add_string target "ACCEPT"
-	json_close_object
-}
-
 start_service() {
 	config_load "$CONF"
 
@@ -142,7 +121,9 @@ start_service() {
 			ip -6 rule add fwmark "$tun_mark" lookup "$table_mark"
 		fi
 
-		utpl -S "$HP_DIR/scripts/firewall_nftables.ut" > "$RUN_DIR/fw4.nft"
+		utpl -S "$HP_DIR/scripts/firewall_pre.ut" > "$RUN_DIR/fw4_pre.nft"
+		utpl -S "$HP_DIR/scripts/firewall_post.ut" > "$RUN_DIR/fw4_post.nft"
+		fw4 reload >"/dev/null" 2>&1
 	fi
 
 	procd_open_instance "sing-box"
@@ -154,39 +135,6 @@ start_service() {
 	procd_set_param limits nofile="1000000 1000000"
 	procd_set_param stderr 1
 	procd_set_param respawn
-
-	# Setup firewall
-	local firewall_configured
-	if [ "$outbound_node" != "nil" ] && [ "$routing_mode" = "custom" ]; then
-		firewall_configured=1
-		procd_open_data
-
-		json_add_array firewall
-		json_add_object ""
-		json_add_string type "rule"
-		json_add_string name "Allow-Forward-HomeProxy-TUN"
-		json_add_string src "*"
-		json_add_string dest "*"
-		json_add_string direction "out"
-		json_add_string device "$tun_name"
-		json_add_string proto "all"
-		json_add_string target "ACCEPT"
-		json_close_object
-	fi
-	local server_auto_firewall
-	config_get_bool server_auto_firewall "server" "auto_firewall" "0"
-	if [ "$server_auto_firewall" = "1" ]; then
-		[ -n "$firewall_configured" ] || {
-			firewall_configured=1
-			procd_open_data
-			json_add_array firewall
-		}
-		config_foreach setup_server_firewall "server"
-	fi
-	[ -z "$firewall_configured" ] || {
-		json_close_array
-		procd_close_data
-	}
 
 	procd_close_instance
 
@@ -236,9 +184,9 @@ service_stopped() {
 		nft flush set inet fw4 "$i" 2>"/dev/null"
 		nft delete set inet fw4 "$i" 2>"/dev/null"
 	done
-	echo > "$RUN_DIR/fw4.nft"
-
-	procd_set_config_changed firewall
+	echo > "$RUN_DIR/fw4_pre.nft"
+	echo > "$RUN_DIR/fw4_post.nft"
+	fw4 reload >"/dev/null" 2>&1
 
 	# Remove DNS hijack
 	rm -rf "$DNSMASQ_DIR/../dnsmasq-homeproxy.conf" "$DNSMASQ_DIR"

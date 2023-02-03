@@ -14,7 +14,6 @@
 	const uci = cursor();
 	uci.load(cfgname);
 
-	/* Client config start */
 	const table_mark = uci.get(cfgname, 'infra', 'table_mark') || '100';
 	const routing_mode = uci.get(cfgname, 'config', 'routing_mode') || 'bypass_mainland_china';
 
@@ -43,7 +42,6 @@
 		tun_mark = uci.get(cfgname, 'infra', 'tun_mark') || '102';
 		outbound_node = uci.get(cfgname, 'routing', 'default_outbound') || 'nil';
 	}
-	/* Client config end */
 	/* UCI config end */
 -%}
 

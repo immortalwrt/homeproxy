@@ -1,24 +1,19 @@
 #!/bin/sh
 
-if [ -e "$(command -v fw4)" ]; then
-	uci -q batch <<-EOF >"/dev/null"
-		delete firewall.homeproxy
-		set firewall.homeproxy=include
-		set firewall.homeproxy.type=nftables
-		set firewall.homeproxy.path="/var/run/homeproxy/fw4.nft"
-		set firewall.homeproxy.position="table-post"
-		commit firewall
-	EOF
-else
-	uci -q batch <<-EOF >"/dev/null"
-		delete firewall.homeproxy
-		set firewall.homeproxy=include
-		set firewall.homeproxy.type=script
-		set firewall.homeproxy.path="/var/run/homeproxy/homeproxy.include"
-		set firewall.homeproxy.reload=1
-		commit firewall
-	EOF
-fi
+uci -q batch <<-EOF >"/dev/null"
+	delete firewall.homeproxy_pre
+	set firewall.homeproxy_pre=include
+	set firewall.homeproxy_pre.type=nftables
+	set firewall.homeproxy_pre.path="/var/run/homeproxy/fw4_pre.nft"
+	set firewall.homeproxy_pre.position="table-pre"
+
+	delete firewall.homeproxy_post
+	set firewall.homeproxy_post=include
+	set firewall.homeproxy_post.type=nftables
+	set firewall.homeproxy_post.path="/var/run/homeproxy/fw4_post.nft"
+	set firewall.homeproxy_post.position="table-post"
+	commit firewall
+EOF
 
 rm -f /tmp/luci-indexcache
 exit 0
