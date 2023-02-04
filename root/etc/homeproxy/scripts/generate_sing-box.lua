@@ -560,23 +560,31 @@ if notEmpty(main_node) then
 	if routing_mode == "gfwlist" then
 		routing_geosite = { "gfw", "greatfire" }
 		routing_geoip = { "telegram" }
-		final_node = "direct-out"
+
+		-- Main out
+		config.route.rules[#config.route.rules+1] = {
+			geosite = table.clone(routing_geosite),
+			geoip = table.clone(routing_geoip),
+			outbound = "main-out",
+		}
+		config.route.final = "direct-out"
 	else
-		final_node = "main-out"
+		-- Main out
+		config.route.final = "main-out"
 	end
 
 	-- Main UDP out
 	if notEmpty(main_udp_node) and main_udp_node ~= "same" and main_udp_node ~= main_node then
+		if routing_mode == "gfwlist" then
+			config.route.rules[#config.route.rules].network = "tcp"
+		end
 		config.route.rules[#config.route.rules+1] = {
-			geosite = routing_geosite,
-			geoip = routing_geoip,
+			geosite = routing_geosite and table.clone(routing_geosite) or nil,
+			geoip = routing_geoip and table.clone(routing_geoip) or nil,
 			network = "udp",
 			outbound = "main-udp-out",
 		}
 	end
-
-	-- Main out
-	config.route.final = final_node
 elseif notEmpty(default_outbound) then
 	uci:foreach(uciconfig, uciroutingrule, function(cfg)
 		if cfg.enabled == "1" then

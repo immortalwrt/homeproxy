@@ -126,7 +126,7 @@ return view.extend({
 				return fs.read_direct(hp_dir + '/sing-box.log', 'text')
 				.then(function(res) {
 					log = E('pre', { 'wrap': 'pre' }, [
-						res.trim() || _('Log is clean.')
+						res.trim() || _('Log is empty.')
 					]);
 
 					dom.content(log_textarea, log);
