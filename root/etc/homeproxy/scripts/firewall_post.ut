@@ -162,7 +162,7 @@ chain homeproxy_redirect {
 }
 {% if (outbound_udp_node !== 'nil'): %}
 {# UDP tproxy #}
-chain homeproxy_mangle {
+chain homeproxy_mangle_prerouting {
 	meta mark {{ self_mark }} counter return
 	ip daddr @homeproxy_localaddr_v4 counter return
 	ip6 daddr @homeproxy_localaddr_v6 counter return
@@ -170,6 +170,7 @@ chain homeproxy_mangle {
 	{% if (routing_mode === 'gfwlist'): %}
 	ip daddr != @homeproxy_gfwlist_v4 counter return
 	ip6 daddr != @homeproxy_gfwlist_v6 counter return
+	udp dport { 80, 443 } counter reject comment "!{{ cfgname }}: Fuck you QUIC"
 	{% elif (routing_mode === 'bypass_mainland_china'): %}
 	ip daddr @homeproxy_mainland_addr_v4 counter return
 	ip6 daddr @homeproxy_mainland_addr_v6 counter return
@@ -212,7 +213,7 @@ chain homeproxy_mangle_output {
 }
 
 chain mangle_prerouting {
-	meta l4proto udp jump homeproxy_mangle
+	meta l4proto udp jump homeproxy_mangle_prerouting
 }
 
 chain mangle_output {
