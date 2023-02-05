@@ -130,15 +130,6 @@ set homeproxy_mainland_addr_v6 {
 {% if (routing_mode !== 'custom'): %}
 {# Regular mode -#}
 {# TCP redirect -#}
-chain dstnat {
-	meta nfproto { ipv4, ipv6 } meta l4proto tcp jump homeproxy_redirect
-}
-
-chain homeproxy_outredir {
-	type nat hook output priority filter -105; policy accept
-	meta nfproto { ipv4, ipv6 } meta l4proto tcp jump homeproxy_redirect
-}
-
 chain homeproxy_redirect {
 	meta mark {{ self_mark }} counter return
 	ip daddr @homeproxy_localaddr_v4 counter return
@@ -158,7 +149,17 @@ chain homeproxy_redirect {
 	{% if (routing_port !== 'all'): %}
 	tcp dport != { {{ routing_port }} } counter return
 	{% endif %}
+
 	meta l4proto tcp counter redirect to :{{ redirect_port }}
+}
+
+chain dstnat {
+	meta nfproto { ipv4, ipv6 } meta l4proto tcp jump homeproxy_redirect
+}
+
+chain homeproxy_output_redir {
+	type nat hook output priority filter -105; policy accept
+	meta nfproto { ipv4, ipv6 } meta l4proto tcp jump homeproxy_redirect
 }
 {% if (outbound_udp_node !== 'nil'): %}
 {# UDP tproxy #}
@@ -181,7 +182,6 @@ chain homeproxy_mangle_prerouting {
 	{% endif %}
 
 	{% if (routing_port !== 'all'): %}
-	udp dport != { {{ routing_port }} } counter return
 	udp dport != { {{ routing_port }} } counter return
 	{% endif %}
 
@@ -206,7 +206,6 @@ chain homeproxy_mangle_output {
 	{% endif %}
 
 	{% if (routing_port !== 'all'): %}
-	udp dport != { {{ routing_port }} } counter return
 	udp dport != { {{ routing_port }} } counter return
 	{% endif %}
 

@@ -181,7 +181,7 @@ service_stopped() {
 	ip -6 rule del fwmark "$tun_mark" table "$table_mark" 2>"/dev/null"
 
 	# Nftables rules
-	for i in "homeproxy_outredir" "homeproxy_redirect" \
+	for i in "homeproxy_output_redir" "homeproxy_redirect" \
 		 "homeproxy_mangle_prerouting" "homeproxy_mangle_output"; do
 		nft flush chain inet fw4 "$i" 2>"/dev/null"
 		nft delete chain inet fw4 "$i" 2>"/dev/null"
