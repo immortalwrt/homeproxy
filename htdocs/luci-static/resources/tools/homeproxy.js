@@ -214,7 +214,7 @@ return baseclass.extend({
 
 		return ui.uploadFile(String.format('/tmp/homeproxy_certificate.tmp', filename), ev.target)
 		.then(L.bind((btn, res) => {
-			return L.resolveDefault(callWriteCertificate(type, filename), {}).then((ret) => {
+			return L.resolveDefault(callWriteCertificate(filename), {}).then((ret) => {
 				if (ret.result === true)
 					ui.addNotification(null, E('p', _('Your %s was successfully uploaded. Size: %sB.').format(type, res.size)));
 				else {
