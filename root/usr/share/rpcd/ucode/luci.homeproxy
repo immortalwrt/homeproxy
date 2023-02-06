@@ -34,9 +34,11 @@ function execute_command(...args) {
 	outfd.close();
 	errfd.close();
 
+	const binary = is_binary(stdout);
+
 	return {
 		command: join(' ', argv),
-		stdout: is_binary(stdout) ? null : stdout,
+		stdout: binary ? null : stdout,
 		stderr,
 		exitcode,
 		binary
@@ -61,9 +63,10 @@ const methods = {
 				const filecontent = readfile(tmpcert);
 				if (is_binary(filecontent)) {
 					system(`rm -f ${tmpcert}`);
-					return { result: false, reason: 'illegal certificate type: binary' };
+					return { result: false, reason: 'illegal file type: binary' };
 				}
 
+				/* Kanged from luci-proto-openconnect */
 				const beg = priv ? /^-----BEGIN (RSA|EC) PRIVATE KEY-----$/ : /^-----BEGIN CERTIFICATE-----$/,
 				      end = priv ? /^-----END (RSA|EC) PRIVATE KEY-----$/ : /^-----END CERTIFICATE-----$/,
 				      lines = split(trim(filecontent), /[\r\n]/);
@@ -116,7 +119,7 @@ const methods = {
 
 			const fd = popen('/usr/bin/sing-box version');
 			if (fd) {
-				for (let line = fd.read('line'), flag = false; length(line); line = fd.read('line')) {
+				for (let line = fd.read('line'); length(line); line = fd.read('line')) {
 					let tags = match(trim(line), /Tags: (.*)/);
 					if (!tags)
 						continue;

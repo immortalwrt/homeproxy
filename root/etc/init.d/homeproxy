@@ -65,13 +65,17 @@ start_service() {
 		fi
 		/etc/init.d/cron restart
 
+		local ipv6_support
+		config_get_bool ipv6_support "config" "ipv6_support" "0"
+
 		# DNSMasq rules
 		local dns_port
 		config_get dns_port "infra" "dns_port" "5333"
+		[ "$ipv6_support" -eq "0" ] || local nftset_v6=",6#inet#fw4#homeproxy_gfwlist_v6"
 		mkdir -p "$DNSMASQ_DIR"
 		echo -e "conf-dir=$DNSMASQ_DIR" > "$DNSMASQ_DIR/../dnsmasq-homeproxy.conf"
 		if [ "$routing_mode" = "gfwlist" ]; then
-			sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#homeproxy_gfwlist_v4,6#inet#fw4#homeproxy_gfwlist_v6/g" \
+			sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#homeproxy_gfwlist_v4$nftset_v6/g" \
 				"$HP_DIR/resources/gfw_list.txt" > "$DNSMASQ_DIR/gfw_list.conf"
 		elif [ "$routing_mode" = "bypass_mainland_china" ]; then
 			sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port/g" \
@@ -101,8 +105,10 @@ start_service() {
 				ip rule add fwmark "$tproxy_mark" table "$table_mark"
 				ip route add local 0.0.0.0/0 dev lo table "$table_mark"
 
+				if [ "$ipv6_support" -eq "1" ]; then
 				ip -6 rule add fwmark "$tproxy_mark" table "$table_mark"
 				ip -6 route add local ::/0 dev lo table "$table_mark"
+				fi
 			fi
 		else
 			local tun_name tun_mark

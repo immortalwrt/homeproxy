@@ -128,6 +128,11 @@ return view.extend({
 		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.rmempty = false;
 
+		o = s.option(form.Flag, 'enable_ipv6', _('IPv6 support'));
+		o.default = o.enabled;
+		o.rmempty = false;
+		o.depends({'routing_mode': 'custom', '!reverse': true});
+
 		o = s.option(form.ListValue, 'routing_mode', _('Routing mode'));
 		o.value('gfwlist', _('GFWList'));
 		o.value('bypass_mainland_china', _('Bypass mainland China'));

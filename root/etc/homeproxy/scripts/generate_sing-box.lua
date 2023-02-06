@@ -54,6 +54,7 @@ local ucinode = "node"
 local uciserver = "server"
 
 local routing_mode = uci:get(uciconfig, ucimain, "routing_mode") or "bypass_mainland_china"
+local ipv6_support = uci:get(uciconfig, ucimain, "ipv6_support") or "0"
 
 local wan_dns = luci.sys.exec("ifstatus wan | jsonfilter -e '@[\"dns-server\"][0]'"):trim()
 if isEmpty(wan_dns) then
@@ -278,6 +279,7 @@ if notEmpty(main_node) then
 		config.dns.servers[3] = {
 			tag = "main-dns",
 			address = dns_server,
+			strategy = (ipv6_support ~= "1") and "ipv4_only" or nil,
 			detour = "main-out"
 		}
 		default_final_dns = "main-dns"
