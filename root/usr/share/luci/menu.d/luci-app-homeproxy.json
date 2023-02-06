@@ -11,7 +11,7 @@
 		}
 	},
 	"admin/services/homeproxy/client": {
-		"title": "Client settings",
+		"title": "Client Settings",
 		"order": 10,
 		"action": {
 			"type": "view",
@@ -19,7 +19,7 @@
 		}
 	},
 	"admin/services/homeproxy/node": {
-		"title": "Node settings",
+		"title": "Node Settings",
 		"order": 15,
 		"action": {
 			"type": "view",
@@ -27,7 +27,7 @@
 		}
 	},
 	"admin/services/homeproxy/server": {
-		"title": "Server settings",
+		"title": "Server Settings",
 		"order": 20,
 		"action": {
 			"type": "view",
@@ -35,7 +35,7 @@
 		}
 	},
 	"admin/services/homeproxy/status": {
-		"title": "Service status",
+		"title": "Service Status",
 		"order": 30,
 		"action": {
 			"type": "view",
