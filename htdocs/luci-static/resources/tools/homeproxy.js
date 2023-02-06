@@ -1,4 +1,5 @@
-/* SPDX-License-Identifier: GPL-2.0-only
+/*
+ * SPDX-License-Identifier: GPL-2.0-only
  *
  * Copyright (C) 2022-2023 ImmortalWrt.org
  */
@@ -7,6 +8,7 @@
 'require baseclass';
 'require form';
 'require fs';
+'require rpc';
 'require uci';
 'require ui';
 
@@ -158,15 +160,13 @@ return baseclass.extend({
 	},
 
 	getBuiltinFeatures: function() {
-		return L.resolveDefault(fs.exec('/usr/bin/sing-box', [ 'version' ]).then((res) => {
-			var features = {};
+		var callGetSingBoxFeatures = rpc.declare({
+			object: 'luci.homeproxy',
+			method: 'singbox_get_features',
+			expect: { '': {} }
+		});
 
-			if(res.code === 0 && res.stdout.trim().match(/Tags: (.*)/))
-				for (var i of RegExp.$1.split(','))
-					features[i] = true;
-
-			return features;
-		}), {});
+		return L.resolveDefault(callGetSingBoxFeatures(), {});
 	},
 
 	loadDefaultLabel: function(uciconfig, ucisection) {
@@ -205,23 +205,24 @@ return baseclass.extend({
 	},
 
 	uploadCertificate: function(option, type, filename, ev) {
-		L.resolveDefault(fs.exec('/bin/mkdir', [ '-p', '/etc/homeproxy/certs/' ]));
+		var callWriteCertificate = rpc.declare({
+			object: 'luci.homeproxy',
+			method: 'certificate_write',
+			params: ['filename'],
+			expect: { '': {} }
+		});
 
-		return ui.uploadFile(String.format('/etc/homeproxy/certs/%s.pem', filename), ev.target)
-		.then(L.bind(function(btn, res) {
-			btn.firstChild.data = _('Checking %s...').format(type);
-
-			if (res.size <= 0) {
-				ui.addNotification(null, E('p', _('The uploaded %s is empty.').format(type)));
-				return fs.remove(String.format('/etc/homeproxy/certs/%s.pem', filename));
-			}
-
-			ui.addNotification(null, E('p', _('Your %s was successfully uploaded. Size: %sB.').format(type, res.size)));
+		return ui.uploadFile(String.format('/tmp/homeproxy_certificate.tmp', filename), ev.target)
+		.then(L.bind((btn, res) => {
+			return L.resolveDefault(callWriteCertificate(type, filename), {}).then((ret) => {
+				if (ret.result === true)
+					ui.addNotification(null, E('p', _('Your %s was successfully uploaded. Size: %sB.').format(type, res.size)));
+				else {
+					ui.addNotification(null, E('p', _('Failed to upload %s, reason: %s.').format(type, ret.reason)));
+				}
+			});
 		}, this, ev.target))
-		.catch(function(e) { ui.addNotification(null, E('p', e.message)) })
-		.finally(L.bind(function(btn, input) {
-			btn.firstChild.data = _('Upload...');
-		}, this, ev.target));
+		.catch((e) => { ui.addNotification(null, E('p', e.message)) });
 	},
 
 	validateBase64Key: function(length, section_id, value) {
@@ -232,7 +233,7 @@ return baseclass.extend({
 			else if (value.length !== length || !value.match(/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/) || value[length-1] !== '=')
 				return _('Expecting: %s').format(_('valid base64 key with %d characters').format(length));
 		}
-	
+
 		return true;
 	},
 
@@ -250,7 +251,7 @@ return baseclass.extend({
 			if (duplicate)
 				return _('Expecting: %s').format(_('unique value'));
 		}
-	
+
 		return true;
 	},
 
