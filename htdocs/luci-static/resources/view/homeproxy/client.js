@@ -128,7 +128,7 @@ return view.extend({
 		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.rmempty = false;
 
-		o = s.option(form.Flag, 'enable_ipv6', _('IPv6 support'));
+		o = s.option(form.Flag, 'ipv6_support', _('IPv6 support'));
 		o.default = o.enabled;
 		o.rmempty = false;
 		o.depends({'routing_mode': 'custom', '!reverse': true});

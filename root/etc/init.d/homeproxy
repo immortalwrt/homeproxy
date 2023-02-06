@@ -106,8 +106,8 @@ start_service() {
 				ip route add local 0.0.0.0/0 dev lo table "$table_mark"
 
 				if [ "$ipv6_support" -eq "1" ]; then
-				ip -6 rule add fwmark "$tproxy_mark" table "$table_mark"
-				ip -6 route add local ::/0 dev lo table "$table_mark"
+					ip -6 rule add fwmark "$tproxy_mark" table "$table_mark"
+					ip -6 route add local ::/0 dev lo table "$table_mark"
 				fi
 			fi
 		else

@@ -71,7 +71,7 @@ set homeproxy_localaddr_v4 {
 		240.0.0.0/4
 	}
 }
-
+{% if (routing_mode === 'custom' || ipv6_support === '1'): %}
 set homeproxy_localaddr_v6 {
 	type ipv6_addr
 	flags interval
@@ -92,6 +92,7 @@ set homeproxy_localaddr_v6 {
 		ff00::/8
 	}
 }
+{% endif %}
 
 {% if (routing_mode === 'gfwlist'): %}
 set homeproxy_gfwlist_v4 {
