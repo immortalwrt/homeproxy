@@ -6,6 +6,7 @@
 
 'use strict';
 'require form';
+'require network';
 'require poll';
 'require rpc';
 'require uci';
@@ -18,6 +19,20 @@ var callServiceList = rpc.declare({
 	object: 'service',
 	method: 'list',
 	params: ['name'],
+	expect: { '': {} }
+});
+
+var callReadDomainList = rpc.declare({
+	object: 'luci.homeproxy',
+	method: 'acllist_read',
+	params: ['type'],
+	expect: { '': {} }
+});
+
+var callWriteDomainList = rpc.declare({
+	object: 'luci.homeproxy',
+	method: 'acllist_write',
+	params: ['type', 'content'],
 	expect: { '': {} }
 });
 
@@ -78,12 +93,14 @@ var stubValidator = {
 return view.extend({
 	load: function() {
 		return Promise.all([
-			uci.load('homeproxy')
+			uci.load('homeproxy'),
+			network.getHostHints()
 		]);
 	},
 
 	render: function(data) {
 		var m, s, o, ss, so;
+		var hosts = data[1].hosts;
 
 		m = new form.Map('homeproxy', _('HomeProxy'),
 			_('The modern ImmortalWrt proxy platform for ARM64/AMD64.'));
@@ -196,6 +213,152 @@ return view.extend({
 
 			return true;
 		}
+
+		/* Regular mode ACL settings start */
+		s.tab('access_control', _('Access Control'));
+
+		o = s.taboption('access_control', form.SectionValue, '_access_control', form.NamedSection, 'access_control', 'homeproxy');
+		o.depends({'routing_mode': 'custom', '!reverse': true});
+		ss = o.subsection;
+
+		/* Interface control start */
+		ss.tab('interface', _('Interface Control'));
+
+		so = ss.taboption('interface', widgets.DeviceSelect, 'listen_interface', _('Listen interface'),
+			_('Only process traffic from specific interface. Leave empty for all.'));
+		so.multiple = true;
+		so.noaliases = true;
+
+		so = ss.taboption('interface', widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
+			_('Bind outbound traffic to specific interface. Leave empty to auto detect.'));
+		so.multiple = true;
+		so.noaliases = true;
+		/* Interface control end */
+
+		/* LAN IP policy start */
+		ss.tab('lan_ip_policy', _('LAN IP Policy'));
+
+		var ipaddrs = {}, ip6addrs = {};
+		Object.keys(hosts).forEach(function(mac) {
+			var addrs = L.toArray(hosts[mac].ipaddrs || hosts[mac].ipv4);
+
+			for (var i = 0; i < addrs.length; i++)
+				ipaddrs[addrs[i]] = hosts[mac].name || mac;
+		});
+		Object.keys(hosts).forEach(function(mac) {
+			var addrs = L.toArray(hosts[mac].ip6addrs || hosts[mac].ipv6);
+
+			for (var i = 0; i < addrs.length; i++)
+				ip6addrs[addrs[i]] = hosts[mac].name || mac;
+		});
+
+		so = ss.taboption('lan_ip_policy', form.ListValue, 'lan_proxy_mode', _('Proxy filter mode'));
+		so.value('disabled', _('Disabled'));
+		so.value('listed_only', _('Proxy listed only'));
+		so.value('except_listed', _('Proxy all except listed'));
+		so.default = 'disabled';
+		so.rmempty = false;
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_direct_mac_addrs', _('Direct MAC addresses'));
+		so.datatype = 'macaddr';
+		so.depends('lan_proxy_mode', 'except_listed');
+		Object.keys(hosts).forEach(function(mac) {
+			var hint = hosts[mac].name || L.toArray(hosts[mac].ipaddrs || hosts[mac].ipv4)[0];
+			so.value(mac, hint ? '%s (%s)'.format(mac, hint) : mac);
+		});
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_direct_ipv4_ips', _('Direct IPv4 IP-s'));
+		so.datatype = 'or(ip4addr, cidr4)';
+		so.depends('lan_proxy_mode', 'except_listed');
+		L.sortedKeys(ipaddrs, null, 'addr').forEach(function(ipv4) {
+			so.value(ipv4, '%s (%s)'.format(ipv4, ipaddrs[ipv4]));
+		});
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_direct_ipv6_ips', _('Direct IPv6 IP-s'));
+		so.datatype = 'or(ip6addr, cidr6)';
+		so.depends('lan_proxy_mode', 'except_listed');
+		L.sortedKeys(ip6addrs, null, 'addr').forEach(function(ipv6) {
+			so.value(ipv6, '%s (%s)'.format(ipv6, ip6addrs[ipv6]));
+		});
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_proxy_mac_addrs', _('Proxy MAC addresses'));
+		so.datatype = 'macaddr';
+		so.depends('lan_proxy_mode', 'listed_only');
+		Object.keys(hosts).forEach(function(mac) {
+			var hint = hosts[mac].name || L.toArray(hosts[mac].ipaddrs || hosts[mac].ipv4)[0];
+			so.value(mac, hint ? '%s (%s)'.format(mac, hint) : mac);
+		});
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_proxy_ipv4_ips', _('Proxy IPv4 IP-s'));
+		so.datatype = 'or(ip4addr, cidr4)';
+		so.depends('lan_proxy_mode', 'listed_only');
+		L.sortedKeys(ipaddrs, null, 'addr').forEach(function(ipv4) {
+			so.value(ipv4, '%s (%s)'.format(ipv4, ipaddrs[ipv4]));
+		});
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_proxy_ipv6_ips', _('Proxy IPv6 IP-s'));
+		so.datatype = 'or(ip6addr, cidr6)';
+		so.depends('lan_proxy_mode', 'listed_only');
+		L.sortedKeys(ip6addrs, null, 'addr').forEach(function(ipv6) {
+			so.value(ipv6, '%s (%s)'.format(ipv6, ip6addrs[ipv6]));
+		});
+		/* LAN IP policy end */
+
+		/* WAN IP policy start */
+		ss.tab('wan_ip_policy', _('WAN IP Policy'));
+
+		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_direct_ipv4_ips', _('Direct IPv4 IP-s'));
+		so.datatype = 'or(ip4addr, cidr4)';
+
+		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_direct_ipv6_ips', _('Direct IPv6 IP-s'));
+		so.datatype = 'or(ip6addr, cidr6)';
+
+		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_proxy_ipv4_ips', _('Proxy IPv4 IP-s'));
+		so.datatype = 'or(ip4addr, cidr4)';
+
+		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_proxy_ipv6_ips', _('Proxy IPv6 IP-s'));
+		so.datatype = 'or(ip6addr, cidr6)';
+		/* WAN IP policy end */
+
+		/* Direct domain list start */
+		ss.tab('direct_domain_list', _('Direct Domain List'));
+
+		so = ss.taboption('direct_domain_list', form.TextValue, '_direct_domain_list');
+		so.rows = 10;
+		so.monospace = true;
+		so.datatype = 'hostname';
+		so.load = function(section_id) {
+			return L.resolveDefault(callReadDomainList('direct_list')).then((res) => {
+				return res.content;
+			}, {});
+		}
+		so.write = function(section_id, value) {
+			return callWriteDomainList('direct_list', value);
+		}
+		so.remove = function(section_id, value) {
+			return callWriteDomainList('direct_list', '');
+		}
+		/* Direct domain list end */
+		/* Proxy domain list start */
+		ss.tab('proxy_domain_list', _('Proxy Domain List'));
+
+		so = ss.taboption('proxy_domain_list', form.TextValue, '_proxy_domain_list');
+		so.rows = 10;
+		so.monospace = true;
+		so.datatype = 'hostname';
+		so.load = function(section_id) {
+			return L.resolveDefault(callReadDomainList('proxy_list')).then((res) => {
+				return res.content;
+			}, {});
+		}
+		so.write = function(section_id, value) {
+			return callWriteDomainList('proxy_list', value);
+		}
+		so.remove = function(section_id, value) {
+			return callWriteDomainList('proxy_list', '');
+		}
+		/* Proxy domain list end */
+		/* Regular mode ACL settings end */
 
 		/* Custom routing settings start */
 		/* Routing settings start */

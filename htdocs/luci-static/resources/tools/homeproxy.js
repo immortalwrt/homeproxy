@@ -218,7 +218,7 @@ return baseclass.extend({
 				if (ret.result === true)
 					ui.addNotification(null, E('p', _('Your %s was successfully uploaded. Size: %sB.').format(type, res.size)));
 				else {
-					ui.addNotification(null, E('p', _('Failed to upload %s, reason: %s.').format(type, ret.reason)));
+					ui.addNotification(null, E('p', _('Failed to upload %s, error: %s.').format(type, ret.error)));
 				}
 			});
 		}, this, ev.target))

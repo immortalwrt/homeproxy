@@ -48,6 +48,40 @@ function execute_command(...args) {
 const HP_DIR = '/etc/homeproxy';
 
 const methods = {
+	acllist_read: {
+		args: { type: 'type' },
+		call: function(req) {
+			if (index(['direct_list', 'proxy_list'], req.args?.type) === -1)
+				return { content: null, error: 'type is wrong or empty' };
+
+			const filecontent = readfile(`${HP_DIR}/resources/${req.args?.type}.txt`);
+			return { content: filecontent };
+		}
+	},
+	acllist_write: {
+		args: { type: 'type', content: 'content' },
+		call: function(req) {
+			if (index(['direct_list', 'proxy_list'], req.args?.type) === -1)
+				return { result: false, error: 'type is wrong or empty' };
+
+			const file = `${HP_DIR}/resources/${req.args?.type}.txt`;
+			let content = req.args?.content;
+
+			/* Sanitize content */
+			if (content) {
+				content = trim(content);
+				content = replace(content, /\r\n?/g, '\n');
+				if (!match(content, /\n$/))
+					content += '\n';
+			}
+
+			system(`mkdir -p ${HP_DIR}/resources`);
+			writefile(file, content);
+
+			return { result: true };
+		}
+	},
+
 	certificate_write: {
 		args: { filename: 'filename' },
 		call: function(req) {
@@ -57,13 +91,13 @@ const methods = {
 
 				if (!filestat || filestat.type !== 'file' || filestat.size <= 0) {
 					system(`rm -f ${tmpcert}`);
-					return { result: false, reason: 'empty certificate file' };
+					return { result: false, error: 'empty certificate file' };
 				}
 
-				const filecontent = readfile(tmpcert);
+				let filecontent = readfile(tmpcert);
 				if (is_binary(filecontent)) {
 					system(`rm -f ${tmpcert}`);
-					return { result: false, reason: 'illegal file type: binary' };
+					return { result: false, error: 'illegal file type: binary' };
 				}
 
 				/* Kanged from luci-proto-openconnect */
@@ -81,7 +115,7 @@ const methods = {
 
 				if (!start || i < length(lines) - 1 || !match(lines[i], end)) {
 					system(`rm -f ${tmpcert}`);
-					return { result: false, reason: 'this does not look like a correct PEM file' };
+					return { result: false, error: 'this does not look like a correct PEM file' };
 				}
 
 				/* Sanitize certificate */
@@ -107,7 +141,7 @@ const methods = {
 				return writeCertificate(filename, true);
 				break;
 			default:
-				return { result: false, reason: 'invalid certificate filename' };
+				return { result: false, error: 'invalid certificate filename' };
 				break;
 			}
 		}
