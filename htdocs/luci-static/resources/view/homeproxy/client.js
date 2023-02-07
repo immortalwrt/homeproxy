@@ -225,13 +225,13 @@ return view.extend({
 		ss.tab('interface', _('Interface Control'));
 
 		so = ss.taboption('interface', widgets.DeviceSelect, 'listen_interface', _('Listen interface'),
-			_('Only process traffic from specific interface. Leave empty for all.'));
+			_('Only process traffic from specific interface(s). Leave empty for all.'));
 		so.multiple = true;
 		so.noaliases = true;
 
 		so = ss.taboption('interface', widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
 			_('Bind outbound traffic to specific interface. Leave empty to auto detect.'));
-		so.multiple = true;
+		so.multiple = false;
 		so.noaliases = true;
 		/* Interface control end */
 
