@@ -376,6 +376,16 @@ return view.extend({
 		so.remove = function(section_id, value) {
 			return callWriteDomainList('direct_list', '');
 		}
+		so.validate = function(section_id, value) {
+			if (section_id && value) {
+				for (var i of value.split('\n')) {
+					if (!stubValidator.apply('hostname', i))
+						return _('Expecting: %s').format(_('valid hostname'));
+				}
+			}
+
+			return true;
+		}
 		/* Direct domain list end */
 		/* Proxy domain list start */
 		ss.tab('proxy_domain_list', _('Proxy Domain List'));
@@ -394,6 +404,16 @@ return view.extend({
 		}
 		so.remove = function(section_id, value) {
 			return callWriteDomainList('proxy_list', '');
+		}
+		so.validate = function(section_id, value) {
+			if (section_id && value) {
+				for (var i of value.split('\n')) {
+					if (!stubValidator.apply('hostname', i))
+						return _('Expecting: %s').format(_('valid hostname'));
+				}
+			}
+
+			return true;
 		}
 		/* Proxy domain list end */
 		/* Regular mode ACL settings end */
