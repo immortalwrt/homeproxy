@@ -100,7 +100,7 @@ return view.extend({
 
 	render: function(data) {
 		var m, s, o, ss, so;
-		var hosts = data[1].hosts;
+		var hosts = data[1]?.hosts;
 
 		m = new form.Map('homeproxy', _('HomeProxy'),
 			_('The modern ImmortalWrt proxy platform for ARM64/AMD64.'));
@@ -215,9 +215,9 @@ return view.extend({
 		}
 
 		/* Regular mode ACL settings start */
-		s.tab('access_control', _('Access Control'));
+		s.tab('control', _('Access Control'));
 
-		o = s.taboption('access_control', form.SectionValue, '_access_control', form.NamedSection, 'access_control', 'homeproxy');
+		o = s.taboption('control', form.SectionValue, '_control', form.NamedSection, 'control', 'homeproxy');
 		o.depends({'routing_mode': 'custom', '!reverse': true});
 		ss = o.subsection;
 
@@ -299,6 +299,44 @@ return view.extend({
 		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_proxy_ipv6_ips', _('Proxy IPv6 IP-s'));
 		so.datatype = 'or(ip6addr, cidr6)';
 		so.depends('lan_proxy_mode', 'listed_only');
+		L.sortedKeys(ip6addrs, null, 'addr').forEach(function(ipv6) {
+			so.value(ipv6, '%s (%s)'.format(ipv6, ip6addrs[ipv6]));
+		});
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_global_proxy_mac_addrs', _('Global proxy MAC addresses'));
+		so.datatype = 'macaddr';
+		Object.keys(hosts).forEach(function(mac) {
+			var hint = hosts[mac].name || L.toArray(hosts[mac].ipaddrs || hosts[mac].ipv4)[0];
+			so.value(mac, hint ? '%s (%s)'.format(mac, hint) : mac);
+		});
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_global_proxy_ipv4_ips', _('Global proxy IPv4 IP-s'));
+		so.datatype = 'or(ip4addr, cidr4)';
+		L.sortedKeys(ipaddrs, null, 'addr').forEach(function(ipv4) {
+			so.value(ipv4, '%s (%s)'.format(ipv4, ipaddrs[ipv4]));
+		});
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_global_proxy_ipv6_ips', _('Global proxy IPv6 IP-s'));
+		so.datatype = 'or(ip6addr, cidr6)';
+		L.sortedKeys(ip6addrs, null, 'addr').forEach(function(ipv6) {
+			so.value(ipv6, '%s (%s)'.format(ipv6, ip6addrs[ipv6]));
+		});
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_gaming_mode_mac_addrs', _('Gaming mode MAC addresses'));
+		so.datatype = 'macaddr';
+		Object.keys(hosts).forEach(function(mac) {
+			var hint = hosts[mac].name || L.toArray(hosts[mac].ipaddrs || hosts[mac].ipv4)[0];
+			so.value(mac, hint ? '%s (%s)'.format(mac, hint) : mac);
+		});
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_gaming_mode_ipv4_ips', _('Gaming mode IPv4 IP-s'));
+		so.datatype = 'or(ip4addr, cidr4)';
+		L.sortedKeys(ipaddrs, null, 'addr').forEach(function(ipv4) {
+			so.value(ipv4, '%s (%s)'.format(ipv4, ipaddrs[ipv4]));
+		});
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_gaming_mode_ipv6_ips', _('Gaming mode IPv6 IP-s'));
+		so.datatype = 'or(ip6addr, cidr6)';
 		L.sortedKeys(ip6addrs, null, 'addr').forEach(function(ipv6) {
 			so.value(ipv6, '%s (%s)'.format(ipv6, ip6addrs[ipv6]));
 		});
