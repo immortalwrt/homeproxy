@@ -41,7 +41,7 @@ start_service() {
 	fi
 
 	mkdir -p "$RUN_DIR"
-	"$HP_DIR"/scripts/generate_sing-box.lua 2>>"$LOG_PATH"
+	ucode -S "$HP_DIR/scripts/generate_sing-box.uc" 2>>"$LOG_PATH"
 
 	local inbounds="$(jsonfilter -i "$RUN_DIR/sing-box.json" -e "@.inbounds[@.tag!='dns-in']" 2>"/dev/null")"
 	if [ ! -e "$RUN_DIR/sing-box.json" ]; then

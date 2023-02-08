@@ -37,7 +37,7 @@ function execute_command(...args) {
 	const binary = is_binary(stdout);
 
 	return {
-		command: join(' ', argv),
+		command: join(' ', args),
 		stdout: binary ? null : stdout,
 		stderr,
 		exitcode,
