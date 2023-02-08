@@ -224,8 +224,8 @@ return view.extend({
 		/* Interface control start */
 		ss.tab('interface', _('Interface Control'));
 
-		so = ss.taboption('interface', widgets.DeviceSelect, 'listen_interface', _('Listen interface'),
-			_('Only process traffic from specific interface(s). Leave empty for all.'));
+		so = ss.taboption('interface', widgets.DeviceSelect, 'listen_interfaces', _('Listen interfaces'),
+			_('Only process traffic from specific interfaces. Leave empty for all.'));
 		so.multiple = true;
 		so.noaliases = true;
 
@@ -253,7 +253,7 @@ return view.extend({
 		});
 
 		so = ss.taboption('lan_ip_policy', form.ListValue, 'lan_proxy_mode', _('Proxy filter mode'));
-		so.value('disabled', _('Disabled'));
+		so.value('disabled', _('Disable'));
 		so.value('listed_only', _('Proxy listed only'));
 		so.value('except_listed', _('Proxy all except listed'));
 		so.default = 'disabled';
@@ -303,25 +303,6 @@ return view.extend({
 			so.value(ipv6, '%s (%s)'.format(ipv6, ip6addrs[ipv6]));
 		});
 
-		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_global_proxy_mac_addrs', _('Global proxy MAC addresses'));
-		so.datatype = 'macaddr';
-		Object.keys(hosts).forEach(function(mac) {
-			var hint = hosts[mac].name || L.toArray(hosts[mac].ipaddrs || hosts[mac].ipv4)[0];
-			so.value(mac, hint ? '%s (%s)'.format(mac, hint) : mac);
-		});
-
-		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_global_proxy_ipv4_ips', _('Global proxy IPv4 IP-s'));
-		so.datatype = 'or(ip4addr, cidr4)';
-		L.sortedKeys(ipaddrs, null, 'addr').forEach(function(ipv4) {
-			so.value(ipv4, '%s (%s)'.format(ipv4, ipaddrs[ipv4]));
-		});
-
-		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_global_proxy_ipv6_ips', _('Global proxy IPv6 IP-s'));
-		so.datatype = 'or(ip6addr, cidr6)';
-		L.sortedKeys(ip6addrs, null, 'addr').forEach(function(ipv6) {
-			so.value(ipv6, '%s (%s)'.format(ipv6, ip6addrs[ipv6]));
-		});
-
 		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_gaming_mode_mac_addrs', _('Gaming mode MAC addresses'));
 		so.datatype = 'macaddr';
 		Object.keys(hosts).forEach(function(mac) {
@@ -340,23 +321,72 @@ return view.extend({
 		L.sortedKeys(ip6addrs, null, 'addr').forEach(function(ipv6) {
 			so.value(ipv6, '%s (%s)'.format(ipv6, ip6addrs[ipv6]));
 		});
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_global_proxy_mac_addrs', _('Global proxy MAC addresses'));
+		so.datatype = 'macaddr';
+		Object.keys(hosts).forEach(function(mac) {
+			var hint = hosts[mac].name || L.toArray(hosts[mac].ipaddrs || hosts[mac].ipv4)[0];
+			so.value(mac, hint ? '%s (%s)'.format(mac, hint) : mac);
+		});
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_global_proxy_ipv4_ips', _('Global proxy IPv4 IP-s'));
+		so.datatype = 'or(ip4addr, cidr4)';
+		L.sortedKeys(ipaddrs, null, 'addr').forEach(function(ipv4) {
+			so.value(ipv4, '%s (%s)'.format(ipv4, ipaddrs[ipv4]));
+		});
+
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_global_proxy_ipv6_ips', _('Global proxy IPv6 IP-s'));
+		so.datatype = 'or(ip6addr, cidr6)';
+		L.sortedKeys(ip6addrs, null, 'addr').forEach(function(ipv6) {
+			so.value(ipv6, '%s (%s)'.format(ipv6, ip6addrs[ipv6]));
+		});
 		/* LAN IP policy end */
 
 		/* WAN IP policy start */
 		ss.tab('wan_ip_policy', _('WAN IP Policy'));
 
-		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_direct_ipv4_ips', _('Direct IPv4 IP-s'));
-		so.datatype = 'or(ip4addr, cidr4)';
-
-		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_direct_ipv6_ips', _('Direct IPv6 IP-s'));
-		so.datatype = 'or(ip6addr, cidr6)';
-
 		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_proxy_ipv4_ips', _('Proxy IPv4 IP-s'));
 		so.datatype = 'or(ip4addr, cidr4)';
 
 		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_proxy_ipv6_ips', _('Proxy IPv6 IP-s'));
-		so.datatype = 'or(ip6addr, cidr6)';
+		so.datatype = 'or(ip6addr, cidr6)'
+
+		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_direct_ipv4_ips', _('Direct IPv4 IP-s'));
+		so.datatype = 'or(ip4addr, cidr4)';
+
+		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_direct_ipv6_ips', _('Direct IPv6 IP-s'));
+		so.datatype = 'or(ip6addr, cidr6)';;
 		/* WAN IP policy end */
+
+		/* Proxy domain list start */
+		ss.tab('proxy_domain_list', _('Proxy Domain List'));
+
+		so = ss.taboption('proxy_domain_list', form.TextValue, '_proxy_domain_list');
+		so.rows = 10;
+		so.monospace = true;
+		so.datatype = 'hostname';
+		so.load = function(section_id) {
+			return L.resolveDefault(callReadDomainList('proxy_list')).then((res) => {
+				return res.content;
+			}, {});
+		}
+		so.write = function(section_id, value) {
+			return callWriteDomainList('proxy_list', value);
+		}
+		so.remove = function(section_id, value) {
+			return callWriteDomainList('proxy_list', '');
+		}
+		so.validate = function(section_id, value) {
+			if (section_id && value) {
+				for (var i of value.split('\n')) {
+					if (!stubValidator.apply('hostname', i))
+						return _('Expecting: %s').format(_('valid hostname'));
+				}
+			}
+
+			return true;
+		}
+		/* Proxy domain list end */
 
 		/* Direct domain list start */
 		ss.tab('direct_domain_list', _('Direct Domain List'));
@@ -387,35 +417,6 @@ return view.extend({
 			return true;
 		}
 		/* Direct domain list end */
-		/* Proxy domain list start */
-		ss.tab('proxy_domain_list', _('Proxy Domain List'));
-
-		so = ss.taboption('proxy_domain_list', form.TextValue, '_proxy_domain_list');
-		so.rows = 10;
-		so.monospace = true;
-		so.datatype = 'hostname';
-		so.load = function(section_id) {
-			return L.resolveDefault(callReadDomainList('proxy_list')).then((res) => {
-				return res.content;
-			}, {});
-		}
-		so.write = function(section_id, value) {
-			return callWriteDomainList('proxy_list', value);
-		}
-		so.remove = function(section_id, value) {
-			return callWriteDomainList('proxy_list', '');
-		}
-		so.validate = function(section_id, value) {
-			if (section_id && value) {
-				for (var i of value.split('\n')) {
-					if (!stubValidator.apply('hostname', i))
-						return _('Expecting: %s').format(_('valid hostname'));
-				}
-			}
-
-			return true;
-		}
-		/* Proxy domain list end */
 		/* Regular mode ACL settings end */
 
 		/* Custom routing settings start */

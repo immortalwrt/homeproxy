@@ -69,9 +69,9 @@ start_service() {
 		config_get_bool ipv6_support "config" "ipv6_support" "0"
 
 		# DNSMasq rules
-		local dns_port
+		local dns_port nftset_v6
 		config_get dns_port "infra" "dns_port" "5333"
-		[ "$ipv6_support" -eq "0" ] || local nftset_v6=",6#inet#fw4#homeproxy_gfwlist_v6"
+		[ "$ipv6_support" -eq "0" ] || nftset_v6=",6#inet#fw4#homeproxy_gfwlist_v6"
 		mkdir -p "$DNSMASQ_DIR"
 		echo -e "conf-dir=$DNSMASQ_DIR" > "$DNSMASQ_DIR/../dnsmasq-homeproxy.conf"
 		if [ "$routing_mode" = "gfwlist" ]; then
@@ -89,6 +89,12 @@ start_service() {
 				no-resolv
 				server=127.0.0.1#$dns_port
 			EOF
+		fi
+
+		if [ "$routing_mode" != "custom" ]; then
+			[ "$ipv6_support" -eq "0" ] || nftset_v6=",6#inet#fw4#homeproxy_proxylist_v6"
+			sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#homeproxy_proxylist_v4$nftset_v6/g" \
+				"$HP_DIR/resources/proxy_list.txt" > "$DNSMASQ_DIR/proxy_list.conf"
 		fi
 		/etc/init.d/dnsmasq restart >"/dev/null" 2>&1
 
@@ -187,14 +193,15 @@ service_stopped() {
 	ip -6 rule del fwmark "$tun_mark" table "$table_mark" 2>"/dev/null"
 
 	# Nftables rules
-	for i in "homeproxy_output_redir" "homeproxy_redirect" \
-		 "homeproxy_mangle_prerouting" "homeproxy_mangle_output"; do
+	for i in "homeproxy_dstnat_redir" "homeproxy_output_redir" "homeproxy_redirect" \
+		 "homeproxy_mangle_mark" "homeproxy_mangle_prerouting" "homeproxy_mangle_output"; do
 		nft flush chain inet fw4 "$i" 2>"/dev/null"
 		nft delete chain inet fw4 "$i" 2>"/dev/null"
 	done
 	for i in "homeproxy_localaddr_v4" "homeproxy_localaddr_v6" \
 		 "homeproxy_gfwlist_v4" "homeproxy_gfwlist_v6" \
-		 "homeproxy_mainland_addr_v4" "homeproxy_mainland_addr_v6"; do
+		 "homeproxy_mainland_addr_v4" "homeproxy_mainland_addr_v6" \
+		 "homeproxy_proxy_addr_v4" "homeproxy_proxy_addr_v6"; do
 		nft flush set inet fw4 "$i" 2>"/dev/null"
 		nft delete set inet fw4 "$i" 2>"/dev/null"
 	done

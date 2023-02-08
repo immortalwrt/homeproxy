@@ -41,6 +41,7 @@ local uci = luci.model.uci.cursor()
 local uciconfig = "homeproxy"
 local uciinfra = "infra"
 local ucimain = "config"
+local ucicontrol = "control"
 
 local ucidnssetting = "dns"
 local ucidnsserver = "dns_server"
@@ -67,17 +68,19 @@ local dns_port = uci:get(uciconfig, uciinfra, "dns_port") or "5333"
 
 local enable_server = uci:get(uciconfig, uciserver, "enabled") or "0"
 
-local ipv6_support, main_node, main_udp_node, default_outbound, default_interface
+local main_node, main_udp_node, ipv6_support, default_outbound, default_interface
 local dns_strategy, dns_default_server, dns_disable_cache, dns_disable_cache_expire
 local redirect_port, tproxy_port, self_mark
 local sniff_override, tun_name, tcpip_stack, endpoint_independent_nat
 if routing_mode ~= "custom" then
-	ipv6_support = uci:get(uciconfig, ucimain, "ipv6_support") or "0"
 	main_node = uci:get(uciconfig, ucimain, "main_node") or "nil"
 	main_udp_node = uci:get(uciconfig, ucimain, "main_udp_node") or "nil"
 	redirect_port = uci:get(uciconfig, uciinfra, "redirect_port") or "5331"
 	tproxy_port = uci:get(uciconfig, uciinfra, "tproxy_port") or "5332"
 	self_mark = uci:get(uciconfig, uciinfra, "self_mark") or "100"
+
+	ipv6_support = uci:get(uciconfig, ucimain, "ipv6_support") or "0"
+	default_interface = uci:get(uciconfig, ucicontrol, "bind_interface")
 else
 	-- DNS settings
 	dns_strategy = uci:get(uciconfig, ucidnssetting, "dns_strategy")
