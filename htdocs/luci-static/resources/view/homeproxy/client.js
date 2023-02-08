@@ -349,13 +349,13 @@ return view.extend({
 		so.datatype = 'or(ip4addr, cidr4)';
 
 		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_proxy_ipv6_ips', _('Proxy IPv6 IP-s'));
-		so.datatype = 'or(ip6addr, cidr6)'
+		so.datatype = 'or(ip6addr, cidr6)';
 
 		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_direct_ipv4_ips', _('Direct IPv4 IP-s'));
 		so.datatype = 'or(ip4addr, cidr4)';
 
 		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_direct_ipv6_ips', _('Direct IPv6 IP-s'));
-		so.datatype = 'or(ip6addr, cidr6)';;
+		so.datatype = 'or(ip6addr, cidr6)';
 		/* WAN IP policy end */
 
 		/* Proxy domain list start */
