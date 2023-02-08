@@ -1,6 +1,6 @@
 TODO:
 - Support ACL for regular mode
 - Refactor resources management
-- Tproxy UDP is almost broken (nat4), need ask sing-box for help
+- Tproxy UDP performs nat4 due to incorrect firewall rules
 - Rewrite existing lua scripts into ucode
 - Any other improvements
