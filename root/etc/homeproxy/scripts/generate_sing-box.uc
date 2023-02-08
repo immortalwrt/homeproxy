@@ -48,10 +48,6 @@ function executeCommand(...args) {
 /* Utilities end */
 
 /* String helper start */
-function startswith(str, pat) {
-	return substr(str, 0, length(pat)) === pat;
-}
-
 function isEmpty(res) {
 	return !res || res === 'nil' || (type(res) in ['array', 'object'] && length(res) === 0);
 }
