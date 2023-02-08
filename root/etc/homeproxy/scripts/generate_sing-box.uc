@@ -444,7 +444,7 @@ if (server_enabled === '1')
 		if (cfg.enabled !== '1')
 			return;
 
-		pushd(config.inbounds, {
+		push(config.inbounds, {
 			type: cfg.type,
 			tag: 'cfg-' + cfg['.name'] + '-in',
 
@@ -456,7 +456,7 @@ if (server_enabled === '1')
 			sniff_override_destination: (cfg.sniff_override === '1'),
 			domain_strategy: cfg.domain_strategy,
 			proxy_protocol: (cfg.proxy_protocol === '1') || null,
-			proxy_protocol_accept_no_header: (proxy_protocol_accept_no_header === '1') || null,
+			proxy_protocol_accept_no_header: (cfg.proxy_protocol_accept_no_header === '1') || null,
 			network: cfg.network,
 
 			/* Hysteria */

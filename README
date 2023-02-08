@@ -2,5 +2,6 @@ TODO:
 - Support ACL for regular mode
 - Refactor resources management
 - Tproxy UDP performs nat4 due to incorrect firewall rules
-- Rewrite existing lua scripts into ucode
+- Rewrite subscription script into ucode
+- Refactor nft rules
 - Any other improvements
