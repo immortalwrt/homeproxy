@@ -8,6 +8,7 @@
 'require form';
 'require fs';
 'require poll';
+'require rpc';
 'require ui';
 'require view';
 
@@ -26,26 +27,65 @@ var css = '				\
 	background-color: #33ccff;	\
 }';
 
-var hp_dir = '/var/run/homeproxy',
-    hp_geoupdater = '/etc/homeproxy/scripts/update_geodata.sh';
+var hp_dir = '/var/run/homeproxy';
+
+function getResVersion(self, type) {
+	var callResVersion = rpc.declare({
+		object: 'luci.homeproxy',
+		method: 'resources_get_version',
+		params: ['type'],
+		expect: { '': {} }
+	});
+
+	var callResUpdate = rpc.declare({
+		object: 'luci.homeproxy',
+		method: 'resources_update',
+		params: ['type'],
+		expect: { '': {} }
+	});
+
+	return L.resolveDefault(callResVersion(type), {}).then((res) => {
+		var spanTemp = E('div', { 'style': 'cbi-value-field' }, [
+			E('button', {
+				'class': 'btn cbi-button cbi-button-action',
+				'click': ui.createHandlerFn(this, function() {
+					return L.resolveDefault(callResUpdate(type), {}).then((res) => {
+						switch (res.status) {
+						case 0:
+							self.description = _('Successfully updated.');
+							break;
+						case 1:
+							self.description = _('Update failed.');
+							break;
+						case 2:
+							self.description = _('Already in updating.');
+							break;
+						case 3:
+							self.description = _('Already at the latest version.');
+							break;
+						default:
+							self.description = _('Unknown error.');
+							break;
+						}
+
+						return self.map.reset();
+					});
+				})
+			}, [ _('Check update') ]),
+			' ',
+			E('strong', {
+				'style': (res.error ? 'color:red' : 'color:green')
+			}, [
+				res.error ? 'not found' : res.version
+			]),
+		]);
+
+		self.default = spanTemp
+	});
+}
 
 return view.extend({
-	load: function() {
-		return Promise.all([
-			fs.read(hp_dir + '/homeproxy.log', 'text') .then((res) => {
-				return res.trim() || _('Log is clean.');
-			}).catch((err) => {
-				var log;
-				if (err.toString().includes('NotFoundError'))
-					log = _('Log file does not exist.');
-				else
-					log = _('Unknown error: %s').format(err);
-				return log;
-			})
-		])
-	},
-
-	render: function(data) {
+	render: function() {
 		var m, s, o;
 
 		m = new form.Map('homeproxy');
@@ -53,58 +93,71 @@ return view.extend({
 		s = m.section(form.NamedSection, 'config', 'homeproxy', _('Resources management'));
 		s.anonymous = true;
 
-		o = s.option(form.DummyValue, '_geodata_version', _('GeoData version'));
-		o.cfgvalue = function() {
-			var errSpanTemp = '<div style="margin-top:5px"><strong style="color:red">%s<strong></div>';
-			return fs.exec(hp_geoupdater, [ 'get_version' ]).then((res) => {
-				var spanTemp = '<div style="margin-top:5px;">%s</div>';
-				if (res.stdout.trim())
-					this.default = spanTemp.format(res.stdout.trim());
-				else {
-					ui.addNotification(null, E('p', [ _('Unknown error: %s').format(res) ]));
-					this.default = errSpanTemp.format(_('unknown error'));
-				}
-
-				return null;
-			}).catch((err) => {
-				ui.addNotification(null, E('p', [ _('Unknown error: %s').format(err) ]));
-				this.default = errSpanTemp.format(_('unknown error'));
-
-				return null;
-			});
-		}
+		o = s.option(form.DummyValue, '_geoip_version', _('GeoIP version'));
+		o.cfgvalue = function() { return getResVersion(this, 'geoip') };
 		o.rawhtml = true;
 
-		o = s.option(form.Button, '_update_geodata', _('Update GeoData'));
-		o.inputstyle = 'action';
-		o.onclick = function() {
-			return fs.exec(hp_geoupdater, [ 'update_version' ]).then((res) => {
-					if (res.code === 0)
-						this.description = _('Successfully updated');
-					else if (res.code === 1)
-						this.description = _('Update failed');
-					else if (res.code === 2)
-						this.description = _('Already in updating');
-					else if (res.code === 3)
-						this.description = _('Already at the latest version');
+		o = s.option(form.DummyValue, '_geosite_version', _('GeoSite version'));
+		o.cfgvalue = function() { return getResVersion(this, 'geosite') };
+		o.rawhtml = true;
 
-				return this.map.reset();
-			}).catch((err) => {
-				ui.addNotification(null, E('p', [ _('Unknown error: %s').format(err) ]));
-				this.description = _('Update failed');
-				return this.map.reset();
-			});
-		}
+		o = s.option(form.DummyValue, '_china_ip4_version', _('China IPv4 list version'));
+		o.cfgvalue = function() { return getResVersion(this, 'china_ip4') };
+		o.rawhtml = true;
+
+		o = s.option(form.DummyValue, '_china_ip6_version', _('China IPv6 list version'));
+		o.cfgvalue = function() { return getResVersion(this, 'china_ip6') };
+		o.rawhtml = true;
+
+		o = s.option(form.DummyValue, '_gfw_list_version', _('GFW list version'));
+		o.cfgvalue = function() { return getResVersion(this, 'gfw_list') };
+		o.rawhtml = true;
+
+		o = s.option(form.DummyValue, '_china_list_version', _('China list version'));
+		o.cfgvalue = function() { return getResVersion(this, 'china_list') };
+		o.rawhtml = true;
 
 		o = s.option(form.DummyValue, '_homeproxy_logview');
 		o.render = function() {
+			var log_textarea = E('div', { 'id': 'log_textarea' },
+				E('img', {
+					'src': L.resource(['icons/loading.gif']),
+					'alt': _('Loading'),
+					'style': 'vertical-align:middle'
+				}, _('Collecting data...'))
+			);
+
+			var log;
+			poll.add(L.bind(function() {
+				return fs.read_direct(hp_dir + '/homeproxy.log', 'text')
+				.then(function(res) {
+					log = E('pre', { 'wrap': 'pre' }, [
+						res.trim() || _('Log is empty.')
+					]);
+
+					dom.content(log_textarea, log);
+				}).catch(function(err) {
+					if (err.toString().includes('NotFoundError'))
+						log = E('pre', { 'wrap': 'pre' }, [
+							_('Log file does not exist.')
+						]);
+					else
+						log = E('pre', { 'wrap': 'pre' }, [
+							_('Unknown error: %s').format(err)
+						]);
+
+					dom.content(log_textarea, log);
+				});
+			}));
+
 			return E([
 				E('style', [ css ]),
 				E('div', {'class': 'cbi-map'}, [
 					E('h3', {'name': 'content'}, _('HomeProxy log')),
 					E('div', {'class': 'cbi-section'}, [
-						E('div', { 'id': 'log_textarea' },
-							E('pre', { 'wrap': 'pre' }, [ data[0] ])
+						log_textarea,
+						E('div', {'style': 'text-align:right'},
+							E('small', {}, _('Refresh every %s seconds.').format(L.env.pollinterval))
 						)
 					])
 				])

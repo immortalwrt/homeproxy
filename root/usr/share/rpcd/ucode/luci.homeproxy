@@ -45,6 +45,11 @@ function execute_command(...args) {
 	};
 }
 
+/* Kanged from ucode/luci */
+function shellquote(s) {
+	return `'${replace(s, "'", "'\\''")}'`;
+}
+
 const HP_DIR = '/etc/homeproxy';
 
 const methods = {
@@ -173,14 +178,18 @@ const methods = {
 		args: { type: 'type' },
 		call: function(req) {
 			const version = trim(readfile(`${HP_DIR}/resources/${req.args?.type}.ver`));
-			return { version: version };
+			return { version: version, error: error() };
 		}
 	},
 	resources_update: {
 		args: { type: 'type' },
 		call: function(req) {
-			const exit_code = system(`${HP_DIR}/scripts/update_geodata.sh ${req.args?.type}`);
-			return { status: exit_code };
+			if (req.args?.type) {
+				const type = shellquote(req.args?.type);
+				const exit_code = system(`${HP_DIR}/scripts/update_geodata.sh ${type}`);
+				return { status: exit_code };
+			} else
+				return { status: 255, error: 'argument "type" is empty' };
 		}
 	}
 };

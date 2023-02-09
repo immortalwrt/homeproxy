@@ -46,8 +46,8 @@ string.trim = luci.util.trim
 
 -- Kanged from https://gist.github.com/yi/01e3ab762838d567e65d
 function string.fromhex(str)
-	return (str:gsub('..', function (cc)
-		return string.char(tonumber(cc, 16))
+	return (str:gsub('..', function (c)
+		return string.char(tonumber(c, 16))
 	end))
 end
 

@@ -6,120 +6,150 @@
 NAME="homeproxy"
 
 RESOURCES_DIR="/etc/$NAME/resources"
-GEOIP_REPO="1715173329/sing-geoip"
-GEOSITE_REPO="1715173329/sing-geosite"
 mkdir -p "$RESOURCES_DIR"
 
 RUN_DIR="/var/run/$NAME"
 LOG_PATH="$RUN_DIR/$NAME.log"
-LOCK="$RUN_DIR/update_geodata.lock"
 mkdir -p "$RUN_DIR"
 
 log() {
 	echo -e "$(date "+%Y-%m-%d %H:%M:%S") $*" >> "$LOG_PATH"
 }
 
-check_multi_task() {
-	if [ -e "$LOCK" ]; then
-		log "A task is already running."
-		exit 2
-	else
-		touch "$LOCK"
-	fi
-}
+set_lock() {
+	local act="$1"
+	local type="$2"
 
-check_update() {
-	local geotype="$1"
-	local georepo="$2"
-	local geotypeupper="$(to_upper "$geotype")"
-
-	local geodata_ver="$(curl --connect-timeout 5 -fsSL "https://api.github.com/repos/$georepo/releases/latest" | jsonfilter -e "@.tag_name")"
-	if [ -z "$geodata_ver" ]; then
-		log "[$geotypeupper] Failed to get the latest version, please retry later."
-		return 1
-	fi
-
-	local_geodata_ver="$(cat "$RESOURCES_DIR/$geotype.db.ver" 2>"/dev/null" || echo "NOT FOUND")"
-	if [ "$local_geodata_ver" = "$geodata_ver" ]; then
-		log "[$geotypeupper] Current version: $geodata_ver."
-		log "[$geotypeupper] You're already at the latest version."
-		return 3
-	else
-		log "[$geotypeupper] Local version: $local_geodata_ver, latest version: $geodata_ver."
-	fi
-
-	local geodata_hash
-	if curl --connect-timeout 5 -fsSL "https://github.com/$georepo/releases/download/$geodata_ver/$geotype.db" -o "$RUN_DIR/$geotype.db" && \
-			geodata_hash="$(curl --connect-timeout 5 -fsSL "https://github.com/$georepo/releases/download/$geodata_ver/$geotype.db.sha256sum")"; then
-		[ -z "$geodata_hash" ] || geodata_hash="$(echo "$geodata_hash" | awk '{print $1}')"
-		if validate_sha256sum "$RUN_DIR/$geotype.db" "$geodata_hash"; then
-			mv -f "$RUN_DIR/$geotype.db" "$RESOURCES_DIR/$geotype.db"
-			echo -e "$geodata_ver" > "$RESOURCES_DIR/$geotype.db.ver"
-			log "[$geotypeupper] Successfully updated."
-			return 0
+	local lock="$RUN_DIR/update_geodata-$type.lock"
+	if [ "$act" = "set" ]; then
+		if [ -e "$lock" ]; then
+			log "[$(to_upper "$type")] A task is already running."
+			exit 2
+		else
+			touch "$lock"
 		fi
+	elif [ "$act" = "remove" ]; then
+		rm -f "$lock"
 	fi
-
-	rm -f "$RUN_DIR/$geotype.db"
-	log "[$geotypeupper] Update failed."
-	return 1
 }
 
 to_upper() {
 	echo -e "$1" | tr "[a-z]" "[A-Z]"
 }
 
-validate_sha256sum() {
-	local file="$1"
-	local hash="$2"
+check_geodata_update() {
+	local geotype="$1"
+	local georepo="$2"
+	local curl="curl --connect-timeout 5 -fsSL"
 
-	if [ ! -e "$file" ] || [ -z "$hash" ]; then
+	set_lock "set" "$geotype"
+
+	local geodata_ver="$($curl "https://api.github.com/repos/$georepo/releases/latest" | jsonfilter -e "@.tag_name")"
+	if [ -z "$geodata_ver" ]; then
+		log "[$(to_upper "$geotype")] Failed to get the latest version, please retry later."
+
+		set_lock "remove" "$geotype"
 		return 1
 	fi
 
-	local filehash="$(sha256sum "$file" | awk '{print $1}')"
-	if [ -z "$filehash" ] || [ "$filehash" != "$hash" ]; then
-		return 1
+	local local_geodata_ver="$(cat "$RESOURCES_DIR/$geotype.ver" 2>"/dev/null" || echo "NOT FOUND")"
+	if [ "$local_geodata_ver" = "$geodata_ver" ]; then
+		log "[$(to_upper "$geotype")] Current version: $geodata_ver."
+		log "[$(to_upper "$geotype")] You're already at the latest version."
+
+		set_lock "remove" "$geotype"
+		return 3
 	else
-		return 0
+		log "[$(to_upper "$geotype")] Local version: $local_geodata_ver, latest version: $geodata_ver."
 	fi
+
+	local geodata_hash
+	$curl "https://github.com/$georepo/releases/download/$geodata_ver/$geotype.db" -o "$RUN_DIR/$geotype.db"
+	geodata_hash="$($curl "https://github.com/$georepo/releases/download/$geodata_ver/$geotype.db.sha256sum" | awk '{print $1}')"
+	if ! echo -e "$geodata_hash $RUN_DIR/$geotype.db" | sha256sum -s -c -; then
+		rm -f "$RUN_DIR/$geotype.db"
+		log "[$(to_upper "$geotype")] Update failed."
+
+		set_lock "remove" "$geotype"
+		return 1
+	fi
+
+	mv -f "$RUN_DIR/$geotype.db" "$RESOURCES_DIR/$geotype.db"
+	echo -e "$geodata_ver" > "$RESOURCES_DIR/$geotype.ver"
+	log "[$(to_upper "$geotype")] Successfully updated."
+
+	set_lock "remove" "$geotype"
+	return 0
+}
+
+check_list_update() {
+	local listtype="$1"
+	local listrepo="$2"
+	local listref="$3"
+	local listname="$4"
+	local curl="curl --connect-timeout 5 -fsSL"
+
+	set_lock "set" "$listtype"
+
+	local list_info="$($curl "https://api.github.com/repos/$listrepo/commits?sha=$listref&path=$listname")"
+	local list_sha="$(echo -e "$list_info" | jsonfilter -e "@[0].sha")"
+	local list_ver="$(echo -e "$list_info" | jsonfilter -e "@[0].commit.message" | grep -Eo "[0-9-]+" | tr -d '-')"
+	if [ -z "$list_sha" ] || [ -z "$list_ver" ]; then
+		log "[$(to_upper "$listtype")] Failed to get the latest version, please retry later."
+
+		set_lock "remove" "$listtype"
+		return 1
+	fi
+
+	local local_list_ver="$(cat "$RESOURCES_DIR/$listtype.ver" 2>"/dev/null" || echo "NOT FOUND")"
+	if [ "$local_list_ver" = "$list_ver" ]; then
+		log "[$(to_upper "$listtype")] Current version: $list_ver."
+		log "[$(to_upper "$listtype")] You're already at the latest version."
+
+		set_lock "remove" "$listtype"
+		return 3
+	else
+		log "[$(to_upper "$listtype")] Local version: $local_list_ver, latest version: $list_ver."
+	fi
+
+	$curl "https://fastly.jsdelivr.net/gh/$listrepo@$list_sha/$listname" -o "$RUN_DIR/$listname"
+	if [ ! -s "$RUN_DIR/$listname" ]; then
+		rm -f "$RUN_DIR/$listname"
+		log "[$(to_upper "$listtype")] Update failed."
+
+		set_lock "remove" "$listtype"
+		return 1
+	fi
+
+	mv -f "$RUN_DIR/$listname" "$RESOURCES_DIR/$listtype.${listname##*.}"
+	echo -e "$list_ver" > "$RESOURCES_DIR/$listtype.ver"
+	log "[$(to_upper "$listtype")] Successfully updated."
+
+	set_lock "remove" "$listtype"
+	return 0
 }
 
 case "$1" in
-"get_version")
-	for i in "geoip" "geosite"; do
-		if [ ! -s "$RESOURCES_DIR/$i.db.ver" ]; then
-			info="${info:+$info<br/>}<strong style=\"color:red\">$(to_upper "$i"): NOT FOUND</strong>"
-		else
-			info="${info:+$info<br/>}<strong style=\"color:green\">$(to_upper "$i"): $(cat $RESOURCES_DIR/$i.db.ver)</strong>"
-		fi
-	done
-	echo -e "$info"
+"geoip")
+	check_geodata_update "$1" "1715173329/sing-geoip"
 	;;
-"update_version")
-	check_multi_task
-
-	check_update "geoip" "$GEOIP_REPO"
-	ret1="$?"
-	check_update "geosite" "$GEOSITE_REPO"
-	ret2="$?"
-
-	if [ "$2" = "update_subscription" ]; then
-		lua "$RESOURCES_DIR/../scripts/update_subscribe.lua"
-	fi
-
-	rm -f "$LOCK"
-
-	if [ "$ret1" = "1" ] || [ "$ret2" = "1" ]; then
-		exit 1
-	elif [ "$ret1" = "0" ] || [ "$ret2" = "0" ]; then
-		exit 0
-	else
-		exit 3
-	fi
+"geosite")
+	check_geodata_update "$1" "1715173329/sing-geosite"
+	;;
+"china_ip4")
+	check_list_update "$1" "gaoyifan/china-operator-ip" "ip-lists" "china.txt"
+	;;
+"china_ip6")
+	check_list_update "$1" "gaoyifan/china-operator-ip" "ip-lists" "china6.txt"
+	;;
+"gfw_list")
+	check_list_update "$1" "Loyalsoldier/v2ray-rules-dat" "release" "gfw.txt"
+	;;
+"china_list")
+	check_list_update "$1" "Loyalsoldier/v2ray-rules-dat" "release" "direct-list.txt"
 	;;
 *)
-	echo -e "Usage: $0 get_version | update_version <update_subscription>"
+	echo -e "Usage: $0 <geoip / geosite / china_ip4 / china_ip6 / gfw_list / china_list>"
 	exit 1
 	;;
 esac

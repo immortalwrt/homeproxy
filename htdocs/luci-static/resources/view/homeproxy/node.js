@@ -978,7 +978,7 @@ return view.extend({
 			so.value('360', _('360'));
 			so.value('android', _('Android'));
 			so.value('chrome', _('Chrome'));
-			so.value('edge', _('EDGE'));
+			so.value('edge', _('Edge'));
 			so.value('firefox', _('Firefox'));
 			so.value('ios', _('iOS'));
 			so.value('qq', _('QQ'));
