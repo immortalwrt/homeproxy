@@ -10,6 +10,11 @@
 import { mkstemp, readfile, writefile } from 'fs';
 import { cursor } from 'uci';
 
+/* Global variables start */
+const hp_dir = '/etc/homeproxy';
+const run_dir = '/var/run/homeproxy';
+/* Global variables end */
+
 /* Utilities start */
 /* Kanged from luci-app-commands */
 function isBinary(str) {
@@ -114,9 +119,9 @@ else
 
 const dns_port = uci.get(uciconfig, uciinfra, 'dns_port') || '5333';
 
-let main_node, main_udp_node, ipv6_support, default_outbound, default_interface,
+let main_node, main_udp_node, dedicated_udp_node, ipv6_support, default_outbound, default_interface,
     dns_server, dns_strategy, dns_default_server, dns_disable_cache, dns_disable_cache_expire,
-    redirect_port, tproxy_port, self_mark,
+    redirect_port, tproxy_port, self_mark, proxy_domain_list, direct_domain_list,
     sniff_override, tun_name, tcpip_stack, endpoint_independent_nat;
 
 if (routing_mode !== 'custom') {
@@ -129,9 +134,14 @@ if (routing_mode !== 'custom') {
 	ipv6_support = uci.get(uciconfig, ucimain, 'ipv6_support') || '0';
 	default_interface = uci.get(uciconfig, ucicontrol, 'bind_interface');
 
+	dedicated_udp_node = !isEmpty(main_udp_node) && !(main_udp_node in ['same', main_node]);
+
 	dns_server = uci.get(uciconfig, ucimain, 'dns_server');
 	if (isEmpty(dns_server) || dns_server === 'wan')
 		dns_server = wan_dns;
+
+	proxy_domain_list = trim(readfile(hp_dir + '/resources/proxy_list.txt'));
+	direct_domain_list = trim(readfile(hp_dir + '/resources/direct_list.txt'));
 } else {
 	/* DNS settings */
 	dns_strategy = uci.get(uciconfig, ucidnssetting, 'dns_strategy');
@@ -150,9 +160,6 @@ if (routing_mode !== 'custom') {
 /* UCI config end */
 
 /* Config helper start */
-const hp_dir = '/etc/homeproxy';
-const run_dir = '/var/run/homeproxy';
-
 function generate_outbound(node) {
 	if (type(node) !== 'object' || isEmpty(node))
 		return null;
@@ -545,7 +552,7 @@ config.outbounds = [
 	}
 ];
 
-/* Main ouubounds */
+/* Main outbounds */
 if (!isEmpty(main_node)) {
 	config.outbounds[0].routing_mark = int(self_mark);
 
@@ -554,9 +561,9 @@ if (!isEmpty(main_node)) {
 	config.outbounds[length(config.outbounds)-1].routing_mark = int(self_mark);
 	config.outbounds[length(config.outbounds)-1].tag = 'main-out';
 
-	if (!isEmpty(main_udp_node) && !(main_udp_node in ['same', main_node])) {
+	if (dedicated_udp_node) {
 		const main_udp_node_cfg = uci.get_all(uciconfig, main_udp_node) || {};
-		push(config.outbounds, generate_outbound(main_node_cfg));
+		push(config.outbounds, generate_outbound(main_udp_node_cfg));
 		config.outbounds[length(config.outbounds)-1].routing_mark = int(self_mark);
 		config.outbounds[length(config.outbounds)-1].tag = 'main-udp-out';
 	}
@@ -604,35 +611,59 @@ if (!isEmpty(main_node) || !isEmpty(default_outbound))
 
 if (!isEmpty(main_node)) {
 	/* Routing rules */
-	let routing_geosite, routing_geoip, final_node;
+	/* Proxy domain list */
+	if (proxy_domain_list) {
+		push(config.route.rules, {
+			domain_keyword: split(proxy_domain_list, /[\r\n]/),
+			network: dedicated_udp_node ? 'tcp' : null,
+			outbound: 'main-out'
+		});
+
+		if (dedicated_udp_node)
+			push(config.route.rules, {
+				domain_keyword: split(proxy_domain_list, /[\r\n]/),
+				network: 'udp',
+				outbound: 'main-udp-out'
+			});
+	}
+
+	/* Direct domain list */
+	if (direct_domain_list)
+		push(config.route.rules, {
+			domain_keyword: split(direct_domain_list, /[\r\n]/),
+			outbound: 'direct-out'
+		});
+
+	let routing_geosite, routing_geoip;
 	if (routing_mode === 'gfwlist') {
 		routing_geosite = [ 'gfw', 'greatfire' ];
 		routing_geoip = [ 'telegram' ];
 
-		/* Main out */
 		push(config.route.rules, {
 			geosite: routing_geosite,
 			geoip: routing_geoip,
+			network: dedicated_udp_node ? 'tcp' : null,
 			outbound: 'main-out'
 		});
-
-		config.route.final = 'direct-out';
-	} else
-		/* Main out */
-		config.route.final = 'main-out';
+	} else if (routing_mode === 'bypass_mainland_china') {
+		/* Direct CN traffic, in case of dirty nftset table */
+		push(config.route.rules, {
+			geosite: [ 'cn' ],
+			geoip: [ 'cn' ],
+			outbound: 'direct-out'
+		});
+	}
 
 	/* Main UDP out */
-	if (!isEmpty(main_udp_node) && !(main_udp_node in ['same', main_node])) {
-		if (routing_mode === 'gfwlist')
-			config.route.rules[length(config.route.rules)-1].network = 'tcp';
-
+	if (dedicated_udp_node)
 		push(config.route.rules, {
 			geosite: routing_geosite,
 			geoip: routing_geoip,
 			network: 'udp',
 			outbound: 'main-udp-out'
 		});
-	}
+
+	config.route.final = (routing_mode === 'gfwlist') ? 'direct-out' : 'main-out';
 } else if (!isEmpty(default_outbound)) {
 	uci.foreach(uciconfig, uciroutingrule, (cfg) => {
 		if (cfg.enabled !== '1')

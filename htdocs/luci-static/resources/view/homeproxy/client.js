@@ -379,7 +379,7 @@ return view.extend({
 		so.validate = function(section_id, value) {
 			if (section_id && value) {
 				for (var i of value.split('\n')) {
-					if (!stubValidator.apply('hostname', i))
+					if (i && !stubValidator.apply('hostname', i))
 						return _('Expecting: %s').format(_('valid hostname'));
 				}
 			}
@@ -409,7 +409,7 @@ return view.extend({
 		so.validate = function(section_id, value) {
 			if (section_id && value) {
 				for (var i of value.split('\n')) {
-					if (!stubValidator.apply('hostname', i))
+					if (i && !stubValidator.apply('hostname', i))
 						return _('Expecting: %s').format(_('valid hostname'));
 				}
 			}

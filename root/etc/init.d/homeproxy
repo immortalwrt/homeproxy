@@ -92,8 +92,8 @@ start_service() {
 		fi
 
 		if [ "$routing_mode" != "custom" ]; then
-			[ "$ipv6_support" -eq "0" ] || nftset_v6=",6#inet#fw4#homeproxy_proxylist_v6"
-			sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#homeproxy_proxylist_v4$nftset_v6/g" \
+			[ "$ipv6_support" -eq "0" ] || nftset_v6=",6#inet#fw4#homeproxy_proxy_addr_v6"
+			sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#homeproxy_proxy_addr_v4$nftset_v6/g" \
 				"$HP_DIR/resources/proxy_list.txt" > "$DNSMASQ_DIR/proxy_list.conf"
 		fi
 		/etc/init.d/dnsmasq restart >"/dev/null" 2>&1
