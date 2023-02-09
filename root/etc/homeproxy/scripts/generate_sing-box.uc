@@ -61,6 +61,12 @@ function strToInt(str) {
 	return !isEmpty(str) ? int(str) || null : null;
 }
 
+function validateHostname(hostname) {
+	return (match(hostname, /^[a-zA-Z0-9_]+$/) != null ||
+		(match(hostname, /^[a-zA-Z0-9_][a-zA-Z0-9_%-.]*[a-zA-Z0-9]$/) &&
+			match(hostname, /[^0-9.]/)));
+}
+
 function removeBlankAttrs(res) {
 	let content;
 
@@ -326,6 +332,30 @@ config.dns = {
 };
 
 if (!isEmpty(main_node)) {
+	/* Avoid DNS loop */
+	const main_node_addr = uci.get(uciconfig, main_node, 'address');
+	if (validateHostname(main_node_addr)) {
+		if (!config.dns.rules)
+			config.dns.rules = [];
+
+		config.dns.rules[length(config.dns.rules)] = {
+			domain: main_node_addr,
+			server: 'default-dns'
+		}
+	}
+	if (dedicated_udp_node) {
+		const main_udp_node_addr = uci.get(uciconfig, main_udp_node, 'address');
+		if (validateHostname(main_udp_node_addr)) {
+			if (!config.dns.rules)
+				config.dns.rules = [];
+
+			config.dns.rules[length(config.dns.rules)] = {
+				domain: main_udp_node_addr,
+				server: 'default-dns'
+			}
+		}
+	}
+
 	let default_final_dns = 'default-dns';
 	/* Main DNS */
 	if (dns_server !== wan_dns) {

@@ -84,6 +84,52 @@ function getResVersion(self, type) {
 	});
 }
 
+function getRuntimeLog(title, file) {
+	var log_textarea = E('div', { 'id': 'log_textarea' },
+		E('img', {
+			'src': L.resource(['icons/loading.gif']),
+			'alt': _('Loading'),
+			'style': 'vertical-align:middle'
+		}, _('Collecting data...'))
+	);
+
+	var log;
+	poll.add(L.bind(function() {
+		return fs.read_direct(hp_dir + '/' + file, 'text')
+		.then(function(res) {
+			log = E('pre', { 'wrap': 'pre' }, [
+				res.trim() || _('Log is empty.')
+			]);
+
+			dom.content(log_textarea, log);
+		}).catch(function(err) {
+			if (err.toString().includes('NotFoundError'))
+				log = E('pre', { 'wrap': 'pre' }, [
+					_('Log file does not exist.')
+				]);
+			else
+				log = E('pre', { 'wrap': 'pre' }, [
+					_('Unknown error: %s').format(err)
+				]);
+
+			dom.content(log_textarea, log);
+		});
+	}));
+
+	return E([
+		E('style', [ css ]),
+		E('div', {'class': 'cbi-map'}, [
+			E('h3', {'name': 'content'}, _('%s log').format(title)),
+			E('div', {'class': 'cbi-section'}, [
+				log_textarea,
+				E('div', {'style': 'text-align:right'},
+					E('small', {}, _('Refresh every %s seconds.').format(L.env.pollinterval))
+				)
+			])
+		])
+	]);
+}
+
 return view.extend({
 	render: function() {
 		var m, s, o;
@@ -118,98 +164,10 @@ return view.extend({
 		o.rawhtml = true;
 
 		o = s.option(form.DummyValue, '_homeproxy_logview');
-		o.render = function() {
-			var log_textarea = E('div', { 'id': 'log_textarea' },
-				E('img', {
-					'src': L.resource(['icons/loading.gif']),
-					'alt': _('Loading'),
-					'style': 'vertical-align:middle'
-				}, _('Collecting data...'))
-			);
-
-			var log;
-			poll.add(L.bind(function() {
-				return fs.read_direct(hp_dir + '/homeproxy.log', 'text')
-				.then(function(res) {
-					log = E('pre', { 'wrap': 'pre' }, [
-						res.trim() || _('Log is empty.')
-					]);
-
-					dom.content(log_textarea, log);
-				}).catch(function(err) {
-					if (err.toString().includes('NotFoundError'))
-						log = E('pre', { 'wrap': 'pre' }, [
-							_('Log file does not exist.')
-						]);
-					else
-						log = E('pre', { 'wrap': 'pre' }, [
-							_('Unknown error: %s').format(err)
-						]);
-
-					dom.content(log_textarea, log);
-				});
-			}));
-
-			return E([
-				E('style', [ css ]),
-				E('div', {'class': 'cbi-map'}, [
-					E('h3', {'name': 'content'}, _('HomeProxy log')),
-					E('div', {'class': 'cbi-section'}, [
-						log_textarea,
-						E('div', {'style': 'text-align:right'},
-							E('small', {}, _('Refresh every %s seconds.').format(L.env.pollinterval))
-						)
-					])
-				])
-			]);
-		}
+		o.render = L.bind(getRuntimeLog, this, 'HomeProxy' ,'homeproxy.log');
 
 		o = s.option(form.DummyValue, '_sing-box_logview');
-		o.render = function() {
-			var log_textarea = E('div', { 'id': 'log_textarea' },
-				E('img', {
-					'src': L.resource(['icons/loading.gif']),
-					'alt': _('Loading'),
-					'style': 'vertical-align:middle'
-				}, _('Collecting data...'))
-			);
-
-			var log;
-			poll.add(L.bind(function() {
-				return fs.read_direct(hp_dir + '/sing-box.log', 'text')
-				.then(function(res) {
-					log = E('pre', { 'wrap': 'pre' }, [
-						res.trim() || _('Log is empty.')
-					]);
-
-					dom.content(log_textarea, log);
-				}).catch(function(err) {
-					if (err.toString().includes('NotFoundError'))
-						log = E('pre', { 'wrap': 'pre' }, [
-							_('Log file does not exist.')
-						]);
-					else
-						log = E('pre', { 'wrap': 'pre' }, [
-							_('Unknown error: %s').format(err)
-						]);
-
-					dom.content(log_textarea, log);
-				});
-			}));
-
-			return E([
-				E('style', [ css ]),
-				E('div', {'class': 'cbi-map'}, [
-					E('h3', {'name': 'content'}, _('Sing-box log')),
-					E('div', {'class': 'cbi-section'}, [
-						log_textarea,
-						E('div', {'style': 'text-align:right'},
-							E('small', {}, _('Refresh every %s seconds.').format(L.env.pollinterval))
-						)
-					])
-				])
-			]);
-		}
+		o.render = L.bind(getRuntimeLog, this, 'sing-box' ,'sing-box.log');
 
 		return m.render();
 	},
