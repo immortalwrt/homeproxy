@@ -16,13 +16,14 @@ function shellquote(s) {
 }
 
 const HP_DIR = '/etc/homeproxy';
+const RUN_DIR = '/var/run/homeproxy';
 
 const methods = {
 	acllist_read: {
 		args: { type: 'type' },
 		call: function(req) {
 			if (index(['direct_list', 'proxy_list'], req.args?.type) === -1)
-				return { content: null, error: 'type is wrong or empty' };
+				return { content: null, error: 'illegal type' };
 
 			const filecontent = readfile(`${HP_DIR}/resources/${req.args?.type}.txt`);
 			return { content: filecontent };
@@ -32,7 +33,7 @@ const methods = {
 		args: { type: 'type', content: 'content' },
 		call: function(req) {
 			if (index(['direct_list', 'proxy_list'], req.args?.type) === -1)
-				return { result: false, error: 'type is wrong or empty' };
+				return { result: false, error: 'illegal type' };
 
 			const file = `${HP_DIR}/resources/${req.args?.type}.txt`;
 			let content = req.args?.content;
@@ -114,6 +115,19 @@ const methods = {
 				return { result: false, error: 'invalid certificate filename' };
 				break;
 			}
+		}
+	},
+
+	log_clean: {
+		args: { type: 'type' },
+		call: function(req) {
+			if (!(req.args?.type in ['homeproxy', 'sing-box']))
+				return { result: false, error: 'illegal type' };
+
+			const filestat = lstat(`${RUN_DIR}/${req.args?.type}.log`);
+			if (filestat)
+				writefile(`${RUN_DIR}/${req.args?.type}.log`, '');
+			return { result: true };
 		}
 	},
 

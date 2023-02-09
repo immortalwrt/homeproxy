@@ -84,7 +84,14 @@ function getResVersion(self, type) {
 	});
 }
 
-function getRuntimeLog(title, file) {
+function getRuntimeLog(name) {
+	var callLogClean = rpc.declare({
+		object: 'luci.homeproxy',
+		method: 'log_clean',
+		params: ['type'],
+		expect: { '': {} }
+	});
+
 	var log_textarea = E('div', { 'id': 'log_textarea' },
 		E('img', {
 			'src': L.resource(['icons/loading.gif']),
@@ -95,7 +102,7 @@ function getRuntimeLog(title, file) {
 
 	var log;
 	poll.add(L.bind(function() {
-		return fs.read_direct(hp_dir + '/' + file, 'text')
+		return fs.read_direct(`${hp_dir}/${name.toLowerCase()}.log`, 'text')
 		.then(function(res) {
 			log = E('pre', { 'wrap': 'pre' }, [
 				res.trim() || _('Log is empty.')
@@ -119,7 +126,16 @@ function getRuntimeLog(title, file) {
 	return E([
 		E('style', [ css ]),
 		E('div', {'class': 'cbi-map'}, [
-			E('h3', {'name': 'content'}, _('%s log').format(title)),
+			E('h3', {'name': 'content'}, [
+				_('%s log').format(name),
+				' ',
+				E('button', {
+					'class': 'btn cbi-button cbi-button-action',
+					'click': ui.createHandlerFn(this, function() {
+						return L.resolveDefault(callLogClean(name.toLowerCase()), {});
+					})
+				}, [ _('Clean log') ])
+			]),
 			E('div', {'class': 'cbi-section'}, [
 				log_textarea,
 				E('div', {'style': 'text-align:right'},
@@ -164,10 +180,10 @@ return view.extend({
 		o.rawhtml = true;
 
 		o = s.option(form.DummyValue, '_homeproxy_logview');
-		o.render = L.bind(getRuntimeLog, this, 'HomeProxy' ,'homeproxy.log');
+		o.render = L.bind(getRuntimeLog, this, 'HomeProxy');
 
 		o = s.option(form.DummyValue, '_sing-box_logview');
-		o.render = L.bind(getRuntimeLog, this, 'sing-box' ,'sing-box.log');
+		o.render = L.bind(getRuntimeLog, this, 'sing-box');
 
 		return m.render();
 	},
