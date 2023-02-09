@@ -645,11 +645,12 @@ if (!isEmpty(main_node)) {
 			network: dedicated_udp_node ? 'tcp' : null,
 			outbound: 'main-out'
 		});
-	} else if (routing_mode === 'bypass_mainland_china') {
-		/* Direct CN traffic, in case of dirty nftset table */
+	} else if (routing_mode in ['bypass_mainland_china', 'proxy_mainland_china']) {
+		/* Check CN traffic, in case of dirty nftset table */
 		push(config.route.rules, {
 			geosite: [ 'cn' ],
 			geoip: [ 'cn' ],
+			invert: (routing_mode === 'proxy_mainland_china') ? true : null,
 			outbound: 'direct-out'
 		});
 	}
