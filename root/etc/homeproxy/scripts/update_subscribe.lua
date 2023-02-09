@@ -328,7 +328,8 @@ local function parse_uri(uri)
 				transport = (params.type ~= "tcp") and params.type or nil,
 				tls = notEmpty(params.security) and "1" or "0",
 				tls_sni = params.sni,
-				tls_alpn = params.alpn and urldecode(params.alpn, true):split(",") or nil
+				tls_alpn = params.alpn and urldecode(params.alpn, true):split(",") or nil,
+				tls_utls = sing_features.with_utls and params.fp or nil
 			}
 			if config.transport == "grpc" then
 				config.grpc_servicename = params.serviceName

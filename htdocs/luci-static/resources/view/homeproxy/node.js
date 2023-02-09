@@ -180,7 +180,8 @@ function parseShareLink(uri, features) {
 				transport: params.get('type') !== 'tcp' ? params.get('type') : null,
 				tls: params.get('security') ? '1' : '0',
 				tls_sni: params.get('sni'),
-				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')).split(',') : null
+				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')).split(',') : null,
+				tls_utls: features.with_utls ? params.get('fp') : null
 			};
 			switch (params.get('type')) {
 			case 'grpc':
