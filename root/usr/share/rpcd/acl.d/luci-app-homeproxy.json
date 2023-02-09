@@ -3,7 +3,6 @@
 		"description": "Grant access to homeproxy configuration",
 		"read": {
 			"file": {
-				"/etc/homeproxy/scripts/update_geodata.sh": [ "exec" ],
 				"/etc/homeproxy/scripts/update_subscribe.lua": [ "exec" ],
 				"/var/run/homeproxy/homeproxy.log": [ "read" ],
 				"/var/run/homeproxy/sing-box.log": [ "read" ]

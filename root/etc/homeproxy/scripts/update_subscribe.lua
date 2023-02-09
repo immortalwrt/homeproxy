@@ -500,6 +500,8 @@ local function main()
 			if not node_result[cfg.grouphash] or not node_result[cfg.grouphash][cfg[".name"]] then
 				uci:delete(uciconfig, cfg[".name"])
 				removed = removed + 1
+
+				log(translatef("Removing node: %s.", cfg.label or cfg[".name"]))
 			else
 				uci:tset(uciconfig, cfg[".name"], node_result[cfg.grouphash][cfg[".name"]])
 				setmetatable(node_result[cfg.grouphash][cfg[".name"]], { __index = {isExisting = true} })
@@ -511,6 +513,8 @@ local function main()
 			if not node.isExisting then
 				uci:section(uciconfig, ucinode, node.nameHash, node)
 				added = added + 1
+
+				log(translatef("Adding node: %s.", node.label or node.nameHash))
 			end
 		end
 	end

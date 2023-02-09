@@ -10,46 +10,6 @@
 import { access, error, lstat, mkstemp, popen, readfile, writefile } from 'fs';
 import { cursor } from 'uci';
 
-/* Kanged from luci-app-commands */
-function is_binary(str) {
-	for (let off = 0, byte = ord(str); off < length(str); byte = ord(str, ++off))
-		if (byte <= 8 || (byte >= 14 && byte <= 31))
-			return true;
-
-	return false;
-}
-
-function execute_command(...args) {
-	let outfd = mkstemp();
-	let errfd = mkstemp();
-
-	const exitcode = system(`${join(' ', args)} >&${outfd.fileno()} 2>&${errfd.fileno()}`);
-
-	outfd.seek(0);
-	errfd.seek(0);
-
-	const stdout = outfd.read(1024 * 512) ?? '';
-	const stderr = errfd.read(1024 * 512) ?? '';
-
-	outfd.close();
-	errfd.close();
-
-	const binary = is_binary(stdout);
-
-	return {
-		command: join(' ', args),
-		stdout: binary ? null : stdout,
-		stderr,
-		exitcode,
-		binary
-	};
-}
-
-/* Kanged from ucode/luci */
-function shellquote(s) {
-	return `'${replace(s, "'", "'\\''")}'`;
-}
-
 const HP_DIR = '/etc/homeproxy';
 
 const methods = {
@@ -189,7 +149,7 @@ const methods = {
 				const exit_code = system(`${HP_DIR}/scripts/update_geodata.sh ${type}`);
 				return { status: exit_code };
 			} else
-				return { status: 255, error: 'argument "type" is empty' };
+				return { status: 255, error: "argument 'type' is empty" };
 		}
 	}
 };
