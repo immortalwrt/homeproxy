@@ -1,5 +1,4 @@
 TODO:
-- Refactor resources management
 - Check bugs in ACL, config generator etc.
 - Tproxy UDP performs nat4 due to incorrect firewall rules
 - Rewrite subscription script into ucode
