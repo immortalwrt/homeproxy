@@ -10,6 +10,11 @@
 import { access, error, lstat, mkstemp, popen, readfile, writefile } from 'fs';
 import { cursor } from 'uci';
 
+/* Kanged from ucode/luci */
+function shellquote(s) {
+	return `'${replace(s, "'", "'\\''")}'`;
+}
+
 const HP_DIR = '/etc/homeproxy';
 
 const methods = {
