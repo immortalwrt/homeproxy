@@ -338,10 +338,10 @@ if (!isEmpty(main_node)) {
 		if (!config.dns.rules)
 			config.dns.rules = [];
 
-		config.dns.rules[length(config.dns.rules)] = {
+		push(config.dns.rules, {
 			domain: main_node_addr,
 			server: 'default-dns'
-		}
+		});
 	}
 	if (dedicated_udp_node) {
 		const main_udp_node_addr = uci.get(uciconfig, main_udp_node, 'address');
@@ -349,10 +349,10 @@ if (!isEmpty(main_node)) {
 			if (!config.dns.rules)
 				config.dns.rules = [];
 
-			config.dns.rules[length(config.dns.rules)] = {
+			push(config.dns.rules, {
 				domain: main_udp_node_addr,
 				server: 'default-dns'
-			}
+			});
 		}
 	}
 
