@@ -180,7 +180,7 @@ function generate_outbound(node) {
 		proxy_protocol: strToInt(node.proxy_protocol),
 		/* Hysteria */
 		up_mbps: strToInt(node.hysteria_down_mbps),
-		down_bps: strToInt(node.hysteria_down_mbps),
+		down_mbps: strToInt(node.hysteria_down_mbps),
 		obfs: node.hysteria_bofs_password,
 		auth: (node.hysteria_auth_type === 'base64') ? node.hysteria_auth_payload : null,
 		auth_str: (node.hysteria_auth_type === 'string') ? node.hysteria_auth_payload : null,
