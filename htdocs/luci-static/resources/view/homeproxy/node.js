@@ -974,11 +974,15 @@ return view.extend({
 			so = ss.option(form.ListValue, 'tls_utls', _('uTLS fingerprint'),
 				_('uTLS is a fork of "crypto/tls", which provides ClientHello fingerprinting resistance.'));
 			so.value('', _('Disable'));
+			so.value('360', _('360'));
 			so.value('android', _('Android'));
 			so.value('chrome', _('Chrome'));
+			so.value('edge', _('EDGE'));
 			so.value('firefox', _('Firefox'));
 			so.value('ios', _('iOS'));
+			so.value('qq', _('QQ'));
 			so.value('random', _('Random'));
+			so.value('safari', _('Safari'));
 			so.depends('tls', '1');
 			so.modalonly = true;
 		}
