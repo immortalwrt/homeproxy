@@ -22,6 +22,7 @@ fi
 TEMP_DIR="$(mktemp -d -p $BASE_DIR)"
 TEMP_PKG_DIR="$TEMP_DIR/$PKG_NAME"
 mkdir -p "$TEMP_PKG_DIR/CONTROL/"
+mkdir -p "$TEMP_PKG_DIR/lib/upgrade/keep.d/"
 mkdir -p "$TEMP_PKG_DIR/www/"
 
 cp -fpR "$PKG_DIR/htdocs"/* "$TEMP_PKG_DIR/www/"
