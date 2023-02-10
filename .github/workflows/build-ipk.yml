@@ -3,7 +3,7 @@ name: Build ipk for HomeProxy
 on:
   push:
     branches:
-      - 'js'
+      - 'master'
     paths:
       - 'htdocs/**'
       - 'root/**'
