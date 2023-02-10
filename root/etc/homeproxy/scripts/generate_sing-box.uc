@@ -666,19 +666,21 @@ if (!isEmpty(main_node)) {
 	/* Routing rules */
 	/* Proxy list */
 	if (length(proxy_domain_list) || length(wan_proxy_ips)) {
-		if (dedicated_udp_node)
 		push(config.route.rules, {
 			domain_keyword: proxy_domain_list,
 			ip_cidr: wan_proxy_ips,
-			network: 'udp',
-			outbound: 'main-udp-out'
-		});
-
-		push(config.route.rules, {
-			domain_keyword: proxy_domain_list,
-			ip_cidr: wan_proxy_ips,
+			network: dedicated_udp_node ? 'tcp' : null,
 			outbound: 'main-out'
 		});
+
+		if (dedicated_udp_node) {
+			push(config.route.rules, {
+				domain_keyword: proxy_domain_list,
+				ip_cidr: wan_proxy_ips,
+				network: 'udp',
+				outbound: 'main-udp-out'
+			});
+		}
 	}
 
 	/* Direct list */
