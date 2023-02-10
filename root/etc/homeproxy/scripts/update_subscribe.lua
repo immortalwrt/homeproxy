@@ -173,7 +173,7 @@ end
 -- Log end
 
 local function parse_uri(uri)
-	local config;
+	local config
 
 	if type(uri) == "table" then
 		if uri.nodetype == "sip008" then
