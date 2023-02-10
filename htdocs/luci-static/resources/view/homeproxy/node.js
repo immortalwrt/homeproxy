@@ -219,6 +219,8 @@ function parseShareLink(uri, features) {
 			/* Unsupported protocols */
 			else if (uri.net === 'kcp')
 				return null;
+			else if (url.net === 'quic' && ((url.type && url.type !== 'none') || url.path || !features.with_quic))
+				return null;
 			/* https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
 			 * else if (uri.aid && parseInt(uri.aid) !== 0)
 			 * 	return null;
@@ -243,14 +245,14 @@ function parseShareLink(uri, features) {
 				break;
 			case 'h2':
 			case 'tcp':
-				if (config.transport === 'h2' || uri.type === 'http') {
+				if (uri.net === 'h2' || uri.type === 'http') {
 					config.transport = 'http';
 					config.http_host = uri.host ? uri.host.split(',') : null;
 					config.http_path = uri.path;
 				}
 				break;
 			case 'ws':
-				config.ws_host = config.tls !== '1' ? uri.host : null;
+				config.ws_host = (config.tls !== '1') ? uri.host : null;
 				config.ws_path = uri.path;
 				if (config.ws_path && config.ws_path.includes('?ed=')) {
 					config.websocket_early_data_header = 'Sec-WebSocket-Protocol';

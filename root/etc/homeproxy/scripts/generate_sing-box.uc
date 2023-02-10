@@ -7,91 +7,11 @@
 
 'use strict';
 
-import { mkstemp, readfile, writefile } from 'fs';
+import { readfile, writefile } from 'fs';
 import { cursor } from 'uci';
 
-/* Global variables start */
-const hp_dir = '/etc/homeproxy';
-const run_dir = '/var/run/homeproxy';
-/* Global variables end */
-
-/* Utilities start */
-/* Kanged from luci-app-commands */
-function isBinary(str) {
-	for (let off = 0, byte = ord(str); off < length(str); byte = ord(str, ++off))
-		if (byte <= 8 || (byte >= 14 && byte <= 31))
-			return true;
-
-	return false;
-}
-
-function executeCommand(...args) {
-	let outfd = mkstemp();
-	let errfd = mkstemp();
-
-	const exitcode = system(`${join(' ', args)} >&${outfd.fileno()} 2>&${errfd.fileno()}`);
-
-	outfd.seek(0);
-	errfd.seek(0);
-
-	const stdout = outfd.read(1024 * 512) ?? '';
-	const stderr = errfd.read(1024 * 512) ?? '';
-
-	outfd.close();
-	errfd.close();
-
-	const binary = isBinary(stdout);
-
-	return {
-		command: join(' ', args),
-		stdout: binary ? null : stdout,
-		stderr,
-		exitcode,
-		binary
-	};
-}
-/* Utilities end */
-
-/* String helper start */
-function isEmpty(res) {
-	return !res || res === 'nil' || (type(res) in ['array', 'object'] && length(res) === 0);
-}
-
-function strToInt(str) {
-	return !isEmpty(str) ? int(str) || null : null;
-}
-
-function validateHostname(hostname) {
-	return (match(hostname, /^[a-zA-Z0-9_]+$/) != null ||
-		(match(hostname, /^[a-zA-Z0-9_][a-zA-Z0-9_%-.]*[a-zA-Z0-9]$/) &&
-			match(hostname, /[^0-9.]/)));
-}
-
-function removeBlankAttrs(res) {
-	let content;
-
-	if (type(res) === 'object') {
-		content = {};
-		map(keys(res), (k) => {
-			if (type(res[k]) in ['array', 'object'])
-				content[k] = removeBlankAttrs(res[k]);
-			else if (res[k] !== null && res[k] !== '')
-				content[k] = res[k];
-		});
-	} else if (type(res) === 'array') {
-		content = [];
-		map(res, (k, i) => {
-			if (type(k) in ['array', 'object'])
-				push(content, removeBlankAttrs(k));
-			else if (k !== null && k !== '')
-				push(content, k);
-		});
-	} else
-		return res;
-
-	return content;
-}
-/* String helper end */
+import { executeCommand, isEmpty, strToInt, removeBlankAttrs, validateHostname } from 'homeproxy';
+import { HP_DIR, RUN_DIR } from 'homeproxy';
 
 /* UCI config start */
 const uci = cursor();
@@ -164,8 +84,8 @@ if (routing_mode !== 'custom') {
 		}
 	}
 
-	proxy_domain_list = split(trim(readfile(hp_dir + '/resources/proxy_list.txt')), /[\r\n]/);
-	direct_domain_list = split(trim(readfile(hp_dir + '/resources/direct_list.txt')), /[\r\n]/);
+	proxy_domain_list = split(trim(readfile(HP_DIR + '/resources/proxy_list.txt')), /[\r\n]/);
+	direct_domain_list = split(trim(readfile(HP_DIR + '/resources/direct_list.txt')), /[\r\n]/);
 	if (proxy_domain_list)
 		proxy_domain_list = split(proxy_domain_list, /[\r\n]/);
 	if (direct_domain_list)
@@ -331,7 +251,7 @@ const config = {};
 config.log = {
 	disabled: false,
 	level: 'warn',
-	output: run_dir + '/sing-box.log',
+	output: RUN_DIR + '/sing-box.log',
 	timestamp: true
 };
 
@@ -559,7 +479,7 @@ if (server_enabled === '1')
 				key_path: cfg.tls_key_path,
 				acme: (cfg.tls_acme === '1') ? {
 					domain: cfg.tls_acme_domains,
-					data_directory: hp_dir + '/certs',
+					data_directory: HP_DIR + '/certs',
 					default_server_name: cfg.tls_acme_dsn,
 					email: cfg.tls_acme_email,
 					provider: cfg.tls_acme_provider,
@@ -639,12 +559,12 @@ if (!isEmpty(main_node)) {
 if (!isEmpty(main_node) || !isEmpty(default_outbound))
 	config.route = {
 		geoip: {
-			path: hp_dir + '/resources/geoip.db',
+			path: HP_DIR + '/resources/geoip.db',
 			download_url: 'https://github.com/1715173329/sing-geoip/releases/latest/download/geoip.db',
 			download_detour: get_outbound(default_outbound) || (routing_mode !== 'proxy_mainland_china' && !isEmpty(main_node)) ? 'main-out' : 'direct-out'
 		},
 		geosite: {
-			path: hp_dir + '/resources/geosite.db',
+			path: HP_DIR + '/resources/geosite.db',
 			download_url: 'https://github.com/1715173329/sing-geosite/releases/latest/download/geosite.db',
 			download_detour: get_outbound(default_outbound) || (routing_mode !== 'proxy_mainland_china' && !isEmpty(main_node)) ? 'main-out' : 'direct-out'
 		},
@@ -754,5 +674,5 @@ if (!isEmpty(main_node)) {
 }
 /* Routing rules end */
 
-system('mkdir -p ' + run_dir);
-writefile(run_dir + '/sing-box.json', sprintf('%.J\n', removeBlankAttrs(config)));
+system('mkdir -p ' + RUN_DIR);
+writefile(RUN_DIR + '/sing-box.json', sprintf('%.J\n', removeBlankAttrs(config)));
