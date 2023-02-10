@@ -165,7 +165,7 @@ const methods = {
 		call: function(req) {
 			if (req.args?.type) {
 				const type = shellquote(req.args?.type);
-				const exit_code = system(`${HP_DIR}/scripts/update_geodata.sh ${type}`);
+				const exit_code = system(`${HP_DIR}/scripts/update_resources.sh ${type}`);
 				return { status: exit_code };
 			} else
 				return { status: 255, error: "argument 'type' is empty" };

@@ -20,7 +20,7 @@ set_lock() {
 	local act="$1"
 	local type="$2"
 
-	local lock="$RUN_DIR/update_geodata-$type.lock"
+	local lock="$RUN_DIR/update_resources-$type.lock"
 	if [ "$act" = "set" ]; then
 		if [ -e "$lock" ]; then
 			log "[$(to_upper "$type")] A task is already running."

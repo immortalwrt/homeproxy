@@ -61,9 +61,9 @@ start_service() {
 		config_get_bool auto_update "subscription" "auto_update" "0"
 		if [ "auto_update" = "1" ]; then
 			config_get auto_update_time "subscription" "auto_update_time" "2"
-			echo "0 ${auto_update_time} * * * $HP_DIR/scripts/update_geodata.sh update_version update_subscription" >> "/etc/crontabs/root"
+			echo "0 ${auto_update_time} * * * $HP_DIR/scripts/update_crond.sh" >> "/etc/crontabs/root"
+			/etc/init.d/cron restart
 		fi
-		/etc/init.d/cron restart
 
 		local ipv6_support
 		config_get_bool ipv6_support "config" "ipv6_support" "0"
