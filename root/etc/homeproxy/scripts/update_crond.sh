@@ -5,8 +5,8 @@
 
 SCRIPTS_DIR="/etc/homeproxy/scripts"
 
-for i in "geoip" "geosite" "china_ip4" "china_ip6" "gfw_list" "china_list"
-	"$SCRIPTS_DIR"/scripts/update_resources.sh
+for i in "geoip" "geosite" "china_ip4" "china_ip6" "gfw_list" "china_list"; do
+	"$SCRIPTS_DIR"/update_resources.sh "$i"
 done
 
-"$SCRIPTS_DIR"/scripts/update_subscribe.lua
+"$SCRIPTS_DIR"/update_subscribe.lua
