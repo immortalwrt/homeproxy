@@ -207,7 +207,7 @@ local function parse_uri(uri)
 			config = {
 				label = urldecode(url.fragment, true),
 				type = "hysteria",
-				address = url.hostname,
+				address = url.host,
 				port = url.port,
 				hysteria_protocol = params.protocol or "udp",
 				hysteria_auth_type = params.auth and "string" or nil,
@@ -242,7 +242,7 @@ local function parse_uri(uri)
 				userinfo = { url.user, urldecode(url.password) }
 			elseif url.user then
 				-- User info encoded with base64
-				userinfo = b64decode(url.user):split(":")
+				userinfo = b64decode(urldecode(url.user)):split(":")
 			end
 
 			local plugin, plugin_opts
@@ -400,6 +400,10 @@ local function parse_uri(uri)
 				end
 			end
 		end
+	end
+
+	if config.address then
+		config.address = config.address:gsub("%[?%]?", "")
 	end
 
 	if notEmpty(config) then

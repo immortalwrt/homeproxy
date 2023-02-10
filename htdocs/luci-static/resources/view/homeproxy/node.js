@@ -72,7 +72,7 @@ function parseShareLink(uri, features) {
 					userinfo = [url.username, decodeURIComponent(url.password)];
 				else if (url.username)
 					/* User info encoded with base64 */
-					userinfo = hp.decodeBase64Str(url.username).split(':');
+					userinfo = hp.decodeBase64Str(decodeURIComponent(url.username)).split(':');
 
 				if (!hp.shadowsocks_encrypt_methods.includes(userinfo[0]))
 					return null;
@@ -269,6 +269,8 @@ function parseShareLink(uri, features) {
 			return null;
 		else if (!config.label)
 			config.label = config.address + ':' + config.port;
+
+		config.address = config.address.replace(/\[|\]/, '');
 	}
 
 	return config;
@@ -481,7 +483,7 @@ return view.extend({
 						else if (encmode === '2022-blake3-aes-128-gcm')
 							return hp.validateBase64Key(24, section_id, value);
 						else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode))
-							return hp.validateBase64Key(45, section_id, value);
+							return hp.validateBase64Key(44, section_id, value);
 					}
 					if (!value)
 						return _('Expecting: %s').format(_('non-empty value'));

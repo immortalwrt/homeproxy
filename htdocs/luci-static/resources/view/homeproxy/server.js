@@ -105,7 +105,7 @@ return view.extend({
 					else if (encmode === '2022-blake3-aes-128-gcm')
 						return hp.validateBase64Key(24, section_id, value);
 					else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode))
-						return hp.validateBase64Key(45, section_id, value);
+						return hp.validateBase64Key(44, section_id, value);
 				}
 				if (!value)
 					return _('Expecting: %s').format(_('non-empty value'));
