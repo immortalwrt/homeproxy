@@ -1,0 +1,61 @@
+name: Build ipk for HomeProxy
+
+on:
+  push:
+    branches:
+      - 'js'
+    paths:
+      - 'htdocs/**'
+      - 'root/**'
+      - 'Makefile'
+      - '.github/**'
+
+  pull_request:
+    branch:
+      - 'js'
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - 'htdocs/**'
+      - 'root/**'
+      - 'Makefile'
+      - '.github/**'
+
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source tree
+        uses: actions/checkout@v3
+
+      - name: Build ipk file
+        env:
+          RELEASE_TYPE: ${{ github.event_name }}
+        run: |
+          pushd .github
+          fakeroot bash build-ipk.sh
+          echo "ASSET_NAME=$(ls *.ipk)" >> $GITHUB_ENV
+          popd
+
+      - name: Publishing to GitHub Artifacts
+        uses: actions/upload-artifact@v3
+        if: github.event_name != 'release'
+        with:
+          name: ${{ env.ASSET_NAME }}
+          path: .github/*.ipk
+
+      - name: Publishing to GitHub Releases
+        uses: floralatin/upload-release-action@3688e13ae053ba3052eb4f0cfe03e78deb8f88d7
+        if: github.event_name == 'release'
+        with:
+          repo_token: ${{ github.token }}
+          file: .github/*.ipk
+          tag: ${{ github.ref }}
+          file_glob: true
