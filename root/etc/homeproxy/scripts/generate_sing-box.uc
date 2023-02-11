@@ -90,7 +90,6 @@ if (routing_mode !== 'custom') {
 		proxy_domain_list = split(proxy_domain_list, /[\r\n]/);
 	if (direct_domain_list)
 		direct_domain_list = split(direct_domain_list, /[\r\n]/);
-
 } else {
 	/* DNS settings */
 	dns_strategy = uci.get(uciconfig, ucidnssetting, 'dns_strategy');
@@ -634,7 +633,6 @@ if (!isEmpty(main_node)) {
 	if (dedicated_udp_node)
 		push(config.route.rules, {
 			geosite: routing_geosite,
-			geoip: routing_geoip,
 			network: 'udp',
 			outbound: 'main-udp-out'
 		});

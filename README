@@ -1,6 +1,5 @@
 TODO:
 - Rewrite subscription script into ucode
 - Check bugs in ACL, config generator etc.
-- Tproxy UDP performs nat4 due to incorrect firewall rules
 - Refactor nft rules
 - Any other improvements
