@@ -167,6 +167,10 @@ set homeproxy_proxy_addr_v6 {
 {% if (routing_mode !== 'custom'): %}
 {# Regular mode -#}
 {# TCP redirect -#}
+chain homeproxy_redirect_proxy {
+	meta l4proto tcp counter redirect to :{{ redirect_port }}
+}
+
 chain homeproxy_redirect {
 	meta mark {{ self_mark }} counter return
 
@@ -197,15 +201,15 @@ chain homeproxy_redirect {
 	{% endif %}
 
 	{% if (control_info['wan_proxy_ipv4_ips']): %}
-	ip daddr { {{ array_to_nftstr(control_info['wan_proxy_ipv4_ips']) }} } meta l4proto tcp counter redirect to :{{ redirect_port }}
+	ip daddr { {{ array_to_nftstr(control_info['wan_proxy_ipv4_ips']) }} } counter goto homeproxy_redirect_proxy
 	{% endif %}
 	{% if (ipv6_support === '1' && control_info['wan_proxy_ipv6_ips']): %}
-	ip6 daddr { {{ array_to_nftstr(control_info['wan_proxy_ipv6_ips']) }} } meta l4proto tcp counter redirect to :{{ redirect_port }}
+	ip6 daddr { {{ array_to_nftstr(control_info['wan_proxy_ipv6_ips']) }} } counter goto homeproxy_redirect_proxy
 	{% endif %}
 
-	ip daddr @homeproxy_proxy_addr_v4 meta l4proto tcp counter redirect to :{{ redirect_port }}
+	ip daddr @homeproxy_proxy_addr_v4 counter goto homeproxy_redirect_proxy
 	{% if (ipv6_support === '1'): %}
-	ip6 daddr @homeproxy_proxy_addr_v6 meta l4proto tcp counter redirect to :{{ redirect_port }}
+	ip6 daddr @homeproxy_proxy_addr_v6 counter goto homeproxy_redirect_proxy
 	{% endif %}
 
 	ip daddr @homeproxy_localaddr_v4 counter return
@@ -214,13 +218,13 @@ chain homeproxy_redirect {
 	{% endif %}
 
 	{% if (control_info['lan_global_proxy_mac_addrs']): %}
-	ether saddr { {{ array_to_nftstr(control_info['lan_global_proxy_mac_addrs']) }} } meta l4proto tcp counter redirect to :{{ redirect_port }}
+	ether saddr { {{ array_to_nftstr(control_info['lan_global_proxy_mac_addrs']) }} } counter goto homeproxy_redirect_proxy
 	{% endif %}
 	{% if (control_info['lan_global_proxy_ipv4_ips']): %}
-	ip saddr { {{ array_to_nftstr(control_info['lan_global_proxy_ipv4_ips']) }} } meta l4proto tcp counter redirect to :{{ redirect_port }}
+	ip saddr { {{ array_to_nftstr(control_info['lan_global_proxy_ipv4_ips']) }} } counter goto homeproxy_redirect_proxy
 	{% endif %}
 	{% if (ipv6_support === '1' && control_info['lan_global_proxy_ipv6_ips']): %}
-	ip6 saddr { {{ array_to_nftstr(control_info['lan_global_proxy_ipv6_ips']) }} } meta l4proto tcp counter redirect to :{{ redirect_port }}
+	ip6 saddr { {{ array_to_nftstr(control_info['lan_global_proxy_ipv6_ips']) }} } counter goto homeproxy_redirect_proxy
 	{% endif %}
 
 	{% if (control_info['wan_direct_ipv4_ips']): %}
@@ -247,7 +251,7 @@ chain homeproxy_redirect {
 	{% endif %}
 	{% endif %}
 
-	meta l4proto tcp counter redirect to :{{ redirect_port }}
+	meta l4proto tcp counter goto homeproxy_redirect_proxy
 }
 
 chain homeproxy_dstnat_redir {
@@ -268,6 +272,17 @@ chain dstnat {
 }
 {% if (outbound_udp_node !== 'nil'): %}
 {# UDP tproxy #}
+chain homeproxy_mangle_tproxy {
+	meta l4proto udp mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
+	{% if (ipv6_support === '1'): %}
+	meta l4proto udp mark set {{ tproxy_mark }} tproxy ip6 to [::]:{{ tproxy_port }} counter accept
+	{% endif %}
+}
+
+chain homeproxy_mangle_mark {
+	meta l4proto udp mark set {{ tproxy_mark }} counter accept
+}
+
 chain homeproxy_mangle_prerouting {
 	{% if (listen_interfaces): %}
 	meta iifname != { {{ array_to_nftstr(listen_interfaces) }}, lo } counter return
@@ -298,15 +313,15 @@ chain homeproxy_mangle_prerouting {
 	{% endif %}
 
 	{% if (control_info['wan_proxy_ipv4_ips']): %}
-	ip daddr { {{ array_to_nftstr(control_info['wan_proxy_ipv4_ips']) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
+	ip daddr { {{ array_to_nftstr(control_info['wan_proxy_ipv4_ips']) }} } counter goto homeproxy_mangle_tproxy
 	{% endif %}
 	{% if (ipv6_support === '1' && control_info['wan_proxy_ipv6_ips']): %}
-	ip6 daddr { {{ array_to_nftstr(control_info['wan_proxy_ipv6_ips']) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip6 to [::1]:{{ tproxy_port }} counter accept
+	ip6 daddr { {{ array_to_nftstr(control_info['wan_proxy_ipv6_ips']) }} } counter goto homeproxy_mangle_tproxy
 	{% endif %}
 
-	ip daddr @homeproxy_proxy_addr_v4 meta l4proto udp mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
+	ip daddr @homeproxy_proxy_addr_v4 counter goto homeproxy_mangle_tproxy
 	{% if (ipv6_support === '1'): %}
-	ip6 daddr @homeproxy_proxy_addr_v6 meta l4proto udp mark set {{ tproxy_mark }} tproxy ip6 to [::1]:{{ tproxy_port }} counter accept
+	ip6 daddr @homeproxy_proxy_addr_v6 counter goto homeproxy_mangle_tproxy
 	{% endif %}
 
 	ip daddr @homeproxy_localaddr_v4 counter return
@@ -315,14 +330,13 @@ chain homeproxy_mangle_prerouting {
 	{% endif %}
 
 	{% if (control_info['lan_global_proxy_mac_addrs']): %}
-	ether saddr { {{ array_to_nftstr(control_info['lan_global_proxy_mac_addrs']) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
-	ether saddr { {{ array_to_nftstr(control_info['lan_global_proxy_mac_addrs']) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip6 to [::]:{{ tproxy_port }} counter accept
+	ether saddr { {{ array_to_nftstr(control_info['lan_global_proxy_mac_addrs']) }} } counter goto homeproxy_mangle_tproxy
 	{% endif %}
 	{% if (control_info['lan_global_proxy_ipv4_ips']): %}
-	ip saddr { {{ array_to_nftstr(control_info['lan_global_proxy_ipv4_ips']) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
+	ip saddr { {{ array_to_nftstr(control_info['lan_global_proxy_ipv4_ips']) }} } counter goto homeproxy_mangle_tproxy
 	{% endif %}
 	{% if (ipv6_support === '1' && control_info['lan_global_proxy_ipv6_ips']): %}
-	ip6 saddr { {{ array_to_nftstr(control_info['lan_global_proxy_ipv6_ips']) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip6 to [::1]:{{ tproxy_port }} counter accept
+	ip6 saddr { {{ array_to_nftstr(control_info['lan_global_proxy_ipv6_ips']) }} } counter goto homeproxy_mangle_tproxy
 	{% endif %}
 
 	{% if (control_info['wan_direct_ipv4_ips']): %}
@@ -352,24 +366,21 @@ chain homeproxy_mangle_prerouting {
 	{% endif %}
 
 	{% if (control_info['lan_gaming_mode_mac_addrs']): %}
-	ether saddr { {{ array_to_nftstr(control_info['lan_gaming_mode_mac_addrs']) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
-	ether saddr { {{ array_to_nftstr(control_info['lan_gaming_mode_mac_addrs']) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip6 to [::]:{{ tproxy_port }} counter accept
+	ether saddr { {{ array_to_nftstr(control_info['lan_gaming_mode_mac_addrs']) }} } counter goto homeproxy_mangle_tproxy
+	ether saddr { {{ array_to_nftstr(control_info['lan_gaming_mode_mac_addrs']) }} } counter goto homeproxy_mangle_tproxy
 	{% endif %}
 	{% if (control_info['lan_gaming_mode_ipv4_ips']): %}
-	ip saddr { {{ array_to_nftstr(control_info['lan_gaming_mode_ipv4_ips']) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
+	ip saddr { {{ array_to_nftstr(control_info['lan_gaming_mode_ipv4_ips']) }} } counter goto homeproxy_mangle_tproxy
 	{% endif %}
 	{% if (ipv6_support === '1' && control_info['lan_gaming_mode_ipv6_ips']): %}
-	ip6 saddr { {{ array_to_nftstr(control_info['lan_gaming_mode_ipv6_ips']) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip6 to [::1]:{{ tproxy_port }} counter accept
+	ip6 saddr { {{ array_to_nftstr(control_info['lan_gaming_mode_ipv6_ips']) }} } counter goto homeproxy_mangle_tproxy
 	{% endif %}
 
 	{% if (routing_port !== 'all'): %}
 	udp dport != { {{ routing_port }} } counter return
 	{% endif %}
 
-	meta l4proto udp mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
-	{% if (ipv6_support === '1'): %}
-	meta l4proto udp mark set {{ tproxy_mark }} tproxy ip6 to [::1]:{{ tproxy_port }} counter accept
-	{% endif %}
+	meta l4proto udp counter goto homeproxy_mangle_tproxy
 }
 
 chain homeproxy_mangle_output {
@@ -380,15 +391,15 @@ chain homeproxy_mangle_output {
 	{% endif %}
 
 	{% if (control_info['wan_proxy_ipv4_ips']): %}
-	ip daddr { {{ array_to_nftstr(control_info['wan_proxy_ipv4_ips']) }} } meta l4proto udp mark set {{ tproxy_mark }} counter accept
+	ip daddr { {{ array_to_nftstr(control_info['wan_proxy_ipv4_ips']) }} } counter goto homeproxy_mangle_mark
 	{% endif %}
 	{% if (ipv6_support === '1' && control_info['wan_proxy_ipv6_ips']): %}
-	ip6 daddr { {{ array_to_nftstr(control_info['wan_proxy_ipv6_ips']) }} } meta l4proto udp mark set {{ tproxy_mark }} counter accept
+	ip6 daddr { {{ array_to_nftstr(control_info['wan_proxy_ipv6_ips']) }} } counter goto homeproxy_mangle_mark
 	{% endif %}
 
-	ip daddr @homeproxy_proxy_addr_v4 meta l4proto udp mark set {{ tproxy_mark }} counter accept
+	ip daddr @homeproxy_proxy_addr_v4 counter goto homeproxy_mangle_mark
 	{% if (ipv6_support === '1'): %}
-	ip6 daddr @homeproxy_proxy_addr_v6 meta l4proto udp mark set {{ tproxy_mark }} counter accept
+	ip6 daddr @homeproxy_proxy_addr_v6 counter goto homeproxy_mangle_mark
 	{% endif %}
 
 	ip daddr @homeproxy_localaddr_v4 counter return
@@ -420,7 +431,7 @@ chain homeproxy_mangle_output {
 	{% endif %}
 	{% endif %}
 
-	meta l4proto udp mark set {{ tproxy_mark }} counter accept
+	meta l4proto udp counter goto homeproxy_mangle_mark
 }
 
 chain mangle_prerouting {
