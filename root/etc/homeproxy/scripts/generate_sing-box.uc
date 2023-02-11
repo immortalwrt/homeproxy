@@ -298,6 +298,9 @@ if (!isEmpty(main_node)) {
 			server: 'default-dns'
 		});
 
+	if (isEmpty(config.dns.rules))
+		config.dns.rules = null;
+
 	let default_final_dns = 'default-dns';
 	/* Main DNS */
 	if (dns_server !== wan_dns) {
