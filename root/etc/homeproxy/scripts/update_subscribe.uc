@@ -47,10 +47,6 @@ if (routing_mode !== 'custom') {
 /* UCI config end */
 
 /* String helper start */
-function notEmpty(res) {
-	return !isEmpty(res) && res
-}
-
 function filter_check(name) {
 	if (isEmpty(name) || filter_mode === 'disabled' || isEmpty(filter_keywords))
 		return false;
@@ -67,7 +63,7 @@ function filter_check(name) {
 /* String helper end */
 
 /* Common var start */
-let node_cache = [], node_result = [];
+let node_cache = {}, node_result = {};
 
 const ubus = connect();
 const sing_features = ubus.call('luci.homeproxy', 'singbox_get_features', {}) || {};
@@ -108,7 +104,7 @@ function parse_uri(uri) {
 			const url = urlparse('http://' + url[1]);
 			const params = urldecode_params('http://' + url[1]);
 
-			if (!sing_features.with_quic || (!isEmpty(params.protocol && params.protocol !== 'udp'))) {
+			if (!sing_features.with_quic || (params.protocol && params.protocol !== 'udp')) {
 				log(sprintf('Skipping unsupportedd %s node: %s.', 'hysteria', urldecode(url.hash) || url.hostname));
 				if (!sing_features.with_quic)
 					log(sprintf('Please rebuild sing-box with %s support!', 'QUIC'));
@@ -191,7 +187,7 @@ function parse_uri(uri) {
 			}
 			/*
 			 * https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
-			 * else if (!isEmpty(uri.aid) && int(uri.aid) !== 0) {
+			 * else if (uri.aid && int(uri.aid) !== 0) {
 			 * 	log(sprintf('Skipping unsupported %s node: %s.', 'VMess', uri.ps || uri.add));
 			 * 	return null;
 			 * }
@@ -237,3 +233,10 @@ function parse_uri(uri) {
 		}
 	}
 }
+
+function main() {
+
+}
+
+if (!isEmpty(subscription_urls))
+	call(main);

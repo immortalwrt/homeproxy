@@ -62,7 +62,7 @@ if (routing_mode !== 'custom') {
 -%}
 
 {# Reserved addresses -#}
-set homeproxy_localaddr_v4 {
+set homeproxy_local_addr_v4 {
 	type ipv4_addr
 	flags interval
 	auto-merge
@@ -88,7 +88,7 @@ set homeproxy_localaddr_v4 {
 	}
 }
 {% if (routing_mode === 'custom' || ipv6_support === '1'): %}
-set homeproxy_localaddr_v6 {
+set homeproxy_local_addr_v6 {
 	type ipv6_addr
 	flags interval
 	auto-merge
@@ -111,13 +111,13 @@ set homeproxy_localaddr_v6 {
 {% endif %}
 
 {% if (routing_mode === 'gfwlist'): %}
-set homeproxy_gfwlist_v4 {
+set homeproxy_gfw_list_v4 {
 	type ipv4_addr
 	flags interval
 	auto-merge
 }
 {% if (ipv6_support === '1'): %}
-set homeproxy_gfwlist_v6 {
+set homeproxy_gfw_list_v6 {
 	type ipv6_addr
 	flags interval
 	auto-merge
@@ -212,9 +212,9 @@ chain homeproxy_redirect {
 	ip6 daddr @homeproxy_proxy_addr_v6 counter goto homeproxy_redirect_proxy
 	{% endif %}
 
-	ip daddr @homeproxy_localaddr_v4 counter return
+	ip daddr @homeproxy_local_addr_v4 counter return
 	{% if (ipv6_support === '1'): %}
-	ip6 daddr @homeproxy_localaddr_v6 counter return
+	ip6 daddr @homeproxy_local_addr_v6 counter return
 	{% endif %}
 
 	{% if (control_info['lan_global_proxy_mac_addrs']): %}
@@ -235,9 +235,9 @@ chain homeproxy_redirect {
 	{% endif %}
 
 	{% if (routing_mode === 'gfwlist'): %}
-	ip daddr != @homeproxy_gfwlist_v4 counter return
+	ip daddr != @homeproxy_gfw_list_v4 counter return
 	{% if (ipv6_support === '1'): %}
-	ip6 daddr != @homeproxy_gfwlist_v6 counter return
+	ip6 daddr != @homeproxy_gfw_list_v6 counter return
 	{% endif %}
 	{% elif (routing_mode === 'bypass_mainland_china'): %}
 	ip daddr @homeproxy_mainland_addr_v4 counter return
@@ -324,9 +324,9 @@ chain homeproxy_mangle_prerouting {
 	ip6 daddr @homeproxy_proxy_addr_v6 counter goto homeproxy_mangle_tproxy
 	{% endif %}
 
-	ip daddr @homeproxy_localaddr_v4 counter return
+	ip daddr @homeproxy_local_addr_v4 counter return
 	{% if (ipv6_support === '1'): %}
-	ip6 daddr @homeproxy_localaddr_v6 counter return
+	ip6 daddr @homeproxy_local_addr_v6 counter return
 	{% endif %}
 
 	{% if (control_info['lan_global_proxy_mac_addrs']): %}
@@ -347,9 +347,9 @@ chain homeproxy_mangle_prerouting {
 	{% endif %}
 
 	{% if (routing_mode === 'gfwlist'): %}
-	ip daddr != @homeproxy_gfwlist_v4 counter return
+	ip daddr != @homeproxy_gfw_list_v4 counter return
 	{% if (ipv6_support === '1'): %}
-	ip6 daddr != @homeproxy_gfwlist_v6 counter return
+	ip6 daddr != @homeproxy_gfw_list_v6 counter return
 	udp dport { 80, 443 } counter reject comment "!{{ cfgname }}: Fuck you QUIC"
 	{% endif %}
 	{% elif (routing_mode === 'bypass_mainland_china'): %}
@@ -402,9 +402,9 @@ chain homeproxy_mangle_output {
 	ip6 daddr @homeproxy_proxy_addr_v6 counter goto homeproxy_mangle_mark
 	{% endif %}
 
-	ip daddr @homeproxy_localaddr_v4 counter return
+	ip daddr @homeproxy_local_addr_v4 counter return
 	{% if (ipv6_support === '1'): %}
-	ip6 daddr @homeproxy_localaddr_v6 counter return
+	ip6 daddr @homeproxy_local_addr_v6 counter return
 	{% endif %}
 
 	{% if (control_info['wan_direct_ipv4_ips']): %}
@@ -415,9 +415,9 @@ chain homeproxy_mangle_output {
 	{% endif %}
 
 	{% if (routing_mode === 'gfwlist'): %}
-	ip daddr != @homeproxy_gfwlist_v4 counter return
+	ip daddr != @homeproxy_gfw_list_v4 counter return
 	{% if (ipv6_support === '1'): %}
-	ip6 daddr != @homeproxy_gfwlist_v6 counter return
+	ip6 daddr != @homeproxy_gfw_list_v6 counter return
 	{% endif %}
 	{% elif (routing_mode === 'bypass_mainland_china'): %}
 	ip daddr @homeproxy_mainland_addr_v4 counter return
@@ -446,8 +446,8 @@ chain mangle_output {
 {# TUN mode -#}
 chain homeproxy_mangle {
 	meta l4proto { tcp, udp } iifname {{ tun_name }} counter return
-	ip daddr @homeproxy_localaddr_v4 counter return
-	ip6 daddr @homeproxy_localaddr_v6 counter return
+	ip daddr @homeproxy_local_addr_v4 counter return
+	ip6 daddr @homeproxy_local_addr_v6 counter return
 	meta l4proto { tcp, udp } counter mark set {{ tun_mark }}
 }
 

@@ -8,6 +8,7 @@
 'use strict';
 
 import { access, error, lstat, mkstemp, popen, readfile, writefile } from 'fs';
+import { init_action } from 'luci.sys';
 
 /* Kanged from ucode/luci */
 function shellquote(s) {
@@ -47,6 +48,7 @@ const methods = {
 
 			system(`mkdir -p ${HP_DIR}/resources`);
 			writefile(file, content);
+			system('env -i /etc/init.d/homeproxy restart >/dev/null &');
 
 			return { result: true };
 		}

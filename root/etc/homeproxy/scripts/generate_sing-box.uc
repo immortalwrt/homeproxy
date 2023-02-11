@@ -84,8 +84,8 @@ if (routing_mode !== 'custom') {
 		}
 	}
 
-	proxy_domain_list = split(trim(readfile(HP_DIR + '/resources/proxy_list.txt')), /[\r\n]/);
-	direct_domain_list = split(trim(readfile(HP_DIR + '/resources/direct_list.txt')), /[\r\n]/);
+	proxy_domain_list = trim(readfile(HP_DIR + '/resources/proxy_list.txt'));
+	direct_domain_list = trim(readfile(HP_DIR + '/resources/direct_list.txt'));
 	if (proxy_domain_list)
 		proxy_domain_list = split(proxy_domain_list, /[\r\n]/);
 	if (direct_domain_list)
@@ -268,6 +268,7 @@ config.dns = {
 			address: 'rcode://name_error'
 		}
 	],
+	rules: [],
 	strategy: dns_strategy,
 	disable_cache: (dns_disable_cache === '1'),
 	disable_expire: (dns_disable_cache_expire === '1')
@@ -276,27 +277,26 @@ config.dns = {
 if (!isEmpty(main_node)) {
 	/* Avoid DNS loop */
 	const main_node_addr = uci.get(uciconfig, main_node, 'address');
-	if (validateHostname(main_node_addr)) {
-		if (!config.dns.rules)
-			config.dns.rules = [];
-
+	if (validateHostname(main_node_addr))
 		push(config.dns.rules, {
 			domain: main_node_addr,
 			server: 'default-dns'
 		});
-	}
+
 	if (dedicated_udp_node) {
 		const main_udp_node_addr = uci.get(uciconfig, main_udp_node, 'address');
-		if (validateHostname(main_udp_node_addr)) {
-			if (!config.dns.rules)
-				config.dns.rules = [];
-
+		if (validateHostname(main_udp_node_addr))
 			push(config.dns.rules, {
 				domain: main_udp_node_addr,
 				server: 'default-dns'
 			});
-		}
 	}
+
+	if (direct_domain_list)
+		push(config.dns.rules, {
+			domain_keyword: direct_domain_list,
+			server: 'default-dns'
+		});
 
 	let default_final_dns = 'default-dns';
 	/* Main DNS */
@@ -330,7 +330,6 @@ if (!isEmpty(main_node)) {
 	});
 
 	/* DNS rules */
-	config.dns.rules = [];
 	uci.foreach(uciconfig, ucidnsrule, (cfg) => {
 		if (cfg.enabled !== '1')
 			return;
@@ -610,7 +609,7 @@ if (!isEmpty(main_node)) {
 			outbound: 'direct-out'
 		});
 
-	let routing_geosite, routing_geoip;
+	let routing_geosite;
 	if (routing_mode === 'gfwlist') {
 		routing_geosite = [ 'gfw', 'greatfire' ];
 
