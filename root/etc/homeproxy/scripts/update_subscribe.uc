@@ -170,7 +170,7 @@ function parse_uri(uri) {
 
 			/* https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2) */
 			try {
-				uri = json(decodeBase64Str(uri));
+				uri = json(decodeBase64Str(uri[1]));
 			} catch(e) {
 				log(sprintf('Skipping unsupported %s format.', 'VMess'));
 				return null;
@@ -185,7 +185,7 @@ function parse_uri(uri) {
 			} else if (uri.net === 'kcp') {
 				log(sprintf('Skipping unsupported %s node: %s.', 'VMess', uri.ps || uri.add));
 				return null;
-			} else if (uri.net === 'quic' && ((url.type && url.type !== 'none') || url.path || !sing_features.with_quic)) {
+			} else if (uri.net === 'quic' && ((uri.type && uri.type !== 'none') || uri.path || !sing_features.with_quic)) {
 				log(sprintf('Skipping unsupported %s node: %s.', 'VMess', uri.ps || uri.add));
 				if (!sing_features.with_quic)
 					log(sprintf('Please rebuild sing-box with %s support!', 'QUIC'));
