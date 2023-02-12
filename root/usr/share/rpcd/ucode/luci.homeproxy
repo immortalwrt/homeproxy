@@ -8,7 +8,6 @@
 'use strict';
 
 import { access, error, lstat, mkstemp, popen, readfile, writefile } from 'fs';
-import { init_action } from 'luci.sys';
 
 /* Kanged from ucode/luci */
 function shellquote(s) {

@@ -44,19 +44,6 @@ local translatef = luci.i18n.translatef
 string.split = luci.util.split
 string.trim = luci.util.trim
 
--- Kanged from https://gist.github.com/yi/01e3ab762838d567e65d
-function string.fromhex(str)
-	return (str:gsub('..', function (c)
-		return string.char(tonumber(c, 16))
-	end))
-end
-
-function string.tohex(str)
-	return (str:gsub('.', function (c)
-		return string.format('%02x', string.byte(c))
-	end))
-end
-
 table.contains = luci.util.contains
 table.dump = luci.util.dumptable
 table.splice = function(tbl, start, length)

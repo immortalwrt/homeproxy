@@ -108,6 +108,14 @@ export function validateHostname(hostname) {
 		(match(hostname, /^[a-zA-Z0-9_][a-zA-Z0-9_%-.]*[a-zA-Z0-9]$/) &&
 			match(hostname, /[^0-9.]/)));
 };
+
+export function validation(datatype, data) {
+	if (!datatype || !data || type(datatype) !== 'string')
+		return null;
+
+	const ret = system(`/sbin/validate_data ${shellQuote(datatype)} ${shellQuote(data)} 2>/dev/null`);
+	return ret;
+};
 /* String helper end */
 
 /* String parser start */

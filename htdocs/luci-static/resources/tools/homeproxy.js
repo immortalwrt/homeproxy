@@ -169,17 +169,6 @@ return baseclass.extend({
 		return L.resolveDefault(callGetSingBoxFeatures(), {});
 	},
 
-	/* Kanged from https://stackoverflow.com/a/32361825 */
-	hexDecode: function(hex) {
-		return decodeURIComponent(hex.replace(/(..)/g,'%$1'));
-	},
-
-	hexEncode: function(str) {
-		return unescape(encodeURIComponent(str)).split('').map((v) => {
-			return v.charCodeAt(0).toString(16).padStart(2, '0')
-		}).join('');
-	},
-
 	loadDefaultLabel: function(uciconfig, ucisection) {
 		var label = uci.get(uciconfig, ucisection, 'label');
 		if (label)
