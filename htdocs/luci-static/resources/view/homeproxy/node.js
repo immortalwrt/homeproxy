@@ -167,6 +167,8 @@ function parseShareLink(uri, features) {
 			/* Unsupported protocol */
 			if (params.get('type') === 'kcp')
 				return null;
+			else if (params.get('type') === 'quic' && ((params.get('quicSecurity') && params.get('quicSecurity') !== 'none') || !features.with_quic))
+				return null;
 			/* Check if uuid and type exist */
 			if (!url.username || !params.get('type'))
 				return null;
@@ -195,7 +197,7 @@ function parseShareLink(uri, features) {
 				}
 				break;
 			case 'ws':
-				config.ws_host = config.tls !== '1' ? (params.get('host') ? decodeURIComponent(params.get('host')) : null) : null;
+				config.ws_host = (config.tls !== '1' && params.get('host')) ? decodeURIComponent(params.get('host')) : null;
 				config.ws_path = params.get('path') ? decodeURIComponent(params.get('path')) : null;
 				if (config.ws_path && config.ws_path.includes('?ed=')) {
 					config.websocket_early_data_header = 'Sec-WebSocket-Protocol';
@@ -219,7 +221,7 @@ function parseShareLink(uri, features) {
 			/* Unsupported protocols */
 			else if (uri.net === 'kcp')
 				return null;
-			else if (uri.net === 'quic' && ((uri.type && uri.type !== 'none') || uri.path || !features.with_quic))
+			else if (uri.net === 'quic' && ((uri.type && uri.type !== 'none') || !features.with_quic))
 				return null;
 			/* https://www.v2fly.org/config/protocols/vmess.html#vmess-md5-%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF-%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6
 			 * else if (uri.aid && parseInt(uri.aid) !== 0)

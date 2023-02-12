@@ -1,5 +1,6 @@
 TODO:
 - Rewrite subscription script into ucode
 - Check bugs in ACL, config generator etc.
+- Allow use redirect/tproxy mode for custom routing
 - Refactor nft rules
 - Any other improvements

@@ -16,7 +16,7 @@ import { init_action } from 'luci.sys';
 
 import {
 	calcStringMD5, CURL, executeCommand, decodeBase64Str,
-	isEmpty, removeBlankAttrs, urlparse, validation,
+	isEmpty, parseURL, removeBlankAttrs, validation,
 	HP_DIR, RUN_DIR
 } from 'homeproxy';
 
@@ -102,11 +102,11 @@ function parse_uri(uri) {
 		switch (uri[0]) {
 		case 'hysteria':
 			/* https://github.com/HyNetwork/hysteria/wiki/URI-Scheme */
-			const url = urlparse('http://' + uri[1]),
-			      hysteria_params = urldecode_params('http://' + uri[1]);
+			const hysteria_url = parseURL('http://' + uri[1]),
+			      hysteria_params = hysteria_url.searchParams;
 
 			if (!sing_features.with_quic || (hysteria_params.protocol && hysteria_params.protocol !== 'udp')) {
-				log(sprintf('Skipping unsupportedd %s node: %s.', 'hysteria', urldecode(url.hash) || url.hostname));
+				log(sprintf('Skipping unsupportedd %s node: %s.', 'hysteria', urldecode(hysteria_url.hash) || hysteria_url.hostname));
 				if (!sing_features.with_quic)
 					log(sprintf('Please rebuild sing-box with %s support!', 'QUIC'));
 
@@ -114,10 +114,10 @@ function parse_uri(uri) {
 			}
 
 			config = {
-				label: urldecode(url.hash),
+				label: urldecode(hysteria_url.hash),
 				type: 'hysteria',
-				address: url.hostname,
-				port: url.port,
+				address: hysteria_url.hostname,
+				port: hysteria_url.port,
 				hysteria_protocol: hysteria_params.protocol || 'udp',
 				hysteria_auth_type: hysteria_params.auth ? 'string' : null,
 				hysteria_auth_payload: hysteria_params.auth,
@@ -128,6 +128,53 @@ function parse_uri(uri) {
 				tls_insecure: (hysteria_params.insecure in ['true', '1']) ? '1' : '0',
 				tls_sni: hysteria_params.peer,
 				tls_alpn: hysteria_params.alpn
+			};
+
+			break;
+		case 'ss':
+			/* "Lovely" Shadowrocket format */
+			const ss_suri = split(uri[1], '#');
+			let ss_slabel = '';
+			if (length(ss_suri) <= 2) {
+				if (length(ss_suri) === 2)
+					ss_slabel = '#' + urlencode(ss_suri[1]);
+				if (decodeBase64Str(ss_suri[0]))
+					uri[1] = decodeBase64Str(ss_suri[0]) + ss_slabel;
+			}
+
+			/* Legacy format is not supported, it should be never appeared in modern subscriptions */
+			/* https://github.com/shadowsocks/shadowsocks-org/commit/78ca46cd6859a4e9475953ed34a2d301454f579e */
+
+			/* SIP002 format https://shadowsocks.org/guide/sip002.html */
+			const ss_url = parseURL('http://' + uri[1]);
+
+			let ss_userinfo = {};
+			if (ss_url.username && ss_url.password)
+				/* User info encoded with URIComponent */
+				ss_userinfo = [ss_url.username, urldecode(ss_url.password)];
+			else if (ss_url.username)
+				/* User info encoded with base64 */
+				ss_userinfo = split(decodeBase64Str(urldecode(ss_url.username)), ':');
+
+			let ss_plugin, ss_plugin_opts;
+			if (ss_url.search && ss_url.searchParams.plugin) {
+				const ss_plugin_info = split(ss_url.searchParams.plugin, ';');
+				ss_plugin = ss_plugin_info[0];
+				if (ss_plugin === 'simple-obfs')
+					/* Fix non-standard plugin name */
+					ss_plugin = 'obfs-local';
+				ss_plugin_opts = slice(ss_plugin_info, 1) ? join(';', slice(ss_plugin_info, 1)) : null;
+			}
+
+			config = {
+				label: ss_url.hash ? urldecode(ss_url.hash) : null,
+				type: 'shadowsocks',
+				address: ss_url.hostname,
+				port: ss_url.port,
+				shadowsocks_encrypt_method: ss_userinfo[0],
+				password: ss_userinfo[1],
+				shadowsocks_plugin: ss_plugin,
+				shadowsocks_plugin_opts: ss_plugin_opts
 			};
 
 			break;
@@ -161,6 +208,73 @@ function parse_uri(uri) {
 			};
 
 			break;
+		case 'trojan':
+			/* https://p4gefau1t.github.io/trojan-go/developer/url/ */
+			const trojan_url = new URL('http://' + uri[1]);
+
+			config = {
+				label: trojan_url.hash ? urldecode(trojan_url.hash) : null,
+				type: 'trojan',
+				address: trojan_url.hostname,
+				port: trojan_url.port,
+				password: urldecode(trojan_url.username),
+				tls: '1',
+				tls_sni: trojan_url.searchParams ? trojan_url.searchParams.sni : null
+			};
+
+			break;
+		case 'vless':
+			/* https://github.com/XTLS/Xray-core/discussions/716 */
+			const vless_url = parseURL('http://' + uri[1]),
+			      vless_params = vless_url.searchParams;
+
+			/* Unsupported protocol */
+			if (vless_params.type === 'kcp') {
+				log(sprintf('Skipping sunsupported %s node: %s.', 'VLESS', urldecode(vless_url) || vless_url.hostname));
+				return null;
+			} else if (vless_params.type === 'quic' && (vless_params.quicSecurity && vless_params.quicSecurity !== 'none') || !sing_features.with_quic) {
+				log(sprintf('Skipping sunsupported %s node: %s.', 'VLESS', urldecode(vless_url) || vless_url.hostname));
+				if (!sing_features.with_quic)
+					log(sprintf('Please rebuild sing-box with %s support!', 'QUIC'));
+
+				return null;
+			}
+
+			config = {
+				label: vless_url.hash ? urldecode(vless_url.hash) : null,
+				type: 'vless',
+				address: vless_url.hostname,
+				port: vless_url.port,
+				uuid: vless_url.username,
+				transport: (vless_params.type !== 'tcp') ? vless_params.type : null,
+				tls: vless_params.security ? '1' : '0',
+				tls_sni = vless_params.sni,
+				tls_alpn: vless_params.alpn ? split(urldecode(vless_params.alpn), ',') : null,
+				tls_utls: sing_features.with_utls ? vless_params.fp : null
+			};
+			switch(vless_params.type) {
+			case 'grpc':
+				config.grpc_servicename = vless_params.serviceName;
+				break;
+			case 'http':
+			case 'tcp':
+				if (config.transport === 'http' || vless_params.headerType === 'http') {
+					config.http_host = vless_params.host ? split(urldecode(vless_params.host), ',') : null;
+					config.http_path = vless_params.path ? urldecode(vless_params.path) : null;
+				}
+				break;
+			case 'ws':
+				config.ws_host = (config.tls !== '1' && vless_params.host) ? urldecode(vless_params.host) : null;
+				config.ws_path = vless_params.path ? urldecode(vless_params.path) : null;
+				if (config.ws_path && match(config.ws_path, /\?ed=/)) {
+					config.websocket_early_data_header = 'Sec-WebSocket-Protocol';
+					config.websocket_early_data = split(config.ws_path, '?ed=')[1];
+					config.ws_path = split(config.ws_path, '?ed=')[0];
+				}
+				break;
+			}
+
+			break;
 		case 'vmess':
 			/* "Lovely" shadowrocket format */
 			if (match(uri, /&/)) {
@@ -176,12 +290,10 @@ function parse_uri(uri) {
 				return null;
 			}
 
-			if (isEmpty(uri))
-				return null;
-			else if (uri.v !== '2') {
+			if (uri.v !== '2') {
 				log(sprintf('Skipping unsupported %s format.', 'VMess'));
 				return null;
-			/* Unsupported protocols */
+			/* Unsupported protocol */
 			} else if (uri.net === 'kcp') {
 				log(sprintf('Skipping unsupported %s node: %s.', 'VMess', uri.ps || uri.add));
 				return null;
@@ -303,7 +415,7 @@ function main() {
 			else if (node_cache[groupHash][confHash] || node_cache[groupHash][nameHash])
 				log(sprintf('Skipping duplicate node: %s.', config.label));
 			else {
-				if (config.tls === '1' && allow_insecure)
+				if (config.tls === '1' && allow_insecure === '1')
 					config.tls_insecure = '1';
 				if (config.type in ['vless', 'vmess'])
 					config.packet_encoding = packet_encoding;
@@ -323,7 +435,7 @@ function main() {
 	if (isEmpty(node_result)) {
 		log('Failed to update subscriptions: no valid node found.');
 
-		if (via_proxy === '1') {
+		if (via_proxy !== '1') {
 			log('Starting service...');
 			init_action('homeproxy', 'start');
 		}

@@ -5,7 +5,7 @@
  */
 
 import { mkstemp } from 'fs';
-import { urldecode, urlencode, urldecode_params } from 'luci.http';
+import { urldecode, urldecode_params } from 'luci.http';
 
 /* Global variables start */
 export const HP_DIR = '/etc/homeproxy';
@@ -134,8 +134,78 @@ export function decodeBase64Str(str) {
 	return b64dec(str);
 };
 
-export function urlparse(url) {
+export function parseURL(url) {
 	if (type(url) !== 'string')
 		return null;
-}
+
+	const services = {
+		http: '80',
+		https: '443'
+	};
+
+	const objurl = {};
+
+	objurl.href = url;
+
+	url = replace(url, /#(.+)$/, (m1, m2) => {
+		objurl.hash = m2;
+		return '';
+	});
+
+	url = replace(url, /^(\w[A-Za-z0-9\+\-\_\.]+):/, (m1, m2) => {
+		objurl.protocol = m2;
+		return '';
+	});
+
+	url = replace(url, /\?(.+)/, (m1, m2) => {
+		objurl.search = m2;
+		objurl.searchParams = urldecode_params(m2);
+		return '';
+	});
+
+	url = replace(url, /^\/\/([^\/]+)/, (m1, m2) => {
+		m2 = replace(m2, /^([^@]+)@/, (m1, m2) => {
+			objurl.userinfo = m2;
+			return '';
+		});
+
+		m2 = replace(m2, /:(\d+)$/, (m1, m2) => {
+			objurl.port = m2;
+			return '';
+		});
+
+		if (validation('ip4addr', m2) === 0 ||
+		    validation('ip6addr', replace(m2, /\[|\]/, '')) === 0 ||
+		    validation('hostname', m2) === 0)
+			objurl.hostname = m2;
+
+		return '';
+	});
+
+	objurl.pathname = url ?? '/';
+
+	if (!objurl.protocol || !objurl.hostname)
+		return null;
+
+	if (objurl.userinfo) {
+		objurl.userinfo = replace(objurl.userinfo, /:([^:]+)$/, (m1, m2) => {
+			objurl.password = m2;
+			return '';
+		});
+
+		if (match(objurl.userinfo, /^[A-Za-z0-9\+\-\_\.]+$/)) {
+			objurl.username = objurl.userinfo;
+			delete objurl.userinfo;
+		} else {
+			delete objurl.userinfo;
+			delete objurl.password;
+		}
+	};
+
+	if (!objurl.port)
+		objurl.port = services[objurl.protocol];
+
+	objurl.host = objurl.hostname + (objurl.port ? `:${objurl.port}` : '');
+	objurl.origin = `${objurl.protocol}://${objurl.host}`;
+};
 /* String parser start */
