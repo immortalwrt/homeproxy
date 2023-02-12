@@ -16,7 +16,7 @@ import { init_action } from 'luci.sys';
 
 import {
 	calcStringMD5, CURL, executeCommand, decodeBase64Str,
-	isEmpty, removeBlankAttrs, validation,
+	isEmpty, removeBlankAttrs, urlparse, validation,
 	HP_DIR, RUN_DIR
 } from 'homeproxy';
 
@@ -268,8 +268,8 @@ function main() {
 			continue;
 		}
 
-		const grouphash = calcStringMD5(url);
-		node_cache[grouphash] = {};
+		const groupHash = calcStringMD5(url);
+		node_cache[groupHash] = {};
 
 		push(node_result, []);
 		const subindex = length(node_result) - 1;
@@ -300,7 +300,7 @@ function main() {
 
 			if (filter_check(config.label))
 				log(sprintf('Skipping blacklist node: %s.', config.label));
-			else if (node_cache[grouphash][confHash] || node_cache[grouphash][nameHash])
+			else if (node_cache[groupHash][confHash] || node_cache[groupHash][nameHash])
 				log(sprintf('Skipping duplicate node: %s.', config.label));
 			else {
 				if (config.tls === '1' && allow_insecure)
@@ -308,10 +308,10 @@ function main() {
 				if (config.type in ['vless', 'vmess'])
 					config.packet_encoding = packet_encoding;
 
-				config.grouphash = grouphash;
+				config.grouphash = groupHash;
 				push(node_result[subindex], config);
-				node_cache[grouphash][confHash] = config;
-				node_cache[grouphash][nameHash] = config;
+				node_cache[groupHash][confHash] = config;
+				node_cache[groupHash][nameHash] = config;
 
 				count += 1;
 			}
@@ -393,12 +393,12 @@ function main() {
 
 	if (need_restart) {
 		uci.commit();
-		log('Reloading service...');
+		log('Restarting service...');
 		init_action('homeproxy', 'stop');
 		init_action('homeproxy', 'start');
 	}
 
-	log(sprintf('%s nodes added, %s removed', added, removed));
+	log(sprintf('%s nodes added, %s removed.', added, removed));
 	log('Successfully updated subscriptions.');
 }
 
@@ -409,7 +409,7 @@ if (!isEmpty(subscription_urls))
 		log('[FATAL ERROR] An error occurred during updating subscriptions:');
 		log(e);
 
-		log('Reloading service...');
+		log('Restarting service...');
 		init_action('homeproxy', 'stop');
 		init_action('homeproxy', 'start');
 	}

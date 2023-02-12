@@ -133,4 +133,9 @@ export function decodeBase64Str(str) {
 
 	return b64dec(str);
 };
+
+export function urlparse(url) {
+	if (type(url) !== 'string')
+		return null;
+}
 /* String parser start */
