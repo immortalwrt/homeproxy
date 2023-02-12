@@ -12,9 +12,7 @@ LUCI_PKGARCH:=all
 LUCI_DEPENDS:= \
 	+sing-box \
 	+@SING_BOX_BUILD_GVISOR \
-	+curl \
-	+luci-lua-runtime \
-	+lua-neturl
+	+curl
 
 define Package/luci-app-homeproxy/conffiles
 /etc/config/homeproxy

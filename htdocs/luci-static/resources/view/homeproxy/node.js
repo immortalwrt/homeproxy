@@ -274,7 +274,7 @@ function parseShareLink(uri, features) {
 		else if (!config.label)
 			config.label = config.address + ':' + config.port;
 
-		config.address = config.address.replace(/\[|\]/, '');
+		config.address = config.address.replace(/\[|\]/g, '');
 	}
 
 	return config;
