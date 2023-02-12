@@ -10,7 +10,8 @@
 'require uci';
 'require ui';
 'require view';
-'require tools.homeproxy as hp';
+
+'require homeproxy as hp';
 'require tools.widgets as widgets';
 
 function allowInsecureConfirm(ev, section_id, value) {

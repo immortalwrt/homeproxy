@@ -8,7 +8,8 @@
 'require form';
 'require uci';
 'require view';
-'require tools.homeproxy as hp';
+
+'require homeproxy as hp';
 
 return view.extend({
 	load: function() {

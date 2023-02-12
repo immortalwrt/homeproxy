@@ -12,7 +12,8 @@
 'require uci';
 'require validation';
 'require view';
-'require tools.homeproxy as hp';
+
+'require homeproxy as hp';
 'require tools.widgets as widgets';
 
 var callServiceList = rpc.declare({

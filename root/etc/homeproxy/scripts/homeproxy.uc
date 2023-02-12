@@ -147,37 +147,37 @@ export function parseURL(url) {
 
 	objurl.href = url;
 
-	url = replace(url, /#(.+)$/, (m1, m2) => {
-		objurl.hash = m2;
+	url = replace(url, /#(.+)$/, (_, val) => {
+		objurl.hash = val;
 		return '';
 	});
 
-	url = replace(url, /^(\w[A-Za-z0-9\+\-\.]+):/, (m1, m2) => {
-		objurl.protocol = m2;
+	url = replace(url, /^(\w[A-Za-z0-9\+\-\.]+):/, (_, val) => {
+		objurl.protocol = val;
 		return '';
 	});
 
-	url = replace(url, /\?(.+)/, (m1, m2) => {
-		objurl.search = m2;
-		objurl.searchParams = urldecode_params(m2);
+	url = replace(url, /\?(.+)/, (_, val) => {
+		objurl.search = val;
+		objurl.searchParams = urldecode_params(val);
 		return '';
 	});
 
-	url = replace(url, /^\/\/([^\/]+)/, (m1, m2) => {
-		m2 = replace(m2, /^([^@]+)@/, (m1, m2) => {
-			objurl.userinfo = m2;
+	url = replace(url, /^\/\/([^\/]+)/, (_, val) => {
+		val = replace(val, /^([^@]+)@/, (_, val) => {
+			objurl.userinfo = val;
 			return '';
 		});
 
-		m2 = replace(m2, /:(\d+)$/, (m1, m2) => {
-			objurl.port = m2;
+		val = replace(val, /:(\d+)$/, (_, val) => {
+			objurl.port = val;
 			return '';
 		});
 
-		if (validation('ip4addr', m2) === 0 ||
-		    validation('ip6addr', replace(m2, /\[|\]/g, '')) === 0 ||
-		    validation('hostname', m2) === 0)
-			objurl.hostname = m2;
+		if (validation('ip4addr', val) === 0 ||
+		    validation('ip6addr', replace(val, /\[|\]/g, '')) === 0 ||
+		    validation('hostname', val) === 0)
+			objurl.hostname = val;
 
 		return '';
 	});
@@ -188,8 +188,8 @@ export function parseURL(url) {
 		return null;
 
 	if (objurl.userinfo) {
-		objurl.userinfo = replace(objurl.userinfo, /:([^:]+)$/, (m1, m2) => {
-			objurl.password = m2;
+		objurl.userinfo = replace(objurl.userinfo, /:([^:]+)$/, (_, val) => {
+			objurl.password = val;
 			return '';
 		});
 
