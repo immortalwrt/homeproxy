@@ -102,8 +102,8 @@ function parse_uri(uri) {
 		switch (uri[0]) {
 		case 'hysteria':
 			/* https://github.com/HyNetwork/hysteria/wiki/URI-Scheme */
-			//const url = urlparse('http://' + url[1]);
-			const hysteria_params = urldecode_params('http://' + url[1]);
+			const url = urlparse('http://' + uri[1]),
+			      hysteria_params = urldecode_params('http://' + uri[1]);
 
 			if (!sing_features.with_quic || (hysteria_params.protocol && hysteria_params.protocol !== 'udp')) {
 				log(sprintf('Skipping unsupportedd %s node: %s.', 'hysteria', urldecode(url.hash) || url.hostname));
@@ -242,7 +242,8 @@ function parse_uri(uri) {
 			log(sprintf('Skipping invalid %s node: %s.', config.type, config.label || 'NULL'));
 			return null;
 		} else if (!config.label)
-			config.label = (validation('ip6addr', config.address) === 0 ? `[${config.address}]` : config.address) + ':' + config.port;
+			config.label = (validation('ip6addr', config.address) === 0 ?
+				`[${config.address}]` : config.address) + ':' + config.port;
 	}
 
 	return config;
@@ -268,11 +269,11 @@ function main() {
 		const subindex = length(node_result) - 1;
 
 		let nodes;
-		if (json(res)) {
+		try {
 			nodes = json(res).servers || json(res);
 			if (nodes[0].server && nodes[0].method)
 				map(nodes, (_, i) => nodes[i].nodetype = 'sip008');
-		} else {
+		} catch(e) {
 			nodes = decodeBase64Str(res);
 			nodes = nodes ? split(replace(nodes, / /, /_/), '\n') : {};
 		}
@@ -308,8 +309,6 @@ function main() {
 
 				count += 1;
 			}
-
-			//printf('%.J\n\n', config);
 		}
 
 		log(sprintf('Successfully fetched %s nodes of total %s from %s.', count, length(nodes), url));
@@ -380,8 +379,8 @@ function main() {
 				}
 			}
 		} else {
-			uci.get(uciconfig, ucimain, 'main_node', 'nil');
-			uci.get(uciconfig, ucimain, 'main_udp_node', 'nil');
+			uci.set(uciconfig, ucimain, 'main_node', 'nil');
+			uci.set(uciconfig, ucimain, 'main_udp_node', 'nil');
 			uci.commit();
 			need_restart = true;
 
@@ -400,4 +399,13 @@ function main() {
 }
 
 if (!isEmpty(subscription_urls))
-	call(main);
+	try {
+		call(main);
+	} catch(e) {
+		log('[FATAL ERROR] An error occurred during updating subscriptions:');
+		log(e);
+
+		log('Reloading service...');
+		init_action('homeproxy', 'stop');
+		init_action('homeproxy', 'start');
+	}
