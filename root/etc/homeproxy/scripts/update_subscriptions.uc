@@ -340,10 +340,10 @@ function parse_uri(uri) {
 			case 'ws':
 				config.ws_host = (config.tls !== '1') ? uri.host : null;
 				config.ws_path = uri.path;
-				if (config.ws_path && config.ws_path.includes('?ed=')) {
+				if (config.ws_path && match(config.ws_path, /\?ed=/)) {
 					config.websocket_early_data_header = 'Sec-WebSocket-Protocol';
-					config.websocket_early_data = config.ws_path.split('?ed=')[1];
-					config.ws_path = config.ws_path.split('?ed=')[0];
+					config.websocket_early_data = split(config.ws_path, '?ed=')[1];
+					config.ws_path = split(config.ws_path, '?ed=')[0];
 				}
 				break;
 			}
@@ -393,7 +393,7 @@ function main() {
 				map(nodes, (_, i) => nodes[i].nodetype = 'sip008');
 		} catch(e) {
 			nodes = decodeBase64Str(res);
-			nodes = nodes ? split(trim(replace(nodes, / /g, /_/)), '\n') : {};
+			nodes = nodes ? split(trim(replace(nodes, / /g, '_')), '\n') : {};
 		}
 
 		let count = 0;
@@ -460,7 +460,7 @@ function main() {
 			node_cache[cfg.grouphash][cfg['.name']].isExisting = true;
 		}
 	});
-	for (let nodes in node_result) {
+	for (let nodes in node_result)
 		map(nodes, (node) => {
 			if (node.isExisting)
 				return null;
@@ -472,7 +472,6 @@ function main() {
 			added += 1;
 			log(sprintf('Adding node: %s.', node.label));
 		});
-	}
 	uci.commit();
 
 	let need_restart = (via_proxy !== '1');
