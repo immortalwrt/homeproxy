@@ -56,7 +56,7 @@ export function calcStringMD5(str) {
 	if (!str || type(str) !== 'string')
 		return null;
 
-	const output = executeCommand(`echo -n ${shellQuote(str)} | md5sum | awk '{print $1}'`) || {};
+	const output = executeCommand(`/bin/echo -n ${shellQuote(str)} | /usr/bin/md5sum | /usr/bin/awk '{print $1}'`) || {};
 	return trim(output.stdout);
 };
 
@@ -64,7 +64,7 @@ export function CURL(url) {
 	if (!url || type(url) !== 'string')
 		return null;
 
-	const output = executeCommand(`curl -fsL --connect-timeout '10' --retry '3' ${shellQuote(url)}`) || {};
+	const output = executeCommand(`/usr/bin/curl -fsL --connect-timeout '10' --retry '3' ${shellQuote(url)}`) || {};
 	return trim(output.stdout);
 };
 /* Utilities end */

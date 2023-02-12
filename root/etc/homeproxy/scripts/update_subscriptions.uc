@@ -53,7 +53,7 @@ function filter_check(name) {
 	let ret = false;
 	for (let i in filter_keywords) {
 		const patten = regexp(i);
-		if (match(name, i))
+		if (match(name, patten))
 			ret = true;
 	} if (filter_mode === 'whitelist')
 		ret = !ret;
@@ -75,10 +75,9 @@ system(`mkdir -p ${RUN_DIR}`);
 function log(...args) {
 	const logtime = trim(executeCommand('date "+%Y-%m-%d %H:%M:%S"').stdout);
 
-	//const logfile = open(`${RUN_DIR}/homeproxy.log`, 'a');
-	//logfile.write(`${logtime} [SUBSCRIBE] ${join(' ', args)}\n`);
-	//logfile.close();
-	print(`${logtime} [SUBSCRIBE] ${join(' ', args)}\n`);
+	const logfile = open(`${RUN_DIR}/homeproxy.log`, 'a');
+	logfile.write(`${logtime} [SUBSCRIBE] ${join(' ', args)}\n`);
+	logfile.close();
 }
 
 function parse_uri(uri) {
@@ -231,10 +230,10 @@ function parse_uri(uri) {
 
 			/* Unsupported protocol */
 			if (vless_params.type === 'kcp') {
-				log(sprintf('Skipping sunsupported %s node: %s.', 'VLESS', urldecode(vless_url) || vless_url.hostname));
+				log(sprintf('Skipping sunsupported %s node: %s.', 'VLESS', urldecode(vless_url.hash) || vless_url.hostname));
 				return null;
-			} else if (vless_params.type === 'quic' && (vless_params.quicSecurity && vless_params.quicSecurity !== 'none') || !sing_features.with_quic) {
-				log(sprintf('Skipping sunsupported %s node: %s.', 'VLESS', urldecode(vless_url) || vless_url.hostname));
+			} else if (vless_params.type === 'quic' && (vless_params.quicSecurity && vless_params.quicSecurity !== 'none' || !sing_features.with_quic)) {
+				log(sprintf('Skipping sunsupported %s node: %s.', 'VLESS', urldecode(vless_url.hash) || vless_url.hostname));
 				if (!sing_features.with_quic)
 					log(sprintf('Please rebuild sing-box with %s support!', 'QUIC'));
 
