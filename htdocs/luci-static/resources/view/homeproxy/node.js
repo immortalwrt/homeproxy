@@ -1098,7 +1098,7 @@ return view.extend({
 			}
 		}
 		o.onclick = function() {
-			return fs.exec('/etc/homeproxy/scripts/update_subscribe.lua').then((res) => {
+			return fs.exec('/etc/homeproxy/scripts/update_subscriptions.uc').then((res) => {
 				return location.reload();
 			}).catch((err) => {
 				ui.addNotification(null, E('p', _('An error occurred during updating subscriptions: %s').format(err)));
