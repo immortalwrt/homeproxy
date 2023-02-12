@@ -353,6 +353,7 @@ if (!isEmpty(main_node)) {
 			port: parse_port(cfg.port),
 			port_range: cfg.port_range,
 			process_name: cfg.process_name,
+			process_path: cfg.process_path,
 			user: cfg.user,
 			invert: (cfg.invert === '1'),
 			outbound: get_outbound(cfg.outbound),
@@ -664,6 +665,7 @@ if (!isEmpty(main_node)) {
 			port: parse_port(cfg.port),
 			port_range: cfg.port_range,
 			process_name: cfg.process_name,
+			process_path: cfg.process_path,
 			user: cfg.user,
 			invert: (cfg.invert === '1'),
 			outbound: get_outbound(cfg.outbound)

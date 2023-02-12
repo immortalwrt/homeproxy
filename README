@@ -1,4 +1,5 @@
 TODO:
+- Very slow response when nodes >= 60
 - Check bugs in ACL, config generator etc.
 - Allow use redirect/tproxy mode for custom routing
 - Refactor nft rules
