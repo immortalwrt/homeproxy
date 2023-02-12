@@ -169,7 +169,13 @@ function parse_uri(uri) {
 			}
 
 			/* https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2) */
-			uri = json(decodeBase64Str(uri));
+			try {
+				uri = json(decodeBase64Str(uri));
+			} catch(e) {
+				log(sprintf('Skipping unsupported %s format.', 'VMess'));
+				return null;
+			}
+
 			if (isEmpty(uri))
 				return null;
 			else if (uri.v !== '2') {
@@ -363,7 +369,6 @@ function main() {
 		if (first_server) {
 			if (!uci.get(uciconfig, main_node)) {
 				uci.set(uciconfig, ucimain, 'main_node', first_server);
-				uci.commit();
 				need_restart = true;
 
 				log('Main node is gone, switching to the first node.');
@@ -372,7 +377,6 @@ function main() {
 			if (!isEmpty(main_udp_node) && main_udp_node !== 'same') {
 				if (!uci.get(uciconfig, main_udp_node)) {
 					uci.set(uciconfig, ucimain, 'main_udp_node', first_server);
-					uci.commit();
 					need_restart = true;
 
 					log('Main UDP node is gone, switching to the first node.');
@@ -381,7 +385,6 @@ function main() {
 		} else {
 			uci.set(uciconfig, ucimain, 'main_node', 'nil');
 			uci.set(uciconfig, ucimain, 'main_udp_node', 'nil');
-			uci.commit();
 			need_restart = true;
 
 			log('No available node, disable tproxy.');
@@ -389,6 +392,7 @@ function main() {
 	}
 
 	if (need_restart) {
+		uci.commit();
 		log('Reloading service...');
 		init_action('homeproxy', 'stop');
 		init_action('homeproxy', 'start');
