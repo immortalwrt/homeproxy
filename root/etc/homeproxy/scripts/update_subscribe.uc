@@ -51,10 +51,11 @@ function filter_check(name) {
 		return false;
 
 	let ret = false;
-	for (let i in filter_keywords)
+	for (let i in filter_keywords) {
+		const patten = regexp(i);
 		if (match(name, i))
 			ret = true;
-	if (filter_mode === 'whitelist')
+	} if (filter_mode === 'whitelist')
 		ret = !ret;
 
 	return ret
@@ -97,7 +98,7 @@ function parse_uri(uri) {
 			};
 		}
 	} else if (type(uri) === 'string') {
-		uri = split(uri, '://');
+		uri = split(trim(uri), '://');
 
 		switch (uri[0]) {
 		case 'hysteria':
@@ -210,7 +211,7 @@ function parse_uri(uri) {
 			break;
 		case 'trojan':
 			/* https://p4gefau1t.github.io/trojan-go/developer/url/ */
-			const trojan_url = new URL('http://' + uri[1]);
+			const trojan_url = parseURL('http://' + uri[1]);
 
 			config = {
 				label: trojan_url.hash ? urldecode(trojan_url.hash) : null,
@@ -248,7 +249,7 @@ function parse_uri(uri) {
 				uuid: vless_url.username,
 				transport: (vless_params.type !== 'tcp') ? vless_params.type : null,
 				tls: vless_params.security ? '1' : '0',
-				tls_sni = vless_params.sni,
+				tls_sni: vless_params.sni,
 				tls_alpn: vless_params.alpn ? split(urldecode(vless_params.alpn), ',') : null,
 				tls_utls: sing_features.with_utls ? vless_params.fp : null
 			};
@@ -354,7 +355,7 @@ function parse_uri(uri) {
 
 	if (!isEmpty(config)) {
 		if (config.address)
-			config.address = replace(config.address, /\[|\]/, '');
+			config.address = replace(config.address, /\[|\]/g, '');
 
 		if (validation('host', config.address) !== 0 || validation('port', config.port) !== 0) {
 			log(sprintf('Skipping invalid %s node: %s.', config.type, config.label || 'NULL'));
@@ -393,7 +394,7 @@ function main() {
 				map(nodes, (_, i) => nodes[i].nodetype = 'sip008');
 		} catch(e) {
 			nodes = decodeBase64Str(res);
-			nodes = nodes ? split(replace(nodes, / /, /_/), '\n') : {};
+			nodes = nodes ? split(trim(replace(nodes, / /, /_/)), '\n') : {};
 		}
 
 		let count = 0;

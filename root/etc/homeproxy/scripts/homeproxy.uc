@@ -152,7 +152,7 @@ export function parseURL(url) {
 		return '';
 	});
 
-	url = replace(url, /^(\w[A-Za-z0-9\+\-\_\.]+):/, (m1, m2) => {
+	url = replace(url, /^(\w[A-Za-z0-9\+\-\.]+):/, (m1, m2) => {
 		objurl.protocol = m2;
 		return '';
 	});
@@ -175,7 +175,7 @@ export function parseURL(url) {
 		});
 
 		if (validation('ip4addr', m2) === 0 ||
-		    validation('ip6addr', replace(m2, /\[|\]/, '')) === 0 ||
+		    validation('ip6addr', replace(m2, /\[|\]/g, '')) === 0 ||
 		    validation('hostname', m2) === 0)
 			objurl.hostname = m2;
 
@@ -207,5 +207,7 @@ export function parseURL(url) {
 
 	objurl.host = objurl.hostname + (objurl.port ? `:${objurl.port}` : '');
 	objurl.origin = `${objurl.protocol}://${objurl.host}`;
+
+	return objurl;
 };
 /* String parser start */
