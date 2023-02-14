@@ -149,7 +149,7 @@ return view.extend({
 		for (var i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
 		o.default = 'nil';
-		o.depends({'routing_mode': 'custom', '!reverse': true});
+		o.depends({'routing_mode': /^((?!custom).)+$/, 'proxy_mode': /^((?!redirect$).)+$/});
 		o.rmempty = false;
 
 		o = s.taboption('routing', form.Value, 'dns_server', _('DNS server'),
@@ -214,46 +214,14 @@ return view.extend({
 		}
 
 		o = s.taboption('routing', form.ListValue, 'proxy_mode', _('Proxy mode'));
+		o.value('redirect', _('Redirect TCP'));
 		o.value('redirect_tproxy', _('Redirect TCP + TProxy UDP'));
 		/* This detection is required as the `system` stack doesn't work currently */
 		if (features.with_gvisor || features.with_lwip) {
 			o.value('redirect_tun', _('Redirect TCP + Tun UDP'));
-			o.value('tun', _('Tun'));
+			o.value('tun', _('Tun TCP/UDP'));
 		}
 		o.default = 'redirect_tproxy';
-		o.rmempty = false;
-
-		o = s.taboption('routing', form.ListValue, 'tcpip_stack', _('TCP/IP stack'),
-			_('TCP/IP stack.'));
-		if (features.with_gvisor)
-			o.value('gvisor', _('gVisor'));
-		if (features.with_lwip)
-			o.value('lwip', _('LWIP'));
-		/*
-		 * The `system` stack doesn't work properly on OpenWrt, so hide it
-		 * until it gets fixed.
-		 *
-		 * o.value('system', _('System'));
-		 */
-		o.default = 'gvisor';
-		o.depends('proxy_mode', 'redirect_tun');
-		o.depends('proxy_mode', 'tun');
-		o.rmempty = false;
-		o.onchange = function(ev, section_id, value) {
-			var desc = ev.target.nextElementSibling;
-			if (value === 'gvisor')
-				desc.innerHTML = _('Based on google/gvisor (recommended).');
-			else if (value === 'lwip')
-				desc.innerHTML = _('Upstream archived. Not recommended.');
-			else if (value === 'system')
-				desc.innerHTML = _('Less compatibility and sometimes better performance.');
-		}
-
-		o = s.taboption('routing', form.Flag, 'endpoint_independent_nat', _('Enable endpoint-independent NAT'),
-			_('Performance may degrade slightly, so it is not recommended to enable on when it is not needed.'));
-		o.default = o.enabled;
-		o.depends('tcpip_stack', 'gvisor');
-		o.depends('tcpip_stack', 'gvisor');
 		o.rmempty = false;
 
 		o = s.taboption('routing', form.Flag, 'ipv6_support', _('IPv6 support'));
@@ -266,6 +234,39 @@ return view.extend({
 		o.depends('routing_mode', 'custom');
 
 		ss = o.subsection;
+		so = ss.option(form.ListValue, 'tcpip_stack', _('TCP/IP stack'),
+			_('TCP/IP stack.'));
+		if (features.with_gvisor)
+			so.value('gvisor', _('gVisor'));
+		if (features.with_lwip)
+			so.value('lwip', _('LWIP'));
+		/*
+		* The `system` stack doesn't work properly on OpenWrt, so hide it
+		* until it gets fixed.
+		*
+		* o.value('system', _('System'));
+		*/
+		so.default = 'gvisor';
+		so.depends('homeproxy.config.proxy_mode', 'redirect_tun');
+		so.depends('homeproxy.config.proxy_mode', 'tun');
+		so.rmempty = false;
+		so.onchange = function(ev, section_id, value) {
+			var desc = ev.target.nextElementSibling;
+			if (value === 'gvisor')
+				desc.innerHTML = _('Based on google/gvisor (recommended).');
+			else if (value === 'lwip')
+				desc.innerHTML = _('Upstream archived. Not recommended.');
+			else if (value === 'system')
+				desc.innerHTML = _('Less compatibility and sometimes better performance.');
+		}
+
+		so = ss.option(form.Flag, 'endpoint_independent_nat', _('Enable endpoint-independent NAT'),
+			_('Performance may degrade slightly, so it is not recommended to enable on when it is not needed.'));
+		so.default = so.enabled;
+		so.depends('tcpip_stack', 'gvisor');
+		so.depends('tcpip_stack', 'gvisor');
+		so.rmempty = false;
+
 		so = ss.option(form.Flag, 'bypass_cn_traffic', _('Bypass CN traffic'),
 			_('Bypass mainland China traffic via firewall rules by default.'));
 		so.default = so.disabled;
@@ -526,10 +527,7 @@ return view.extend({
 		so = ss.option(form.ListValue, 'dns_strategy', _('DNS strategy'),
 			_('The DNS strategy for resolving the domain name in the address.'));
 		for (var i in hp.dns_strategy)
-			if (i)
-				so.value(i, hp.dns_strategy[i]);
-		so.default = 'prefer_ipv4';
-		so.rmempty = false;
+			so.value(i, hp.dns_strategy[i]);
 
 		so = ss.option(form.ListValue, 'default_server', _('Default DNS server'));
 		so.load = function(section_id) {
@@ -931,11 +929,9 @@ return view.extend({
 
 		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_proxy_ipv4_ips', _('Proxy IPv4 IP-s'));
 		so.datatype = 'or(ip4addr, cidr4)';
-		so.depends({'homeproxy.config.routing_mode': 'custom', '!reverse': true});
 
 		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_proxy_ipv6_ips', _('Proxy IPv6 IP-s'));
 		so.datatype = 'or(ip6addr, cidr6)';
-		so.depends({'homeproxy.config.routing_mode': 'custom', '!reverse': true});
 
 		so = ss.taboption('wan_ip_policy', form.DynamicList, 'wan_direct_ipv4_ips', _('Direct IPv4 IP-s'));
 		so.datatype = 'or(ip4addr, cidr4)';
@@ -964,12 +960,10 @@ return view.extend({
 			return callWriteDomainList('proxy_list', '');
 		}
 		so.validate = function(section_id, value) {
-			if (section_id && value) {
-				for (var i of value.split('\n')) {
+			if (section_id && value)
+				for (var i of value.split('\n'))
 					if (i && !stubValidator.apply('hostname', i))
 						return _('Expecting: %s').format(_('valid hostname'));
-				}
-			}
 
 			return true;
 		}
@@ -995,12 +989,10 @@ return view.extend({
 			return callWriteDomainList('direct_list', '');
 		}
 		so.validate = function(section_id, value) {
-			if (section_id && value) {
-				for (var i of value.split('\n')) {
+			if (section_id && value)
+				for (var i of value.split('\n'))
 					if (i && !stubValidator.apply('hostname', i))
 						return _('Expecting: %s').format(_('valid hostname'));
-				}
-			}
 
 			return true;
 		}
