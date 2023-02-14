@@ -30,7 +30,7 @@ const control_options = [ "lan_proxy_mode",
 	"lan_direct_mac_addrs", "lan_direct_ipv4_ips", "lan_direct_ipv6_ips",
 	"lan_proxy_mac_addrs", "lan_proxy_ipv4_ips", "lan_proxy_ipv6_ips",
 	"lan_gaming_mode_mac_addrs", "lan_gaming_mode_ipv4_ips", "lan_gaming_mode_ipv6_ips",
-	"lan_global_proxy_mac_addrs", "lan_global_proxy_ipv4_ips", "lan_global_proxy_ipv6_ips",
+	"lan_global_proxy_ipv4_ips", "lan_global_proxy_ipv6_ips",
 	"wan_proxy_ipv4_ips", "wan_proxy_ipv6_ips", "wan_direct_ipv4_ips", "wan_direct_ipv6_ips" ];
 const control_info = {};
 
@@ -131,7 +131,7 @@ set homeproxy_mainland_addr_v4 {
 	flags interval
 	auto-merge
 	elements = {
-		{% for (let cnip4 in split(trim(readfile(resources_dir + '/china_ip4.txt')), '\n')): %}
+		{% for (let cnip4 in split(trim(readfile(resources_dir + '/china_ip4.txt')), /[\r\n]/)): %}
 		{{ cnip4 }},
 		{% endfor %}
 	}
@@ -142,7 +142,7 @@ set homeproxy_mainland_addr_v6 {
 	flags interval
 	auto-merge
 	elements = {
-		{% for (let cnip6 in split(trim(readfile(resources_dir + '/china_ip6.txt')), '\n')): %}
+		{% for (let cnip6 in split(trim(readfile(resources_dir + '/china_ip6.txt')), /[\r\n]/)): %}
 		{{ cnip6 }},
 		{% endfor %}
 	}
@@ -219,9 +219,6 @@ chain homeproxy_redirect {
 	ip6 daddr @homeproxy_local_addr_v6 counter return
 	{% endif %}
 
-	{% if (control_info['lan_global_proxy_mac_addrs']): %}
-	ether saddr { {{ array_to_nftstr(control_info['lan_global_proxy_mac_addrs']) }} } counter goto homeproxy_redirect_proxy
-	{% endif %}
 	{% if (control_info['lan_global_proxy_ipv4_ips']): %}
 	ip saddr { {{ array_to_nftstr(control_info['lan_global_proxy_ipv4_ips']) }} } counter goto homeproxy_redirect_proxy
 	{% endif %}
@@ -331,9 +328,6 @@ chain homeproxy_mangle_prerouting {
 	ip6 daddr @homeproxy_local_addr_v6 counter return
 	{% endif %}
 
-	{% if (control_info['lan_global_proxy_mac_addrs']): %}
-	ether saddr { {{ array_to_nftstr(control_info['lan_global_proxy_mac_addrs']) }} } counter goto homeproxy_mangle_tproxy
-	{% endif %}
 	{% if (control_info['lan_global_proxy_ipv4_ips']): %}
 	ip saddr { {{ array_to_nftstr(control_info['lan_global_proxy_ipv4_ips']) }} } counter goto homeproxy_mangle_tproxy
 	{% endif %}

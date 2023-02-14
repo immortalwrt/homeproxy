@@ -47,7 +47,7 @@ const dns_port = uci.get(uciconfig, uciinfra, 'dns_port') || '5333';
 
 let main_node, main_udp_node, dedicated_udp_node, ipv6_support, default_outbound, default_interface,
     dns_server, dns_strategy, dns_default_server, dns_disable_cache, dns_disable_cache_expire,
-    wan_proxy_ips, proxy_domain_list, wan_direct_ips, direct_domain_list,
+    lan_proxy_ips, wan_proxy_ips, proxy_domain_list, wan_direct_ips, direct_domain_list,
     redirect_port, tproxy_port, self_mark, sniff_override, tun_name, tcpip_stack, endpoint_independent_nat;
 
 if (routing_mode !== 'custom') {
@@ -65,6 +65,15 @@ if (routing_mode !== 'custom') {
 	dns_server = uci.get(uciconfig, ucimain, 'dns_server');
 	if (isEmpty(dns_server) || dns_server === 'wan')
 		dns_server = wan_dns;
+
+	for (let i in ['lan_global_proxy_ipv4_ips', 'lan_global_proxy_ipv6_ips']) {
+		const global_proxy_ips = uci.get(uciconfig, ucicontrol, i);
+		if (length(global_proxy_ips)) {
+			if (!lan_proxy_ips)
+				lan_proxy_ips = [];
+			map(global_proxy_ips, (v) => push(lan_proxy_ips, v));
+		}
+	}
 
 	for (let i in ['wan_proxy_ipv4_ips', 'wan_proxy_ipv6_ips']) {
 		const proxy_ips = uci.get(uciconfig, ucicontrol, i);
@@ -587,9 +596,10 @@ if (!isEmpty(main_node) || !isEmpty(default_outbound))
 if (!isEmpty(main_node)) {
 	/* Routing rules */
 	/* Proxy list */
-	if (length(proxy_domain_list) || length(wan_proxy_ips)) {
+	if (length(proxy_domain_list) || length(lan_proxy_ips) || length(wan_proxy_ips)) {
 		push(config.route.rules, {
 			domain_keyword: proxy_domain_list,
+			source_ip_cidr: lan_proxy_ips,
 			ip_cidr: wan_proxy_ips,
 			network: dedicated_udp_node ? 'tcp' : null,
 			outbound: 'main-out'
@@ -598,6 +608,7 @@ if (!isEmpty(main_node)) {
 		if (dedicated_udp_node) {
 			push(config.route.rules, {
 				domain_keyword: proxy_domain_list,
+				source_ip_cidr: lan_proxy_ips,
 				ip_cidr: wan_proxy_ips,
 				network: 'udp',
 				outbound: 'main-udp-out'
