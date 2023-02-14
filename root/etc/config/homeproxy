@@ -38,16 +38,16 @@ config homeproxy 'routing'
 
 config homeproxy 'dns'
 	option dns_strategy 'prefer_ipv4'
+	option default_server 'local-dns'
+	option disable_cache '0'
+	option disable_cache_expire '0'
+
+config homeproxy 'subscription'
+	option auto_update '0'
 	option allow_insecure '0'
 	option packet_encoding 'xudp'
 	option update_via_proxy '0'
 	option filter_nodes 'disabled'
-
-config homeproxy 'subscription'
-	option auto_update '0'
-	option default_server 'local-dns'
-	option disable_cache '0'
-	option disable_cache_expire '0'
 
 config homeproxy 'server'
 	option enabled '0'
