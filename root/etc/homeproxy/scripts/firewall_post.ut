@@ -296,11 +296,11 @@ chain dstnat {
 chain homeproxy_mangle_tproxy {
 	{% if (routing_port !== 'all'): %}
 	udp dport != { {{ routing_port }} } counter return
-	{% endif %}
+	{% endif /* routing_port */ %}
 	meta l4proto udp mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
 	{% if (ipv6_support === '1'): %}
 	meta l4proto udp mark set {{ tproxy_mark }} tproxy ip6 to [::]:{{ tproxy_port }} counter accept
-	{% endif %}
+	{% endif /* ipv6_support */ %}
 }
 
 chain homeproxy_mangle_mark {
@@ -385,13 +385,16 @@ chain homeproxy_mangle_prerouting {
 	{% endif /* routing_mode */ %}
 
 	{% if (control_info.lan_gaming_mode_mac_addrs): %}
-	ether saddr { {{ array_to_nftstr(control_info.lan_gaming_mode_mac_addrs) }} } meta l4proto udp mark set {{ tproxy_mark }} counter accept
+	ether saddr { {{ array_to_nftstr(control_info.lan_gaming_mode_mac_addrs) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
+	ether saddr { {{ array_to_nftstr(control_info.lan_gaming_mode_mac_addrs) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip6 to [::]:{{ tproxy_port }} counter accept
 	{% endif /* lan_gaming_mode_mac_addrs */ %}
 	{% if (control_info.lan_gaming_mode_ipv4_ips): %}
-	ip saddr { {{ array_to_nftstr(control_info.lan_gaming_mode_ipv4_ips) }} } meta l4proto udp mark set {{ tproxy_mark }} counter accept
+	ip saddr { {{ array_to_nftstr(control_info.lan_gaming_mode_ipv4_ips) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
+	ip saddr { {{ array_to_nftstr(control_info.lan_gaming_mode_ipv4_ips) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip6 to [::]:{{ tproxy_port }} counter accept
 	{% endif /* lan_gaming_mode_ipv4_ips */ %}
 	{% if (ipv6_support === '1' && control_info.lan_gaming_mode_ipv6_ips): %}
-	ip6 saddr { {{ array_to_nftstr(control_info.lan_gaming_mode_ipv6_ips) }} } meta l4proto udp mark set {{ tproxy_mark }} counter accept
+	ip6 saddr { {{ array_to_nftstr(control_info.lan_gaming_mode_ipv6_ips) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip to 127.0.0.1:{{ tproxy_port }} counter accept
+	ip6 saddr { {{ array_to_nftstr(control_info.lan_gaming_mode_ipv6_ips) }} } meta l4proto udp mark set {{ tproxy_mark }} tproxy ip6 to [::]:{{ tproxy_port }} counter accept
 	{% endif /* lan_gaming_mode_ipv6_ips */ %}
 
 	counter goto homeproxy_mangle_tproxy

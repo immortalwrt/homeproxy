@@ -85,6 +85,7 @@ function parse_uri(uri) {
 
 	if (type(uri) === 'object') {
 		if (uri.nodetype === 'sip008') {
+			/* https://shadowsocks.org/guide/sip008.html */
 			config = {
 				label: uri.remarks,
 				type: 'shadowsocks',
@@ -389,6 +390,8 @@ function main() {
 		let nodes;
 		try {
 			nodes = json(res).servers || json(res);
+
+			/* Shadowsocks SIP008 format */
 			if (nodes[0].server && nodes[0].method)
 				map(nodes, (_, i) => nodes[i].nodetype = 'sip008');
 		} catch(e) {

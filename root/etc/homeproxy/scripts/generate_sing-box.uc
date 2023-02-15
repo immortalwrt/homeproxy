@@ -41,7 +41,7 @@ let wan_dns = executeCommand('ifstatus wan | jsonfilter -e \'@["dns-server"][0]\
 if (wan_dns.exitcode === 0 && trim(wan_dns.stdout))
 	wan_dns = trim(wan_dns.stdout);
 else
-	wan_dns = (routing_mode in ['proxy_mainland_china', 'global']) ? '8.8.8.8' : '114.114.114.114';
+	wan_dns = (routing_mode in ['proxy_mainland_china', 'global']) ? '208.67.222.222' : '114.114.114.114';
 
 const dns_port = uci.get(uciconfig, uciinfra, 'dns_port') || '5333';
 
