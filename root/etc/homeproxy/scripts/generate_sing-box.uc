@@ -221,7 +221,7 @@ function get_outbound(cfg) {
 	if (isEmpty(cfg))
 		return null;
 
-	if (cfg in ['direct-out', 'black-out'])
+	if (cfg in ['direct-out', 'block-out'])
 		return cfg;
 	else {
 		const node = uci.get(uciconfig, cfg, 'node');
