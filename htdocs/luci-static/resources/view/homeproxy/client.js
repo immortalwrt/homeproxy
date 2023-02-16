@@ -153,7 +153,7 @@ return view.extend({
 		o.rmempty = false;
 
 		o = s.taboption('routing', form.Value, 'dns_server', _('DNS server'),
-			_('You can only have one server set. Custom DNS server format as plain IPv4/IPv6.'));
+			_('You can only have one server set. It MUST support TCP query.'));
 		o.value('wan', _('Use DNS server from WAN'));
 		o.value('1.1.1.1', _('CloudFlare Public DNS (1.1.1.1)'));
 		o.value('208.67.222.222', _('Cisco Public DNS (208.67.222.222)'));
@@ -167,9 +167,11 @@ return view.extend({
 		o.depends({'routing_mode': 'custom', '!reverse': true});
 		o.validate = function(section_id, value) {
 			if (section_id && !['local', 'wan'].includes(value)) {
+				let ipv6_support = this.map.lookupOption('ipv6_support', section_id)[0].formvalue(section_id);
+
 				if (!value)
 					return _('Expecting: %s').format(_('non-empty value'));
-				else if (!stubValidator.apply('ipaddr', value))
+				else if (!stubValidator.apply((ipv6_support === '1') ? 'ipaddr' : 'ip4addr', value))
 					return _('Expecting: %s').format(_('valid IP address'));
 			}
 

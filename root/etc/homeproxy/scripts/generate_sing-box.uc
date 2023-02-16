@@ -10,7 +10,7 @@
 import { readfile, writefile } from 'fs';
 import { cursor } from 'uci';
 
-import { executeCommand, isEmpty, strToInt, removeBlankAttrs, validateHostname } from 'homeproxy';
+import { executeCommand, isEmpty, strToInt, removeBlankAttrs, validateHostname, validation } from 'homeproxy';
 import { HP_DIR, RUN_DIR } from 'homeproxy';
 
 /* UCI config start */
@@ -317,7 +317,7 @@ if (!isEmpty(main_node)) {
 	if (dns_server !== wan_dns) {
 		push(config.dns.servers, {
 			tag: 'main-dns',
-			address: dns_server,
+			address: 'tcp://' + ((validation('ip6addr', dns_server) === 0) ? `[${dns_server}]` : dns_server),
 			strategy: (ipv6_support !== '1') ? 'ipv4_only' : null,
 			detour: 'main-out'
 		});
