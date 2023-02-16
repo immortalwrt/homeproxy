@@ -484,6 +484,7 @@ function main() {
 		if (first_server) {
 			if (!uci.get(uciconfig, main_node)) {
 				uci.set(uciconfig, ucimain, 'main_node', first_server);
+				uci.commit();
 				need_restart = true;
 
 				log('Main node is gone, switching to the first node.');
@@ -492,6 +493,7 @@ function main() {
 			if (!isEmpty(main_udp_node) && main_udp_node !== 'same') {
 				if (!uci.get(uciconfig, main_udp_node)) {
 					uci.set(uciconfig, ucimain, 'main_udp_node', first_server);
+					uci.commit();
 					need_restart = true;
 
 					log('Main UDP node is gone, switching to the first node.');
@@ -500,6 +502,7 @@ function main() {
 		} else {
 			uci.set(uciconfig, ucimain, 'main_node', 'nil');
 			uci.set(uciconfig, ucimain, 'main_udp_node', 'nil');
+			uci.commit();
 			need_restart = true;
 
 			log('No available node, disable tproxy.');
@@ -507,7 +510,6 @@ function main() {
 	}
 
 	if (need_restart) {
-		uci.commit();
 		log('Restarting service...');
 		init_action('homeproxy', 'stop');
 		init_action('homeproxy', 'start');
