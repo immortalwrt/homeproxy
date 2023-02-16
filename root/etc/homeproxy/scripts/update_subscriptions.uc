@@ -429,7 +429,7 @@ function main() {
 				node_cache[groupHash][confHash] = config;
 				node_cache[groupHash][nameHash] = config;
 
-				count += 1;
+				count++;
 			}
 		}
 
@@ -454,7 +454,7 @@ function main() {
 
 		if (!node_cache[cfg.grouphash] || !node_cache[cfg.grouphash][cfg['.name']]) {
 			uci.delete(uciconfig, cfg['.name']);
-			removed += 1;
+			removed++;
 
 			log(sprintf('Removing node: %s.', cfg.label || cfg['name']));
 		} else {
@@ -473,7 +473,7 @@ function main() {
 			uci.set(uciconfig, nameHash, 'node');
 			map(keys(node), (v) => uci.set(uciconfig, nameHash, v, node[v]));
 
-			added += 1;
+			added++;
 			log(sprintf('Adding node: %s.', node.label));
 		});
 	uci.commit();

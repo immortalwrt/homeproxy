@@ -569,12 +569,12 @@ if (!isEmpty(main_node) || !isEmpty(default_outbound))
 		geoip: {
 			path: HP_DIR + '/resources/geoip.db',
 			download_url: 'https://github.com/1715173329/sing-geoip/releases/latest/download/geoip.db',
-			download_detour: get_outbound(default_outbound) || (routing_mode !== 'proxy_mainland_china' && !isEmpty(main_node)) ? 'main-out' : 'direct-out'
+			download_detour: get_outbound(default_outbound) || ((routing_mode !== 'proxy_mainland_china' && !isEmpty(main_node)) ? 'main-out' : 'direct-out')
 		},
 		geosite: {
 			path: HP_DIR + '/resources/geosite.db',
 			download_url: 'https://github.com/1715173329/sing-geosite/releases/latest/download/geosite.db',
-			download_detour: get_outbound(default_outbound) || (routing_mode !== 'proxy_mainland_china' && !isEmpty(main_node)) ? 'main-out' : 'direct-out'
+			download_detour: get_outbound(default_outbound) || ((routing_mode !== 'proxy_mainland_china' && !isEmpty(main_node)) ? 'main-out' : 'direct-out')
 		},
 		rules: [
 			{
