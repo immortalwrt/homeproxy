@@ -34,7 +34,7 @@ echo -e "/etc/homeproxy/certs/" > "$TEMP_PKG_DIR/lib/upgrade/keep.d/$PKG_NAME"
 cat > "$TEMP_PKG_DIR/CONTROL/control" <<-EOF
 	Package: $PKG_NAME
 	Version: $PKG_VERSION
-	Depends: libc, sing-box, kmod-tun, curl, firewall4
+	Depends: libc, sing-box, curl, firewall4, kmod-nft-tproxy
 	Source: https://github.com/immortalwrt/homeproxy
 	SourceName: $PKG_NAME
 	Section: luci
