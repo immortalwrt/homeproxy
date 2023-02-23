@@ -507,8 +507,11 @@ if (server_enabled === '1')
 
 			transport: !isEmpty(cfg.transport) ? {
 				type: cfg.transport,
-				host: cfg.http_host || cfg.ws_host,
+				host: cfg.http_host,
 				path: cfg.http_path || cfg.ws_path,
+				headers: cfg.ws_host ? {
+					Host: cfg.ws_host
+				} : null,
 				method: cfg.http_method,
 				max_early_data: cfg.websocket_early_data,
 				early_data_header_name: cfg.websocket_early_data_header,

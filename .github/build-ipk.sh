@@ -29,7 +29,10 @@ cp -fpR "$PKG_DIR/htdocs"/* "$TEMP_PKG_DIR/www/"
 cp -fpR "$PKG_DIR/root"/* "$TEMP_PKG_DIR/"
 
 echo -e "/etc/config/homeproxy" > "$TEMP_PKG_DIR/CONTROL/conffiles"
-echo -e "/etc/homeproxy/certs/" > "$TEMP_PKG_DIR/lib/upgrade/keep.d/$PKG_NAME"
+cat > "$TEMP_PKG_DIR/lib/upgrade/keep.d/$PKG_NAME" <<-EOF
+/etc/homeproxy/certs/
+/etc/homeproxy/resources/
+EOF
 
 cat > "$TEMP_PKG_DIR/CONTROL/control" <<-EOF
 	Package: $PKG_NAME
