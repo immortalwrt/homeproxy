@@ -462,9 +462,6 @@ if (server_enabled === '1')
 			method: (cfg.type === 'shadowsocks') ? cfg.shadowsocks_encrypt_method : null,
 			password: (cfg.type in ['shadowsocks', 'shadowtls']) ? cfg.password : null,
 
-			/* ShadowTLS */
-			version: (cfg.type === 'shadowtls') ? strToInt(cfg.shadowtls_version) : null,
-
 			/* HTTP / Hysteria / Socks / Trojan / VMess */
 			users: (cfg.type !== 'shadowsocks') ? [
 				{
