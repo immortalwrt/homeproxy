@@ -158,6 +158,7 @@ function generate_outbound(node) {
 		version: (node.type === 'shadowtls') ? strToInt(node.shadowtls_version) : ((node.type === 'socks') ? node.socks_version : null),
 		/* VLESS / VMess */
 		uuid: node.uuid,
+		flow: node.vless_flow,
 		alter_id: strToInt(node.vmess_alterid),
 		security: node.vmess_encrypt,
 		global_padding: node.vmess_global_padding ? (node.vmess_global_padding === '1') : null,
@@ -197,6 +198,11 @@ function generate_outbound(node) {
 			utls: !isEmpty(node.tls_utls) ? {
 				enabled: true,
 				fingerprint: node.tls_utls
+			} : null,
+			reality: (node.tls_reality === '1') ? {
+				enabled: true,
+				public_key: node.tls_reality_public_key,
+				short_id: node.tls_reality_short_id
 			} : null
 		} : null,
 		transport: !isEmpty(node.transport) ? {
