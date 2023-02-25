@@ -201,8 +201,11 @@ function generate_outbound(node) {
 		} : null,
 		transport: !isEmpty(node.transport) ? {
 			type: node.transport,
-			host: node.http_host || node.ws_host,
+			host: node.http_host,
 			path: node.http_path || node.ws_path,
+			headers: node.ws_host ? {
+				Host: node.ws_host
+			} : null,
 			method: node.http_method,
 			max_early_data: strToInt(node.websocket_early_data),
 			early_data_header_name: node.websocket_early_data_header,
@@ -462,7 +465,7 @@ if (server_enabled === '1')
 			method: (cfg.type === 'shadowsocks') ? cfg.shadowsocks_encrypt_method : null,
 			password: (cfg.type in ['shadowsocks', 'shadowtls']) ? cfg.password : null,
 
-			/* HTTP / Hysteria / Socks / Trojan / VMess */
+			/* HTTP / Hysteria / Socks / Trojan / VLESS / VMess */
 			users: (cfg.type !== 'shadowsocks') ? [
 				{
 					name: !(cfg.type in ['http', 'socks']) ? 'cfg-' + cfg['.name'] + '-server' : null,
@@ -513,7 +516,7 @@ if (server_enabled === '1')
 					Host: cfg.ws_host
 				} : null,
 				method: cfg.http_method,
-				max_early_data: cfg.websocket_early_data,
+				max_early_data: strToInt(cfg.websocket_early_data),
 				early_data_header_name: cfg.websocket_early_data_header,
 				service_name: cfg.grpc_servicename
 			} : null
