@@ -856,20 +856,15 @@ return view.extend({
 			so.value(mac, hint ? '%s (%s)'.format(mac, hint) : mac);
 		});
 
-		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_direct_ipv4_ips', _('Direct IPv4 IP-s'));
-		so.datatype = 'or(ip4addr, cidr4)';
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_direct_ips', _('Direct IP-s'));
+		so.datatype = 'or(ipaddr, cidr)';
 		so.depends('lan_proxy_mode', 'except_listed');
 		L.sortedKeys(ipaddrs, null, 'addr').forEach(function(ipv4) {
 			so.value(ipv4, '%s (%s)'.format(ipv4, ipaddrs[ipv4]));
 		});
-
-		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_direct_ipv6_ips', _('Direct IPv6 IP-s'));
-		so.datatype = 'or(ip6addr, cidr6)';
-		so.depends('lan_proxy_mode', 'except_listed');
 		L.sortedKeys(ip6addrs, null, 'addr').forEach(function(ipv6) {
 			so.value(ipv6, '%s (%s)'.format(ipv6, ip6addrs[ipv6]));
 		});
-		so.depends('homeproxy.config.ipv6_support', '1');
 
 		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_proxy_mac_addrs', _('Proxy MAC addresses'));
 		so.datatype = 'macaddr';
@@ -879,20 +874,15 @@ return view.extend({
 			so.value(mac, hint ? '%s (%s)'.format(mac, hint) : mac);
 		});
 
-		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_proxy_ipv4_ips', _('Proxy IPv4 IP-s'));
-		so.datatype = 'or(ip4addr, cidr4)';
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_proxy_ips', _('Proxy IP-s'));
+		so.datatype = 'or(ipaddr, cidr)';
 		so.depends('lan_proxy_mode', 'listed_only');
 		L.sortedKeys(ipaddrs, null, 'addr').forEach(function(ipv4) {
 			so.value(ipv4, '%s (%s)'.format(ipv4, ipaddrs[ipv4]));
 		});
-
-		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_proxy_ipv6_ips', _('Proxy IPv6 IP-s'));
-		so.datatype = 'or(ip6addr, cidr6)';
-		so.depends('lan_proxy_mode', 'listed_only');
 		L.sortedKeys(ip6addrs, null, 'addr').forEach(function(ipv6) {
 			so.value(ipv6, '%s (%s)'.format(ipv6, ip6addrs[ipv6]));
 		});
-		so.depends('homeproxy.config.ipv6_support', '1');
 
 		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_gaming_mode_mac_addrs', _('Gaming mode MAC addresses'));
 		so.datatype = 'macaddr';
@@ -901,32 +891,24 @@ return view.extend({
 			so.value(mac, hint ? '%s (%s)'.format(mac, hint) : mac);
 		});
 
-		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_gaming_mode_ipv4_ips', _('Gaming mode IPv4 IP-s'));
-		so.datatype = 'or(ip4addr, cidr4)';
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_gaming_mode_ips', _('Gaming mode IP-s'));
+		so.datatype = 'or(ipaddr, cidr)';
 		L.sortedKeys(ipaddrs, null, 'addr').forEach(function(ipv4) {
 			so.value(ipv4, '%s (%s)'.format(ipv4, ipaddrs[ipv4]));
 		});
-
-		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_gaming_mode_ipv6_ips', _('Gaming mode IPv6 IP-s'));
-		so.datatype = 'or(ip6addr, cidr6)';
 		L.sortedKeys(ip6addrs, null, 'addr').forEach(function(ipv6) {
 			so.value(ipv6, '%s (%s)'.format(ipv6, ip6addrs[ipv6]));
 		});
-		so.depends('homeproxy.config.ipv6_support', '1');
 
-		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_global_proxy_ipv4_ips', _('Global proxy IPv4 IP-s'));
-		so.datatype = 'or(ip4addr, cidr4)';
+		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_global_proxy_ips', _('Global proxy IP-s'));
+		so.datatype = 'or(ipaddr, cidr)';
 		L.sortedKeys(ipaddrs, null, 'addr').forEach(function(ipv4) {
 			so.value(ipv4, '%s (%s)'.format(ipv4, ipaddrs[ipv4]));
+		});
+		L.sortedKeys(ip6addrs, null, 'addr').forEach(function(ipv6) {
+			so.value(ipv6, '%s (%s)'.format(ipv6, ip6addrs[ipv6]));
 		});
 		so.depends({'homeproxy.config.routing_mode': 'custom', '!reverse': true});
-
-		so = ss.taboption('lan_ip_policy', form.DynamicList, 'lan_global_proxy_ipv6_ips', _('Global proxy IPv6 IP-s'));
-		so.datatype = 'or(ip6addr, cidr6)';
-		L.sortedKeys(ip6addrs, null, 'addr').forEach(function(ipv6) {
-			so.value(ipv6, '%s (%s)'.format(ipv6, ip6addrs[ipv6]));
-		});
-		so.depends({'homeproxy.config.routing_mode': /^((?!custom).)+$/, 'homeproxy.config.ipv6_support': '1'});
 		/* LAN IP policy end */
 
 		/* WAN IP policy start */
