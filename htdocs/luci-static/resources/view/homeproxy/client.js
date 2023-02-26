@@ -526,7 +526,7 @@ return view.extend({
 		o.depends('routing_mode', 'custom');
 
 		ss = o.subsection;
-		so = ss.option(form.ListValue, 'dns_strategy', _('DNS strategy'),
+		so = ss.option(form.ListValue, 'default_strategy', _('Default DNS strategy'),
 			_('The DNS strategy for resolving the domain name in the address.'));
 		for (var i in hp.dns_strategy)
 			so.value(i, hp.dns_strategy[i]);
