@@ -183,7 +183,7 @@ set homeproxy_lan_direct_addrs {
 	type ether_addr
 	flags interval
 	auto-merge
-{% if (control_info.lan_direct_mac_addrs || control_info.lan_direct_ips) %}
+{% if (control_info.lan_direct_mac_addrs || control_info.lan_direct_ips): %}
 	elements = {
 		{% for (let lmac in control_info.lan_direct_mac_addrs): %}
 		{{ lmac }},
