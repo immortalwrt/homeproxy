@@ -167,6 +167,7 @@ set homeproxy_lan_proxy_addrs {
 	type ether_addr
 	flags interval
 	auto-merge
+{% if (control_info.lan_proxy_mac_addrs || control_info.lan_proxy_ips): %}
 	elements = {
 		{% for (let lmac in control_info.lan_proxy_mac_addrs): %}
 		{{ lmac }},
@@ -175,12 +176,14 @@ set homeproxy_lan_proxy_addrs {
 		{{ lips }},
 		{% endfor /* lan_proxy_ips */ %}
 	}
+{% endif /* lan_proxy_mac_addrs || lan_proxy_ips */ %}
 }
 {% elif (control_info.lan_proxy_mode === 'except_listed'): %}
 set homeproxy_lan_direct_addrs {
 	type ether_addr
 	flags interval
 	auto-merge
+{% if (control_info.lan_direct_mac_addrs || control_info.lan_direct_ips) %}
 	elements = {
 		{% for (let lmac in control_info.lan_direct_mac_addrs): %}
 		{{ lmac }},
@@ -189,6 +192,7 @@ set homeproxy_lan_direct_addrs {
 		{{ lips }},
 		{% endfor /* lan_direct_ips */ %}
 	}
+{% endif /* lan_direct_mac_addrs || lan_direct_ips */ %}
 }
 {% endif %}
 
@@ -197,18 +201,21 @@ set homeproxy_lan_global_proxy_addrs {
 	type ether_addr
 	flags interval
 	auto-merge
+{% if (control_info.lan_global_proxy_ips): %}
 	elements = {
 		{% for (let lips in control_info.lan_global_proxy_ips): %}
 		{{ lips }},
 		{% endfor %}
 	}
+{% endif /* lan_global_proxy_ips */ %}
 }
-{% endif %}
+{% endif /* routing_mode */ %}
 
 set homeproxy_lan_gaming_addrs {
 	type ether_addr
 	flags interval
 	auto-merge
+{% if (control_info.lan_gaming_mode_mac_addrs || control_info.lan_gaming_mode_ips): %}
 	elements = {
 		{% for (let lmac in control_info.lan_gaming_mode_mac_addrs): %}
 		{{ lmac }},
@@ -217,6 +224,7 @@ set homeproxy_lan_gaming_addrs {
 		{{ lips }},
 		{% endfor /* lan_gaming_mode_ips */ %}
 	}
+{% endif %}
 }
 
 {# WAN ACL addresses #}
