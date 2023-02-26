@@ -58,7 +58,15 @@ if (routing_mode !== 'custom') {
 	if (isEmpty(dns_server) || dns_server === 'wan')
 		dns_server = wan_dns;
 
-	lan_proxy_ips = uci.get(uciconfig, ucicontrol, 'lan_global_proxy_ips');
+	for (let i in ['lan_global_proxy_ipv4_ips', 'lan_global_proxy_ipv6_ips']) {
+		const global_proxy_ips = uci.get(uciconfig, ucicontrol, i);
+		if (length(global_proxy_ips)) {
+			if (!lan_proxy_ips)
+				lan_proxy_ips = [];
+			map(global_proxy_ips, (v) => push(lan_proxy_ips, v));
+		}
+	}
+
 	for (let i in ['wan_proxy_ipv4_ips', 'wan_proxy_ipv6_ips']) {
 		const proxy_ips = uci.get(uciconfig, ucicontrol, i);
 		if (length(proxy_ips)) {
