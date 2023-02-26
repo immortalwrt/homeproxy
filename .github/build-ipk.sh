@@ -23,6 +23,7 @@ TEMP_DIR="$(mktemp -d -p $BASE_DIR)"
 TEMP_PKG_DIR="$TEMP_DIR/$PKG_NAME"
 mkdir -p "$TEMP_PKG_DIR/CONTROL/"
 mkdir -p "$TEMP_PKG_DIR/lib/upgrade/keep.d/"
+mkdir -p "$TEMP_PKG_DIR/usr/lib/lua/luci/i18n/"
 mkdir -p "$TEMP_PKG_DIR/www/"
 
 cp -fpR "$PKG_DIR/htdocs"/* "$TEMP_PKG_DIR/www/"
@@ -47,6 +48,13 @@ cat > "$TEMP_PKG_DIR/CONTROL/control" <<-EOF
 	Installed-Size: TO-BE-FILLED-BY-IPKG-BUILD
 	Description:  The modern ImmortalWrt proxy platform for ARM64/AMD64
 EOF
+
+svn co "https://github.com/openwrt/luci/trunk/modules/luci-base/src" "po2lmo"
+pushd "po2lmo"
+make po2lmo
+./po2lmo "$PKG_DIR/po/zh_Hans/homeproxy.po" "$TEMP_PKG_DIR/usr/lib/lua/luci/i18n/homeproxy.zh-cn.lmo"
+popd
+rm -rf "po2lmo"
 
 echo -e '#!/bin/sh
 [ "${IPKG_NO_SCRIPT}" = "1" ] && exit 0
