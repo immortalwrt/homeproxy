@@ -278,7 +278,7 @@ msgstr "清空日志"
 
 #: root/usr/share/luci/menu.d/luci-app-homeproxy.json:14
 msgid "Client Settings"
-msgstr "客户端设定"
+msgstr "客户端设置"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:158
 msgid "CloudFlare Public DNS (1.1.1.1)"
@@ -367,19 +367,17 @@ msgstr "默认服务器名称"
 msgid "Direct"
 msgstr "直连"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:962
+#: htdocs/luci-static/resources/view/homeproxy/client.js:980
 msgid "Direct Domain List"
 msgstr "直连域名列表"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:859
-msgid "Direct IP-s"
-msgstr "直连 IP 地址"
-
-#: htdocs/luci-static/resources/view/homeproxy/client.js:924
+#: htdocs/luci-static/resources/view/homeproxy/client.js:942
 msgid "Direct IPv4 IP-s"
 msgstr "直连 IPv4 地址"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:927
+#: htdocs/luci-static/resources/view/homeproxy/client.js:866
+#: htdocs/luci-static/resources/view/homeproxy/client.js:945
 msgid "Direct IPv6 IP-s"
 msgstr "直连 IPv6 地址"
 
@@ -595,8 +593,8 @@ msgstr "加密方式"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:175
 #: htdocs/luci-static/resources/view/homeproxy/client.js:203
 #: htdocs/luci-static/resources/view/homeproxy/client.js:208
-#: htdocs/luci-static/resources/view/homeproxy/client.js:955
-#: htdocs/luci-static/resources/view/homeproxy/client.js:984
+#: htdocs/luci-static/resources/view/homeproxy/client.js:973
+#: htdocs/luci-static/resources/view/homeproxy/client.js:1002
 #: htdocs/luci-static/resources/view/homeproxy/node.js:384
 #: htdocs/luci-static/resources/view/homeproxy/node.js:495
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1064
@@ -651,11 +649,15 @@ msgstr "GFW 域名列表版本"
 msgid "GFWList"
 msgstr "GFWList"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:894
-msgid "Gaming mode IP-s"
-msgstr "游戏模式 IP 地址"
+#: htdocs/luci-static/resources/view/homeproxy/client.js:904
+msgid "Gaming mode IPv4 IP-s"
+msgstr "游戏模式 IPv4 地址"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:887
+#: htdocs/luci-static/resources/view/homeproxy/client.js:910
+msgid "Gaming mode IPv6 IP-s"
+msgstr "游戏模式 IPv6 IP-s"
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:897
 msgid "Gaming mode MAC addresses"
 msgstr "游戏模式 MAC 地址"
 
@@ -680,9 +682,13 @@ msgstr "Geosite"
 msgid "Global"
 msgstr "全局"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:903
-msgid "Global proxy IP-s"
-msgstr "全局代理 IP 地址"
+#: htdocs/luci-static/resources/view/homeproxy/client.js:917
+msgid "Global proxy IPv4 IP-s"
+msgstr "全局代理 IPv4 IP-s"
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:924
+msgid "Global proxy IPv6 IP-s"
+msgstr "全局代理 IPv6 IP-s"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:27
 msgid "Global settings"
@@ -1243,23 +1249,21 @@ msgid ""
 "default in v2ray and cannot be disabled)."
 msgstr "协议参数。 如启用会随机浪费流量（在 v2ray 中默认启用并且无法禁用）。"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:933
+#: htdocs/luci-static/resources/view/homeproxy/client.js:951
 msgid "Proxy Domain List"
 msgstr "代理域名列表"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:877
-msgid "Proxy IP-s"
-msgstr "代理 IP 地址"
-
-#: htdocs/luci-static/resources/view/homeproxy/client.js:917
+#: htdocs/luci-static/resources/view/homeproxy/client.js:882
+#: htdocs/luci-static/resources/view/homeproxy/client.js:935
 msgid "Proxy IPv4 IP-s"
 msgstr "代理 IPv4 地址"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:920
+#: htdocs/luci-static/resources/view/homeproxy/client.js:889
+#: htdocs/luci-static/resources/view/homeproxy/client.js:938
 msgid "Proxy IPv6 IP-s"
 msgstr "代理 IPv6 地址"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:869
+#: htdocs/luci-static/resources/view/homeproxy/client.js:874
 msgid "Proxy MAC addresses"
 msgstr "代理 MAC 地址"
 
@@ -1865,7 +1869,7 @@ msgstr "VLESS"
 msgid "VMess"
 msgstr "VMess"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:915
+#: htdocs/luci-static/resources/view/homeproxy/client.js:933
 msgid "WAN IP Policy"
 msgstr "WAN IP 策略"
 
@@ -2017,8 +2021,8 @@ msgstr "有效网址"
 msgid "valid base64 key with %d characters"
 msgstr "包含 %d 个字符的有效 base64 密钥"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:955
-#: htdocs/luci-static/resources/view/homeproxy/client.js:984
+#: htdocs/luci-static/resources/view/homeproxy/client.js:973
+#: htdocs/luci-static/resources/view/homeproxy/client.js:1002
 msgid "valid hostname"
 msgstr "有效主机名"
 

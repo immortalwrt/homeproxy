@@ -360,19 +360,17 @@ msgstr ""
 msgid "Direct"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:962
+#: htdocs/luci-static/resources/view/homeproxy/client.js:980
 msgid "Direct Domain List"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:859
-msgid "Direct IP-s"
-msgstr ""
-
-#: htdocs/luci-static/resources/view/homeproxy/client.js:924
+#: htdocs/luci-static/resources/view/homeproxy/client.js:942
 msgid "Direct IPv4 IP-s"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:927
+#: htdocs/luci-static/resources/view/homeproxy/client.js:866
+#: htdocs/luci-static/resources/view/homeproxy/client.js:945
 msgid "Direct IPv6 IP-s"
 msgstr ""
 
@@ -578,8 +576,8 @@ msgstr ""
 #: htdocs/luci-static/resources/view/homeproxy/client.js:175
 #: htdocs/luci-static/resources/view/homeproxy/client.js:203
 #: htdocs/luci-static/resources/view/homeproxy/client.js:208
-#: htdocs/luci-static/resources/view/homeproxy/client.js:955
-#: htdocs/luci-static/resources/view/homeproxy/client.js:984
+#: htdocs/luci-static/resources/view/homeproxy/client.js:973
+#: htdocs/luci-static/resources/view/homeproxy/client.js:1002
 #: htdocs/luci-static/resources/view/homeproxy/node.js:384
 #: htdocs/luci-static/resources/view/homeproxy/node.js:495
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1064
@@ -634,11 +632,15 @@ msgstr ""
 msgid "GFWList"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:894
-msgid "Gaming mode IP-s"
+#: htdocs/luci-static/resources/view/homeproxy/client.js:904
+msgid "Gaming mode IPv4 IP-s"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:887
+#: htdocs/luci-static/resources/view/homeproxy/client.js:910
+msgid "Gaming mode IPv6 IP-s"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:897
 msgid "Gaming mode MAC addresses"
 msgstr ""
 
@@ -663,8 +665,12 @@ msgstr ""
 msgid "Global"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:903
-msgid "Global proxy IP-s"
+#: htdocs/luci-static/resources/view/homeproxy/client.js:917
+msgid "Global proxy IPv4 IP-s"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:924
+msgid "Global proxy IPv6 IP-s"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:27
@@ -1221,23 +1227,21 @@ msgid ""
 "default in v2ray and cannot be disabled)."
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:933
+#: htdocs/luci-static/resources/view/homeproxy/client.js:951
 msgid "Proxy Domain List"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:877
-msgid "Proxy IP-s"
-msgstr ""
-
-#: htdocs/luci-static/resources/view/homeproxy/client.js:917
+#: htdocs/luci-static/resources/view/homeproxy/client.js:882
+#: htdocs/luci-static/resources/view/homeproxy/client.js:935
 msgid "Proxy IPv4 IP-s"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:920
+#: htdocs/luci-static/resources/view/homeproxy/client.js:889
+#: htdocs/luci-static/resources/view/homeproxy/client.js:938
 msgid "Proxy IPv6 IP-s"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:869
+#: htdocs/luci-static/resources/view/homeproxy/client.js:874
 msgid "Proxy MAC addresses"
 msgstr ""
 
@@ -1826,7 +1830,7 @@ msgstr ""
 msgid "VMess"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:915
+#: htdocs/luci-static/resources/view/homeproxy/client.js:933
 msgid "WAN IP Policy"
 msgstr ""
 
@@ -1977,8 +1981,8 @@ msgstr ""
 msgid "valid base64 key with %d characters"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:955
-#: htdocs/luci-static/resources/view/homeproxy/client.js:984
+#: htdocs/luci-static/resources/view/homeproxy/client.js:973
+#: htdocs/luci-static/resources/view/homeproxy/client.js:1002
 msgid "valid hostname"
 msgstr ""
 
