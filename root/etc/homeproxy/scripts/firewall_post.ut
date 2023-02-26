@@ -228,7 +228,7 @@ chain homeproxy_redirect {
 	{% if (control_info.lan_direct_mac_addrs): %}
 	ether saddr { {{ array_to_nftstr(control_info.lan_direct_mac_addrs) }} } counter return
 	{% endif /* lan_direct_mac_addrs */ %}
-	{% if (control_info.lan_proxy_ipv4_ips): %}
+	{% if (control_info.lan_direct_ipv4_ips): %}
 	ip saddr { {{ array_to_nftstr(control_info.lan_direct_ipv4_ips) }} } counter return
 	{% endif /* lan_direct_ipv4_ips */ %}
 	{% if (control_info.lan_direct_ipv6_ips): %}
@@ -352,7 +352,7 @@ chain homeproxy_mangle_prerouting {
 	{% if (control_info.lan_direct_mac_addrs): %}
 	ether saddr { {{ array_to_nftstr(control_info.lan_direct_mac_addrs) }} } counter return
 	{% endif /* lan_direct_mac_addrs */ %}
-	{% if (control_info.lan_proxy_ipv4_ips): %}
+	{% if (control_info.lan_direct_ipv4_ips): %}
 	ip saddr { {{ array_to_nftstr(control_info.lan_direct_ipv4_ips) }} } counter return
 	{% endif /* lan_direct_ipv4_ips */ %}
 	{% if (control_info.lan_direct_ipv6_ips): %}
@@ -504,7 +504,7 @@ chain homeproxy_mangle_tun {
 	{% if (control_info.lan_direct_mac_addrs): %}
 	ether saddr { {{ array_to_nftstr(control_info.lan_direct_mac_addrs) }} } counter return
 	{% endif /* lan_direct_mac_addrs */ %}
-	{% if (control_info.lan_proxy_ipv4_ips): %}
+	{% if (control_info.lan_direct_ipv4_ips): %}
 	ip saddr { {{ array_to_nftstr(control_info.lan_direct_ipv4_ips) }} } counter return
 	{% endif /* lan_direct_ipv4_ips */ %}
 	{% if (control_info.lan_direct_ipv6_ips): %}
