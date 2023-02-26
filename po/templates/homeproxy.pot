@@ -163,7 +163,7 @@ msgid "Auto update"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1042
-msgid "Auto update subscriptions, geoip and geosite."
+msgid "Auto update subscriptions, GeoIP and GeoSite."
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:526

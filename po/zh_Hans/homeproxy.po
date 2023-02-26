@@ -170,8 +170,8 @@ msgid "Auto update"
 msgstr "自动更新"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1042
-msgid "Auto update subscriptions, geoip and geosite."
-msgstr "自动更新订阅、geoip 和 geosite。"
+msgid "Auto update subscriptions, GeoIP and GeoSite."
+msgstr "自动更新订阅、GeoIP 和 GeoSite"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:526
 #: htdocs/luci-static/resources/view/homeproxy/server.js:145
@@ -457,7 +457,7 @@ msgid ""
 "Regular_Expressions\">Regex</a> is supported."
 msgstr ""
 "丢弃/保留 包含指定关键词的节点。支持<a target=\"_blank\" href=\"https://"
-"developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions\">"
+"developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions\">"
 "正则表达式</a>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1075
@@ -1311,7 +1311,7 @@ msgstr "Redirect TCP + Tun UDP"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1139
 msgid "Remove %s nodes"
-msgstr "移除了 %s 个节点。"
+msgstr "移除 %s 个节点"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1129
 msgid "Remove all nodes from subscriptions"
@@ -1748,7 +1748,7 @@ msgstr "上传失败。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1109
 msgid "Update nodes from subscriptions"
-msgstr "从代理更新节点"
+msgstr "从订阅更新节点"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1053
 msgid "Update subscriptions via proxy."
