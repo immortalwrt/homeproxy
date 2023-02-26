@@ -8,6 +8,10 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: htdocs/luci-static/resources/view/homeproxy/status.js:127
+msgid "%s log"
+msgstr "%s 日志"
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1161
 msgid "%s nodes removed"
 msgstr "移除了 %s 个节点"
@@ -243,6 +247,18 @@ msgstr "证书路径"
 msgid "Check update"
 msgstr "检查更新"
 
+#: htdocs/luci-static/resources/view/homeproxy/status.js:163
+msgid "China IPv4 list version"
+msgstr "中国 IPv4 库版本"
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:167
+msgid "China IPv6 list version"
+msgstr "中国 IPv6 库版本"
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:175
+msgid "China list version"
+msgstr "中国域名列表版本"
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:992
 msgid "Chrome"
 msgstr "Chrome"
@@ -255,6 +271,10 @@ msgstr "密码套件"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:159
 msgid "Cisco Public DNS (208.67.222.222)"
 msgstr "思科公共 DNS（208.67.222.222）"
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:134
+msgid "Clean log"
+msgstr "清空日志"
 
 #: root/usr/share/luci/menu.d/luci-app-homeproxy.json:14
 msgid "Client Settings"
@@ -623,6 +643,10 @@ msgstr "流控"
 msgid "GET"
 msgstr "GET"
 
+#: htdocs/luci-static/resources/view/homeproxy/status.js:171
+msgid "GFW list version"
+msgstr "GFW 域名列表版本"
+
 #: htdocs/luci-static/resources/view/homeproxy/client.js:182
 msgid "GFWList"
 msgstr "GFWList"
@@ -638,6 +662,14 @@ msgstr "游戏模式 MAC 地址"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:458
 msgid "GeoIP"
 msgstr "GeoIP"
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:155
+msgid "GeoIP version"
+msgstr "GeoIP 版本"
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:159
+msgid "GeoSite version"
+msgstr "GeoSite 版本"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:450
 #: htdocs/luci-static/resources/view/homeproxy/client.js:715
@@ -822,6 +854,14 @@ msgstr "加载中"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:811
 msgid "Local address"
 msgstr "本地地址"
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:112
+msgid "Log file does not exist."
+msgstr "日志文件不存在。"
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:105
+msgid "Log is empty."
+msgstr "日志为空。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:838
 msgid "MTU"
@@ -1309,6 +1349,10 @@ msgstr "Redirect TCP + TProxy UDP"
 msgid "Redirect TCP + Tun UDP"
 msgstr "Redirect TCP + Tun UDP"
 
+#: htdocs/luci-static/resources/view/homeproxy/status.js:139
+msgid "Refresh every %s seconds."
+msgstr "每 %s 秒刷新。"
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1139
 msgid "Remove %s nodes"
 msgstr "移除 %s 个节点"
@@ -1320,6 +1364,10 @@ msgstr "移除所有订阅节点"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:623
 msgid "Resolve strategy"
 msgstr "解析策略"
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:152
+msgid "Resources management"
+msgstr "资源管理"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:302
 msgid "Routing Nodes"
@@ -1684,9 +1732,10 @@ msgstr "上游出站的标签。<br/>启用时，其他拨号字段将被忽略�
 #: htdocs/luci-static/resources/view/homeproxy/node.js:913
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1090
 msgid ""
-"This is <b>DANGEROUS</b>, your traffic is almost like <b>PLAIN TEXT</b>! Use "
-"at your own risk!"
-msgstr "这是危险行为，您的流量将几乎等同于明文！使用风险自负！"
+"This is <strong>DANGEROUS</strong>, your traffic is almost like "
+"<strong>PLAIN TEXT</strong>! Use at your own risk!"
+msgstr ""
+"这是危险行为，您的流量将几乎等同于<strong>明文</strong>！使用风险自负！"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:273
 msgid ""
@@ -1737,6 +1786,10 @@ msgstr "UUID"
 #: htdocs/luci-static/resources/view/homeproxy/status.js:67
 msgid "Unknown error."
 msgstr "未知错误。"
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:116
+msgid "Unknown error: %s"
+msgstr "未知错误：%s"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1114
 msgid "Update %s subscriptions"

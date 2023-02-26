@@ -1,6 +1,10 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
+#: htdocs/luci-static/resources/view/homeproxy/status.js:127
+msgid "%s log"
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1161
 msgid "%s nodes removed"
 msgstr ""
@@ -236,6 +240,18 @@ msgstr ""
 msgid "Check update"
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/status.js:163
+msgid "China IPv4 list version"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:167
+msgid "China IPv6 list version"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:175
+msgid "China list version"
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:992
 msgid "Chrome"
 msgstr ""
@@ -247,6 +263,10 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:159
 msgid "Cisco Public DNS (208.67.222.222)"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:134
+msgid "Clean log"
 msgstr ""
 
 #: root/usr/share/luci/menu.d/luci-app-homeproxy.json:14
@@ -606,6 +626,10 @@ msgstr ""
 msgid "GET"
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/status.js:171
+msgid "GFW list version"
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/client.js:182
 msgid "GFWList"
 msgstr ""
@@ -620,6 +644,14 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:458
 msgid "GeoIP"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:155
+msgid "GeoIP version"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:159
+msgid "GeoSite version"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:450
@@ -801,6 +833,14 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:811
 msgid "Local address"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:112
+msgid "Log file does not exist."
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:105
+msgid "Log is empty."
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:838
@@ -1287,6 +1327,10 @@ msgstr ""
 msgid "Redirect TCP + Tun UDP"
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/status.js:139
+msgid "Refresh every %s seconds."
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1139
 msgid "Remove %s nodes"
 msgstr ""
@@ -1297,6 +1341,10 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:623
 msgid "Resolve strategy"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:152
+msgid "Resources management"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:302
@@ -1647,8 +1695,8 @@ msgstr ""
 #: htdocs/luci-static/resources/view/homeproxy/node.js:913
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1090
 msgid ""
-"This is <b>DANGEROUS</b>, your traffic is almost like <b>PLAIN TEXT</b>! Use "
-"at your own risk!"
+"This is <strong>DANGEROUS</strong>, your traffic is almost like "
+"<strong>PLAIN TEXT</strong>! Use at your own risk!"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:273
@@ -1698,6 +1746,10 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:67
 msgid "Unknown error."
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/status.js:116
+msgid "Unknown error: %s"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1114
