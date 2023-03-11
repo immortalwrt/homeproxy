@@ -215,7 +215,10 @@ function generate_outbound(node) {
 			method: node.http_method,
 			max_early_data: strToInt(node.websocket_early_data),
 			early_data_header_name: node.websocket_early_data_header,
-			service_name: node.grpc_servicename
+			service_name: node.grpc_servicename,
+			idle_timeout: strToInt(node.http_idle_timeout),
+			ping_timeout: strToInt(node.http_ping_timeout),
+			permit_without_stream: (node.grpc_permit_without_stream === '1') || null
 		} : null,
 		udp_over_tcp: (node.udp_over_tcp === '1') || null,
 		tcp_fast_open: (node.tcp_fast_open === '1') || null,
@@ -524,7 +527,8 @@ if (server_enabled === '1')
 				method: cfg.http_method,
 				max_early_data: strToInt(cfg.websocket_early_data),
 				early_data_header_name: cfg.websocket_early_data_header,
-				service_name: cfg.grpc_servicename
+				service_name: cfg.grpc_servicename,
+				idle_timeout: strToInt(node.http_idle_timeout)
 			} : null
 		});
 	});
