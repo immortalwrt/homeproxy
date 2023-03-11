@@ -60,9 +60,9 @@ start_service() {
 		# Auto update
 		local auto_update auto_update_time
 		config_get_bool auto_update "subscription" "auto_update" "0"
-		if [ "auto_update" = "1" ]; then
+		if [ "$auto_update" = "1" ]; then
 			config_get auto_update_time "subscription" "auto_update_time" "2"
-			echo "0 ${auto_update_time} * * * $HP_DIR/scripts/update_crond.sh" >> "/etc/crontabs/root"
+			echo -e "0 $auto_update_time * * * $HP_DIR/scripts/update_crond.sh" >> "/etc/crontabs/root"
 			/etc/init.d/cron restart
 		fi
 
