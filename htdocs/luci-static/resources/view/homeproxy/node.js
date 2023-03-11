@@ -997,6 +997,15 @@ return view.extend({
 			so.value('randomized', _('Randomized'));
 			so.value('safari', _('Safari'));
 			so.depends('tls', '1');
+			so.validate = function(section_id, value) {
+				if (section_id) {
+					let tls_reality = this.map.lookupOption('tls_reality', section_id)[0].formvalue(section_id);
+					if (tls_reality && !value)
+						return _('Expecting: %s').format(_('non-empty value'));
+				}
+
+				return true;
+			}
 			so.modalonly = true;
 
 			so = ss.option(form.Flag, 'tls_reality', _('REALITY'));
