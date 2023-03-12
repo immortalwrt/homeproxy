@@ -293,6 +293,7 @@ return view.extend({
 		var m, s, o, ss, so;
 		var main_node = uci.get(data[0], 'config', 'main_node');
 		var routing_mode = uci.get(data[0], 'config', 'routing_mode');
+		var features = data[1];
 
 		m = new form.Map('homeproxy', _('Edit nodes'));
 
@@ -334,7 +335,7 @@ return view.extend({
 								var packet_encoding = uci.get(data[0], 'subscription', 'packet_encoding');
 								var imported_node = 0;
 								input_links.forEach((l) => {
-									var config = parseShareLink(l, data[1]);
+									var config = parseShareLink(l, features);
 									if (config) {
 										if (config.tls === '1' && allow_insecure === '1')
 											config.tls_insecure = '1'
@@ -428,15 +429,15 @@ return view.extend({
 		so = ss.option(form.ListValue, 'type', _('Type'));
 		so.value('direct', _('Direct'));
 		so.value('http', _('HTTP'));
-		if (data[1].with_quic)
+		if (features.with_quic)
 			so.value('hysteria', _('Hysteria'));
 		so.value('shadowsocks', _('Shadowsocks'));
-		if (data[1].with_shadowsocksr)
+		if (features.with_shadowsocksr)
 			so.value('shadowsocksr', _('ShadowsocksR'));
 		so.value('shadowtls', _('ShadowTLS'));
 		so.value('socks', _('Socks'));
 		so.value('trojan', _('Trojan'));
-		if (data[1].with_wireguard)
+		if (features.with_wireguard)
 			so.value('wireguard', _('WireGuard'));
 		so.value('vless', _('VLESS'));
 		so.value('vmess', _('VMess'));
@@ -980,7 +981,7 @@ return view.extend({
 		so.onclick = L.bind(hp.uploadCertificate, this, _('certificate'), 'client_ca');
 		so.modalonly = true;
 
-		if (data[1].with_ech) {
+		if (features.with_ech) {
 			so = ss.option(form.Flag, 'tls_ech', _('Enable ECH'),
 				_('ECH (Encrypted Client Hello) is a TLS extension that allows a client to encrypt the first part of its ClientHello message.'));
 			so.depends('tls', '1');
@@ -1002,7 +1003,7 @@ return view.extend({
 			so.modalonly = true;
 		}
 
-		if (data[1].with_utls) {
+		if (features.with_utls) {
 			so = ss.option(form.ListValue, 'tls_utls', _('uTLS fingerprint'),
 				_('uTLS is a fork of "crypto/tls", which provides ClientHello fingerprinting resistance.'));
 			so.value('', _('Disable'));

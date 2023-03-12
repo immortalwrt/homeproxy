@@ -256,11 +256,11 @@ return view.extend({
 		o.depends('transport', 'http');
 		o.modalonly = true;
 
-		so = ss.option(form.Value, 'http_idle_timeout', _('Idle timeout'));
-		so.datatype = 'uinteger';
-		so.depends('transport', 'grpc');
-		so.depends({'transport': 'http', 'tls': '1'});
-		so.modalonly = true;
+		o = s.option(form.Value, 'http_idle_timeout', _('Idle timeout'));
+		o.datatype = 'uinteger';
+		o.depends('transport', 'grpc');
+		o.depends({'transport': 'http', 'tls': '1'});
+		o.modalonly = true;
 		/* HTTP config end */
 
 		/* WebSocket config start */
