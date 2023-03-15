@@ -746,9 +746,9 @@ return view.extend({
 		so.depends('type', 'vmess');
 		so.onchange = function(ev, section_id, value) {
 			var desc = this.map.findElement('id', 'cbid.homeproxy.%s.transport'.format(section_id)).nextElementSibling;
-			if (value === 'http') {
+			if (value === 'http')
 				desc.innerHTML = _('TLS is not enforced. If TLS is not configured, plain HTTP 1.1 is used.');
-			} else if (value === 'quic')
+			else if (value === 'quic')
 				desc.innerHTML = _('No additional encryption support: It\'s basically duplicate encryption.');
 			else
 				desc.innerHTML = _('No TCP transport, plain HTTP is merged into the HTTP transport.');

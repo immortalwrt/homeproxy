@@ -21,6 +21,7 @@ return view.extend({
 
 	render: function(data) {
 		var m, s, o;
+		var features = data[1];
 
 		m = new form.Map('homeproxy', _('Edit servers'));
 
@@ -54,7 +55,7 @@ return view.extend({
 
 		o = s.option(form.ListValue, 'type', _('Type'));
 		o.value('http', _('HTTP'));
-		if (data[1].with_quic) {
+		if (features.with_quic) {
 			o.value('hysteria', _('Hysteria'));
 			o.value('naive', _('NaïveProxy'));
 		}
@@ -236,7 +237,7 @@ return view.extend({
 			if ((value === 'http' && tls_element.checked) || (value === 'grpc' && !features.with_grpc))
 				this.map.findElement('id', 'cbid.homeproxy.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
 					_('Specifies the time until idle clients should be closed with a GOAWAY frame. PING frames are not considered as activity.');
-			else if (value === 'gprc' && features.with_grpc)
+			else if (value === 'grpc' && features.with_grpc)
 				this.map.findElement('id', 'cbid.homeproxy.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
 					_('If the transport doesn\'t see any activity after a duration of this time, it pings the client to check if the connection is still active.');
 		}
@@ -274,11 +275,11 @@ return view.extend({
 		o.modalonly = true;
 
 		if (features.with_grpc) {
-			so = ss.option(form.Value, 'http_ping_timeout', _('Ping timeout'),
+			o = s.option(form.Value, 'http_ping_timeout', _('Ping timeout'),
 				_('The timeout that after performing a keepalive check, the client will wait for activity. If no activity is detected, the connection will be closed.'));
-			so.datatype = 'uinteger';
-			so.depends('transport', 'grpc');
-			so.modalonly = true;
+			o.datatype = 'uinteger';
+			o.depends('transport', 'grpc');
+			o.modalonly = true;
 		}
 		/* HTTP config end */
 
@@ -355,7 +356,7 @@ return view.extend({
 		o.optional = true;
 		o.modalonly = true;
 
-		if (data[1].with_acme) {
+		if (features.with_acme) {
 			o = s.option(form.Flag, 'tls_acme', _('Enable ACME'),
 				_('Use ACME TLS certificate issuer.'));
 			o.default = o.disabled;
