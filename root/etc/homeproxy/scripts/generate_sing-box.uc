@@ -531,7 +531,8 @@ if (server_enabled === '1')
 				max_early_data: strToInt(cfg.websocket_early_data),
 				early_data_header_name: cfg.websocket_early_data_header,
 				service_name: cfg.grpc_servicename,
-				idle_timeout: cfg.http_idle_timeout ? (cfg.http_idle_timeout + 's') : null
+				idle_timeout: cfg.http_idle_timeout ? (cfg.http_idle_timeout + 's') : null,
+				ping_timeout: cfg.http_ping_timeout ? (cfg.http_ping_timeout + 's') : null
 			} : null
 		});
 	});

@@ -746,12 +746,29 @@ return view.extend({
 		so.depends('type', 'vmess');
 		so.onchange = function(ev, section_id, value) {
 			var desc = this.map.findElement('id', 'cbid.homeproxy.%s.transport'.format(section_id)).nextElementSibling;
-			if (value === 'http')
+			if (value === 'http') {
 				desc.innerHTML = _('TLS is not enforced. If TLS is not configured, plain HTTP 1.1 is used.');
-			else if (value === 'quic')
+			} else if (value === 'quic')
 				desc.innerHTML = _('No additional encryption support: It\'s basically duplicate encryption.');
 			else
 				desc.innerHTML = _('No TCP transport, plain HTTP is merged into the HTTP transport.');
+
+			var tls_element = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
+			if ((value === 'http' && tls_element.checked) || (value === 'grpc' && !features.with_grpc)) {
+				this.map.findElement('id', 'cbid.homeproxy.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
+					_('Specifies the period of time after which a health check will be performed using a ping frame if no frames have been received on the connection.<br/>' +
+						'Please note that a ping response is considered a received frame, so if there is no other traffic on the connection, the health check will be executed every interval.');
+
+				this.map.findElement('id', 'cbid.homeproxy.%s.http_ping_timeout'.format(section_id)).nextElementSibling.innerHTML =
+					_('Specifies the timeout duration after sending a PING frame, within which a response must be received.<br/>' +
+						'If a response to the PING frame is not received within the specified timeout duration, the connection will be closed.');
+			} else if (value === 'grpc' && features.with_grpc) {
+				this.map.findElement('id', 'cbid.homeproxy.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
+					_('If the transport doesn\'t see any activity after a duration of this time, it pings the client to check if the connection is still active.');
+
+				this.map.findElement('id', 'cbid.homeproxy.%s.http_ping_timeout'.format(section_id)).nextElementSibling.innerHTML =
+					_('The timeout that after performing a keepalive check, the client will wait for activity. If no activity is detected, the connection will be closed.');
+			}
 		}
 		so.modalonly = true;
 
@@ -761,7 +778,8 @@ return view.extend({
 		so.modalonly = true;
 
 		if (features.with_grpc) {
-			so = ss.option(form.Flag, 'grpc_permit_without_stream', _('gRPC permit without stream'));
+			so = ss.option(form.Flag, 'grpc_permit_without_stream', _('gRPC permit without stream'),
+				_('If enabled, the client transport sends keepalive pings even with no active connections.'));
 			so.default = so.disabled;
 			so.depends('transport', 'grpc');
 			so.modalonly = true;
@@ -784,13 +802,15 @@ return view.extend({
 		so.depends('transport', 'http');
 		so.modalonly = true;
 
-		so = ss.option(form.Value, 'http_idle_timeout', _('Idle timeout'));
+		so = ss.option(form.Value, 'http_idle_timeout', _('Idle timeout'),
+			_('Idle timeout'));
 		so.datatype = 'uinteger';
 		so.depends('transport', 'grpc');
 		so.depends({'transport': 'http', 'tls': '1'});
 		so.modalonly = true;
 
-		so = ss.option(form.Value, 'http_ping_timeout', _('Ping timeout'));
+		so = ss.option(form.Value, 'http_ping_timeout', _('Ping timeout'),
+			_('Ping timeout'));
 		so.datatype = 'uinteger';
 		so.depends('transport', 'grpc');
 		so.depends({'transport': 'http', 'tls': '1'});
