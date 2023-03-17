@@ -803,14 +803,16 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'http_idle_timeout', _('Idle timeout'),
-			_('Idle timeout'));
+			_('Specifies the period of time after which a health check will be performed using a ping frame if no frames have been received on the connection.<br/>' +
+				'Please note that a ping response is considered a received frame, so if there is no other traffic on the connection, the health check will be executed every interval.'));
 		so.datatype = 'uinteger';
 		so.depends('transport', 'grpc');
 		so.depends({'transport': 'http', 'tls': '1'});
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'http_ping_timeout', _('Ping timeout'),
-			_('Ping timeout'));
+			_('Specifies the timeout duration after sending a PING frame, within which a response must be received.<br/>' +
+				'If a response to the PING frame is not received within the specified timeout duration, the connection will be closed.'));
 		so.datatype = 'uinteger';
 		so.depends('transport', 'grpc');
 		so.depends({'transport': 'http', 'tls': '1'});

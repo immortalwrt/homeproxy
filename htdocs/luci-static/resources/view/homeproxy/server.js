@@ -268,7 +268,7 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'http_idle_timeout', _('Idle timeout'),
-			_('Idle timeout'));
+			_('Specifies the time until idle clients should be closed with a GOAWAY frame. PING frames are not considered as activity.'));
 		o.datatype = 'uinteger';
 		o.depends('transport', 'grpc');
 		o.depends({'transport': 'http', 'tls': '1'});
