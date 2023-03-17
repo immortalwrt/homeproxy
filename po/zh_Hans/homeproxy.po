@@ -424,7 +424,7 @@ msgstr "禁用 DNS 缓存"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1013
 msgid "Disable dynamic record sizing"
-msgstr ""
+msgstr "禁用动态记录大小"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:569
 #: htdocs/luci-static/resources/view/homeproxy/server.js:185
@@ -756,13 +756,13 @@ msgstr "IPv6 支持"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:805
 #: htdocs/luci-static/resources/view/homeproxy/server.js:270
 msgid "Idle timeout"
-msgstr ""
+msgstr "空闲超时"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:782
 msgid ""
 "If enabled, the client transport sends keepalive pings even with no active "
 "connections."
-msgstr ""
+msgstr "如果启用，客户端传输即使没有活动连接也会发送 keepalive ping。"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:492
 msgid ""
@@ -782,6 +782,8 @@ msgid ""
 "If the transport doesn't see any activity after a duration of this time, it "
 "pings the client to check if the connection is still active."
 msgstr ""
+"如果传输在此时间段后没有看到任何活动，它会向客户端发送 ping 请求以检查连接是"
+"否仍然活动。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:986
 msgid ""
@@ -1192,7 +1194,7 @@ msgstr "性能可能会略有下降，建议仅在需要时开启。"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:813
 #: htdocs/luci-static/resources/view/homeproxy/server.js:278
 msgid "Ping timeout"
-msgstr ""
+msgstr "Ping 超时"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:594
 msgid "Plugin"
@@ -1535,13 +1537,16 @@ msgid ""
 "there is no other traffic on the connection, the health check will be "
 "executed every interval."
 msgstr ""
+"如果连接上没有收到任何帧，指定一段时间后将使用 PING 帧执行健康检查。<br/>需要"
+"注意的是，PING 响应被视为已接收的帧，因此如果连接上没有其他流量，则健康检查将"
+"在每个间隔执行一次。"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:239
 #: htdocs/luci-static/resources/view/homeproxy/server.js:271
 msgid ""
 "Specifies the time until idle clients should be closed with a GOAWAY frame. "
 "PING frames are not considered as activity."
-msgstr ""
+msgstr "指定闲置客户端应在多长时间内使用 GOAWAY 帧关闭。PING 帧不被视为活动。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:763
 #: htdocs/luci-static/resources/view/homeproxy/node.js:814
@@ -1551,6 +1556,8 @@ msgid ""
 "received within the specified timeout duration, the connection will be "
 "closed."
 msgstr ""
+"指定发送 PING 帧后，在指定的超时时间内必须接收到响应。<br/>如果在指定的超时时"
+"间内没有收到 PING 帧的响应，则连接将关闭。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:195
 msgid ""
@@ -1783,6 +1790,8 @@ msgid ""
 "The timeout that after performing a keepalive check, the client will wait "
 "for activity. If no activity is detected, the connection will be closed."
 msgstr ""
+"经过一段时间之后，客户端将执行 keepalive 检查并等待活动。如果没有检测到任何活"
+"动，则会关闭连接。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:955
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1142
@@ -1993,7 +2002,7 @@ msgstr "gRPC"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:781
 msgid "gRPC permit without stream"
-msgstr ""
+msgstr "gRPC 允许无活动连接"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:776
 #: htdocs/luci-static/resources/view/homeproxy/server.js:250
