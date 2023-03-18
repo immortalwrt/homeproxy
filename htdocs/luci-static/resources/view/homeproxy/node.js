@@ -1084,6 +1084,13 @@ return view.extend({
 		so.depends('type', 'socks');
 		so.depends({'type': 'shadowsocks', 'multiplex': '0'});
 		so.modalonly = true;
+
+		so = ss.option(form.ListValue, 'udp_over_tcp_version', _('SUoT version'));
+		so.value('1', _('v1'));
+		so.value('1', _('v2'));
+		so.default = '2';
+		so.depends('udp_over_tcp', '1');
+		so.modalonly = true;
 		/* Extra settings end */
 		/* Nodes settings end */
 
