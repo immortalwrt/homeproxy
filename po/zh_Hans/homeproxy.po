@@ -1428,7 +1428,7 @@ msgstr "STUN"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1088
 msgid "SUoT version"
-msgstr ""
+msgstr "SUoT 版本"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1041
 msgid "Safari"
@@ -1601,7 +1601,7 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:244
 msgid "System"
-msgstr ""
+msgstr "系统"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:415
 #: htdocs/luci-static/resources/view/homeproxy/client.js:679
