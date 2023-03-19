@@ -929,9 +929,12 @@ return view.extend({
 			if (section_id) {
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
 				var tls = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
-				var required_type = [ 'hysteria', 'shadowtls' ];
-				if (required_type.includes(type) && !tls.checked)
+
+				if (['hysteria', 'shadowtls'].includes(type)) {
 					tls.checked = true;
+					tls.disabled = true;
+				} else
+					tls.disabled = null;
 			}
 
 			return true;
@@ -1086,7 +1089,7 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'udp_over_tcp_version', _('SUoT version'));
 		so.value('1', _('v1'));
-		so.value('1', _('v2'));
+		so.value('2', _('v2'));
 		so.default = '2';
 		so.depends('udp_over_tcp', '1');
 		so.modalonly = true;
