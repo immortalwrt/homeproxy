@@ -102,7 +102,7 @@ const proxy_mode = uci.get(uciconfig, ucimain, 'proxy_mode') || 'redirect_tproxy
       default_interface = uci.get(uciconfig, ucicontrol, 'bind_interface');
 
 let self_mark, redirect_port, tproxy_port,
-    tun_name, tcpip_stack = 'gvisor', endpoint_independent_nat = '1';
+    tun_name, tcpip_stack = 'system', endpoint_independent_nat;
 if (match(proxy_mode, /redirect/)) {
 	self_mark = uci.get(uciconfig, 'infra', 'self_mark') || '100';
 	redirect_port = uci.get(uciconfig, 'infra', 'redirect_port') || '5331';
@@ -113,8 +113,8 @@ if (match(proxy_mode), /tproxy/)
 if (match(proxy_mode), /tun/) {
 	tun_name = uci.get(uciconfig, uciinfra, 'tun_name') || 'singtun0';
 	if (routing_mode === 'custom') {
-		tcpip_stack = uci.get(uciconfig, uciroutingsetting, 'tcpip_stack') || 'gvisor';
-		endpoint_independent_nat = uci.get(uciconfig, uciroutingsetting, 'endpoint_independent_nat') || '1';
+		tcpip_stack = uci.get(uciconfig, uciroutingsetting, 'tcpip_stack') || 'system';
+		endpoint_independent_nat = uci.get(uciconfig, uciroutingsetting, 'endpoint_independent_nat');
 	}
 }
 /* UCI config end */
