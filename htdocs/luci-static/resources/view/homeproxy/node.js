@@ -338,6 +338,7 @@ return view.extend({
 		o = s.taboption('node', form.SectionValue, '_node', form.GridSection, 'node');
 		ss = o.subsection;
 		ss.addremove = true;
+		ss.rowcolors = true;
 		ss.sortable = true;
 		ss.nodescriptions = true;
 		ss.modaltitle = L.bind(hp.loadModalTitle, this, _('Node'), _('Add a node'), data[0]);

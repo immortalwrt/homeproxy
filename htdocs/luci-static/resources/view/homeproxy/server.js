@@ -36,6 +36,7 @@ return view.extend({
 
 		s = m.section(form.GridSection, 'server');
 		s.addremove = true;
+		s.rowcolors = true;
 		s.sortable = true;
 		s.nodescriptions = true;
 		s.modaltitle = L.bind(hp.loadModalTitle, this, _('Server'), _('Add a server'), data[0]);
