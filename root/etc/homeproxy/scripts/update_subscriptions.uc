@@ -156,7 +156,7 @@ function parse_uri(uri) {
 			const socks_url = parseURL('http://' + uri[1]);
 
 			config = {
-				label: socks_url.hash ? urldecode(socks_url.hash.slice(1)) : null,
+				label: socks_url.hash ? urldecode(socks_url.hash) : null,
 				type: 'socks',
 				address: socks_url.hostname,
 				port: socks_url.port || '80',
