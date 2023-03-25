@@ -214,10 +214,14 @@ function parseShareLink(uri, features) {
 				port: url.port || '80',
 				uuid: url.username,
 				transport: params.get('type') !== 'tcp' ? params.get('type') : null,
-				tls: params.get('security') ? '1' : '0',
+				tls: ['tls', 'xtls', 'reality'].includes(params.get('security')) ? '1' : '0',
 				tls_sni: params.get('sni'),
 				tls_alpn: params.get('alpn') ? decodeURIComponent(params.get('alpn')).split(',') : null,
-				tls_utls: features.with_utls ? params.get('fp') : null
+				tls_reality: (params.get('security') === 'reality') ? '1' : '0',
+				tls_reality_public_key: params.get('pbk') ? decodeURIComponent(params.get('pbk')) : null,
+				tls_reality_short_id: params.get('sid'),
+				tls_utls: features.with_utls ? params.get('fp') : null,
+				vless_flow: ['tls', 'reality'].includes(params.get('security')) ? params.get('flow') : null
 			};
 			switch (params.get('type')) {
 			case 'grpc':
