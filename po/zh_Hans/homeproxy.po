@@ -1865,7 +1865,7 @@ msgstr "未知错误：%s"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1091
 msgid "Unsupported fingerprint!"
-msgstr ""
+msgstr "不支持的指纹！"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1217
 msgid "Update %s subscriptions"
