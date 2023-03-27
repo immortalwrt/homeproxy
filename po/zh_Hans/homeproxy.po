@@ -707,11 +707,11 @@ msgstr "HTTP"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:468
 msgid "Handshake server address"
-msgstr ""
+msgstr "握手服务器地址"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:474
 msgid "Handshake server port"
-msgstr ""
+msgstr "握手服务器端口"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:54
 #: htdocs/luci-static/resources/view/homeproxy/client.js:56
@@ -998,7 +998,7 @@ msgstr "最大下载速度（Mbps）"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:463
 msgid "Max time difference"
-msgstr ""
+msgstr "最大时间差"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:576
 #: htdocs/luci-static/resources/view/homeproxy/server.js:128
@@ -1348,7 +1348,7 @@ msgstr "REALITY"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:453
 msgid "REALITY private key"
-msgstr ""
+msgstr "REALITY 私钥"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1103
 msgid "REALITY public key"
@@ -1777,7 +1777,7 @@ msgstr "允许对等点打开的 QUIC 并发双向流的最大数量。"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:464
 msgid "The maximum time difference between the server and the client."
-msgstr ""
+msgstr "服务器和客户端之间的最大时间差。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1002
 #: htdocs/luci-static/resources/view/homeproxy/server.js:341
