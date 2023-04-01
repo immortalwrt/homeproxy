@@ -74,7 +74,8 @@ function getResVersion(self, type) {
 			}, [ _('Check update') ]),
 			' ',
 			E('strong', { 'style': (res.error ? 'color:red' : 'color:green') },
-				[ res.error ? 'not found' : res.version ]),
+				[ res.error ? 'not found' : res.version ]
+			),
 		]);
 
 		self.default = spanTemp;
