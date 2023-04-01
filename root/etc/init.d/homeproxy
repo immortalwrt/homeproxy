@@ -133,7 +133,6 @@ start_service() {
 		fi
 
 		utpl -S "$HP_DIR/scripts/firewall_post.ut" > "$RUN_DIR/fw4_post.nft"
-
 	fi
 
 	utpl -S "$HP_DIR/scripts/firewall_pre.ut" > "$RUN_DIR/fw4_pre.nft"
