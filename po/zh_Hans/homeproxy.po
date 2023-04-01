@@ -383,7 +383,7 @@ msgstr "直连 IPv6 地址"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:841
 msgid "Direct MAC-s"
-msgstr ""
+msgstr "直连 MAC 地址"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:140
 #: htdocs/luci-static/resources/view/homeproxy/client.js:148
@@ -657,11 +657,11 @@ msgstr "游戏模式 IPv4 地址"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:865
 msgid "Gaming mode IPv6 IP-s"
-msgstr "游戏模式 IPv6 IP-s"
+msgstr "游戏模式 IPv6 地址"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:868
 msgid "Gaming mode MAC-s"
-msgstr ""
+msgstr "游戏模式 MAC 地址"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:454
 msgid "GeoIP"
@@ -686,15 +686,15 @@ msgstr "全局"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:875
 msgid "Global proxy IPv4 IP-s"
-msgstr "全局代理 IPv4 IP-s"
+msgstr "全局代理 IPv4 地址"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:878
 msgid "Global proxy IPv6 IP-s"
-msgstr "全局代理 IPv6 IP-s"
+msgstr "全局代理 IPv6 地址"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:881
 msgid "Global proxy MAC-s"
-msgstr ""
+msgstr "全局代理 MAC 地址"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:28
 msgid "Global settings"
@@ -1309,7 +1309,7 @@ msgstr "代理 IPv6 地址"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:855
 msgid "Proxy MAC-s"
-msgstr ""
+msgstr "代理 MAC 地址"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:831
 msgid "Proxy all except listed"
@@ -1497,7 +1497,7 @@ msgstr "当 ClientHello 的 ServerName 字段为空时，选择证书所使用�
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:38
 msgid "Server settings"
-msgstr ""
+msgstr "服务器设置"
 
 #: root/usr/share/luci/menu.d/luci-app-homeproxy.json:38
 msgid "Service Status"
