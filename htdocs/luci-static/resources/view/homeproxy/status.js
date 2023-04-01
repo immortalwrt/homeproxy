@@ -9,6 +9,7 @@
 'require fs';
 'require poll';
 'require rpc';
+'require uci';
 'require ui';
 'require view';
 
