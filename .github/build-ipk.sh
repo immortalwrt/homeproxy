@@ -32,7 +32,12 @@ cp -fpR "$PKG_DIR/root"/* "$TEMP_PKG_DIR/"
 echo -e "/etc/config/homeproxy" > "$TEMP_PKG_DIR/CONTROL/conffiles"
 cat > "$TEMP_PKG_DIR/lib/upgrade/keep.d/$PKG_NAME" <<-EOF
 /etc/homeproxy/certs/
-/etc/homeproxy/resources/
+/etc/homeproxy/resources/geoip.db
+/etc/homeproxy/resources/geoip.ver
+/etc/homeproxy/resources/geosite.db
+/etc/homeproxy/resources/geosite.ver
+/etc/homeproxy/resources/direct_list.txt
+/etc/homeproxy/resources/proxy_list.txt
 EOF
 
 cat > "$TEMP_PKG_DIR/CONTROL/control" <<-EOF
