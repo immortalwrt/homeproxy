@@ -60,14 +60,6 @@ export function calcStringMD5(str) {
 	return trim(output.stdout);
 };
 
-export function cURL(url) {
-	if (!url || type(url) !== 'string')
-		return null;
-
-	const output = executeCommand(`/usr/bin/curl -fsL --connect-timeout '10' --retry '3' ${shellQuote(url)}`) || {};
-	return trim(output.stdout);
-};
-
 export function getTime(epoch) {
 	const local_time = localtime(epoch);
 	return replace(replace(sprintf(
@@ -80,6 +72,14 @@ export function getTime(epoch) {
 		local_time.sec
 	), ' ', '0'), '@', ' ');
 
+};
+
+export function wGET(url) {
+	if (!url || type(url) !== 'string')
+		return null;
+
+	const output = executeCommand(`/usr/bin/wget -qO- --timeout=10 ${shellQuote(url)}`) || {};
+	return trim(output.stdout);
 };
 /* Utilities end */
 

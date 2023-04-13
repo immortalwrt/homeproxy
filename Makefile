@@ -12,7 +12,6 @@ LUCI_PKGARCH:=all
 LUCI_DEPENDS:= \
 	+sing-box \
 	+chinadns-ng \
-	+curl \
 	+firewall4 \
 	+kmod-nft-tproxy
 
