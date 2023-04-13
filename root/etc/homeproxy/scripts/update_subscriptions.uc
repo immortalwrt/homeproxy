@@ -561,7 +561,8 @@ if (!isEmpty(subscription_urls))
 		call(main);
 	} catch(e) {
 		log('[FATAL ERROR] An error occurred during updating subscriptions:');
-		log(e);
+		log('%s: %s', e.type, e.message);
+		log(e.stacktrace[0].context);
 
 		log('Restarting service...');
 		init_action('homeproxy', 'stop');
