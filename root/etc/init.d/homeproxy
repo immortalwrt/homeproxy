@@ -141,7 +141,7 @@ start_service() {
 			config_get tun_name "infra" "tun_name" "singtun0"
 			config_get tun_mark "infra" "tun_mark" "102"
 
-			ip tuntap add mode tun user sing-box name "$tun_name"
+			ip tuntap add mode tun user root name "$tun_name"
 			ip link set "$tun_name" up
 
 			ip route replace default dev "$tun_name" table "$table_mark"
