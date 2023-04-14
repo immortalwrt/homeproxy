@@ -50,7 +50,7 @@ const dns_port = uci.get(uciconfig, uciinfra, 'dns_port') || '5333';
 
 let main_node, main_udp_node, dedicated_udp_node, default_outbound, sniff_override = '1',
     dns_server, dns_default_strategy, dns_default_server, dns_disable_cache, dns_disable_cache_expire,
-    lan_proxy_ips, direct_domain_list;
+    direct_domain_list;
 
 if (routing_mode !== 'custom') {
 	main_node = uci.get(uciconfig, ucimain, 'main_node') || 'nil';
@@ -60,15 +60,6 @@ if (routing_mode !== 'custom') {
 	dns_server = uci.get(uciconfig, ucimain, 'dns_server');
 	if (isEmpty(dns_server) || dns_server === 'wan')
 		dns_server = wan_dns;
-
-	for (let i in ['lan_global_proxy_ipv4_ips', 'lan_global_proxy_ipv6_ips']) {
-		const global_proxy_ips = uci.get(uciconfig, ucicontrol, i);
-		if (length(global_proxy_ips)) {
-			if (!lan_proxy_ips)
-				lan_proxy_ips = [];
-			map(global_proxy_ips, (v) => push(lan_proxy_ips, v));
-		}
-	}
 
 	direct_domain_list = trim(readfile(HP_DIR + '/resources/direct_list.txt'));
 	if (direct_domain_list)
