@@ -164,6 +164,14 @@ start_service() {
 	procd_set_param command "$PROG"
 	procd_append_param command run --config "$RUN_DIR/sing-box.json"
 
+	procd_add_jail "sing-box" log
+	procd_add_jail_mount "$RUN_DIR/sing-box.json"
+	procd_add_jail_mount_rw "$RUN_DIR/sing-box.log"
+	procd_set_param capabilities "/etc/capabilities/homeproxy.json"
+	procd_set_param no_new_privs 1
+	procd_set_param user sing-box
+	procd_set_param group sing-box
+
 	procd_set_param limits core="unlimited"
 	procd_set_param limits nofile="1000000 1000000"
 	procd_set_param stderr 1
@@ -190,6 +198,13 @@ start_service() {
 		procd_append_param command --gfwlist-file "$HP_DIR/resources/gfw_list.txt"
 		[ "$ipv6_support" -eq "1" ] || procd_append_param command --no-ipv6=tC
 
+		procd_add_jail "chinadns-ng" log
+		procd_add_jail_mount "$HP_DIR/resources/gfw_list.txt"
+		procd_set_param capabilities "/etc/capabilities/homeproxy.json"
+		procd_set_param no_new_privs 1
+		procd_set_param user sing-box
+		procd_set_param group sing-box
+
 		procd_set_param limits core="unlimited"
 		procd_set_param limits nofile="1000000 1000000"
 		procd_set_param stderr 1
@@ -205,6 +220,7 @@ start_service() {
 	procd_close_instance
 
 	echo > "$RUN_DIR/sing-box.log"
+	chown sing-box:sing-box "$RUN_DIR/sing-box.log"
 	log "$(sing-box version | awk 'NR==1{print $1,$3}') started."
 }
 
