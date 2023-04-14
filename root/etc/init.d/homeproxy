@@ -74,11 +74,13 @@ start_service() {
 		config_get dns_port "infra" "dns_port" "5333"
 		mkdir -p "$DNSMASQ_DIR"
 		echo -e "conf-dir=$DNSMASQ_DIR" > "$DNSMASQ_DIR/../dnsmasq-homeproxy.conf"
-		if [ "$routing_mode" = "gfwlist" ]; then
+		case "$routing_mode" in
+		"gfwlist")
 			[ "$ipv6_support" -eq "0" ] || local gfw_nftset_v6=",6#inet#fw4#homeproxy_gfw_list_v6"
 			sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#homeproxy_gfw_list_v4$gfw_nftset_v6/g" \
 				"$HP_DIR/resources/gfw_list.txt" > "$DNSMASQ_DIR/gfw_list.conf"
-		elif [ "$routing_mode" = "bypass_mainland_china" ]; then
+			;;
+		"bypass_mainland_china")
 			config_get china_dns_server "config" "china_dns_server"
 			config_get china_dns_port "infra" "china_dns_port" "5334"
 
@@ -93,16 +95,19 @@ start_service() {
 				sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port/g" \
 					"$HP_DIR/resources/gfw_list.txt" > "$DNSMASQ_DIR/gfw_list.conf"
 			fi
-		elif [ "$routing_mode" = "proxy_mainland_china" ]; then
+			;;
+		"proxy_mainland_china")
 			sed -r -e "s/full://g" -e "/:/d" -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port/g" \
 				"$HP_DIR/resources/china_list.txt" > "$DNSMASQ_DIR/china_list.conf"
-		else
+			;;
+		"custom"|"global")
 			cat <<-EOF >> "$DNSMASQ_DIR/redirect-dns.conf"
 				no-poll
 				no-resolv
 				server=127.0.0.1#$dns_port
 			EOF
-		fi
+			;;
+		esac
 
 		if [ "$routing_mode" != "custom" ] && [ -s "$DNSMASQ_DIR/proxy_list.conf" ]; then
 			[ "$ipv6_support" -eq "0" ] || local wan_nftset_v6=",6#inet#fw4#homeproxy_wan_proxy_addr_v6"
@@ -114,7 +119,8 @@ start_service() {
 		# Setup firewall
 		local table_mark
 		config_get table_mark "infra" "table_mark" "100"
-		if [ "$proxy_mode" = "redirect_tproxy" ]; then
+		case "$proxy_mode" in
+		"redirect_tproxy")
 			local outbound_udp_node
 			config_get outbound_udp_node "config" "main_udp_node" "nil"
 			if [ "$outbound_udp_node" != "nil" ] || [ "$routing_mode" = "custom" ]; then
@@ -129,7 +135,8 @@ start_service() {
 					ip -6 route add local ::/0 dev lo table "$table_mark"
 				fi
 			fi
-		elif [ "$proxy_mode" = "redirect_tun" ] || [ "$proxy_mode" = "tun" ]; then
+			;;
+		"redirect_tun"|"tun")
 			local tun_name tun_mark
 			config_get tun_name "infra" "tun_name" "singtun0"
 			config_get tun_mark "infra" "tun_mark" "102"
@@ -142,7 +149,8 @@ start_service() {
 
 			ip -6 route replace default dev "$tun_name" table "$table_mark"
 			ip -6 rule add fwmark "$tun_mark" lookup "$table_mark"
-		fi
+			;;
+		esac
 
 		utpl -S "$HP_DIR/scripts/firewall_post.ut" > "$RUN_DIR/fw4_post.nft"
 	fi
