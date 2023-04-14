@@ -81,7 +81,8 @@ const proxy_mode = uci.get(uciconfig, ucimain, 'proxy_mode') || 'redirect_tproxy
       default_interface = uci.get(uciconfig, ucicontrol, 'bind_interface');
 
 let self_mark, redirect_port, tproxy_port,
-    tun_name, tcpip_stack = 'system', endpoint_independent_nat;
+    tun_name, tun_addr4, tun_addr6, tun_mtu,
+    tcpip_stack, endpoint_independent_nat;
 if (match(proxy_mode, /redirect/)) {
 	self_mark = uci.get(uciconfig, 'infra', 'self_mark') || '100';
 	redirect_port = uci.get(uciconfig, 'infra', 'redirect_port') || '5331';
@@ -91,6 +92,10 @@ if (match(proxy_mode), /tproxy/)
 		tproxy_port = uci.get(uciconfig, 'infra', 'tproxy_port') || '5332';
 if (match(proxy_mode), /tun/) {
 	tun_name = uci.get(uciconfig, uciinfra, 'tun_name') || 'singtun0';
+	tun_addr4 = uci.get(uciconfig, uciinfra, 'tun_addr4') || '172.19.0.1/30';
+	tun_addr6 = uci.get(uciconfig, uciinfra, 'tun_addr6') || 'fdfe:dcba:9876::1/126';
+	tun_mtu = uci.get(uciconfig, uciinfra, 'tun_mtu') || '9000';
+	tcpip_stack = 'system';
 	if (routing_mode === 'custom') {
 		tcpip_stack = uci.get(uciconfig, uciroutingsetting, 'tcpip_stack') || 'system';
 		endpoint_independent_nat = uci.get(uciconfig, uciroutingsetting, 'endpoint_independent_nat');
@@ -414,9 +419,9 @@ if (!isEmpty(main_node) || !isEmpty(default_outbound)) {
 			tag: 'tun-in',
 
 			interface_name: tun_name,
-			inet4_address: '172.19.0.1/30',
-			inet6_address: 'fdfe:dcba:9876::1/126',
-			mtu: 9000,
+			inet4_address: tun_addr4,
+			inet6_address: (ipv6_support === '1') ? tun_addr6 : null,
+			mtu: strToInt(tun_mtu),
 			auto_route: false,
 			endpoint_independent_nat: (endpoint_independent_nat === '1') || null,
 			stack: tcpip_stack,

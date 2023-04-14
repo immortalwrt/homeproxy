@@ -141,7 +141,7 @@ start_service() {
 			config_get tun_name "infra" "tun_name" "singtun0"
 			config_get tun_mark "infra" "tun_mark" "102"
 
-			ip tuntap add mode tun user root name "$tun_name"
+			ip tuntap add mode tun user sing-box name "$tun_name"
 			ip link set "$tun_name" up
 
 			ip route replace default dev "$tun_name" table "$table_mark"
@@ -164,13 +164,15 @@ start_service() {
 	procd_set_param command "$PROG"
 	procd_append_param command run --config "$RUN_DIR/sing-box.json"
 
-	procd_add_jail "sing-box" log
-	procd_add_jail_mount "$RUN_DIR/sing-box.json"
-	procd_add_jail_mount_rw "$RUN_DIR/sing-box.log"
-	procd_set_param capabilities "/etc/capabilities/homeproxy.json"
-	procd_set_param no_new_privs 1
-	procd_set_param user sing-box
-	procd_set_param group sing-box
+	if [ -x "/sbin/ujail" ] && ! grep -Eq '"type": "(wireguard|tun)"' "$RUN_DIR/sing-box.json"; then
+		procd_add_jail "sing-box" log procfs
+		procd_add_jail_mount "$RUN_DIR/sing-box.json"
+		procd_add_jail_mount_rw "$RUN_DIR/sing-box.log"
+		procd_set_param capabilities "/etc/capabilities/homeproxy.json"
+		procd_set_param no_new_privs 1
+		procd_set_param user sing-box
+		procd_set_param group sing-box
+	fi
 
 	procd_set_param limits core="unlimited"
 	procd_set_param limits nofile="1000000 1000000"
@@ -198,12 +200,14 @@ start_service() {
 		procd_append_param command --gfwlist-file "$HP_DIR/resources/gfw_list.txt"
 		[ "$ipv6_support" -eq "1" ] || procd_append_param command --no-ipv6=tC
 
-		procd_add_jail "chinadns-ng" log
-		procd_add_jail_mount "$HP_DIR/resources/gfw_list.txt"
-		procd_set_param capabilities "/etc/capabilities/homeproxy.json"
-		procd_set_param no_new_privs 1
-		procd_set_param user sing-box
-		procd_set_param group sing-box
+		if [ -x "/sbin/ujail" ]; then
+			procd_add_jail "chinadns-ng" log
+			procd_add_jail_mount "$HP_DIR/resources/gfw_list.txt"
+			procd_set_param capabilities "/etc/capabilities/homeproxy.json"
+			procd_set_param no_new_privs 1
+			procd_set_param user sing-box
+			procd_set_param group sing-box
+		fi
 
 		procd_set_param limits core="unlimited"
 		procd_set_param limits nofile="1000000 1000000"
