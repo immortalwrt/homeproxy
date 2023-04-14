@@ -237,7 +237,7 @@ msgstr "CA 颁发机构"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:189
 msgid "CNNIC Public DNS (210.2.4.8)"
-msgstr ""
+msgstr "CNNIC 公共 DNS（210.2.4.8）"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:361
 msgid "Cancel"
@@ -254,19 +254,19 @@ msgstr "检查更新"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:183
 msgid "China DNS server"
-msgstr ""
+msgstr "国内 DNS 服务器"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:174
 msgid "China IPv4 list version"
-msgstr "中国 IPv4 库版本"
+msgstr "大陆 IPv4 库版本"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:178
 msgid "China IPv6 list version"
-msgstr "中国 IPv6 库版本"
+msgstr "大陆 IPv6 库版本"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:182
 msgid "China list version"
-msgstr "中国域名列表版本"
+msgstr "大陆域名列表版本"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1074
 msgid "Chrome"
@@ -1971,7 +1971,7 @@ msgstr "使用 WAN 下发的 DNS"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:187
 msgid "Use DNS server from WAN + 114DNS"
-msgstr ""
+msgstr "使用 WAN DNS + 114DNS"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:983
 #: htdocs/luci-static/resources/view/homeproxy/server.js:330
@@ -2045,7 +2045,7 @@ msgstr "Xudp (Xray-core)"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:184
 msgid "You can only have one server set."
-msgstr ""
+msgstr "您只能设置一个服务器。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:157
 msgid "You can only have one server set. It MUST support TCP query."
