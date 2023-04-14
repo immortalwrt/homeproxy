@@ -561,7 +561,7 @@ if (!isEmpty(subscription_urls))
 		call(main);
 	} catch(e) {
 		log('[FATAL ERROR] An error occurred during updating subscriptions:');
-		log('%s: %s', e.type, e.message);
+		log(sprintf('%s: %s', e.type, e.message));
 		log(e.stacktrace[0].context);
 
 		log('Restarting service...');
