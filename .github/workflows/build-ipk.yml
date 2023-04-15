@@ -7,12 +7,13 @@ on:
       - 'dev'
     paths:
       - 'htdocs/**'
+      - 'po/**'
       - 'root/**'
       - 'Makefile'
       - '.github/**'
 
   pull_request:
-    branch:
+    branches:
       - 'master'
       - 'dev'
     types:
