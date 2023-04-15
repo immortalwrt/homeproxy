@@ -1432,7 +1432,7 @@ msgstr "移除所有订阅节点"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:907
 msgid "Reserved field bytes"
-msgstr ""
+msgstr "保留字段字节"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:644
 msgid "Resolve strategy"
