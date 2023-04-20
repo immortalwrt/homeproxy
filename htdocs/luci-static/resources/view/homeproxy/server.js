@@ -77,7 +77,15 @@ return view.extend({
 		o.depends('type', 'http');
 		o.depends('type', 'naive');
 		o.depends('type', 'socks');
-		o.rmempty = false;
+		o.validate = function(section_id, value) {
+			if (section_id) {
+				var password = this.map.lookupOption('password', section_id)[0].formvalue(section_id);
+				if (password && !value)
+					return _('Expecting: %s').format(_('non-empty value'));
+			}
+
+			return true;
+		}
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'password', _('Password'));
@@ -99,7 +107,9 @@ return view.extend({
 					else if (['2022-blake3-aes-256-gcm', '2022-blake3-chacha20-poly1305'].includes(encmode))
 						return hp.validateBase64Key(44, section_id, value);
 				}
-				if (!value)
+
+				var username = this.map.lookupOption('username', section_id)[0].formvalue(section_id);
+				if ((username || ['shadowsocks', 'trojan'].includes(type)) && !value)
 					return _('Expecting: %s').format(_('non-empty value'));
 			}
 
