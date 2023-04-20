@@ -77,23 +77,12 @@ return view.extend({
 		o.depends('type', 'http');
 		o.depends('type', 'naive');
 		o.depends('type', 'socks');
-		o.validate = function(section_id, value) {
-			if (section_id) {
-				var password = this.map.lookupOption('password', section_id)[0].formvalue(section_id);
-				if (password && !value)
-					return _('Expecting: %s').format(_('non-empty value'));
-			}
-
-			return true;
-		}
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'password', _('Password'));
 		o.password = true;
-		o.depends('type', 'http');
-		o.depends('type', 'naive');
+		o.depends({'type': /^(http|naive|socks)$/, 'username': /[\s\S]/});
 		o.depends('type', 'shadowsocks');
-		o.depends('type', 'socks');
 		o.depends('type', 'trojan');
 		o.validate = function(section_id, value) {
 			if (section_id) {
@@ -108,8 +97,7 @@ return view.extend({
 						return hp.validateBase64Key(44, section_id, value);
 				}
 
-				var username = this.map.lookupOption('username', section_id)[0].formvalue(section_id);
-				if ((username || ['shadowsocks', 'trojan'].includes(type)) && !value)
+				if (!value)
 					return _('Expecting: %s').format(_('non-empty value'));
 			}
 
