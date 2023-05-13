@@ -697,7 +697,7 @@ msgstr "全局"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:747
 msgid "Global padding"
-msgstr ""
+msgstr "全局填充"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:884
 msgid "Global proxy IPv4 IP-s"
