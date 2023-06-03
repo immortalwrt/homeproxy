@@ -6,6 +6,7 @@
 
 'use strict';
 'require form';
+'require poll';
 'require rpc';
 'require uci';
 'require view';
@@ -53,7 +54,8 @@ return view.extend({
 		var m, s, o;
 		var features = data[1];
 
-		m = new form.Map('homeproxy', _('HomeProxy Server'));
+		m = new form.Map('homeproxy', _('HomeProxy Server'),
+			_('The modern ImmortalWrt proxy platform for ARM64/AMD64.'));
 
 		s = m.section(form.TypedSection);
 		s.render = function () {
