@@ -749,7 +749,7 @@ msgstr "HomeProxy"
 #: htdocs/luci-static/resources/view/homeproxy/server.js:39
 #: htdocs/luci-static/resources/view/homeproxy/server.js:57
 msgid "HomeProxy Server"
-msgstr ""
+msgstr "HomeProxy 服务端"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:815
 #: htdocs/luci-static/resources/view/homeproxy/node.js:848
@@ -2138,11 +2138,11 @@ msgstr "私钥"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:194
 msgid "sing-box client"
-msgstr ""
+msgstr "sing-box 客户端"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:197
 msgid "sing-box server"
-msgstr ""
+msgstr "sing-box 服务端"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1073
 msgid "uTLS fingerprint"
@@ -2209,6 +2209,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:272
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid "Edit servers"
-#~ msgstr "修改服务器"
