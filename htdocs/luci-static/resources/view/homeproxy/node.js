@@ -188,6 +188,7 @@ function parseShareLink(uri, features) {
 				address: url.hostname,
 				port: url.port || '80',
 				password: decodeURIComponent(url.username),
+				transport: params.get('type') !== 'tcp' ? params.get('type') : null,
 				tls: '1',
 				tls_sni: url.searchParams.get('sni')
 			};
@@ -1111,7 +1112,6 @@ return view.extend({
 
 			so = ss.option(form.Value, 'tls_reality_short_id', _('REALITY short ID'));
 			so.depends('tls_reality', '1');
-			so.rmempty = false;
 			so.modalonly = true;
 		}
 		/* TLS config end */
