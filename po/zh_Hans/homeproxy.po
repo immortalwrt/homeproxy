@@ -180,7 +180,7 @@ msgstr "自动更新订阅、GeoIP 和 GeoSite"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:193
 msgid "BaiDu"
-msgstr ""
+msgstr "百度"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:573
 #: htdocs/luci-static/resources/view/homeproxy/server.js:180
@@ -254,7 +254,7 @@ msgstr "证书路径"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:56
 msgid "Check"
-msgstr ""
+msgstr "检查"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:104
 msgid "Check update"
@@ -313,7 +313,7 @@ msgstr "仅常用端口（绕过 P2P 流量）"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:190
 msgid "Connection check"
-msgstr ""
+msgstr "连接检查"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:209
 msgid "Custom routing"
@@ -726,7 +726,7 @@ msgstr "全局设置"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:196
 msgid "Google"
-msgstr ""
+msgstr "谷歌"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:161
 msgid "Google Public DNS (8.8.8.8)"
@@ -2108,7 +2108,7 @@ msgstr "默认"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:52
 msgid "failed"
-msgstr ""
+msgstr "失败"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:785
 #: htdocs/luci-static/resources/view/homeproxy/server.js:257
@@ -2154,7 +2154,7 @@ msgstr "packet addr (v2ray-core v5+)"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:49
 msgid "passed"
-msgstr ""
+msgstr "通过"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:558
 msgid "private key"
@@ -2181,7 +2181,7 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:58
 msgid "unchecked"
-msgstr ""
+msgstr "未检查"
 
 #: htdocs/luci-static/resources/homeproxy.js:206
 #: htdocs/luci-static/resources/view/homeproxy/node.js:443
