@@ -586,7 +586,7 @@ msgstr "启用端点独立 NAT"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:976
 msgid "Enable padding"
-msgstr ""
+msgstr "启用填充"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:564
 msgid "Enable tcp fast open for listener."
@@ -628,7 +628,7 @@ msgstr "加密方式"
 #: htdocs/luci-static/resources/view/homeproxy/server.js:433
 #: htdocs/luci-static/resources/view/homeproxy/server.js:435
 msgid "Expecting: %s"
-msgstr "请输入：%s。"
+msgstr "请输入：%s"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:472
 msgid "External Account Binding"
@@ -1962,7 +1962,7 @@ msgstr "更新 %s 个订阅"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:88
 msgid "Update failed."
-msgstr "上传失败。"
+msgstr "更新失败。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1236
 msgid "Update nodes from subscriptions"
