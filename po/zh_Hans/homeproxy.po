@@ -1648,9 +1648,9 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:219
 msgid ""
-"Specify target port(s) that get proxied. Multiple ports must be separated by "
+"Specify target ports to be proxied. Multiple ports must be separated by "
 "commas."
-msgstr "指定需要被代理的目标端口。多个端口必须用逗号隔开。"
+msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:574
 #: htdocs/luci-static/resources/view/homeproxy/server.js:181
@@ -2241,3 +2241,8 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:272
 msgid "valid uuid"
 msgstr "有效 uuid"
+
+#~ msgid ""
+#~ "Specify target port(s) that get proxied. Multiple ports must be separated "
+#~ "by commas."
+#~ msgstr "指定需要被代理的目标端口。多个端口必须用逗号隔开。"
