@@ -250,6 +250,16 @@ return view.extend({
 		o.default = 'redirect_tproxy';
 		o.rmempty = false;
 
+		o = s.taboption('routing', form.Value, 'clashapi_port', _('Enable clash api'));
+		o.value('', _('Disable'));
+		o.value('9090', _('9090'));
+		o.validate = function(section_id, value) {
+			if (section_id && value && !stubValidator.apply('port', value)) {
+				return _('Expecting: %s').format(_('valid port value'));
+			}
+			return true;
+		}
+
 		o = s.taboption('routing', form.Flag, 'ipv6_support', _('IPv6 support'));
 		o.default = o.enabled;
 		o.rmempty = false;

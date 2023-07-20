@@ -159,6 +159,10 @@ start_service() {
 			procd_add_jail "sing-box-c" log procfs
 			procd_add_jail_mount "$RUN_DIR/sing-box-c.json"
 			procd_add_jail_mount_rw "$RUN_DIR/sing-box-c.log"
+			procd_add_jail_mount "$RUN_DIR/ui/"
+			procd_add_jail_mount_rw "$RUN_DIR/ui/"
+			procd_add_jail_mount "$RUN_DIR/cache.db"
+			procd_add_jail_mount_rw "$RUN_DIR/cache.db"
 			procd_add_jail_mount "$HP_DIR/certs/"
 			procd_add_jail_mount "/etc/ssl/"
 			procd_add_jail_mount "/etc/localtime"
@@ -263,6 +267,8 @@ start_service() {
 		echo > "$RUN_DIR/sing-box-c.log"
 		chown sing-box:sing-box "$RUN_DIR/sing-box-c.log"
 		chown sing-box:sing-box "$RUN_DIR/sing-box-c.json"
+		chown -R sing-box:sing-box "$RUN_DIR/ui"
+		chown sing-box:sing-box "$RUN_DIR/cache.db"
 		chmod 0644 "$HP_DIR/resources/gfw_list.txt"
 	fi
 	if [ "$server_enabled" = "1" ]; then

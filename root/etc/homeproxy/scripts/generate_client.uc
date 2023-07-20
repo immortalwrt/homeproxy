@@ -78,6 +78,8 @@ const proxy_mode = uci.get(uciconfig, ucimain, 'proxy_mode') || 'redirect_tproxy
       ipv6_support = uci.get(uciconfig, ucimain, 'ipv6_support') || '0',
       default_interface = uci.get(uciconfig, ucicontrol, 'bind_interface');
 
+const clashapi_port = uci.get(uciconfig, ucimain, 'clashapi_port') || '';
+
 let self_mark, redirect_port, tproxy_port,
     tun_name, tun_addr4, tun_addr6, tun_mtu,
     tcpip_stack, endpoint_independent_nat;
@@ -550,5 +552,19 @@ if (!isEmpty(main_node)) {
 }
 /* Routing rules end */
 
-system('mkdir -p ' + RUN_DIR);
+/* Experimental start */
+if (!isEmpty(clashapi_port)) {
+	config.experimental = {
+		clash_api: {
+			external_controller: '[::]:'+ clashapi_port,
+			external_ui: RUN_DIR + '/ui',
+			store_selected: true,
+			cache_file: RUN_DIR + '/cache.db'
+		}
+	}
+}
+/* Experimental end */
+
+system('mkdir -p ' + RUN_DIR + '/ui');
+system('touch ' + RUN_DIR + '/cache.db');
 writefile(RUN_DIR + '/sing-box-c.json', sprintf('%.J\n', removeBlankAttrs(config)));

@@ -23,6 +23,7 @@ config homeproxy 'config'
 	option routing_port 'common'
 	option proxy_mode 'redirect_tproxy'
 	option ipv6_support '1'
+	option clashapi_port ''
 
 config homeproxy 'control'
 	option lan_proxy_mode 'disabled'
