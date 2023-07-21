@@ -155,24 +155,6 @@ start_service() {
 		procd_set_param command "$PROG"
 		procd_append_param command run --config "$RUN_DIR/sing-box-c.json"
 
-		if [ -x "/sbin/ujail" ] && [ "$routing_mode" != "custom" ] && ! grep -Eq '"type": "(wireguard|tun)"' "$RUN_DIR/sing-box-c.json"; then
-			procd_add_jail "sing-box-c" log procfs
-			procd_add_jail_mount "$RUN_DIR/sing-box-c.json"
-			procd_add_jail_mount_rw "$RUN_DIR/sing-box-c.log"
-			procd_add_jail_mount "$RUN_DIR/ui/"
-			procd_add_jail_mount_rw "$RUN_DIR/ui/"
-			procd_add_jail_mount "$RUN_DIR/cache.db"
-			procd_add_jail_mount_rw "$RUN_DIR/cache.db"
-			procd_add_jail_mount "$HP_DIR/certs/"
-			procd_add_jail_mount "/etc/ssl/"
-			procd_add_jail_mount "/etc/localtime"
-			procd_add_jail_mount "/etc/TZ"
-			procd_set_param capabilities "/etc/capabilities/homeproxy.json"
-			procd_set_param no_new_privs 1
-			procd_set_param user sing-box
-			procd_set_param group sing-box
-		fi
-
 		procd_set_param limits core="unlimited"
 		procd_set_param limits nofile="1000000 1000000"
 		procd_set_param stderr 1
@@ -198,15 +180,6 @@ start_service() {
 			procd_append_param command --ipset-name6 "inet@fw4@homeproxy_mainland_addr_v6"
 			procd_append_param command --gfwlist-file "$HP_DIR/resources/gfw_list.txt"
 			[ "$ipv6_support" -eq "1" ] || procd_append_param command --no-ipv6=tC
-
-			if [ -x "/sbin/ujail" ]; then
-				procd_add_jail "chinadns-ng" log
-				procd_add_jail_mount "$HP_DIR/resources/gfw_list.txt"
-				procd_set_param capabilities "/etc/capabilities/homeproxy.json"
-				procd_set_param no_new_privs 1
-				procd_set_param user sing-box
-				procd_set_param group sing-box
-			fi
 
 			procd_set_param limits core="unlimited"
 			procd_set_param limits nofile="1000000 1000000"
@@ -235,19 +208,6 @@ start_service() {
 		procd_set_param command "$PROG"
 		procd_append_param command run --config "$RUN_DIR/sing-box-s.json"
 
-		if [ -x "/sbin/ujail" ]; then
-			procd_add_jail "sing-box-s" log procfs
-			procd_add_jail_mount "$RUN_DIR/sing-box-s.json"
-			procd_add_jail_mount_rw "$RUN_DIR/sing-box-s.log"
-			procd_add_jail_mount "$HP_DIR/certs/"
-			procd_add_jail_mount "/etc/localtime"
-			procd_add_jail_mount "/etc/TZ"
-			procd_set_param capabilities "/etc/capabilities/homeproxy.json"
-			procd_set_param no_new_privs 1
-			procd_set_param user sing-box
-			procd_set_param group sing-box
-		fi
-
 		procd_set_param limits core="unlimited"
 		procd_set_param limits nofile="1000000 1000000"
 		procd_set_param stderr 1
@@ -262,15 +222,6 @@ start_service() {
 	procd_set_param respawn
 	procd_close_instance
 
-	# Update permissions for ujail
-	if [ "$outbound_node" != "nil" ]; then
-		echo > "$RUN_DIR/sing-box-c.log"
-		chown sing-box:sing-box "$RUN_DIR/sing-box-c.log"
-		chown sing-box:sing-box "$RUN_DIR/sing-box-c.json"
-		chown -R sing-box:sing-box "$RUN_DIR/ui"
-		chown sing-box:sing-box "$RUN_DIR/cache.db"
-		chmod 0644 "$HP_DIR/resources/gfw_list.txt"
-	fi
 	if [ "$server_enabled" = "1" ]; then
 		echo > "$RUN_DIR/sing-box-s.log"
 		chown sing-box:sing-box "$RUN_DIR/sing-box-s.log"
