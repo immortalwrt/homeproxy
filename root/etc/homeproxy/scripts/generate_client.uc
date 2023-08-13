@@ -153,7 +153,7 @@ function generate_outbound(node) {
 		obfs_param: node.shadowsocksr_obfs_param,
 		/* ShadowTLS / Socks */
 		version: (node.type === 'shadowtls') ? strToInt(node.shadowtls_version) : ((node.type === 'socks') ? node.socks_version : null),
-		/* VLESS / VMess */
+		/* VLESS / VMess / Tuic */
 		uuid: node.uuid,
 		flow: node.vless_flow,
 		alter_id: strToInt(node.vmess_alterid),
@@ -170,6 +170,11 @@ function generate_outbound(node) {
 		pre_shared_key: node.wireguard_pre_shared_key,
 		reserved: parse_port(node.wireguard_reserved),
 		mtu: node.wireguard_mtu,
+		/* Tuic */
+		congestion_control: node.tuic_congestion_control,
+		udp_relay_mode: node.tuic_udp_relay_mode,
+		zero_rtt_handshake: (node.tuic_zero_rtt_handshake === '1') || null,
+		heartbeat: node.tuic_heartbeat,
 
 		multiplex: (node.multiplex === '1') ? {
 			enabled: true,

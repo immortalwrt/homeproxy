@@ -490,6 +490,7 @@ return view.extend({
 		so.value('http', _('HTTP'));
 		if (features.with_quic)
 			so.value('hysteria', _('Hysteria'));
+			so.value('tuic', _('Tuic'));
 		so.value('shadowsocks', _('Shadowsocks'));
 		if (features.with_shadowsocksr)
 			so.value('shadowsocksr', _('ShadowsocksR'));
@@ -526,10 +527,11 @@ return view.extend({
 		so.depends({'type': 'shadowtls', 'shadowtls_version': '2'});
 		so.depends({'type': 'shadowtls', 'shadowtls_version': '3'});
 		so.depends({'type': 'socks', 'socks_version': '5'});
+		so.depends('type', 'tuic');
 		so.validate = function(section_id, value) {
 			if (section_id) {
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
-				var required_type = [ 'shadowsocks', 'shadowsocksr', 'shadowtls', 'trojan' ];
+				var required_type = [ 'shadowsocks', 'shadowsocksr', 'shadowtls', 'trojan', 'tuic' ];
 
 				if (required_type.includes(type)) {
 					if (type === 'shadowsocks') {
@@ -751,6 +753,7 @@ return view.extend({
 		so = ss.option(form.Value, 'uuid', _('UUID'));
 		so.depends('type', 'vless');
 		so.depends('type', 'vmess');
+		so.depends('type', 'tuic');
 		so.validate = hp.validateUUID;
 		so.modalonly = true;
 
@@ -790,6 +793,37 @@ return view.extend({
 		so.depends('type', 'vmess');
 		so.modalonly = true;
 		/* VMess config end */
+
+		/* Tuic config start */
+		so = ss.option(form.ListValue, 'tuic_congestion_control', _('Congestion control'),
+			_('QUIC congestion control algorithm.'));
+		so.value('cubic');
+		so.value('new_reno');
+		so.value('bbr');
+		so.default = 'cubic';
+		so.depends('type', 'tuic');
+		so.modalonly = true;
+
+		so = ss.option(form.ListValue, 'tuic_udp_relay_mode', _('UDP relay mode'),
+			_('UDP packet relay mode.'));
+		so.value('native');
+		so.value('quic');
+		so.default = 'native';
+		so.depends('type', 'tuic');
+		so.modalonly = true;
+
+		so = ss.option(form.Flag, 'tuic_zero_rtt_handshake', _('Zero RTT handshake'),
+			_('Enable 0-RTT QUIC connection handshake on the client side. This is not impacting much on the performance, as the protocol is fully multiplexed. Disabling this is highly recommended, as it is vulnerable to replay attacks.'));
+		so.default = so.disabled;
+		so.depends('type', 'tuic');
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'tuic_heartbeat', _('Heartbeat'),
+			_('Interval for sending heartbeat packets for keeping the connection alive.'));
+		so.default = '10s';
+		so.depends('type', 'tuic');
+		so.modalonly = true;
+		/* Tuic config end */
 
 		/* Transport config start */
 		so = ss.option(form.ListValue, 'transport', _('Transport'),
@@ -1001,12 +1035,13 @@ return view.extend({
 		so.depends('type', 'trojan');
 		so.depends('type', 'vless');
 		so.depends('type', 'vmess');
+		so.depends('type', 'tuic');
 		so.validate = function(section_id, value) {
 			if (section_id) {
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
 				var tls = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
 
-				if (['hysteria', 'shadowtls'].includes(type)) {
+				if (['hysteria', 'shadowtls', 'tuic'].includes(type)) {
 					tls.checked = true;
 					tls.disabled = true;
 				} else {

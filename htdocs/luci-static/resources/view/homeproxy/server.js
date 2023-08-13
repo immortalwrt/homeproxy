@@ -105,6 +105,7 @@ return view.extend({
 		if (features.with_quic) {
 			o.value('hysteria', _('Hysteria'));
 			o.value('naive', _('NaïveProxy'));
+			o.value('tuic', _('Tuic'));
 		}
 		o.value('shadowsocks', _('Shadowsocks'));
 		o.value('socks', _('Socks'));
@@ -122,6 +123,7 @@ return view.extend({
 		o.depends('type', 'http');
 		o.depends('type', 'naive');
 		o.depends('type', 'socks');
+		o.depends('type', 'tuic');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'password', _('Password'));
@@ -129,6 +131,7 @@ return view.extend({
 		o.depends({'type': /^(http|naive|socks)$/, 'username': /[\s\S]/});
 		o.depends('type', 'shadowsocks');
 		o.depends('type', 'trojan');
+		o.depends('type', 'tuic');
 		o.validate = function(section_id, value) {
 			if (section_id) {
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
@@ -233,6 +236,7 @@ return view.extend({
 		o = s.option(form.Value, 'uuid', _('UUID'));
 		o.depends('type', 'vless');
 		o.depends('type', 'vmess');
+		o.depends('type', 'tuic');
 		o.validate = hp.validateUUID;
 		o.modalonly = true;
 
@@ -248,6 +252,35 @@ return view.extend({
 		o.depends('type', 'vmess');
 		o.modalonly = true;
 		/* VMess config end */
+
+               /* Tuic config start */
+               so = ss.option(form.ListValue, 'tuic_congestion_control', _('Congestion control'),
+                       _('QUIC congestion control algorithm.'));
+               so.value('cubic');
+               so.value('new_reno');
+               so.value('bbr');
+               so.default = 'cubic';
+               so.depends('type', 'tuic');
+               so.modalonly = true;
+
+               so = ss.option(form.ListValue, 'tuic_auth_timeout', _('Auth timeout'),
+                       _('How long the server should wait for the client to send the authentication command.'));
+               so.default = '3s';
+               so.depends('type', 'tuic');
+               so.modalonly = true;
+
+               so = ss.option(form.Flag, 'tuic_zero_rtt_handshake', _('Zero RTT handshake'),
+                       _('Enable 0-RTT QUIC connection handshake on the client side. This is not impacting much on the performance, as the protocol is fully multiplexed. Disabling this is highly recommended, as it is vulnerable to replay attacks.'));
+               so.default = so.disabled;
+               so.depends('type', 'tuic');
+               so.modalonly = true;
+
+               so = ss.option(form.Value, 'tuic_heartbeat', _('Heartbeat'),
+                       _('Interval for sending heartbeat packets for keeping the connection alive.'));
+               so.default = '10s';
+               so.depends('type', 'tuic');
+               so.modalonly = true;
+               /* Tuic config end */
 
 		/* Transport config start */
 		o = s.option(form.ListValue, 'transport', _('Transport'),
@@ -358,7 +391,7 @@ return view.extend({
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
 				var tls = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
 
-				if (['hysteria'].includes(type)) {
+				if (['hysteria', 'tuic'].includes(type)) {
 					tls.checked = true;
 					tls.disabled = true;
 				} else {
