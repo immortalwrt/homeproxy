@@ -95,7 +95,7 @@ msgstr "允许不安全连接"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1018
 msgid "Allow insecure connection at TLS client."
-msgstr "允许 TLS 客户端侧的不安全连接"
+msgstr "允许 TLS 客户端侧的不安全连接。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1215
 msgid "Allow insecure connection by default when add nodes from subscriptions."
@@ -108,11 +108,11 @@ msgstr "请求中允许的载荷大小。"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:94
 msgid "Already at the latest version."
-msgstr "已是最新版本"
+msgstr "已是最新版本。"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:91
 msgid "Already in updating."
-msgstr "已在更新中"
+msgstr "已在更新中。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:750
 #: htdocs/luci-static/resources/view/homeproxy/server.js:246
@@ -176,7 +176,7 @@ msgstr "自动更新"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1169
 msgid "Auto update subscriptions, GeoIP and GeoSite."
-msgstr "自动更新订阅、GeoIP 和 GeoSite"
+msgstr "自动更新订阅、GeoIP 和 GeoSite。"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:193
 msgid "BaiDu"
@@ -578,7 +578,7 @@ msgstr "启用 PQ 签名方案。"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1145
 #: htdocs/luci-static/resources/view/homeproxy/server.js:570
 msgid "Enable UDP fragmentation."
-msgstr "启用 UDP 分片"
+msgstr "启用 UDP 分片。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:284
 msgid "Enable endpoint-independent NAT"
@@ -1010,7 +1010,7 @@ msgstr "匹配进程名。"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:517
 #: htdocs/luci-static/resources/view/homeproxy/client.js:780
 msgid "Match process path."
-msgstr "匹配进程路径"
+msgstr "匹配进程路径。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:475
 #: htdocs/luci-static/resources/view/homeproxy/client.js:742
@@ -1045,7 +1045,7 @@ msgstr "最大下载速度"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:591
 #: htdocs/luci-static/resources/view/homeproxy/server.js:167
 msgid "Max download speed in Mbps."
-msgstr "最大下载速度（Mbps）"
+msgstr "最大下载速度（Mbps）。"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:507
 msgid "Max time difference"
@@ -1059,7 +1059,7 @@ msgstr "最大上传速度"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:597
 #: htdocs/luci-static/resources/view/homeproxy/server.js:173
 msgid "Max upload speed in Mbps."
-msgstr "最大上传速度（Mbps）"
+msgstr "最大上传速度（Mbps）。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1034
 #: htdocs/luci-static/resources/view/homeproxy/server.js:392
@@ -1113,7 +1113,7 @@ msgstr "多路复用"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:949
 msgid "Multiplex protocol."
-msgstr "多路复用协议"
+msgstr "多路复用协议。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:57
 #: htdocs/luci-static/resources/view/homeproxy/server.js:39
@@ -1798,7 +1798,7 @@ msgid ""
 msgstr ""
 "默认规则使用以下匹配逻辑：<br/><code>(domain || domain_suffix || "
 "domain_keyword || domain_regex || geosite || geoip || ip_cidr)</code> &&<br/"
-"><code>(source_geoip || source_ip_cidr)</code> &&<br/><code>其他字段</code>."
+"><code>(source_geoip || source_ip_cidr)</code> &&<br/><code>其他字段</code>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:693
 msgid ""
@@ -1809,7 +1809,7 @@ msgid ""
 msgstr ""
 "默认规则使用以下匹配逻辑：<br/><br/><code>(domain || domain_suffix || "
 "domain_keyword || domain_regex || geosite || ip_cidr)</code> &&<br/"
-"><code>(source_geoip || source_ip_cidr)</code> &&<br/><code>其他字段</code>."
+"><code>(source_geoip || source_ip_cidr)</code> &&<br/><code>其他字段</code>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:639
 msgid ""
