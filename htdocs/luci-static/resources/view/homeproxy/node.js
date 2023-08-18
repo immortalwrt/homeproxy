@@ -504,10 +504,12 @@ return view.extend({
 
 		so = ss.option(form.Value, 'address', _('Address'));
 		so.datatype = 'host';
+		so.depends({'type': 'direct', '!reverse': true});
 		so.rmempty = false;
 
 		so = ss.option(form.Value, 'port', _('Port'));
 		so.datatype = 'port';
+		so.depends({'type': 'direct', '!reverse': true});
 		so.rmempty = false;
 
 		so = ss.option(form.Value, 'username', _('Username'));
@@ -549,6 +551,16 @@ return view.extend({
 		so.modalonly = true;
 
 		/* Direct config */
+		so = ss.option(form.Value, 'override_address', _('Override address'),
+			_('Override the connection destination address.'));
+		so.datatype = 'host';
+		so.depends('type', 'direct');
+
+		so = ss.option(form.Value, 'override_port', _('Override port'),
+			_('Override the connection destination port.'));
+		so.datatype = 'port';
+		so.depends('type', 'direct');
+
 		so = ss.option(form.ListValue, 'proxy_protocol', _('Proxy protocol'),
 			_('Write Proxy Protocol in the connection header.'));
 		so.value('', _('Disable'));

@@ -123,15 +123,15 @@ function generate_outbound(node) {
 		tag: 'cfg-' + node['.name'] + '-out',
 		routing_mark: strToInt(self_mark),
 
-		server: (node.type !== 'direct') ? node.address : null,
-		server_port: (node.type !== 'direct') ? int(node.port) : null,
+		server: node.address,
+		server_port: int(node.port),
 
 		username: node.username,
 		password: node.password,
 
 		/* Direct */
-		override_address: (node.type === 'direct') ? node.address : null,
-		override_port: (node.type === 'direct') ? node.port : null,
+		override_address: node.override_address,
+		override_port: int(node.override_port),
 		proxy_protocol: strToInt(node.proxy_protocol),
 		/* Hysteria */
 		up_mbps: strToInt(node.hysteria_down_mbps),
