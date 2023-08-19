@@ -105,11 +105,12 @@ return view.extend({
 		if (features.with_quic) {
 			o.value('hysteria', _('Hysteria'));
 			o.value('naive', _('NaïveProxy'));
-			o.value('tuic', _('Tuic'));
 		}
 		o.value('shadowsocks', _('Shadowsocks'));
 		o.value('socks', _('Socks'));
 		o.value('trojan', _('Trojan'));
+		if (features.with_quic)
+			o.value('tuic', _('Tuic'));
 		o.value('vless', _('VLESS'));
 		o.value('vmess', _('VMess'));
 		o.rmempty = false;
@@ -123,7 +124,6 @@ return view.extend({
 		o.depends('type', 'http');
 		o.depends('type', 'naive');
 		o.depends('type', 'socks');
-		o.depends('type', 'tuic');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'password', _('Password'));
@@ -232,14 +232,46 @@ return view.extend({
 		o.depends('type', 'shadowsocks');
 		o.modalonly = true;
 
-		/* VLESS / VMess config start */
+		/* Tuic config start */
 		o = s.option(form.Value, 'uuid', _('UUID'));
+		o.depends('type', 'tuic');
 		o.depends('type', 'vless');
 		o.depends('type', 'vmess');
-		o.depends('type', 'tuic');
 		o.validate = hp.validateUUID;
 		o.modalonly = true;
 
+		o = s.option(form.ListValue, 'tuic_congestion_control', _('Congestion control algorithm'),
+			_('QUIC congestion control algorithm.'));
+		o.value('cubic');
+		o.value('new_reno');
+		o.value('bbr');
+		o.default = 'cubic';
+		o.depends('type', 'tuic');
+		o.modalonly = true;
+
+		o = s.option(form.ListValue, 'tuic_auth_timeout', _('Auth timeout'),
+			_('How long the server should wait for the client to send the authentication command (in seconds).'));
+		o.datatype = 'uinteger';
+		o.default = '3';
+		o.depends('type', 'tuic');
+		o.modalonly = true;
+
+		o = s.option(form.Flag, 'tuic_enable_zero_rtt', _('Enable 0-RTT handshake'),
+			_('Enable 0-RTT QUIC connection handshake on the client side. This is not impacting much on the performance, as the protocol is fully multiplexed.<br/>' +
+				'Disabling this is highly recommended, as it is vulnerable to replay attacks.'));
+		o.default = o.disabled;
+		o.depends('type', 'tuic');
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'tuic_heartbeat', _('Heartbeat'),
+			_('Interval for sending heartbeat packets for keeping the connection alive (in seconds).'));
+		o.datatype = 'uinteger';
+		o.default = '10';
+		o.depends('type', 'tuic');
+		o.modalonly = true;
+		/* Tuic config end */
+
+		/* VLESS / VMess config start */
 		o = s.option(form.ListValue, 'vless_flow', _('Flow'));
 		o.value('', _('None'));
 		o.value('xtls-rprx-vision');
@@ -252,35 +284,6 @@ return view.extend({
 		o.depends('type', 'vmess');
 		o.modalonly = true;
 		/* VMess config end */
-
-               /* Tuic config start */
-               so = ss.option(form.ListValue, 'tuic_congestion_control', _('Congestion control'),
-                       _('QUIC congestion control algorithm.'));
-               so.value('cubic');
-               so.value('new_reno');
-               so.value('bbr');
-               so.default = 'cubic';
-               so.depends('type', 'tuic');
-               so.modalonly = true;
-
-               so = ss.option(form.ListValue, 'tuic_auth_timeout', _('Auth timeout'),
-                       _('How long the server should wait for the client to send the authentication command.'));
-               so.default = '3s';
-               so.depends('type', 'tuic');
-               so.modalonly = true;
-
-               so = ss.option(form.Flag, 'tuic_zero_rtt_handshake', _('Zero RTT handshake'),
-                       _('Enable 0-RTT QUIC connection handshake on the client side. This is not impacting much on the performance, as the protocol is fully multiplexed. Disabling this is highly recommended, as it is vulnerable to replay attacks.'));
-               so.default = so.disabled;
-               so.depends('type', 'tuic');
-               so.modalonly = true;
-
-               so = ss.option(form.Value, 'tuic_heartbeat', _('Heartbeat'),
-                       _('Interval for sending heartbeat packets for keeping the connection alive.'));
-               so.default = '10s';
-               so.depends('type', 'tuic');
-               so.modalonly = true;
-               /* Tuic config end */
 
 		/* Transport config start */
 		o = s.option(form.ListValue, 'transport', _('Transport'),
@@ -334,7 +337,7 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'http_idle_timeout', _('Idle timeout'),
-			_('Specifies the time until idle clients should be closed with a GOAWAY frame. PING frames are not considered as activity.'));
+			_('Specifies the time (in seconds) until idle clients should be closed with a GOAWAY frame. PING frames are not considered as activity.'));
 		o.datatype = 'uinteger';
 		o.depends('transport', 'grpc');
 		o.depends({'transport': 'http', 'tls': '1'});
@@ -342,7 +345,7 @@ return view.extend({
 
 		if (features.with_grpc) {
 			o = s.option(form.Value, 'http_ping_timeout', _('Ping timeout'),
-				_('The timeout that after performing a keepalive check, the client will wait for activity. If no activity is detected, the connection will be closed.'));
+				_('The timeout (in seconds) that after performing a keepalive check, the client will wait for activity. If no activity is detected, the connection will be closed.'));
 			o.datatype = 'uinteger';
 			o.depends('transport', 'grpc');
 			o.modalonly = true;

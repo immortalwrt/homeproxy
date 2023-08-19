@@ -64,17 +64,17 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 		max_conn_client: strToInt(cfg.hysteria_max_conn_client),
 		disable_mtu_discovery: (cfg.hysteria_disable_mtu_discovery === '1') || null,
 
-		/* Tuic */
-		congestion_control: cfg.tuic_congestion_control,
-		auth_timeout: cfg.tuic_auth_timeout,
-		zero_rtt_handshake: (cfg.tuic_zero_rtt_handshake === '1') || null,
-		heartbeat: cfg.tuic_heartbeat,
-
 		/* Shadowsocks */
 		method: (cfg.type === 'shadowsocks') ? cfg.shadowsocks_encrypt_method : null,
 		password: (cfg.type in ['shadowsocks', 'shadowtls']) ? cfg.password : null,
 
-		/* HTTP / Hysteria / Socks / Trojan / VLESS / VMess / Tuic */
+		/* Tuic */
+		congestion_control: cfg.tuic_congestion_control,
+		auth_timeout: cfg.tuic_auth_timeout ? (cfg.tuic_auth_timeout + 's') : null,
+		zero_rtt_handshake: (cfg.tuic_enable_zero_rtt === '1') || null,
+		heartbeat: cfg.tuic_heartbeat ? (cfg.tuic_heartbeat + 's') : null,
+
+		/* HTTP / Hysteria / Socks / Trojan / Tuic / VLESS / VMess */
 		users: (cfg.type !== 'shadowsocks') ? [
 			{
 				name: !(cfg.type in ['http', 'socks']) ? 'cfg-' + cfg['.name'] + '-server' : null,
@@ -85,8 +85,10 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 				auth: (cfg.hysteria_auth_type === 'base64') ? cfg.hysteria_auth_payload : null,
 				auth_str: (cfg.hysteria_auth_type === 'string') ? cfg.hysteria_auth_payload : null,
 
-				/* VLESS / VMess / Tuic */
+				/* Tuic */
 				uuid: cfg.uuid,
+
+				/* VLESS / VMess */
 				flow: cfg.vless_flow,
 				alterId: strToInt(cfg.vmess_alterid)
 			}

@@ -262,7 +262,7 @@ return view.extend({
 		so = ss.option(form.ListValue, 'tcpip_stack', _('TCP/IP stack'),
 			_('TCP/IP stack.'));
 		if (features.with_gvisor) {
-			so.value('mixed', _('Mixed'))
+			so.value('mixed', _('Mixed'));
 			so.value('gvisor', _('gVisor'));
 		}
 		if (features.with_lwip)
