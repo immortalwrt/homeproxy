@@ -157,6 +157,7 @@ function generate_outbound(node) {
 		uuid: node.uuid,
 		congestion_control: node.tuic_congestion_control,
 		udp_relay_mode: node.tuic_udp_relay_mode,
+		udp_over_stream: (node.tuic_udp_over_stream === '1') || null,
 		zero_rtt_handshake: (node.tuic_enable_zero_rtt === '1') || null,
 		heartbeat: node.tuic_heartbeat ? (node.tuic_heartbeat + 's') : null,
 		/* VLESS / VMess */

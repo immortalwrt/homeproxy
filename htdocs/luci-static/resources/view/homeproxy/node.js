@@ -801,6 +801,14 @@ return view.extend({
 		so.rmempty = false;
 		so.modalonly = true;
 
+		so = ss.option(form.Flag, 'tuic_udp_over_stream', _('UDP over stream'),
+			_('This is the TUIC port of the UDP over TCP protocol, designed to provide a QUIC stream based UDP relay mode that TUIC does not provide. Since it is an add-on protocol, you will need to use sing-box or another program compatible with the protocol as a server.<br/>' +
+				'This mode has no positive effect in a proper UDP proxy scenario and should only be applied to relay streaming UDP traffic (basically QUIC streams).<br/>' +
+				'Conflict with udp_relay_mode.'));
+		so.default = so.disabled;
+		so.depends('type', 'tuic');
+		so.modalonly = true;
+
 		so = ss.option(form.Flag, 'tuic_enable_zero_rtt', _('Enable 0-RTT handshake'),
 			_('Enable 0-RTT QUIC connection handshake on the client side. This is not impacting much on the performance, as the protocol is fully multiplexed.<br/>' +
 				'Disabling this is highly recommended, as it is vulnerable to replay attacks.'));
