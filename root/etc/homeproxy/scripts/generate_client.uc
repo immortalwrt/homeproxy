@@ -294,21 +294,13 @@ config.dns = {
 
 if (!isEmpty(main_node)) {
 	/* Avoid DNS loop */
-	const main_node_addr = uci.get(uciconfig, main_node, 'address');
-	if (validateHostname(main_node_addr))
-		push(config.dns.rules, {
-			domain: main_node_addr,
-			server: 'default-dns'
-		});
-
-	if (dedicated_udp_node) {
-		const main_udp_node_addr = uci.get(uciconfig, main_udp_node, 'address');
-		if (validateHostname(main_udp_node_addr))
-			push(config.dns.rules, {
-				domain: main_udp_node_addr,
-				server: 'default-dns'
-			});
-	}
+        uci.foreach(uciconfig, ucinode, (cfg) => {
+                if (validateHostname(cfg.address))
+                        push(config.dns.rules, {
+                                domain: cfg.address,
+                                server: 'default-dns'
+                        });
+        });
 
 	if (direct_domain_list)
 		push(config.dns.rules, {
@@ -455,15 +447,32 @@ config.outbounds = [
 
 /* Main outbounds */
 if (!isEmpty(main_node)) {
-	const main_node_cfg = uci.get_all(uciconfig, main_node) || {};
-	push(config.outbounds, generate_outbound(main_node_cfg));
-	config.outbounds[length(config.outbounds)-1].tag = 'main-out';
+        const main_node_cfg = uci.get_all(uciconfig, main_node) || {};
+        const outbound_tags = [];
+        uci.foreach(uciconfig, ucinode, (cfg) => {
+                let outbound = generate_outbound(cfg);
+                push(outbound_tags, outbound.tag);
+                push(config.outbounds, outbound);
+        });
+        const main_outbound = generate_outbound(main_node_cfg);
+        push(config.outbounds, {
+                "type": "selector",
+                "tag": "main-out",
+                "outbounds": outbound_tags,
+                "default": main_outbound.tag
+        });
 
-	if (dedicated_udp_node) {
-		const main_udp_node_cfg = uci.get_all(uciconfig, main_udp_node) || {};
-		push(config.outbounds, generate_outbound(main_udp_node_cfg));
-		config.outbounds[length(config.outbounds)-1].tag = 'main-udp-out';
-	}
+        if (dedicated_udp_node) {
+                const main_udp_node_cfg = uci.get_all(uciconfig, main_udp_node) || {};
+                const main_udp_outbound = generate_outbound(main_udp_node_cfg);
+                push(config.outbounds, {
+                        "type": "selector",
+                        "tag": "main-udp-out",
+                        "outbounds": outbound_tags,
+                        "default": main_udp_outbound.tag
+                });
+
+        }
 } else if (!isEmpty(default_outbound))
 	uci.foreach(uciconfig, uciroutingnode, (cfg) => {
 		if (cfg.enabled !== '1')
