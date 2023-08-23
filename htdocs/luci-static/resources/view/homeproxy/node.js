@@ -798,7 +798,12 @@ return view.extend({
 		so.value('quic', _('QUIC'));
 		so.default = 'native';
 		so.depends('type', 'tuic');
-		so.rmempty = false;
+		so.modalonly = true;
+
+		so = ss.option(form.Flag, 'tuic_udp_over_stream', _('UDP over stream'),
+			_('This is the TUIC port of the UDP over TCP protocol, designed to provide a QUIC stream based UDP relay mode that TUIC does not provide.'));
+		so.default = so.disabled;
+		so.depends({'type': 'tuic','tuic_udp_relay_mode': 'native'});
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'tuic_enable_zero_rtt', _('Enable 0-RTT handshake'),
