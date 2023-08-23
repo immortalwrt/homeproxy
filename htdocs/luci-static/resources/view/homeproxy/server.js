@@ -263,7 +263,7 @@ return view.extend({
 		o.depends('type', 'tuic');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'tuic_heartbeat', _('Heartbeat'),
+		o = s.option(form.Value, 'tuic_heartbeat', _('Heartbeat interval'),
 			_('Interval for sending heartbeat packets for keeping the connection alive (in seconds).'));
 		o.datatype = 'uinteger';
 		o.default = '10';
@@ -305,10 +305,10 @@ return view.extend({
 			var tls_element = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
 			if ((value === 'http' && tls_element.checked) || (value === 'grpc' && !features.with_grpc))
 				this.map.findElement('id', 'cbid.homeproxy.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
-					_('Specifies the time until idle clients should be closed with a GOAWAY frame. PING frames are not considered as activity.');
+					_('Specifies the time (in seconds) until idle clients should be closed with a GOAWAY frame. PING frames are not considered as activity.');
 			else if (value === 'grpc' && features.with_grpc)
 				this.map.findElement('id', 'cbid.homeproxy.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
-					_('If the transport doesn\'t see any activity after a duration of this time, it pings the client to check if the connection is still active.');
+					_('If the transport doesn\'t see any activity after a duration of this time (in seconds), it pings the client to check if the connection is still active.');
 		}
 		o.depends('type', 'trojan');
 		o.depends('type', 'vless');

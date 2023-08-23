@@ -813,7 +813,7 @@ return view.extend({
 		so.depends('type', 'tuic');
 		so.modalonly = true;
 
-		so = ss.option(form.Value, 'tuic_heartbeat', _('Heartbeat'),
+		so = ss.option(form.Value, 'tuic_heartbeat', _('Heartbeat interval'),
 			_('Interval for sending heartbeat packets for keeping the connection alive (in seconds).'));
 		so.datatype = 'uinteger';
 		so.default = '10';
@@ -882,18 +882,18 @@ return view.extend({
 			var tls = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
 			if ((value === 'http' && tls.checked) || (value === 'grpc' && !features.with_grpc)) {
 				this.map.findElement('id', 'cbid.homeproxy.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
-					_('Specifies the period of time after which a health check will be performed using a ping frame if no frames have been received on the connection.<br/>' +
+					_('Specifies the period of time (in seconds) after which a health check will be performed using a ping frame if no frames have been received on the connection.<br/>' +
 						'Please note that a ping response is considered a received frame, so if there is no other traffic on the connection, the health check will be executed every interval.');
 
 				this.map.findElement('id', 'cbid.homeproxy.%s.http_ping_timeout'.format(section_id)).nextElementSibling.innerHTML =
-					_('Specifies the timeout duration after sending a PING frame, within which a response must be received.<br/>' +
+					_('Specifies the timeout duration (in seconds) after sending a PING frame, within which a response must be received.<br/>' +
 						'If a response to the PING frame is not received within the specified timeout duration, the connection will be closed.');
 			} else if (value === 'grpc' && features.with_grpc) {
 				this.map.findElement('id', 'cbid.homeproxy.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
-					_('If the transport doesn\'t see any activity after a duration of this time, it pings the client to check if the connection is still active.');
+					_('If the transport doesn\'t see any activity after a duration of this time (in seconds), it pings the client to check if the connection is still active.');
 
 				this.map.findElement('id', 'cbid.homeproxy.%s.http_ping_timeout'.format(section_id)).nextElementSibling.innerHTML =
-					_('The timeout that after performing a keepalive check, the client will wait for activity. If no activity is detected, the connection will be closed.');
+					_('The timeout (in seconds) that after performing a keepalive check, the client will wait for activity. If no activity is detected, the connection will be closed.');
 			}
 		}
 		so.modalonly = true;
