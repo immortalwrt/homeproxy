@@ -937,7 +937,7 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'http_ping_timeout', _('Ping timeout'),
-			_('Specifies the timeout (in seconds) duration after sending a PING frame, within which a response must be received.<br/>' +
+			_('Specifies the timeout duration (in seconds) after sending a PING frame, within which a response must be received.<br/>' +
 				'If a response to the PING frame is not received within the specified timeout duration, the connection will be closed.'));
 		so.datatype = 'uinteger';
 		so.depends('transport', 'grpc');

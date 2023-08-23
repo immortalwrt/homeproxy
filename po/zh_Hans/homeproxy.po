@@ -154,7 +154,7 @@ msgstr "确定要允许不安全连接吗？"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:252
 msgid "Auth timeout"
-msgstr ""
+msgstr "认证超时"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:855
 msgid "Authenticated length"
@@ -184,7 +184,7 @@ msgstr "自动更新订阅、GeoIP 和 GeoSite。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:789
 msgid "BBR"
-msgstr ""
+msgstr "BBR"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:193
 msgid "BaiDu"
@@ -197,7 +197,7 @@ msgstr "Base64"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:280
 msgid "Based on google/gvisor."
-msgstr ""
+msgstr "基于 google/gvisor。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:359
 #: htdocs/luci-static/resources/view/homeproxy/client.js:846
@@ -253,7 +253,7 @@ msgstr "CNNIC 公共 DNS（210.2.4.8）"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:787
 msgid "CUBIC"
-msgstr ""
+msgstr "CUBIC"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:405
 msgid "Cancel"
@@ -326,7 +326,7 @@ msgstr "仅常用端口（绕过 P2P 流量）"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:785
 #: htdocs/luci-static/resources/view/homeproxy/server.js:243
 msgid "Congestion control algorithm"
-msgstr ""
+msgstr "拥塞控制算法"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:190
 msgid "Connection check"
@@ -587,11 +587,13 @@ msgid ""
 "impacting much on the performance, as the protocol is fully multiplexed.<br/"
 ">Disabling this is highly recommended, as it is vulnerable to replay attacks."
 msgstr ""
+"在客户端启用 0-RTT QUIC 连接握手。由于协议是完全复用的，这对性能影响不大。"
+"<br/>强烈建议禁用此功能，因为它容易受到重放攻击。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:809
 #: htdocs/luci-static/resources/view/homeproxy/server.js:259
 msgid "Enable 0-RTT handshake"
-msgstr ""
+msgstr "启用 0-RTT 握手"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:445
 msgid "Enable ACME"
@@ -790,7 +792,7 @@ msgstr "握手服务器端口"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:816
 #: htdocs/luci-static/resources/view/homeproxy/server.js:266
 msgid "Heartbeat interval"
-msgstr ""
+msgstr "心跳间隔"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:55
 #: htdocs/luci-static/resources/view/homeproxy/client.js:57
@@ -817,7 +819,7 @@ msgstr "主机名"
 msgid ""
 "How long the server should wait for the client to send the authentication "
 "command (in seconds)."
-msgstr ""
+msgstr "服务器等待客户端发送认证命令的时间（单位：秒）。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:516
 #: htdocs/luci-static/resources/view/homeproxy/server.js:106
@@ -882,6 +884,8 @@ msgid ""
 "If the transport doesn't see any activity after a duration of this time (in "
 "seconds), it pings the client to check if the connection is still active."
 msgstr ""
+"如果传输在此时间段（单位：秒）后没有看到任何活动，它会向客户端发送 ping 请求"
+"以检查连接是否仍然活动。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1134
 msgid ""
@@ -908,7 +912,7 @@ msgstr "接口控制"
 msgid ""
 "Interval for sending heartbeat packets for keeping the connection alive (in "
 "seconds)."
-msgstr ""
+msgstr "发送心跳包以保持连接存活的时间间隔（单位：秒）。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:439
 #: htdocs/luci-static/resources/view/homeproxy/client.js:705
@@ -1150,11 +1154,11 @@ msgstr "最小流数量"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:265
 msgid "Mixed"
-msgstr ""
+msgstr "混合"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:278
 msgid "Mixed <code>system</code> TCP stack and <code>gVisor</code> UDP stack."
-msgstr ""
+msgstr "混合<code>系统</code> TCP 栈和 <code>gVisor</code> UDP 栈。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:429
 #: htdocs/luci-static/resources/view/homeproxy/client.js:695
@@ -1180,7 +1184,7 @@ msgstr "注意：更新订阅前先保存当前配置。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:797
 msgid "Native"
-msgstr ""
+msgstr "原生"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:107
 msgid "NaïveProxy"
@@ -1194,7 +1198,7 @@ msgstr "网络"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:788
 msgid "New Reno"
-msgstr ""
+msgstr "New Reno"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:864
 #: htdocs/luci-static/resources/view/homeproxy/node.js:880
@@ -1275,7 +1279,7 @@ msgstr "出站节点"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:581
 msgid "Override address"
-msgstr ""
+msgstr "覆盖地址"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:298
 #: htdocs/luci-static/resources/view/homeproxy/server.js:611
@@ -1284,7 +1288,7 @@ msgstr "覆盖目标地址"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:586
 msgid "Override port"
-msgstr ""
+msgstr "覆盖端口"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:299
 #: htdocs/luci-static/resources/view/homeproxy/server.js:612
@@ -1293,11 +1297,11 @@ msgstr "使用嗅探到的域名覆盖连接目标。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:582
 msgid "Override the connection destination address."
-msgstr ""
+msgstr "覆盖目标连接地址。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:587
 msgid "Override the connection destination port."
-msgstr ""
+msgstr "覆盖目标连接端口。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:927
 msgid "PUT"
@@ -1465,7 +1469,7 @@ msgstr "QUIC"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:786
 #: htdocs/luci-static/resources/view/homeproxy/server.js:244
 msgid "QUIC congestion control algorithm."
-msgstr ""
+msgstr "QUIC 拥塞控制算法。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:648
 #: htdocs/luci-static/resources/view/homeproxy/server.js:206
@@ -1708,6 +1712,9 @@ msgid ""
 "frame, so if there is no other traffic on the connection, the health check "
 "will be executed every interval."
 msgstr ""
+"如果连接上没有收到任何帧，指定一段时间（单位秒）后将使用 PING 帧执行健康检"
+"查。<br/>需要注意的是，PING 响应被视为已接收的帧，因此如果连接上没有其他流"
+"量，则健康检查将在每个间隔执行一次。"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:308
 #: htdocs/luci-static/resources/view/homeproxy/server.js:340
@@ -1715,22 +1722,19 @@ msgid ""
 "Specifies the time (in seconds) until idle clients should be closed with a "
 "GOAWAY frame. PING frames are not considered as activity."
 msgstr ""
-
-#: htdocs/luci-static/resources/view/homeproxy/node.js:940
-msgid ""
-"Specifies the timeout (in seconds) duration after sending a PING frame, "
-"within which a response must be received.<br/>If a response to the PING "
-"frame is not received within the specified timeout duration, the connection "
-"will be closed."
-msgstr ""
+"指定闲置客户端应在多长时间（单位：秒）内使用 GOAWAY 帧关闭。PING 帧不被视为活"
+"动。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:889
+#: htdocs/luci-static/resources/view/homeproxy/node.js:940
 msgid ""
 "Specifies the timeout duration (in seconds) after sending a PING frame, "
 "within which a response must be received.<br/>If a response to the PING "
 "frame is not received within the specified timeout duration, the connection "
 "will be closed."
 msgstr ""
+"指定发送 PING 帧后，在指定的超时时间（单位：秒）内必须接收到响应。<br/>如果在"
+"指定的超时时间内没有收到 PING 帧的响应，则连接将关闭。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:218
 msgid ""
@@ -1974,6 +1978,8 @@ msgid ""
 "will wait for activity. If no activity is detected, the connection will be "
 "closed."
 msgstr ""
+"经过一段时间（单位：秒）之后，客户端将执行 keepalive 检查并等待活动。如果没有"
+"检测到任何活动，则会关闭连接。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1103
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1300
@@ -1988,6 +1994,8 @@ msgid ""
 "This is the TUIC port of the UDP over TCP protocol, designed to provide a "
 "QUIC stream based UDP relay mode that TUIC does not provide."
 msgstr ""
+"这是 TUIC 的 UDP over TCP 协议移植， 旨在提供 TUIC 不提供的基于 QUIC 流的 "
+"UDP 中继模式。"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:374
 msgid ""
@@ -2009,7 +2017,7 @@ msgstr "Trojan"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:524
 #: htdocs/luci-static/resources/view/homeproxy/server.js:113
 msgid "Tuic"
-msgstr ""
+msgstr "Tuic"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:247
 msgid "Tun TCP/UDP"
@@ -2037,15 +2045,15 @@ msgstr "UDP over TCP"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:803
 msgid "UDP over stream"
-msgstr ""
+msgstr "UDP over stream"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:796
 msgid "UDP packet relay mode."
-msgstr ""
+msgstr "UDP 包中继模式。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:795
 msgid "UDP relay mode"
-msgstr ""
+msgstr "UDP 中继模式"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:778
 #: htdocs/luci-static/resources/view/homeproxy/server.js:236
@@ -2349,46 +2357,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:271
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid "Based on google/gvisor (recommended)."
-#~ msgstr "基于 google/gvisor（推荐）。"
-
-#~ msgid ""
-#~ "If the transport doesn't see any activity after a duration of this time, "
-#~ "it pings the client to check if the connection is still active."
-#~ msgstr ""
-#~ "如果传输在此时间段后没有看到任何活动，它会向客户端发送 ping 请求以检查连接"
-#~ "是否仍然活动。"
-
-#~ msgid ""
-#~ "Specifies the period of time after which a health check will be performed "
-#~ "using a ping frame if no frames have been received on the connection.<br/"
-#~ ">Please note that a ping response is considered a received frame, so if "
-#~ "there is no other traffic on the connection, the health check will be "
-#~ "executed every interval."
-#~ msgstr ""
-#~ "如果连接上没有收到任何帧，指定一段时间后将使用 PING 帧执行健康检查。<br/>"
-#~ "需要注意的是，PING 响应被视为已接收的帧，因此如果连接上没有其他流量，则健"
-#~ "康检查将在每个间隔执行一次。"
-
-#~ msgid ""
-#~ "Specifies the time until idle clients should be closed with a GOAWAY "
-#~ "frame. PING frames are not considered as activity."
-#~ msgstr ""
-#~ "指定闲置客户端应在多长时间内使用 GOAWAY 帧关闭。PING 帧不被视为活动。"
-
-#~ msgid ""
-#~ "Specifies the timeout duration after sending a PING frame, within which a "
-#~ "response must be received.<br/>If a response to the PING frame is not "
-#~ "received within the specified timeout duration, the connection will be "
-#~ "closed."
-#~ msgstr ""
-#~ "指定发送 PING 帧后，在指定的超时时间内必须接收到响应。<br/>如果在指定的超"
-#~ "时时间内没有收到 PING 帧的响应，则连接将关闭。"
-
-#~ msgid ""
-#~ "The timeout that after performing a keepalive check, the client will wait "
-#~ "for activity. If no activity is detected, the connection will be closed."
-#~ msgstr ""
-#~ "经过一段时间之后，客户端将执行 keepalive 检查并等待活动。如果没有检测到任"
-#~ "何活动，则会关闭连接。"
