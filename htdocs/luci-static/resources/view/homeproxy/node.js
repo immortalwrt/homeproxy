@@ -522,6 +522,8 @@ return view.extend({
 		so.value('trojan', _('Trojan'));
 		if (features.with_quic)
 			so.value('tuic', _('Tuic'));
+		if (features.with_quic)
+			so.value('hysteria2', _('Hysteria2'));
 		if (features.with_wireguard)
 			so.value('wireguard', _('WireGuard'));
 		so.value('vless', _('VLESS'));
@@ -550,6 +552,7 @@ return view.extend({
 		so.depends('type', 'shadowsocksr');
 		so.depends('type', 'trojan');
 		so.depends('type', 'tuic');
+		so.depends('type', 'hysteria2');
 		so.depends({'type': 'shadowtls', 'shadowtls_version': '2'});
 		so.depends({'type': 'shadowtls', 'shadowtls_version': '3'});
 		so.depends({'type': 'socks', 'socks_version': '5'});
@@ -631,12 +634,14 @@ return view.extend({
 			_('Max download speed in Mbps.'));
 		so.datatype = 'uinteger';
 		so.depends('type', 'hysteria');
+		so.depends('type', 'hysteria2');
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'hysteria_up_mbps', _('Max upload speed'),
 			_('Max upload speed in Mbps.'));
 		so.datatype = 'uinteger';
 		so.depends('type', 'hysteria');
+		so.depends('type', 'hysteria2');
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'hysteria_recv_window_conn', _('QUIC stream receive window'),
@@ -821,6 +826,26 @@ return view.extend({
 		so.depends('type', 'tuic');
 		so.modalonly = true;
 		/* Tuic config end */
+
+		/* Hysteria2 config start */
+		so = ss.option(form.Value, 'hysteria2_obfs_type', _('QUIC traffic obfuscator type, only available with salamander.'));
+		so.depends('type', 'hysteria2');
+		so.default = '';
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'hysteria2_obfs_password', _('QUIC traffic obfuscator password.'));
+		so.depends('type', 'hysteria2');
+		so.default = '';
+		so.modalonly = true;
+
+		so = ss.option(form.ListValue, 'hysteria2_network', _('Enabled network.'));
+		so.value('', _('Default'));
+		so.value('tcp', _('TCP'));
+		so.value('udp', _('UDP'));
+		so.default = '';
+		so.depends('type', 'hysteria2');
+		so.modalonly = true;
+		/* Hysteria2 config end */
 
 		/* VMess / VLESS config start */
 		so = ss.option(form.ListValue, 'vless_flow', _('Flow'));
@@ -1069,6 +1094,7 @@ return view.extend({
 		so.depends('type', 'shadowtls');
 		so.depends('type', 'trojan');
 		so.depends('type', 'tuic');
+		so.depends('type', 'hysteria2');
 		so.depends('type', 'vless');
 		so.depends('type', 'vmess');
 		so.validate = function(section_id, value) {
@@ -1076,7 +1102,7 @@ return view.extend({
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
 				var tls = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
 
-				if (['hysteria', 'shadowtls', 'tuic'].includes(type)) {
+				if (['hysteria', 'shadowtls', 'tuic', 'hysteria2'].includes(type)) {
 					tls.checked = true;
 					tls.disabled = true;
 				} else {

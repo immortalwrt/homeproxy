@@ -111,6 +111,8 @@ return view.extend({
 		o.value('trojan', _('Trojan'));
 		if (features.with_quic)
 			o.value('tuic', _('Tuic'));
+		if (features.with_quic)
+			o.value('hysteria2', _('Hysteria2'));
 		o.value('vless', _('VLESS'));
 		o.value('vmess', _('VMess'));
 		o.rmempty = false;
@@ -132,6 +134,7 @@ return view.extend({
 		o.depends('type', 'shadowsocks');
 		o.depends('type', 'trojan');
 		o.depends('type', 'tuic');
+		o.depends('type', 'hysteria2');
 		o.validate = function(section_id, value) {
 			if (section_id) {
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
@@ -169,12 +172,14 @@ return view.extend({
 			_('Max download speed in Mbps.'));
 		o.datatype = 'uinteger';
 		o.depends('type', 'hysteria');
+		o.depends('type', 'hysteria2');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'hysteria_up_mbps', _('Max upload speed'),
 			_('Max upload speed in Mbps.'));
 		o.datatype = 'uinteger';
 		o.depends('type', 'hysteria');
+		o.depends('type', 'hysteria2');
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'hysteria_auth_type', _('Authentication type'));
@@ -270,6 +275,30 @@ return view.extend({
 		o.depends('type', 'tuic');
 		o.modalonly = true;
 		/* Tuic config end */
+
+		/* Hysteria2 config start */
+		o = s.option(form.Value, 'hysteria2_obfs_type', _('QUIC traffic obfuscator type, only available with salamander.'));
+		o.default = '';
+		o.depends('type', 'hysteria2');
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'hysteria2_obfs_password', _('QUIC traffic obfuscator password.'));
+		o.default = '';
+		o.depends('type', 'hysteria2');
+		o.modalonly = true;
+
+		o = s.option(form.Flag, 'hysteria2_ignore_client_bandwidth', _('Commands the client to use the BBR flow control algorithm instead of Hysteria CC.'),
+			_('Conflict with up_mbps and down_mbps.'));
+		o.default = o.disabled;
+		o.depends('type', 'hysteria2');
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'hysteria2_masquerade', _('HTTP3 server behavior when authentication fails.'),
+			_('A 404 page will be returned if empty.'));
+		o.default = '';
+		o.depends('type', 'hysteria2');
+		o.modalonly = true;
+		/* Hysteria2 config end */
 
 		/* VLESS / VMess config start */
 		o = s.option(form.ListValue, 'vless_flow', _('Flow'));

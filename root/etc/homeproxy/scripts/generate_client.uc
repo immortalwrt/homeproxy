@@ -136,7 +136,7 @@ function generate_outbound(node) {
 		/* Hysteria */
 		up_mbps: strToInt(node.hysteria_down_mbps),
 		down_mbps: strToInt(node.hysteria_down_mbps),
-		obfs: node.hysteria_bofs_password,
+		obfs: (node.type == 'hysteria2') ? node.hysteria_obfs_password : {type: node.hysteria2_obfs_type, password: node.hyseria2_obfs_password},
 		auth: (node.hysteria_auth_type === 'base64') ? node.hysteria_auth_payload : null,
 		auth_str: (node.hysteria_auth_type === 'string') ? node.hysteria_auth_payload : null,
 		recv_window_conn: strToInt(node.hysteria_recv_window_conn),
@@ -160,6 +160,8 @@ function generate_outbound(node) {
 		udp_over_stream: (node.tuic_udp_over_stream === '1') || null,
 		zero_rtt_handshake: (node.tuic_enable_zero_rtt === '1') || null,
 		heartbeat: node.tuic_heartbeat ? (node.tuic_heartbeat + 's') : null,
+		/* Hysteria2 */
+		network: node.hysteria2_network,
 		/* VLESS / VMess */
 		flow: node.vless_flow,
 		alter_id: strToInt(node.vmess_alterid),
