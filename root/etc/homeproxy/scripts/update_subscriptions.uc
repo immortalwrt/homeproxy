@@ -319,7 +319,7 @@ function parse_uri(uri) {
 				type: 'hysteria',
 				address: hysteria2_url.hostname,
 				port: hysteria2_url.port,
-        password: hysteria2_url.username,
+				password: hysteria2_url.username,
 				hysteria2_obfs_type: hysteria2_params.obfs,
 				hysteria2_obfs_password: hysteria2_params.obfs-password,
 				tls: '1',
