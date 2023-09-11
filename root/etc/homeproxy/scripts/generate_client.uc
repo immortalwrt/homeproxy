@@ -230,6 +230,7 @@ function generate_outbound(node) {
 			version: strToInt(node.udp_over_tcp_version)
 		} : null,
 		tcp_fast_open: (node.tcp_fast_open === '1') || null,
+		tcp_multi_path: (node.tcp_multi_path === '1') || null,
 		udp_fragment: (node.udp_fragment === '1') || null
 	};
 

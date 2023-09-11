@@ -1225,6 +1225,10 @@ return view.extend({
 		so.default = so.disabled;
 		so.modalonly = true;
 
+		so = ss.option(form.Flag, 'tcp_multi_path', _('Enable TCP Multi Path'));
+		so.default = so.disabled;
+		so.modalonly = true;
+
 		so = ss.option(form.Flag, 'udp_fragment', _('UDP Fragment'),
 			_('Enable UDP fragmentation.'));
 		so.default = so.disabled;

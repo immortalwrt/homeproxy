@@ -47,6 +47,7 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 		listen: '::',
 		listen_port: strToInt(cfg.port),
 		tcp_fast_open: (cfg.tcp_fast_open === '1') || null,
+		tcp_multi_path: (cfg.tcp_multi_path === '1') || null,
 		udp_fragment: (cfg.udp_fragment === '1') || null,
 		sniff: true,
 		sniff_override_destination: (cfg.sniff_override === '1'),
