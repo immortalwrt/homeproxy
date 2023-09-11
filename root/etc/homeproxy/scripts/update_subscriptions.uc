@@ -301,6 +301,34 @@ function parse_uri(uri) {
 			};
 
 			break;
+		case 'hysteria2':
+			/* https://github.com/HyNetwork/hysteria/wiki/URI-Scheme */
+			const hysteria2_url = parseURL('http://' + uri[1]),
+			      hysteria2_params = hysteria_url2.searchParams;
+
+			if (!sing_features.with_quic || !hysteria2_url.username {
+				log(sprintf('Skipping unsupported %s node: %s.', 'hysteria', urldecode(hysteria2_url.hash) || hysteria2_url.hostname));
+				if (!sing_features.with_quic)
+					log(sprintf('Please rebuild sing-box with %s support!', 'QUIC'));
+
+				return null;
+			}
+
+			config = {
+				label: hysteria2_url.hash ? urldecode(hysteria_url2.hash) : null,
+				type: 'hysteria',
+				address: hysteria2_url.hostname,
+				port: hysteria2_url.port,
+        password: hysteria2_url.username,
+				hysteria2_obfs_type: hysteria2_params.obfs,
+				hysteria2_obfs_password: hysteria2_params.obfs-password,
+				tls: '1',
+				tls_insecure: (hysteria2_params.insecure in ['true', '1']) ? '1' : '0',
+				tls_sni: hysteria2_params.sni,
+				tls_alpn: hysteria2_params.alpn
+			};
+
+			break;
 		case 'vless':
 			/* https://github.com/XTLS/Xray-core/discussions/716 */
 			const vless_url = parseURL('http://' + uri[1]),

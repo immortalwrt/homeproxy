@@ -235,6 +235,30 @@ function parseShareLink(uri, features) {
 			};
 
 			break;
+		case 'hysteria2':
+			/* https://v2.hysteria.network/zh/docs/developers/URI-Scheme */
+			/* hysteria2://letmein@example.com/?insecure=1&obfs=salamander&obfs-password=gawrgura&pinSHA256=deadbeef&sni=real.example.com */
+			var url = new URL('http://' + uri[1]);
+			var params = url.searchParams;
+
+			if (!features.with_quic || !url.username)
+				return null;
+
+			config = {
+				label: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
+				type: 'hysteria2',
+				address: url.hostname,
+				port: url.port || '80',
+				password: url.username,
+				hysteria2_obfs_type: params.get('obfs'),
+				hysteria2_obfs_password: params.get('obfs-password'),
+				tls: '1',
+				tls_sni: params.get('sni'),
+				tls_alpn: params.get('alpn'),
+				tls_insecure: params.get('insecure') ? '1' : '0'
+			};
+
+			break;
 		case 'vless':
 			/* https://github.com/XTLS/Xray-core/discussions/716 */
 			var url = new URL('http://' + uri[1]);
