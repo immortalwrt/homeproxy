@@ -136,7 +136,7 @@ function generate_outbound(node) {
 		/* Hysteria */
 		up_mbps: strToInt(node.hysteria_down_mbps),
 		down_mbps: strToInt(node.hysteria_down_mbps),
-		obfs: (node.type == 'hysteria2') ? node.hysteria_obfs_password : {type: node.hysteria2_obfs_type, password: node.hyseria2_obfs_password},
+		obfs: (node.type == 'hysteria2') ? {type: node.hysteria2_obfs_type, password: node.hyseria2_obfs_password} : node.hysteria_obfs_password,
 		auth: (node.hysteria_auth_type === 'base64') ? node.hysteria_auth_payload : null,
 		auth_str: (node.hysteria_auth_type === 'string') ? node.hysteria_auth_payload : null,
 		recv_window_conn: strToInt(node.hysteria_recv_window_conn),

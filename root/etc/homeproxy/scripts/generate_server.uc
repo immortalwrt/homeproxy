@@ -58,7 +58,7 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 		/* Hysteria */
 		up_mbps: strToInt(cfg.hysteria_up_mbps),
 		down_mbps: strToInt(cfg.hysteria_down_mbps),
-		obfs: (cfg.type == 'hysteria') ? cfg.hysteria_obfs_password : {type: cfg.hyteria2_obfs_type, password: cfg.hysteria2_obfs_password},
+		obfs: (cfg.type == 'hysteria2') ? {type: cfg.hyteria2_obfs_type, password: cfg.hysteria2_obfs_password} : cfg.hysteria_obfs_password,
 		recv_window_conn: strToInt(cfg.hysteria_recv_window_conn),
 		recv_window_client: strToInt(cfg.hysteria_revc_window_client),
 		max_conn_client: strToInt(cfg.hysteria_max_conn_client),
