@@ -852,17 +852,17 @@ return view.extend({
 		/* Tuic config end */
 
 		/* Hysteria2 config start */
-		so = ss.option(form.Value, 'hysteria2_obfs_type', _('QUIC traffic obfuscator type, only available with salamander.'));
+		so = ss.option(form.Value, 'hysteria2_obfs_type', _('QUIC traffic obfuscator type, only available with salamander'));
 		so.depends('type', 'hysteria2');
 		so.default = '';
 		so.modalonly = true;
 
-		so = ss.option(form.Value, 'hysteria2_obfs_password', _('QUIC traffic obfuscator password.'));
+		so = ss.option(form.Value, 'hysteria2_obfs_password', _('QUIC traffic obfuscator password'));
 		so.depends('type', 'hysteria2');
 		so.default = '';
 		so.modalonly = true;
 
-		so = ss.option(form.ListValue, 'hysteria2_network', _('Enabled network.'));
+		so = ss.option(form.ListValue, 'hysteria2_network', _('Enabled network'));
 		so.value('', _('Default'));
 		so.value('tcp', _('TCP'));
 		so.value('udp', _('UDP'));

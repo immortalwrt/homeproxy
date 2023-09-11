@@ -277,23 +277,23 @@ return view.extend({
 		/* Tuic config end */
 
 		/* Hysteria2 config start */
-		o = s.option(form.Value, 'hysteria2_obfs_type', _('QUIC traffic obfuscator type, only available with salamander.'));
+		o = s.option(form.Value, 'hysteria2_obfs_type', _('QUIC traffic obfuscator type, only available with salamander'));
 		o.default = '';
 		o.depends('type', 'hysteria2');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'hysteria2_obfs_password', _('QUIC traffic obfuscator password.'));
+		o = s.option(form.Value, 'hysteria2_obfs_password', _('QUIC traffic obfuscator password'));
 		o.default = '';
 		o.depends('type', 'hysteria2');
 		o.modalonly = true;
 
-		o = s.option(form.Flag, 'hysteria2_ignore_client_bandwidth', _('Commands the client to use the BBR flow control algorithm instead of Hysteria CC.'),
+		o = s.option(form.Flag, 'hysteria2_ignore_client_bandwidth', _('Commands the client to use the BBR flow control algorithm instead of Hysteria CC'),
 			_('Conflict with up_mbps and down_mbps.'));
 		o.default = o.disabled;
 		o.depends('type', 'hysteria2');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'hysteria2_masquerade', _('HTTP3 server behavior when authentication fails.'),
+		o = s.option(form.Value, 'hysteria2_masquerade', _('HTTP3 server behavior when authentication fails'),
 			_('A 404 page will be returned if empty.'));
 		o.default = '';
 		o.depends('type', 'hysteria2');
