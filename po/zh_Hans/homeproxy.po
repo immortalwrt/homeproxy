@@ -1168,7 +1168,7 @@ msgstr "模式"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1231
 #: htdocs/luci-static/resources/view/homeproxy/server.js:606
 msgid "MultiPath TCP"
-msgstr ""
+msgstr "多路径 TCP（MPTCP）"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1024
 msgid "Multiplex"
