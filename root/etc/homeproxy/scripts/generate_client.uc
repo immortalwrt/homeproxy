@@ -175,7 +175,7 @@ function generate_outbound(node) {
 		peer_public_key: node.wireguard_peer_public_key,
 		pre_shared_key: node.wireguard_pre_shared_key,
 		reserved: parse_port(node.wireguard_reserved),
-		mtu: node.wireguard_mtu,
+		mtu: strToInt(node.wireguard_mtu),
 
 		multiplex: (node.multiplex === '1') ? {
 			enabled: true,

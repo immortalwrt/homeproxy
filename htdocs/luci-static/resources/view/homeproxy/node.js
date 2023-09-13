@@ -990,12 +990,14 @@ return view.extend({
 		so.password = true;
 		so.depends('type', 'wireguard');
 		so.validate = L.bind(hp.validateBase64Key, this, 44);
+		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'wireguard_peer_public_key', _('Peer pubkic key'),
 			_('WireGuard peer public key.'));
 		so.depends('type', 'wireguard');
 		so.validate = L.bind(hp.validateBase64Key, this, 44);
+		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'wireguard_pre_shared_key', _('Pre-shared key'),
