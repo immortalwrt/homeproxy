@@ -1225,6 +1225,12 @@ return view.extend({
 		so.default = so.disabled;
 		so.modalonly = true;
 
+		if (features.has_mptcp) {
+			so = ss.option(form.Flag, 'tcp_multi_path', _('MultiPath TCP'));
+			so.default = so.disabled;
+			so.modalonly = true;
+		}
+
 		so = ss.option(form.Flag, 'udp_fragment', _('UDP Fragment'),
 			_('Enable UDP fragmentation.'));
 		so.default = so.disabled;
