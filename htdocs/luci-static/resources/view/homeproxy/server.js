@@ -507,26 +507,59 @@ return view.extend({
 			o.rmempty = false;
 			o.modalonly = true;
 
-			o = s.option(form.Flag, 'tls_acme_dhc', _('Disable HTTP challenge'));
+			o = s.option(form.Flag, 'tls_dns01_challenge', _('DNS01 challenge'))
 			o.default = o.disabled;
 			o.depends('tls_acme', '1');
 			o.modalonly = true;
 
+			o = s.option(form.ListValue, 'tls_dns01_provider', _('DNS provider'));
+			o.value('alidns', _('Alibaba Cloud DNS'));
+			o.value('cloudflare', _('Cloudflare'));
+			o.depends('tls_dns01_challenge', '1');
+			o.default = 'cloudflare';
+			o.rmempty = false;
+			o.modalonly = true;
+
+			o = s.option(form.Value, 'tls_dns01_ali_akid', _('Access key ID'));
+			o.depends('tls_dns01_provider', 'alidns');
+			o.rmempty = false;
+			o.modalonly = true;
+
+			o = s.option(form.Value, 'tls_dns01_ali_aksec', _('Access key secret'));
+			o.depends('tls_dns01_provider', 'alidns');
+			o.rmempty = false;
+			o.modalonly = true;
+
+			o = s.option(form.Value, 'tls_dns01_ali_rid', _('Region ID'));
+			o.depends('tls_dns01_provider', 'alidns');
+			o.rmempty = false;
+			o.modalonly = true;
+
+			o = s.option(form.Value, 'tls_dns01_cf_api_token', _('API token'));
+			o.depends('tls_dns01_provider', 'cloudflare');
+			o.rmempty = false;
+			o.modalonly = true;
+
+			o = s.option(form.Flag, 'tls_acme_dhc', _('Disable HTTP challenge'));
+			o.default = o.disabled;
+			o.depends('tls_dns01_challenge', '0');
+			o.modalonly = true;
+
 			o = s.option(form.Flag, 'tls_acme_dtac', _('Disable TLS ALPN challenge'));
 			o.default = o.disabled;
-			o.depends('tls_acme', '1');
+			o.depends('tls_dns01_challenge', '0');
 			o.modalonly = true;
 
 			o = s.option(form.Value, 'tls_acme_ahp', _('Alternative HTTP port'),
 				_('The alternate port to use for the ACME HTTP challenge; if non-empty, this port will be used instead of 80 to spin up a listener for the HTTP challenge.'));
 			o.datatype = 'port';
-			o.depends('tls_acme', '1');
+			o.depends('tls_dns01_challenge', '0');
 			o.modalonly = true;
 
 			o = s.option(form.Value, 'tls_acme_atp', _('Alternative TLS port'),
 				_('The alternate port to use for the ACME TLS-ALPN challenge; the system must forward 443 to this port for challenge to succeed.'));
 			o.datatype = 'port';
-			o.depends('tls_acme', '1');
+			o.depends('tls_dns01_challenge', '0');
 			o.modalonly = true;
 
 			o = s.option(form.Flag, 'tls_acme_external_account', _('External Account Binding'),

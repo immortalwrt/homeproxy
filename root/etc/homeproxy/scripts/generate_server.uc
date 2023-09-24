@@ -122,6 +122,13 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 				external_account: (cfg.tls_acme_external_account === '1') ? {
 					key_id: cfg.tls_acme_ea_keyid,
 					mac_key: cfg.tls_acme_ea_mackey
+				} : null,
+				dns01_challenge: (cfg.tls_dns01_challenge === '1') ? {
+					provider: cfg.tls_dns01_provider,
+					access_key_id: cfg.tls_dns01_ali_akid,
+					access_key_secret: cfg.tls_dns01_ali_aksec,
+					region_id: cfg.tls_dns01_ali_rid,
+					api_token: cfg.tls_dns01_cf_api_token
 				} : null
 			} : null,
 			reality: (cfg.tls_reality === '1') ? {
