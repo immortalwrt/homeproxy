@@ -68,7 +68,7 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 		max_conn_client: strToInt(cfg.hysteria_max_conn_client),
 		disable_mtu_discovery: strToBool(cfg.hysteria_disable_mtu_discovery),
 		ignore_client_bandwidth: strToBool(cfg.hysteria_ignore_client_bandwidth),
-		masquerade: hysteria_masquerade,
+		masquerade: cfg.hysteria_masquerade,
 
 		/* Shadowsocks */
 		method: (cfg.type === 'shadowsocks') ? cfg.shadowsocks_encrypt_method : null,
