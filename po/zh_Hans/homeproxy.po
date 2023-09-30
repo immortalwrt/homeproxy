@@ -32,7 +32,7 @@ msgstr "<strong>上传文件前请先保存配置！</strong>"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:538
 msgid "API token"
-msgstr ""
+msgstr "API 令牌"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:692
 msgid "Accept connections without Proxy Protocol header."
@@ -48,11 +48,11 @@ msgstr "访问控制"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:523
 msgid "Access key ID"
-msgstr ""
+msgstr "访问密钥 ID"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:528
 msgid "Access key secret"
-msgstr ""
+msgstr "访问密钥"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:681
 msgid "Add a DNS rule"
@@ -93,7 +93,7 @@ msgstr "地址解析策略"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:516
 msgid "Alibaba Cloud DNS"
-msgstr ""
+msgstr "阿里云 DNS"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:162
 #: htdocs/luci-static/resources/view/homeproxy/client.js:187
@@ -331,7 +331,7 @@ msgstr "CloudFlare 公共 DNS（1.1.1.1）"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:517
 msgid "Cloudflare"
-msgstr ""
+msgstr "Cloudflare"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:122
 #: htdocs/luci-static/resources/view/homeproxy/server.js:69
@@ -374,7 +374,7 @@ msgstr "DNS 设置"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:515
 msgid "DNS provider"
-msgstr ""
+msgstr "DNS 提供商"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:681
 msgid "DNS rule"
@@ -387,7 +387,7 @@ msgstr "DNS 服务器"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:510
 msgid "DNS01 challenge"
-msgstr ""
+msgstr "DNS01 验证"
 
 #: htdocs/luci-static/resources/homeproxy.js:17
 #: htdocs/luci-static/resources/view/homeproxy/client.js:434
@@ -815,7 +815,7 @@ msgstr "HTTP"
 msgid ""
 "HTTP3 server behavior when authentication fails.<br/>A 404 page will be "
 "returned if empty."
-msgstr ""
+msgstr "身份验证失败时的 HTTP3 服务器响应。默认返回 404 页面。"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:605
 msgid "Handshake server address"
@@ -865,7 +865,7 @@ msgstr "Hysteria"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:541
 #: htdocs/luci-static/resources/view/homeproxy/server.js:107
 msgid "Hysteria2"
-msgstr ""
+msgstr "Hysteria2"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:490
 #: htdocs/luci-static/resources/view/homeproxy/client.js:753
@@ -936,7 +936,7 @@ msgstr "如果你拥有根证书，使用此选项而不是允许不安全连接
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:238
 msgid "Ignore client bandwidth"
-msgstr ""
+msgstr "忽略客户端带宽"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:475
 msgid "Import"
@@ -1051,7 +1051,7 @@ msgstr "主节点"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:244
 msgid "Masquerade"
-msgstr ""
+msgstr "伪装"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:482
 msgid "Match GeoIP."
@@ -1315,7 +1315,7 @@ msgstr "混淆密码"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:650
 #: htdocs/luci-static/resources/view/homeproxy/server.js:200
 msgid "Obfuscate type"
-msgstr ""
+msgstr "混淆类型"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:842
 msgid "Only process traffic from specific interfaces. Leave empty for all."
@@ -1601,7 +1601,7 @@ msgstr "每 %s 秒刷新。"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:533
 msgid "Region ID"
-msgstr ""
+msgstr "区域 ID"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1391
 msgid "Remove %s nodes"
@@ -1667,7 +1667,7 @@ msgstr "Safari"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:652
 #: htdocs/luci-static/resources/view/homeproxy/server.js:202
 msgid "Salamander"
-msgstr ""
+msgstr "Salamander"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:148
 msgid "Same as main node"
@@ -1908,7 +1908,7 @@ msgstr "目标出站标签。"
 #: htdocs/luci-static/resources/view/homeproxy/server.js:239
 msgid ""
 "Tell the client to use the BBR flow control algorithm instead of Hysteria CC."
-msgstr ""
+msgstr "让客户端使用 BBR 流控算法。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:163
 #: htdocs/luci-static/resources/view/homeproxy/client.js:189
