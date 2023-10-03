@@ -2408,18 +2408,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:268
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid "Accept connections without Proxy Protocol header."
-#~ msgstr "接受没有代理协议标头的连接。"
-
-#~ msgid "Accept no header"
-#~ msgstr "接受空标头"
-
-#~ msgid "Parse Proxy Protocol in the connection header."
-#~ msgstr "解析连接标头中的代理协议。"
-
-#~ msgid "Proxy protocol"
-#~ msgstr "代理协议"
-
-#~ msgid "Write Proxy Protocol in the connection header."
-#~ msgstr "在连接标头中写入代理协议。"
