@@ -1010,7 +1010,7 @@ msgstr "支持的应用层协议协商列表，按顺序排列。"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:119
 msgid "Listen address"
-msgstr ""
+msgstr "监听地址"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:841
 msgid "Listen interfaces"
@@ -1018,7 +1018,7 @@ msgstr "监听接口"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:124
 msgid "Listen port"
-msgstr ""
+msgstr "监听端口"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:126
 msgid "Loading"
