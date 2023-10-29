@@ -246,7 +246,7 @@ return view.extend({
 			o.value('redirect_tun', _('Redirect TCP + Tun UDP'));
 			o.value('tun', _('Tun TCP/UDP'));
 		} else {
-			o.description = _('To enable Tun support, you need to install <b>%s</b><br/>').format(['ip-full', 'kmod-tun']);
+			o.description = _('To enable Tun support, you need to install <code>ip-full</code> and <code>kmod-tun</code>');
 		}
 		o.default = 'redirect_tproxy';
 		o.rmempty = false;
