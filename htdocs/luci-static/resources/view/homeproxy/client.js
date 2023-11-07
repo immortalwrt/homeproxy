@@ -698,8 +698,10 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'mode', _('Mode'),
 			_('The default rule uses the following matching logic:<br/>' +
-			'<code>(domain || domain_suffix || domain_keyword || domain_regex || geosite || ip_cidr)</code> &&<br/>' +
+			'<code>(domain || domain_suffix || domain_keyword || domain_regex || geosite)</code> &&<br/>' +
+			'<code>(port || port_range)</code> &&<br/>' +
 			'<code>(source_geoip || source_ip_cidr)</code> &&<br/>' +
+			'<code>(source_port || source_port_range)</code> &&<br/>' +
 			'<code>other fields</code>.'));
 		so.value('default', _('Default'));
 		so.default = 'default';
@@ -751,11 +753,6 @@ return view.extend({
 
 		so = ss.option(form.DynamicList, 'source_ip_cidr', _('Source IP CIDR'),
 			_('Match source IP CIDR.'));
-		so.datatype = 'or(cidr, ipaddr)';
-		so.modalonly = true;
-
-		so = ss.option(form.DynamicList, 'ip_cidr', _('IP CIDR'),
-			_('Match IP CIDR.'));
 		so.datatype = 'or(cidr, ipaddr)';
 		so.modalonly = true;
 
