@@ -580,6 +580,11 @@ return view.extend({
 		so = ss.option(form.Flag, 'disable_cache_expire', _('Disable cache expire'));
 		so.default = so.disabled;
 		so.depends('disable_cache', '0');
+
+		so = ss.option(form.Flag, 'independent_cache', _('Independent cache per server'),
+			_('Make each DNS server\'s cache independent for special purposes. If enabled, will slightly degrade performance.'));
+		so.default = so.disabled;
+		so.depends('disable_cache', '0');
 		/* DNS settings end */
 
 		/* DNS servers start */
