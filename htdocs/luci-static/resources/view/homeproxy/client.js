@@ -794,6 +794,7 @@ return view.extend({
 			delete this.keylist;
 			delete this.vallist;
 
+			this.value('any', _('Any'));
 			this.value('direct-out', _('Direct'));
 			this.value('block-out', _('Block'));
 			uci.sections(data[0], 'routing_node', (res) => {

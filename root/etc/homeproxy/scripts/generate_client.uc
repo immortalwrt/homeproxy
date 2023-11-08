@@ -249,7 +249,7 @@ function get_outbound(cfg) {
 			push(outbounds, get_outbound(i));
 		return outbounds;
 	} else {
-		if (cfg in ['direct-out', 'block-out']) {
+		if (cfg in ['any', 'direct-out', 'block-out']) {
 			return cfg;
 		} else {
 			const node = uci.get(uciconfig, cfg, 'node');
