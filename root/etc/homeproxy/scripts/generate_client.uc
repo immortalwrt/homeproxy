@@ -371,7 +371,6 @@ if (!isEmpty(main_node)) {
 			return;
 
 		push(config.dns.rules, {
-			invert: cfg.invert,
 			network: cfg.network,
 			protocol: cfg.protocol,
 			domain: cfg.domain,
@@ -379,12 +378,12 @@ if (!isEmpty(main_node)) {
 			domain_keyword: cfg.domain_keyword,
 			domain_regex: cfg.domain_regex,
 			geosite: cfg.geosite,
+			port: parse_port(cfg.port),
+			port_range: cfg.port_range,
 			source_geoip: cfg.source_geoip,
 			source_ip_cidr: cfg.source_ip_cidr,
 			source_port: parse_port(cfg.source_port),
 			source_port_range: cfg.source_port_range,
-			port: parse_port(cfg.port),
-			port_range: cfg.port_range,
 			process_name: cfg.process_name,
 			process_path: cfg.process_path,
 			user: cfg.user,
