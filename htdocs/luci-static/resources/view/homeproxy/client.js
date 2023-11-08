@@ -713,6 +713,16 @@ return view.extend({
 		so.rmempty = false;
 		so.readonly = true;
 
+		so = ss.option(form.ListValue, 'ip_version', _('IP Version'));
+		so.value('4', _('IPv4'));
+		so.value('6', _('IPv6'));
+		so.value('', _('Both'));
+		so.modalonly = true;
+
+		so = ss.option(form.DynamicList, 'query_type', _('Query type'),
+			_('Match query type.'));
+		so.modalonly = true;
+
 		so = ss.option(form.ListValue, 'network', _('Network'));
 		so.value('tcp', _('TCP'));
 		so.value('udp', _('UDP'));
@@ -833,6 +843,11 @@ return view.extend({
 		so = ss.option(form.Flag, 'dns_disable_cache', _('Disable dns cache'),
 			_('Disable cache and save cache in this query.'));
 		so.default = so.disabled;
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'rewrite_ttl', _('Rewrite TTL'),
+			_('Rewrite TTL in DNS responses.'));
+		so.datatype = 'uinteger';
 		so.modalonly = true;
 		/* DNS rules end */
 		/* Custom routing settings end */
