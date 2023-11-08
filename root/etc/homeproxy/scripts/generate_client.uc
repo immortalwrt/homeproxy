@@ -8,6 +8,7 @@
 'use strict';
 
 import { readfile, writefile } from 'fs';
+import { isnan } from 'math';
 import { cursor } from 'uci';
 
 import {
@@ -113,6 +114,18 @@ function parse_port(strport) {
 		push(ports, int(i));
 
 	return ports;
+
+}
+
+function parse_dnsquery(strquery) {
+	if (type(strquery) !== 'array' || isEmpty(strquery))
+		return null;
+
+	let querys = [];
+	for (let i in strquery)
+		isnan(int(i)) ? push(querys, i) : push(querys, int(i));
+
+	return querys;
 
 }
 
@@ -384,6 +397,8 @@ if (!isEmpty(main_node)) {
 			return;
 
 		push(config.dns.rules, {
+			ip_version: strToInt(cfg.ip_version),
+			query_type: parse_dnsquery(cfg.query_type),
 			network: cfg.network,
 			protocol: cfg.protocol,
 			domain: cfg.domain,
@@ -403,7 +418,8 @@ if (!isEmpty(main_node)) {
 			invert: (cfg.invert === '1'),
 			outbound: get_outbound(cfg.outbound),
 			server: get_resolver(cfg.server),
-			disable_cache: (cfg.dns_disable_cache === '1')
+			disable_cache: (cfg.dns_disable_cache === '1'),
+			rewrite_ttl: strToInt(cfg.rewrite_ttl)
 		});
 	});
 
