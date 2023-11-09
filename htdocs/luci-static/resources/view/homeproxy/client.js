@@ -421,6 +421,18 @@ return view.extend({
 		so.rmempty = false;
 		so.editable = true;
 
+		so = ss.option(form.ListValue, 'mode', _('Mode'),
+			_('The default rule uses the following matching logic:<br/>' +
+			'<code>(domain || domain_suffix || domain_keyword || domain_regex || geosite || geoip || ip_cidr)</code> &&<br/>' +
+			'<code>(port || port_range)</code> &&<br/>' +
+			'<code>(source_geoip || source_ip_cidr)</code> &&<br/>' +
+			'<code>(source_port || source_port_range)</code> &&<br/>' +
+			'<code>other fields</code>.'));
+		so.value('default', _('Default'));
+		so.default = 'default';
+		so.rmempty = false;
+		so.readonly = true;
+
 		so = ss.option(form.ListValue, 'ip_version', _('IP version'),
 			_('4 or 6. Not limited if empty.'));
 		so.value('4', _('IPv4'));
@@ -428,32 +440,17 @@ return view.extend({
 		so.value('', _('Both'));
 		so.modalonly = true;
 
-		so = ss.option(form.ListValue, 'mode', _('Mode'),
-			_('The default rule uses the following matching logic:<br/>' +
-			'<code>(domain || domain_suffix || domain_keyword || domain_regex || geosite || geoip || ip_cidr)</code> &&<br/>' +
-			'<code>(source_geoip || source_ip_cidr)</code> &&<br/>' +
-			'<code>other fields</code>.'));
-		so.value('default', _('Default'));
-		so.default = 'default';
-		so.rmempty = false;
-		so.readonly = true;
-
-		so = ss.option(form.Flag, 'invert', _('Invert'),
-			_('Invert match result.'));
-		so.default = so.disabled;
-		so.modalonly = true;
-
-		so = ss.option(form.ListValue, 'network', _('Network'));
-		so.value('tcp', _('TCP'));
-		so.value('udp', _('UDP'));
-		so.value('', _('Both'));
-
 		so = ss.option(form.MultiValue, 'protocol', _('Protocol'),
 			_('Sniffed protocol, see <a target="_blank" href="https://sing-box.sagernet.org/configuration/route/sniff/">Sniff</a> for details.'));
 		so.value('http', _('HTTP'));
 		so.value('tls', _('TLS'));
 		so.value('quic', _('QUIC'));
 		so.value('stun', _('STUN'));
+
+		so = ss.option(form.ListValue, 'network', _('Network'));
+		so.value('tcp', _('TCP'));
+		so.value('udp', _('UDP'));
+		so.value('', _('Both'));
 
 		so = ss.option(form.DynamicList, 'domain', _('Domain name'),
 			_('Match full domain.'));
@@ -524,6 +521,11 @@ return view.extend({
 
 		so = ss.option(form.DynamicList, 'user', _('User'),
 			_('Match user name.'));
+		so.modalonly = true;
+
+		so = ss.option(form.Flag, 'invert', _('Invert'),
+			_('Invert match result.'));
+		so.default = so.disabled;
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'outbound', _('Outbound'),

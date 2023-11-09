@@ -580,10 +580,9 @@ if (!isEmpty(main_node)) {
 			return null;
 
 		push(config.route.rules, {
-			invert: cfg.invert,
-			ip_version: cfg.ip_version,
-			network: cfg.network,
+			ip_version: strToInt(cfg.ip_version),
 			protocol: cfg.protocol,
+			network: cfg.network,
 			domain: cfg.domain,
 			domain_suffix: cfg.domain_suffix,
 			domain_keyword: cfg.domain_keyword,
