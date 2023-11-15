@@ -25,6 +25,7 @@ uci.load(uciconfig);
 
 const uciinfra = 'infra',
       ucimain = 'config',
+      uciexp = 'experimental',
       ucicontrol = 'control';
 
 const ucidnssetting = 'dns',
@@ -608,8 +609,17 @@ if (!isEmpty(main_node)) {
 	});
 
 	config.route.final = get_outbound(default_outbound);
-}
+};
 /* Routing rules end */
+
+/* Experimental start */
+config.experimental = {
+	cache_file: {
+		enabled: true,
+		path: HP_DIR + '/cache.db'
+	}
+};
+/* Experimental end */
 
 system('mkdir -p ' + RUN_DIR);
 writefile(RUN_DIR + '/sing-box-c.json', sprintf('%.J\n', removeBlankAttrs(config)));
