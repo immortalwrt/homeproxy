@@ -243,26 +243,22 @@ function get_outbound(cfg) {
 	if (isEmpty(cfg))
 		return null;
 
-	if (cfg in ['direct-out', 'block-out'])
-		return cfg;
-	else {
-		const node = uci.get(uciconfig, cfg, 'node');
-		if (isEmpty(node))
-			die(sprintf("%s's node is missing, please check your configuration.", cfg));
-		else
-			return 'cfg-' + node + '-out';
+	if (type(cfg) === 'array') {
+		let outbounds = [];
+		for (let i in cfg)
+			push(outbounds, get_outbound(i))
+		return outbounds;
+	} else {
+		if (cfg in ['direct-out', 'block-out']) {
+			return cfg;
+		} else {
+			const node = uci.get(uciconfig, cfg, 'node');
+			if (isEmpty(node))
+				die(sprintf("%s's node is missing, please check your configuration.", cfg));
+			else
+				return 'cfg-' + node + '-out';
+		}
 	}
-}
-
-function parse_outbound(rawobs) {
-	if (type(rawobs) !== 'array' || isEmpty(rawobs))
-		return null;
-
-	let obs = [];
-	for (let i in rawobs)
-		push(obs, get_outbound(i));
-
-	return obs;
 }
 
 function get_resolver(cfg) {
@@ -388,7 +384,7 @@ if (!isEmpty(main_node)) {
 			process_path: cfg.process_path,
 			user: cfg.user,
 			invert: (cfg.invert === '1'),
-			outbound: parse_outbound(cfg.outbound),
+			outbound: get_outbound(cfg.outbound),
 			server: get_resolver(cfg.server),
 			disable_cache: (cfg.dns_disable_cache === '1')
 		});
