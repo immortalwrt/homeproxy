@@ -857,6 +857,29 @@ return view.extend({
 		/* DNS rules end */
 		/* Custom routing settings end */
 
+		/* Clash API settings start */
+		s.tab('clash', _('Clash API settings'));
+		o = s.taboption('clash', form.SectionValue, '_clash', form.NamedSection, 'experimental', 'homeproxy');
+
+		ss = o.subsection;
+		so = ss.option(form.Flag, 'clash_api_enabled', _('Enable Clash API'));
+		so.default = so.disabled;
+
+		so = ss.option(form.ListValue, 'dashboard_repo', _('Select Clash Dashboard'));
+		so.value('', _('Use Online Dashboard'));
+		so.value('metacubex/yacd-meta', _('yacd-meta'));
+		so.value('metacubex/metacubexd', _('metacubexd'));
+		so.default = '';
+
+		so = ss.option(form.Value, 'clash_api_port', _('Port'));
+		so.datatype = "and(port, min(1))";
+		so.default = '9090';
+		so.rmempty = false;
+
+		so = ss.option(form.Value, 'clash_api_secret', _('Secret'), _('Automatically generated if empty'));
+		so.password = true;
+		/* Clash API settings end */
+
 		/* ACL settings start */
 		s.tab('control', _('Access Control'));
 
