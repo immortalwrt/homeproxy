@@ -246,7 +246,7 @@ function get_outbound(cfg) {
 	if (type(cfg) === 'array') {
 		let outbounds = [];
 		for (let i in cfg)
-			push(outbounds, get_outbound(i))
+			push(outbounds, get_outbound(i));
 		return outbounds;
 	} else {
 		if (cfg in ['direct-out', 'block-out']) {
