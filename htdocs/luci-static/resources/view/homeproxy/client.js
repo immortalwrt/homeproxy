@@ -38,6 +38,13 @@ var callWriteDomainList = rpc.declare({
 	expect: { '': {} }
 });
 
+var callGetAPISecret = rpc.declare({
+	object: 'luci.homeproxy',
+	method: 'clash_api_get_secret',
+	params: [],
+	expect: { '': {} }
+});
+
 function getServiceStatus() {
 	return L.resolveDefault(callServiceList('homeproxy'), {}).then((res) => {
 		var isRunning = false;
@@ -48,12 +55,14 @@ function getServiceStatus() {
 	});
 }
 
-function renderStatus(isRunning) {
+function renderStatus(isRunning, args) {
 	var spanTemp = '<em><span style="color:%s"><strong>%s %s</strong></span></em>';
 	var renderHTML;
-	if (isRunning)
-		renderHTML = spanTemp.format('green', _('HomeProxy'), _('RUNNING'));
-	else
+	if (isRunning) {
+		var button = String.format('&#160;<a class="btn cbi-button-apply" href="%s" target="_blank" rel="noreferrer noopener">%s</a>',
+			'http://' + window.location.hostname + ':' + args.api_port + '/ui/' + '?hostname=' + window.location.hostname + '&port=' + args.api_port + '&secret=' + args.api_secret, _('Open Clash Dashboard'));
+		renderHTML = spanTemp.format('green', _('HomeProxy'), _('RUNNING')) + button;
+	} else
 		renderHTML = spanTemp.format('red', _('HomeProxy'), _('NOT RUNNING'));
 
 	return renderHTML;
@@ -96,7 +105,8 @@ return view.extend({
 		return Promise.all([
 			uci.load('homeproxy'),
 			hp.getBuiltinFeatures(),
-			network.getHostHints()
+			network.getHostHints(),
+			L.resolveDefault(callGetAPISecret(), {})
 		]);
 	},
 
@@ -104,7 +114,9 @@ return view.extend({
 		var m, s, o, ss, so;
 
 		var features = data[1],
-		    hosts = data[2]?.hosts;
+		    hosts = data[2]?.hosts,
+			api_port = uci.get(data[0], 'experimental', 'clash_api_port'),
+			api_secret = data[3]?.secret || '';
 
 		m = new form.Map('homeproxy', _('HomeProxy'),
 			_('The modern ImmortalWrt proxy platform for ARM64/AMD64.'));
@@ -114,7 +126,7 @@ return view.extend({
 			poll.add(function () {
 				return L.resolveDefault(getServiceStatus()).then((res) => {
 					var view = document.getElementById('service_status');
-					view.innerHTML = renderStatus(res);
+					view.innerHTML = renderStatus(res, {api_port, api_secret});
 				});
 			});
 
@@ -878,6 +890,8 @@ return view.extend({
 
 		so = ss.option(form.Value, 'clash_api_secret', _('Secret'), _('Automatically generated if empty'));
 		so.password = true;
+		if (api_secret)
+			so.description = _('The current Secret is <code>' + api_secret + '</code>');
 		/* Clash API settings end */
 
 		/* ACL settings start */

@@ -212,6 +212,13 @@ const methods = {
 			} else
 				return { status: 255, error: 'illegal type' };
 		}
+	},
+
+	clash_api_get_secret: {
+		call: function() {
+			const client_json = json(trim(readfile(`${RUN_DIR}/sing-box-c.json`)));
+			return { secret: client_json.experimental.clash_api.secret };
+		}
 	}
 };
 
