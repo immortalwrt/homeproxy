@@ -973,6 +973,18 @@ return view.extend({
 		/* Direct domain list end */
 		/* ACL settings end */
 
+		/* Clash API start */
+		s.tab('clash_api', _('Clash API')); 
+
+		so = s.taboption('clash_api', form.Flag, 'clash_api_enable', _('Enable Clash API'));
+		so.default = so.disabled;
+		so.rmempty = false;
+
+		so = s.taboption('clash_api', form.Value, 'clash_api_url', _('Clash API URL'));
+		so.default = '0.0.0.0:9090'
+		so.rmempty = false;
+		so.depends('clash_api_enable', '1');
+
 		return m.render();
 	}
 });

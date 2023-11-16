@@ -566,5 +566,15 @@ if (!isEmpty(main_node)) {
 }
 /* Routing rules end */
 
+if (uci.get(uciconfig, ucimain, 'clash_api_enable') == '1')
+{
+	config.experimental = {
+		clash_api: {
+			external_controller: uci.get(uciconfig, ucimain, 'clash_api_url'),
+			external_ui: '/etc/homeproxy/ui'
+		}
+	};
+}
+
 system('mkdir -p ' + RUN_DIR);
 writefile(RUN_DIR + '/sing-box-c.json', sprintf('%.J\n', removeBlankAttrs(config)));
