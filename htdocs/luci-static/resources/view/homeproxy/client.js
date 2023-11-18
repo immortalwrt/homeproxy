@@ -973,17 +973,29 @@ return view.extend({
 		/* Direct domain list end */
 		/* ACL settings end */
 
-		/* Clash API start */
-		s.tab('clash_api', _('Clash API')); 
-
-		so = s.taboption('clash_api', form.Flag, 'clash_api_enable', _('Enable Clash API'));
+		/* Clash start */
+		s.tab('clash', _('Clash')); 
+		o = s.taboption('clash', form.SectionValue, '_clash', form.NamedSection, 'clash', 'homeproxy');
+		
+		ss = o.subsection;
+		so = ss.option(form.Flag, 'enabled', _('Enable Clash API'));
 		so.default = so.disabled;
-		so.rmempty = false;
 
-		so = s.taboption('clash_api', form.Value, 'clash_api_url', _('Clash API URL'));
+		so = ss.option(form.Value, 'external_controller', _('Clash API URL'));
 		so.default = '0.0.0.0:9090'
 		so.rmempty = false;
-		so.depends('clash_api_enable', '1');
+		so.depends('enabled', '1');
+
+		so = ss.option(form.Value, 'external_ui', _('UI Folder'));
+		so.default = '/etc/homeproxy/ui'
+		so.rmempty = false;
+		so.depends('enabled', '1');
+
+		so = ss.option(form.Value, 'secret', _('Secret'));
+		so.default = ''
+		so.rmempty = true;
+		so.depends('enabled', '1');
+		/* Clash end */
 
 		return m.render();
 	}

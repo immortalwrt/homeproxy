@@ -24,7 +24,8 @@ uci.load(uciconfig);
 
 const uciinfra = 'infra',
       ucimain = 'config',
-      ucicontrol = 'control';
+      ucicontrol = 'control',
+	  uciclash = 'clash';
 
 const ucidnssetting = 'dns',
       ucidnsserver = 'dns_server',
@@ -566,15 +567,23 @@ if (!isEmpty(main_node)) {
 }
 /* Routing rules end */
 
-if (uci.get(uciconfig, ucimain, 'clash_api_enable') == '1')
+/* Clash start */
+if (uci.get(uciconfig, uciclash, 'enabled') == '1')
 {
 	config.experimental = {
 		clash_api: {
-			external_controller: uci.get(uciconfig, ucimain, 'clash_api_url'),
-			external_ui: '/etc/homeproxy/ui'
+			external_controller: uci.get(uciconfig, uciclash, 'external_controller'),
+			external_ui: uci.get(uciconfig, uciclash, 'external_ui')
+			
 		}
 	};
+
+	if (uci.get(uciconfig, uciclash, 'secret') != '')
+	{
+		config.experimental.clash_api.secret = uci.get(uciconfig, uciclash, 'secret');
+	}
 }
+/* Clash end */
 
 system('mkdir -p ' + RUN_DIR);
 writefile(RUN_DIR + '/sing-box-c.json', sprintf('%.J\n', removeBlankAttrs(config)));

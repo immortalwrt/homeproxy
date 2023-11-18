@@ -56,3 +56,5 @@ config homeproxy 'server'
 	option enabled '0'
 	option auto_firewall '0'
 
+config homeproxy 'clash'
+	option enabled '0'
