@@ -2415,3 +2415,19 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:268
 msgid "valid uuid"
 msgstr "有效 uuid"
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:981
+msgid "Enable Clash API"
+msgstr "启用Clash API"
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:984
+msgid "Clash API URL"
+msgstr "Chash API URL"
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:989
+msgid "UI Folder"
+msgstr "UI文件夹"
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:989
+msgid "Secret"
+msgstr "访问密码"

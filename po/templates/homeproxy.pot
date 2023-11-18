@@ -2360,3 +2360,19 @@ msgstr ""
 #: htdocs/luci-static/resources/homeproxy.js:268
 msgid "valid uuid"
 msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:981
+msgid "Enable Clash API"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:984
+msgid "Clash API URL"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:989
+msgid "UI Folder"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:989
+msgid "Secret"
+msgstr ""
