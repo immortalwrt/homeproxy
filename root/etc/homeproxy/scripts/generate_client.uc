@@ -82,6 +82,7 @@ const proxy_mode = uci.get(uciconfig, ucimain, 'proxy_mode') || 'redirect_tproxy
       default_interface = uci.get(uciconfig, ucicontrol, 'bind_interface');
 
 const clash_api_enabled = uci.get(uciconfig, uciexp, 'clash_api_enabled'),
+      nginx_support = uci.get(uciconfig, uciexp, 'nginx_support'),
       dashboard_repo = uci.get(uciconfig, uciexp, 'dashboard_repo'),
       clash_api_port = uci.get(uciconfig, uciexp, 'clash_api_port') || '9090',
       clash_api_secret = uci.get(uciconfig, uciexp, 'clash_api_secret') || trim(readfile('/proc/sys/kernel/random/uuid'));
@@ -624,7 +625,7 @@ if (dashboard_repo) {
 }
 config.experimental = {
 	clash_api: {
-		external_controller: (clash_api_enabled === '1') ? '[::]:'+ clash_api_port : null,
+		external_controller: (clash_api_enabled === '1') ? (nginx_support ? '[::1]:' : '[::]:') + clash_api_port : null,
 		external_ui: dashboard_repo ? RUN_DIR + '/ui' : null,
 		secret: clash_api_secret,
 		store_mode: true,

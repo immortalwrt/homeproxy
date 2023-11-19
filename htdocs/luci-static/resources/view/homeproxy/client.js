@@ -56,11 +56,13 @@ function getServiceStatus() {
 }
 
 function renderStatus(isRunning, args) {
+	let nginx = args.features.hp_has_nginx && args.nginx_support === '1';
 	var spanTemp = '<em><span style="color:%s"><strong>%s %s</strong></span></em>';
 	var renderHTML;
 	if (isRunning) {
 		var button = String.format('&#160;<a class="btn cbi-button-apply" href="%s" target="_blank" rel="noreferrer noopener">%s</a>',
-			'http://' + window.location.hostname + ':' + args.api_port + '/ui/' + '?hostname=' + window.location.hostname + '&port=' + args.api_port + '&secret=' + args.api_secret, _('Open Clash Dashboard'));
+			(nginx ? 'https:' : 'http:') + '//' + window.location.hostname +
+			(nginx ? '/homeproxy' : ':' + args.api_port) + '/ui/', _('Open Clash Dashboard'));
 		renderHTML = spanTemp.format('green', _('HomeProxy'), _('RUNNING')) + button;
 	} else
 		renderHTML = spanTemp.format('red', _('HomeProxy'), _('NOT RUNNING'));
@@ -116,7 +118,8 @@ return view.extend({
 		var features = data[1],
 		    hosts = data[2]?.hosts,
 			api_port = uci.get(data[0], 'experimental', 'clash_api_port'),
-			api_secret = data[3]?.secret || '';
+			api_secret = data[3]?.secret || '',
+			nginx_support = uci.get(data[0], 'experimental', 'nginx_support') || '0';
 
 		m = new form.Map('homeproxy', _('HomeProxy'),
 			_('The modern ImmortalWrt proxy platform for ARM64/AMD64.'));
@@ -126,7 +129,7 @@ return view.extend({
 			poll.add(function () {
 				return L.resolveDefault(getServiceStatus()).then((res) => {
 					var view = document.getElementById('service_status');
-					view.innerHTML = renderStatus(res, {api_port, api_secret});
+					view.innerHTML = renderStatus(res, {features, nginx_support, api_port, api_secret});
 				});
 			});
 
@@ -877,11 +880,28 @@ return view.extend({
 		so = ss.option(form.Flag, 'clash_api_enabled', _('Enable Clash API'));
 		so.default = so.disabled;
 
+		so = ss.option(form.Flag, 'nginx_support', _('Nginx Support'));
+		so.rmempty = true;
+		if (! features.hp_has_nginx) {
+			so.description = _('To enable this feature you need install <b>luci-nginx</b> and <b>luci-ssl-nginx</b><br/> first');
+			so.readonly = true;
+		}
+		so.write = function(section_id, value) {
+			return uci.set(data[0], section_id, 'nginx_support', features.hp_has_nginx ? value : null);
+		}
+
 		so = ss.option(form.ListValue, 'dashboard_repo', _('Select Clash Dashboard'));
 		so.value('', _('Use Online Dashboard'));
 		so.value('metacubex/yacd-meta', _('yacd-meta'));
 		so.value('metacubex/metacubexd', _('metacubexd'));
 		so.default = '';
+		if (features.hp_has_nginx && nginx_support === '1') {
+			so.description = _('The current API URL is <code>%s</code>')
+				.format('https://' + window.location.hostname + '/homeproxy/');
+		} else {
+			so.description = _('The current API URL is <code>%s</code>')
+				.format('http://' + window.location.hostname + ':' + api_port);
+		}
 
 		so = ss.option(form.Value, 'clash_api_port', _('Port'));
 		so.datatype = "and(port, min(1))";

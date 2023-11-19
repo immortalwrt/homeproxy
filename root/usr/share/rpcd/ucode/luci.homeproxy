@@ -180,6 +180,7 @@ const methods = {
 			features.hp_has_tcp_brutal = hasKernelModule('brutal.ko');
 			features.hp_has_tproxy = hasKernelModule('nft_tproxy.ko') || access('/etc/modules.d/nft-tproxy');
 			features.hp_has_tun = hasKernelModule('tun.ko') || access('/etc/modules.d/30-tun');
+			features.hp_has_nginx = access('/usr/sbin/nginx');
 
 			return features;
 		}
