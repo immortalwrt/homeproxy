@@ -244,12 +244,15 @@ function get_outbound(cfg) {
 		return null;
 
 	if (type(cfg) === 'array') {
+		if ('any-out' in cfg)
+			return 'any';
+
 		let outbounds = [];
 		for (let i in cfg)
 			push(outbounds, get_outbound(i));
 		return outbounds;
 	} else {
-		if (cfg in ['any', 'direct-out', 'block-out']) {
+		if (cfg in ['direct-out', 'block-out']) {
 			return cfg;
 		} else {
 			const node = uci.get(uciconfig, cfg, 'node');
