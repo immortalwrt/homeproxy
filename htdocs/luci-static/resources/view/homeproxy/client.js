@@ -123,6 +123,23 @@ return view.extend({
 			]);
 		}
 
+		/* Cache all subscription info, they will be called multiple times */
+		var subs_info = {};
+		{
+			let s = uci.get(data[0], 'subscription');
+			let urls = s.subscription_url;
+			let names = s.subscription_name || [];
+			if (urls) {
+				for (var i = 0; i < urls.length; i++) {
+					subs_info[hp.calcStringMD5(urls[i])] = {
+						"url": urls[i],
+						"name": names[i],
+						"order": i + 1
+					};
+				}
+			}
+		};
+
 		/* Cache all configured proxy nodes, they will be called multiple times */
 		var proxy_nodes = {};
 		uci.sections(data[0], 'node', (res) => {

@@ -1315,6 +1315,10 @@ return view.extend({
 			return true;
 		}
 
+		o = s.taboption('subscription', form.DynamicList, 'subscription_name', _('Subscription Name-s'),
+			_('Add name for Subscription URL, correspond in sequence.'));
+		o.datatype = 'uciname';
+
 		o = s.taboption('subscription', form.ListValue, 'filter_nodes', _('Filter nodes'),
 			_('Drop/keep specific nodes from subscriptions.'));
 		o.value('disabled', _('Disable'));
