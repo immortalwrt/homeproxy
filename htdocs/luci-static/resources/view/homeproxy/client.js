@@ -144,7 +144,10 @@ return view.extend({
 		var proxy_nodes = {};
 		uci.sections(data[0], 'node', (res) => {
 			proxy_nodes[res['.name']] =
-				String.format('[%s] %s', res.type, res.label || (stubValidator.apply('ip6addr', res.address || '') ?
+				String.format('%s [%s] %s', res.grouphash ?
+					String.format('[%s]', subs_info[res.grouphash]?.name || (subs_info[res.grouphash]?.order ?
+					_('Group ') + subs_info[res.grouphash].order : res.grouphash)) : '',
+					res.type, res.label || (stubValidator.apply('ip6addr', res.address || '') ?
 					String.format('[%s]', res.address) : res.address) + ':' + res.port);
 		});
 
