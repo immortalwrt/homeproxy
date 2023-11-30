@@ -145,7 +145,7 @@ msgstr "Android"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:797
 msgid "Any"
-msgstr ""
+msgstr "任何"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1161
 msgid "Append self-signed certificate"
@@ -1839,7 +1839,7 @@ msgstr "系统"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:621
 #: htdocs/luci-static/resources/view/homeproxy/client.js:816
 msgid "System DNS"
-msgstr ""
+msgstr "系统 DNS"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:447
 #: htdocs/luci-static/resources/view/homeproxy/client.js:712
@@ -1968,6 +1968,11 @@ msgid ""
 "source_ip_cidr)</code> &&<br/><code>(source_port || source_port_range)</"
 "code> &&<br/><code>other fields</code>."
 msgstr ""
+"默认规则使用以下匹配逻辑：<br/><code>(domain || domain_suffix || "
+"domain_keyword || domain_regex || geosite)</code> &&<br/><code>(port || "
+"port_range)</code> &&<br/><code>(source_geoip || source_ip_cidr)</code> "
+"&&<br/><code>(source_port || source_port_range)</code> &&<br/><code>other "
+"fields</code>."
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:646
 msgid ""
@@ -2077,6 +2082,7 @@ msgid ""
 "To enable Tun support, you need to install <code>ip-full</code> and "
 "<code>kmod-tun</code>"
 msgstr ""
+"要启用 Tun 支持，您需要安装 <code>ip-full</code> 和 <code>kmod-tun</code>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:888
 #: htdocs/luci-static/resources/view/homeproxy/server.js:317
@@ -2427,14 +2433,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:268
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid ""
-#~ "The default rule uses the following matching logic:<br/><code>(domain || "
-#~ "domain_suffix || domain_keyword || domain_regex || geosite || ip_cidr)</"
-#~ "code> &&<br/><code>(source_geoip || source_ip_cidr)</code> &&<br/"
-#~ "><code>other fields</code>."
-#~ msgstr ""
-#~ "默认规则使用以下匹配逻辑：<br/><br/><code>(domain || domain_suffix || "
-#~ "domain_keyword || domain_regex || geosite || ip_cidr)</code> &&<br/"
-#~ "><code>(source_geoip || source_ip_cidr)</code> &&<br/><code>其他字段</"
-#~ "code>。"
