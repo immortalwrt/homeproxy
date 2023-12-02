@@ -319,8 +319,12 @@ return view.extend({
 		o.value('', _('None'));
 		o.value('grpc', _('gRPC'));
 		o.value('http', _('HTTP'));
+		o.value('httpupgrade', _('HTTPUpgrade'));
 		o.value('quic', _('QUIC'));
 		o.value('ws', _('WebSocket'));
+		o.depends('type', 'trojan');
+		o.depends('type', 'vless');
+		o.depends('type', 'vmess');
 		o.onchange = function(ev, section_id, value) {
 			var desc = this.map.findElement('id', 'cbid.homeproxy.%s.transport'.format(section_id)).nextElementSibling;
 			if (value === 'http')
@@ -338,9 +342,6 @@ return view.extend({
 				this.map.findElement('id', 'cbid.homeproxy.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
 					_('If the transport doesn\'t see any activity after a duration of this time (in seconds), it pings the client to check if the connection is still active.');
 		}
-		o.depends('type', 'trojan');
-		o.depends('type', 'vless');
-		o.depends('type', 'vmess');
 		o.modalonly = true;
 
 		/* gRPC config start */
@@ -356,8 +357,14 @@ return view.extend({
 		o.depends('transport', 'http');
 		o.modalonly = true;
 
+		o = s.option(form.Value, 'httpupgrade_host', _('Host'));
+		o.datatype = 'hostname';
+		o.depends('transport', 'httpupgrade');
+		o.modalonly = true;
+
 		o = s.option(form.Value, 'http_path', _('Path'));
 		o.depends('transport', 'http');
+		o.depends('transport', 'httpupgrade');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'http_method', _('Method'));

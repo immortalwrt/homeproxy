@@ -824,6 +824,7 @@ return view.extend({
 		so.value('', _('None'));
 		so.value('grpc', _('gRPC'));
 		so.value('http', _('HTTP'));
+		so.value('httpupgrade', _('HTTPUpgrade'));
 		so.value('quic', _('QUIC'));
 		so.value('ws', _('WebSocket'));
 		so.depends('type', 'trojan');
@@ -871,14 +872,20 @@ return view.extend({
 		}
 		/* gRPC config end */
 
-		/* HTTP config start */
+		/* HTTP(Upgrade) config start */
 		so = ss.option(form.DynamicList, 'http_host', _('Host'));
 		so.datatype = 'hostname';
 		so.depends('transport', 'http');
 		so.modalonly = true;
 
+		so = ss.option(form.Value, 'httpupgrade_host', _('Host'));
+		so.datatype = 'hostname';
+		so.depends('transport', 'httpupgrade');
+		so.modalonly = true;
+
 		so = ss.option(form.Value, 'http_path', _('Path'));
 		so.depends('transport', 'http');
+		so.depends('transport', 'httpupgrade');
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'http_method', _('Method'));

@@ -128,7 +128,7 @@ function generate_outbound(node) {
 		server_port: strToInt(node.port),
 
 		username: (node.type !== 'ssh') ? node.username : null,
-		user: (node.tpye === 'ssh') ? node.username : null,
+		user: (node.type === 'ssh') ? node.username : null,
 		password: node.password,
 
 		/* Direct */
@@ -217,7 +217,7 @@ function generate_outbound(node) {
 		} : null,
 		transport: !isEmpty(node.transport) ? {
 			type: node.transport,
-			host: node.http_host,
+			host: node.http_host || node.httpupgrade_host,
 			path: node.http_path || node.ws_path,
 			headers: node.ws_host ? {
 				Host: node.ws_host

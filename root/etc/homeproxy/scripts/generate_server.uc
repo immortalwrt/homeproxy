@@ -143,7 +143,7 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 
 		transport: !isEmpty(cfg.transport) ? {
 			type: cfg.transport,
-			host: cfg.http_host,
+			host: cfg.http_host || cfg.httpupgrade_host,
 			path: cfg.http_path || cfg.ws_path,
 			headers: cfg.ws_host ? {
 				Host: cfg.ws_host
