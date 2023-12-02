@@ -152,12 +152,9 @@ function parse_uri(uri) {
 			url = parseURL('http://' + uri[1]);
 			params = url.searchParams;
 
-			/* userpass auth is not supported by sing-box */
-			if (!sing_features.with_quic || (params.password)) {
+			if (!sing_features.with_quic) {
 				log(sprintf('Skipping unsupported %s node: %s.', 'hysteria2', urldecode(url.hash) || url.hostname));
-				if (!sing_features.with_quic)
-					log(sprintf('Please rebuild sing-box with %s support!', 'QUIC'));
-
+				log(sprintf('Please rebuild sing-box with %s support!', 'QUIC'));
 				return null;
 			}
 
@@ -166,7 +163,9 @@ function parse_uri(uri) {
 				type: 'hysteria2',
 				address: url.hostname,
 				port: url.port,
-				password: url.password ? urldecode(url.password) : null,
+				password: url.username ? (
+					urldecode(url.username + (url.password ? (':' + url.password) : ''))
+				) : null,
 				hysteria_obfs_type: params.obfs,
 				hysteria_obfs_password: params['obfs-password'],
 				tls: '1',

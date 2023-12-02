@@ -73,8 +73,7 @@ function parseShareLink(uri, features) {
 			var url = new URL('http://' + uri[1]);
 			var params = url.searchParams;
 
-			/* userpass auth is not supported by sing-box */
-			if (!features.with_quic || url.password)
+			if (!features.with_quic)
 				return null;
 
 			config = {
@@ -82,7 +81,9 @@ function parseShareLink(uri, features) {
 				type: 'hysteria2',
 				address: url.hostname,
 				port: url.port || '80',
-				password: url.username ? decodeURIComponent(url.username) : null,
+				password: url.username ? (
+					decodeURIComponent(url.username + (url.password ? (':' + url.password) : ''))
+				) : null,
 				hysteria_obfs_type: params.get('obfs'),
 				hysteria_obfs_password: params.get('obfs-password'),
 				tls: '1',

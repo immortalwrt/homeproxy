@@ -351,7 +351,7 @@ return view.extend({
 
 		/* gRPC config end */
 
-		/* HTTP config start */
+		/* HTTP(Upgrade) config start */
 		o = s.option(form.DynamicList, 'http_host', _('Host'));
 		o.datatype = 'hostname';
 		o.depends('transport', 'http');
