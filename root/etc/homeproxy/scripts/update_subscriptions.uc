@@ -240,36 +240,6 @@ function parse_uri(uri) {
 			};
 
 			break;
-		case 'ssr':
-			/* https://coderschool.cn/2498.html */
-			uri = split(decodeBase64Str(uri[1]), '/');
-			if (!uri)
-				return null;
-
-			const userinfo = split(uri[0], ':');
-			params = urldecode_params(uri[1]);
-
-			if (!sing_features.with_shadowsocksr) {
-				log(sprintf('Skipping unsupported %s node: %s.', 'ShadowsocksR', decodeBase64Str(params.remarks) || userinfo[1]));
-				log(sprintf('Please rebuild sing-box with %s support!', 'ShadowsocksR'));
-
-				return null;
-			}
-
-			config = {
-				label: decodeBase64Str(params.remarks),
-				type: 'shadowsocksr',
-				address: userinfo[0],
-				port: userinfo[1],
-				shadowsocksr_encrypt_method: userinfo[3],
-				password: decodeBase64Str(userinfo[5]),
-				shadowsocksr_protocol: userinfo[2],
-				shadowsocksr_protocol_param: decodeBase64Str(params.protoparam),
-				shadowsocksr_obfs: userinfo[4],
-				shadowsocksr_obfs_param: decodeBase64Str(params.obfsparam)
-			};
-
-			break;
 		case 'trojan':
 			/* https://p4gefau1t.github.io/trojan-go/developer/url/ */
 			url = parseURL('http://' + uri[1]);

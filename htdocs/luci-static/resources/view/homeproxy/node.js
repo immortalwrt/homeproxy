@@ -170,34 +170,6 @@ function parseShareLink(uri, features) {
 			}
 
 			break;
-		case 'ssr':
-			/* https://coderschool.cn/2498.html */
-			uri = hp.decodeBase64Str(uri[1]).split('/');
-			var userinfo = uri[0].split(':')
-
-			/* Check if method and password exist */
-			if (!features.with_shadowsocksr || !userinfo[3] || !userinfo[5])
-				return null;
-
-			var params = new URLSearchParams(uri[1]);
-			var protoparam = hp.decodeBase64Str(params.get('protoparam'));
-			var obfsparam = hp.decodeBase64Str(params.get('obfsparam'));
-			var remarks = hp.decodeBase64Str(params.get('remarks'));
-
-			config = {
-				label: remarks,
-				type: 'shadowsocksr',
-				address: userinfo[0],
-				port: userinfo[1],
-				shadowsocksr_encrypt_method: userinfo[3],
-				password: hp.decodeBase64Str(userinfo[5]),
-				shadowsocksr_protocol: userinfo[2],
-				shadowsocksr_protocol_param: protoparam,
-				shadowsocksr_obfs: userinfo[4],
-				shadowsocksr_obfs_param: obfsparam
-			};
-
-			break;
 		case 'trojan':
 			/* https://p4gefau1t.github.io/trojan-go/developer/url/ */
 			var url = new URL('http://' + uri[1]);
@@ -541,8 +513,6 @@ return view.extend({
 			so.value('hysteria2', _('Hysteria2'));
 		}
 		so.value('shadowsocks', _('Shadowsocks'));
-		if (features.with_shadowsocksr)
-			so.value('shadowsocksr', _('ShadowsocksR'));
 		so.value('shadowtls', _('ShadowTLS'));
 		so.value('socks', _('Socks'));
 		so.value('trojan', _('Trojan'));
@@ -574,7 +544,6 @@ return view.extend({
 		so.depends('type', 'http');
 		so.depends('type', 'hysteria2');
 		so.depends('type', 'shadowsocks');
-		so.depends('type', 'shadowsocksr');
 		so.depends('type', 'trojan');
 		so.depends('type', 'tuic');
 		so.depends({'type': 'shadowtls', 'shadowtls_version': '2'});
@@ -583,7 +552,7 @@ return view.extend({
 		so.validate = function(section_id, value) {
 			if (section_id) {
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
-				var required_type = [ 'shadowsocks', 'shadowsocksr', 'shadowtls', 'trojan' ];
+				var required_type = [ 'shadowsocks', 'shadowtls', 'trojan' ];
 
 				if (required_type.includes(type)) {
 					if (type === 'shadowsocks') {
@@ -714,70 +683,6 @@ return view.extend({
 		so.depends('shadowsocks_plugin', 'v2ray-plugin');
 		so.modalonly = true;
 		/* Shadowsocks config end */
-
-		/* ShadowsocksR config start */
-		so = ss.option(form.ListValue, 'shadowsocksr_encrypt_method', _('Encrypt method'));
-		so.value('none');
-		so.value('table');
-		so.value('rc4');
-		so.value('rc4-md5-6');
-		so.value('rc4-md5');
-		so.value('aes-128-cfb');
-		so.value('aes-192-cfb');
-		so.value('aes-256-cfb');
-		so.value('aes-128-ctr');
-		so.value('aes-192-ctr');
-		so.value('aes-256-ctr');
-		so.value('bf-cfb');
-		so.value('camellia-128-cfb');
-		so.value('camellia-192-cfb');
-		so.value('camellia-256-cfb');
-		so.value('cast5-cfb');
-		so.value('des-cfb');
-		so.value('idea-cfb');
-		so.value('rc2-cfb');
-		so.value('seed-cfb');
-		so.value('salsa20');
-		so.value('chacha20');
-		so.value('chacha20-ietf');
-		so.depends('type', 'shadowsocksr');
-		so.rmempty = false;
-		so.modalonly = true;
-
-		so = ss.option(form.ListValue, 'shadowsocksr_protocol', _('Protocol'));
-		so.value('origin');
-		so.value('verify_deflate');
-		so.value('auth_sha1_v4');
-		so.value('auth_aes128_sha1');
-		so.value('auth_aes128_md5');
-		so.value('auth_chain_a');
-		so.value('auth_chain_b');
-		so.value('auth_chain_c');
-		so.value('auth_chain_d');
-		so.value('auth_chain_e');
-		so.value('auth_chain_f');
-		so.depends('type', 'shadowsocksr');
-		so.rmempty = false;
-		so.modalonly = true;
-
-		so = ss.option(form.Value, 'shadowsocksr_protocol_param', _('Protocol param'));
-		so.depends('type', 'shadowsocksr');
-		so.modalonly = true;
-
-		so = ss.option(form.ListValue, 'shadowsocksr_obfs', _('Obfs'));
-		so.value('plain');
-		so.value('http_simple');
-		so.value('http_post');
-		so.value('random_head');
-		so.value('tls1.2_ticket_auth');
-		so.depends('type', 'shadowsocksr');
-		so.rmempty = false;
-		so.modalonly = true;
-
-		so = ss.option(form.Value, 'shadowsocksr_obfs_param', _('Obfs param'));
-		so.depends('type', 'shadowsocksr');
-		so.modalonly = true;
-		/* ShadowsocksR config end */
 
 		/* ShadowTLS config */
 		so = ss.option(form.ListValue, 'shadowtls_version', _('ShadowTLS version'));

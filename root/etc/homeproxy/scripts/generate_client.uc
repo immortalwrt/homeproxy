@@ -146,14 +146,9 @@ function generate_outbound(node) {
 		recv_window: strToInt(node.hysteria_revc_window),
 		disable_mtu_discovery: strToBool(node.hysteria_disable_mtu_discovery),
 		/* Shadowsocks */
-		method: node.shadowsocks_encrypt_method || node.shadowsocksr_encrypt_method,
+		method: node.shadowsocks_encrypt_method,
 		plugin: node.shadowsocks_plugin,
 		plugin_opts: node.shadowsocks_plugin_opts,
-		/* ShadowsocksR */
-		protocol: node.shadowsocksr_protocol,
-		protocol_param: node.shadowsocksr_protocol_param,
-		obfs: node.shadowsocksr_obfs,
-		obfs_param: node.shadowsocksr_obfs_param,
 		/* ShadowTLS / Socks */
 		version: (node.type === 'shadowtls') ? strToInt(node.shadowtls_version) : ((node.type === 'socks') ? node.socks_version : null),
 		/* Tuic */
