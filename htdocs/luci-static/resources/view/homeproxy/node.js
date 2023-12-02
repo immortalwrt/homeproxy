@@ -240,7 +240,7 @@ function parseShareLink(uri, features) {
 			/* Unsupported protocol */
 			if (params.get('type') === 'kcp')
 				return null;
-			else if (params.get('type') === 'quic' && ((params.get('quicSecurity') && params.get('quicSecurity') !== 'none' || !features.with_quic)))
+			else if (params.get('type') === 'quic' && ((params.get('quicSecurity') && params.get('quicSecurity') !== 'none') || !features.with_quic))
 				return null;
 			/* Check if uuid and type exist */
 			if (!url.username || !params.get('type'))

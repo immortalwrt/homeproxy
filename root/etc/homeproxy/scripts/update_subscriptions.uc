@@ -308,7 +308,7 @@ function parse_uri(uri) {
 			if (params.type === 'kcp') {
 				log(sprintf('Skipping sunsupported %s node: %s.', 'VLESS', urldecode(url.hash) || url.hostname));
 				return null;
-			} else if (params.type === 'quic' && (params.quicSecurity && params.quicSecurity !== 'none' || !sing_features.with_quic)) {
+			} else if (params.type === 'quic' && ((params.quicSecurity && params.quicSecurity !== 'none') || !sing_features.with_quic)) {
 				log(sprintf('Skipping sunsupported %s node: %s.', 'VLESS', urldecode(url.hash) || url.hostname));
 				if (!sing_features.with_quic)
 					log(sprintf('Please rebuild sing-box with %s support!', 'QUIC'));
