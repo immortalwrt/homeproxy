@@ -127,7 +127,8 @@ function generate_outbound(node) {
 		server: node.address,
 		server_port: strToInt(node.port),
 
-		username: node.username,
+		username: (node.type !== 'ssh') ? node.username : null,
+		user: (node.tpye === 'ssh') ? node.username : null,
 		password: node.password,
 
 		/* Direct */
@@ -151,6 +152,12 @@ function generate_outbound(node) {
 		plugin_opts: node.shadowsocks_plugin_opts,
 		/* ShadowTLS / Socks */
 		version: (node.type === 'shadowtls') ? strToInt(node.shadowtls_version) : ((node.type === 'socks') ? node.socks_version : null),
+		/* SSH */
+		client_version: node.ssh_client_version,
+		host_key: node.ssh_host_key,
+		host_key_algorithms: node.ssh_host_key_algo,
+		private_key: node.ssh_priv_key,
+		private_key_passphrase: node.ssh_priv_key_pp,
 		/* Tuic */
 		uuid: node.uuid,
 		congestion_control: node.tuic_congestion_control,
