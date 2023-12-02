@@ -414,6 +414,41 @@ return view.extend({
 
 		/* Transport config end */
 
+		/* Mux config start */
+		o = s.option(form.Flag, 'multiplex', _('Multiplex'));
+		o.default = o.disabled;
+		o.depends('type', 'shadowsocks');
+		o.depends('type', 'trojan');
+		o.depends('type', 'vless');
+		o.depends('type', 'vmess');
+		o.modalonly = true;
+
+		o = s.option(form.Flag, 'multiplex_padding', _('Enable padding'));
+		o.default = o.disabled;
+		o.depends('multiplex', '1');
+		o.modalonly = true;
+
+		if (features.hp_has_tcp_brutal) {
+			o = s.option(form.Flag, 'multiplex_brutal', _('Enable TCP Brutal'),
+				_('Enable TCP Brutal congestion control algorithm'));
+			o.default = o.disabled;
+			o.depends('multiplex', '1');
+			o.modalonly = true;
+
+			o = s.option(form.Value, 'multiplex_brutal_down', _('Download bandwidth'),
+				_('Download bandwidth in Mbps.'));
+			o.datatype = 'uinteger';
+			o.depends('multiplex_brutal', '1');
+			o.modalonly = true;
+
+			o = s.option(form.Value, 'multiplex_brutal_up', _('Upload bandwidth'),
+				_('Upload bandwidth in Mbps.'));
+			o.datatype = 'uinteger';
+			o.depends('multiplex_brutal', '1');
+			o.modalonly = true;
+		}
+		/* Mux config end */
+
 		/* TLS config start */
 		o = s.option(form.Flag, 'tls', _('TLS'));
 		o.default = o.disabled;

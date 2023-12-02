@@ -1026,6 +1026,24 @@ return view.extend({
 		so.default = so.disabled;
 		so.depends('multiplex', '1');
 		so.modalonly = true;
+
+		so = ss.option(form.Flag, 'multiplex_brutal', _('Enable TCP Brutal'),
+			_('Enable TCP Brutal congestion control algorithm'));
+		so.default = so.disabled;
+		so.depends('multiplex', '1');
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'multiplex_brutal_down', _('Download bandwidth'),
+			_('Download bandwidth in Mbps.'));
+		so.datatype = 'uinteger';
+		so.depends('multiplex_brutal', '1');
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'multiplex_brutal_up', _('Upload bandwidth'),
+			_('Upload bandwidth in Mbps.'));
+		so.datatype = 'uinteger';
+		so.depends('multiplex_brutal', '1');
+		so.modalonly = true;
 		/* Mux config end */
 
 		/* TLS config start */
