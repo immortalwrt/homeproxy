@@ -891,11 +891,8 @@ msgstr ""
 msgid "IP CIDR"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:718
-msgid "IP Version"
-msgstr ""
-
 #: htdocs/luci-static/resources/view/homeproxy/client.js:436
+#: htdocs/luci-static/resources/view/homeproxy/client.js:718
 msgid "IP version"
 msgstr ""
 
