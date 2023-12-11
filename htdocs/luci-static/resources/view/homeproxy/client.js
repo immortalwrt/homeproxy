@@ -45,6 +45,13 @@ var callGetAPISecret = rpc.declare({
 	expect: { '': {} }
 });
 
+var callResVersion = rpc.declare({
+	object: 'luci.homeproxy',
+	method: 'resources_get_version',
+	params: ['type', 'repo'],
+	expect: { '': {} }
+});
+
 function getServiceStatus() {
 	return L.resolveDefault(callServiceList('homeproxy'), {}).then((res) => {
 		var isRunning = false;
@@ -890,17 +897,36 @@ return view.extend({
 			return uci.set(data[0], section_id, 'nginx_support', features.hp_has_nginx ? value : null);
 		}
 
-		so = ss.option(form.ListValue, 'dashboard_repo', _('Select Clash Dashboard'));
-		so.value('', _('Use Online Dashboard'));
-		so.value('metacubex/yacd-meta', _('yacd-meta'));
-		so.value('metacubex/metacubexd', _('metacubexd'));
+		so = ss.option(form.ListValue, 'dashboard_repo', _('Select Clash Dashboard'),
+			_('If the selected dashboard is <code>') + _('Not Installed') + _('</code>.<br/> you will need to check update via <code>') +
+			_('Service Status') + _('</code> » <code>') + _('Clash dashboard version') + _('</code>.'));
+		so.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			let repos = [
+				['metacubex/yacd-meta', _('yacd-meta')],
+				['metacubex/metacubexd', _('metacubexd')]
+			];
+
+			this.value('', _('Use Online Dashboard'));
+			repos.forEach((repo) => {
+				callResVersion('clash_dashboard', repo[0]).then((res) => {
+					this.value(repo[0], repo[1] + ' - ' + (res.error ? _('Not Installed') : _('Installed')));
+				});
+			});
+
+			return this.super('load', section_id);
+		}
 		so.default = '';
-		if (features.hp_has_nginx && nginx_support === '1') {
-			so.description = _('The current API URL is <code>%s</code>')
-				.format('https://' + window.location.hostname + '/homeproxy/');
-		} else {
-			so.description = _('The current API URL is <code>%s</code>')
-				.format('http://' + window.location.hostname + ':' + api_port);
+		if (api_secret) {
+			if (features.hp_has_nginx && nginx_support === '1') {
+				so.description = _('The current API URL is <code>%s</code>')
+					.format('https://' + window.location.hostname + '/homeproxy/');
+			} else {
+				so.description = _('The current API URL is <code>%s</code>')
+					.format('http://' + window.location.hostname + ':' + api_port);
+			}
 		}
 
 		so = ss.option(form.Value, 'clash_api_port', _('Port'));
