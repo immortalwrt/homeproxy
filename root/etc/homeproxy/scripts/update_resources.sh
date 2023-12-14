@@ -85,7 +85,8 @@ check_clash_dashboard_update() {
 
 	mv -f "$RUN_DIR/$dashtype.zip" "$RESOURCES_DIR/${dashrepo//\//_}.zip"
 	touch "$RESOURCES_DIR/$dashtype.ver"
-	json_load_file "$RESOURCES_DIR/$dashtype.ver" || json_init
+	json_init
+	json_load_file "$RESOURCES_DIR/$dashtype.ver"
 	json_select "$dashrepoid" 2>/dev/null || json_add_object "$dashrepoid"
 	json_add_string repo "$dashrepo"
 	json_add_string version "$dashdata_ver"
