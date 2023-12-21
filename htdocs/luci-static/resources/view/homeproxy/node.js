@@ -944,6 +944,12 @@ return view.extend({
 		/* Transport config end */
 
 		/* Wireguard config start */
+		so = ss.option(form.Flag, 'wireguard_gso', _('Generic segmentation offload'));
+		so.default = so.disabled;
+		so.depends('type', 'wireguard');
+		so.rmempty = false;
+		so.modalonly = true;
+
 		so = ss.option(form.DynamicList, 'wireguard_local_address', _('Local address'),
 			_('List of IP (v4 or v6) addresses prefixes to be assigned to the interface.'));
 		so.datatype = 'cidr';
