@@ -430,9 +430,9 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'mode', _('Mode'),
 			_('The default rule uses the following matching logic:<br/>' +
-			'<code>(domain || domain_suffix || domain_keyword || domain_regex || geosite || geoip || ip_cidr)</code> &&<br/>' +
+			'<code>(domain || domain_suffix || domain_keyword || domain_regex || ip_cidr || ip_is_private)</code> &&<br/>' +
 			'<code>(port || port_range)</code> &&<br/>' +
-			'<code>(source_geoip || source_ip_cidr)</code> &&<br/>' +
+			'<code>(source_ip_cidr || source_ip_is_private)</code> &&<br/>' +
 			'<code>(source_port || source_port_range)</code> &&<br/>' +
 			'<code>other fields</code>.'));
 		so.value('default', _('Default'));
@@ -476,26 +476,26 @@ return view.extend({
 			_('Match domain using regular expression.'));
 		so.modalonly = true;
 
-		so = ss.option(form.DynamicList, 'geosite', _('Geosite'),
-			_('Match geosite.'));
-		so.modalonly = true;
-
-		so = ss.option(form.DynamicList, 'source_geoip', _('Source GeoIP'),
-			_('Match source GeoIP.'));
-		so.modalonly = true;
-
-		so = ss.option(form.DynamicList, 'geoip', _('GeoIP'),
-			_('Match GeoIP.'));
-		so.modalonly = true;
-
 		so = ss.option(form.DynamicList, 'source_ip_cidr', _('Source IP CIDR'),
 			_('Match source IP CIDR.'));
 		so.datatype = 'or(cidr, ipaddr)';
 		so.modalonly = true;
 
+		so = ss.option(form.Flag, 'source_ip_is_private', _('Source IP is Private'),
+			_('Match non-public source IP.'));
+		so.default = so.disabled;
+		so.rmempty = false;
+		so.modalonly = true;
+
 		so = ss.option(form.DynamicList, 'ip_cidr', _('IP CIDR'),
 			_('Match IP CIDR.'));
 		so.datatype = 'or(cidr, ipaddr)';
+		so.modalonly = true;
+
+		so = ss.option(form.Flag, 'ip_is_private', _('IP is Private'),
+			_('Match non-public IP.'));
+		so.default = so.disabled;
+		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.DynamicList, 'source_port', _('Source port'),
@@ -528,6 +528,28 @@ return view.extend({
 
 		so = ss.option(form.DynamicList, 'user', _('User'),
 			_('Match user name.'));
+		so.modalonly = true;
+
+		so = ss.option(form.MultiValue, 'rule_set', _('Ruleset'),
+			_('Match Rule Set.'));
+		so.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			this.value('null-rule', _('NULL'));
+			uci.sections(data[0], 'ruleset', (res) => {
+				if (res.enabled === '1')
+					this.value(res['.name'], res.label);
+			});
+
+			return this.super('load', section_id);
+		}
+		so.modalonly = true;
+
+		so = ss.option(form.Flag, 'rule_set_ipcidr_match_source', _('Ruleset ipcidr match source'),
+			_('Make <code>ipcidr</code> in rule sets match the source IP.'));
+		so.default = so.disabled;
+		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'invert', _('Invert'),
@@ -712,9 +734,9 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'mode', _('Mode'),
 			_('The default rule uses the following matching logic:<br/>' +
-			'<code>(domain || domain_suffix || domain_keyword || domain_regex || geosite)</code> &&<br/>' +
+			'<code>(domain || domain_suffix || domain_keyword || domain_regex)</code> &&<br/>' +
 			'<code>(port || port_range)</code> &&<br/>' +
-			'<code>(source_geoip || source_ip_cidr)</code> &&<br/>' +
+			'<code>(source_ip_cidr || source_ip_is_private)</code> &&<br/>' +
 			'<code>(source_port || source_port_range)</code> &&<br/>' +
 			'<code>other fields</code>.'));
 		so.value('default', _('Default'));
@@ -762,10 +784,6 @@ return view.extend({
 			_('Match domain using regular expression.'));
 		so.modalonly = true;
 
-		so = ss.option(form.DynamicList, 'geosite', _('Geosite'),
-			_('Match geosite.'));
-		so.modalonly = true;
-
 		so = ss.option(form.DynamicList, 'port', _('Port'),
 			_('Match port.'));
 		so.datatype = 'port';
@@ -776,13 +794,15 @@ return view.extend({
 		so.validate = validatePortRange;
 		so.modalonly = true;
 
-		so = ss.option(form.DynamicList, 'source_geoip', _('Source GeoIP'),
-			_('Match source GeoIP.'));
-		so.modalonly = true;
-
 		so = ss.option(form.DynamicList, 'source_ip_cidr', _('Source IP CIDR'),
 			_('Match source IP CIDR.'));
 		so.datatype = 'or(cidr, ipaddr)';
+		so.modalonly = true;
+
+		so = ss.option(form.Flag, 'source_ip_is_private', _('Source IP is Private'),
+			_('Match non-public source IP.'));
+		so.default = so.disabled;
+		so.rmempty = false;
 		so.modalonly = true;
 
 		so = ss.option(form.DynamicList, 'source_port', _('Source port'),
@@ -805,6 +825,22 @@ return view.extend({
 
 		so = ss.option(form.DynamicList, 'user', _('User'),
 			_('Match user name.'));
+		so.modalonly = true;
+
+		so = ss.option(form.MultiValue, 'rule_set', _('Ruleset'),
+			_('Match Rule Set.'));
+		so.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			this.value('null-rule', _('NULL'));
+			uci.sections(data[0], 'ruleset', (res) => {
+				if (res.enabled === '1')
+					this.value(res['.name'], res.label);
+			});
+
+			return this.super('load', section_id);
+		}
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'invert', _('Invert'),

@@ -299,6 +299,22 @@ function get_resolver(cfg) {
 	else
 		return 'cfg-' + cfg + '-dns';
 }
+
+function get_ruleset(cfg) {
+	if (isEmpty(cfg))
+		return null;
+
+	if (type(cfg) === 'array') {
+		if ('null-rule' in cfg)
+			return null;
+
+		let rules = [];
+		for (let i in cfg)
+			push(rules, get_ruleset(i));
+		return rules;
+	} else
+		return 'cfg-' + cfg + '-rule';
+}
 /* Config helper end */
 
 const config = {};
@@ -409,16 +425,16 @@ if (!isEmpty(main_node)) {
 			domain_suffix: cfg.domain_suffix,
 			domain_keyword: cfg.domain_keyword,
 			domain_regex: cfg.domain_regex,
-			geosite: cfg.geosite,
 			port: parse_port(cfg.port),
 			port_range: cfg.port_range,
-			source_geoip: cfg.source_geoip,
 			source_ip_cidr: cfg.source_ip_cidr,
+			source_ip_is_private: (cfg.source_ip_is_private === '1') || null,
 			source_port: parse_port(cfg.source_port),
 			source_port_range: cfg.source_port_range,
 			process_name: cfg.process_name,
 			process_path: cfg.process_path,
 			user: cfg.user,
+			rule_set: get_ruleset(cfg.rule_set),
 			invert: (cfg.invert === '1') || null,
 			outbound: get_outbound(cfg.outbound),
 			server: get_resolver(cfg.server),
@@ -538,16 +554,6 @@ if (!isEmpty(main_node)) {
 /* Routing rules start */
 /* Default settings */
 config.route = {
-	geoip: !isEmpty(default_outbound) ? {
-		path: HP_DIR + '/resources/geoip.db',
-		download_url: 'https://github.com/1715173329/sing-geoip/releases/latest/download/geoip.db',
-		download_detour: get_outbound(default_outbound)
-	} : null,
-	geosite: !isEmpty(default_outbound) ? {
-		path: HP_DIR + '/resources/geosite.db',
-		download_url: 'https://github.com/1715173329/sing-geosite/releases/latest/download/geosite.db',
-		download_detour: get_outbound(default_outbound)
-	} : null,
 	rules: [
 		{
 			inbound: 'dns-in',
@@ -593,11 +599,10 @@ if (!isEmpty(main_node)) {
 			domain_suffix: cfg.domain_suffix,
 			domain_keyword: cfg.domain_keyword,
 			domain_regex: cfg.domain_regex,
-			geosite: cfg.geosite,
-			source_geoip: cfg.source_geoip,
-			geoip: cfg.geoip,
 			source_ip_cidr: cfg.source_ip_cidr,
+			source_ip_is_private: (cfg.source_ip_is_private === '1') || null,
 			ip_cidr: cfg.ip_cidr,
+			ip_is_private: (cfg.ip_is_private === '1') || null,
 			source_port: parse_port(cfg.source_port),
 			source_port_range: cfg.source_port_range,
 			port: parse_port(cfg.port),
@@ -605,6 +610,8 @@ if (!isEmpty(main_node)) {
 			process_name: cfg.process_name,
 			process_path: cfg.process_path,
 			user: cfg.user,
+			rule_set: get_ruleset(cfg.rule_set),
+			rule_set_ipcidr_match_source: (cfg.rule_set_ipcidr_match_source === '1') || null,
 			invert: (cfg.invert === '1') || null,
 			outbound: get_outbound(cfg.outbound)
 		});
@@ -621,7 +628,7 @@ if (routing_mode === 'custom') {
 
 		push(config.route.rule_set, {
 			type: cfg.type,
-			tag: cfg['.name'],
+			tag: 'cfg-' + cfg['.name'] + '-rule',
 			format: cfg.format,
 			path: cfg.path,
 			url: cfg.url,
