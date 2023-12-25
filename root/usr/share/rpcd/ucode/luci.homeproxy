@@ -190,12 +190,11 @@ const methods = {
 		args: { type: 'type', repo: 'repo' },
 		call: function(req) {
 			const versions = trim(readfile(`${HP_DIR}/resources/${req.args?.type}.ver`));
-			if (req.args?.repo) {
+			if (req.args?.repo && versions) {
 				const vers_arr = values(json(versions));
 				for (obj in vers_arr) {
-					if (obj.repo === req.args?.repo) {
+					if (obj.repo === req.args?.repo)
 						return { version: obj.version, error: 0 };
-					}
 				}
 				return { version: '', error: 1 };
 			} else
