@@ -71,7 +71,7 @@ start_service() {
 		config_get_bool nginx_support "experimental" "nginx_support" "0"
 		if [ "$clash_api_enabled" = "1" -a "$nginx_support" = "1" ]; then
 			config_get clash_api_port "experimental" "clash_api_port" "9090"
-			[ "$(sed -En "s|^\s*proxy_pass\s+https?://[^:]+:(\d+).*|\1|p" "$APILOCATION_PATH")" = "$clash_api_port" ] || sed -Ei "/proxy_pass/{s|(\bproxy_pass\b)(\s+.+)?|\1 http://localhost:$clash_api_port/;|}" "$APILOCATION_PATH"
+			[ "$(sed -En "s|^\s*proxy_pass\s+https?://[^:]+:(\d+).*|\1|p" "$APILOCATION_PATH")" = "$clash_api_port" ] || sed -Ei "/\bproxy_pass\b/{s|(proxy_pass\s+https?://[^:]+:)(\d+)(.*)|\1$clash_api_port\3|}" "$APILOCATION_PATH"
 			/etc/init.d/nginx reload
 		fi
 

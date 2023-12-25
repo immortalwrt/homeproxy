@@ -6,6 +6,7 @@ location /homeproxy/ {
 	proxy_pass http://localhost:9090/;
 	proxy_redirect default;
 	proxy_set_header Upgrade $http_upgrade;
-	proxy_set_header Connection upgrade;
-	proxy_set_header Connection "keep-alive";
+	proxy_set_header Connection "upgrade";
+	proxy_http_version 1.1;
+	add_header Cache-Control no-cache;
 }
