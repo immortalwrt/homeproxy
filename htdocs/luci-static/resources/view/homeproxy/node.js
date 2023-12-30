@@ -382,6 +382,7 @@ return view.extend({
 
 		o = s.taboption('node', form.SectionValue, '_node', form.GridSection, 'node');
 		ss = o.subsection;
+		var prefmt = { 'prefix': 'node_', 'suffix': '' };
 		ss.addremove = true;
 		ss.rowcolors = true;
 		ss.sortable = true;
@@ -449,13 +450,15 @@ return view.extend({
 				])
 			])
 		}
-		ss.renderSectionAdd = function(extra_class) {
-			var el = form.GridSection.prototype.renderSectionAdd.apply(this, arguments),
+		ss.renderSectionAdd = function(prefmt, extra_class) {
+			var el = form.GridSection.prototype.renderSectionAdd.apply(this, [ extra_class ]),
 				nameEl = el.querySelector('.cbi-section-create-name');
 
 			ui.addValidator(nameEl, 'uciname', true, (v) => {
 				var button = el.querySelector('.cbi-section-create > .cbi-button-add');
 				var uciconfig = this.uciconfig || this.map.config;
+				var prefix = prefmt?.prefix ? prefmt.prefix : '',
+					suffix = prefmt?.suffix ? prefmt.suffix : '';
 
 				if (!v) {
 					button.disabled = true;
@@ -463,6 +466,9 @@ return view.extend({
 				} else if (uci.get(uciconfig, v)) {
 					button.disabled = true;
 					return _('Expecting: %s').format(_('unique UCI identifier'));
+				} else if (uci.get(uciconfig, prefix + v + suffix)) {
+					button.disabled = true;
+					return _('Expecting: %s').format(_('unique label'));
 				} else {
 					button.disabled = null;
 					return true;
@@ -477,6 +483,7 @@ return view.extend({
 
 			return el;
 		}
+		ss.handleAdd = L.bind(hp.handleAdd, this, ss, prefmt);
 		/* Import subscription links end */
 
 		if (routing_mode !== 'custom') {

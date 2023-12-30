@@ -81,13 +81,15 @@ return view.extend({
 		o.rmempty = false;
 
 		s = m.section(form.GridSection, 'server', _('Server settings'));
+		var prefmt = { 'prefix': 'server_', 'suffix': '' };
 		s.addremove = true;
 		s.rowcolors = true;
 		s.sortable = true;
 		s.nodescriptions = true;
 		s.modaltitle = L.bind(hp.loadModalTitle, this, _('Server'), _('Add a server'), data[0]);
 		s.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
-		s.renderSectionAdd = L.bind(hp.renderSectionAdd, this, s);
+		s.renderSectionAdd = L.bind(hp.renderSectionAdd, this, s, prefmt);
+		s.handleAdd = L.bind(hp.handleAdd, this, s, prefmt);
 
 		o = s.option(form.Value, 'label', _('Label'));
 		o.load = L.bind(hp.loadDefaultLabel, this, data[0]);

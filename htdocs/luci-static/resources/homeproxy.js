@@ -191,12 +191,14 @@ return baseclass.extend({
 		return label ? title + ' » ' + label : addtitle;
 	},
 
-	renderSectionAdd: function(section, extra_class) {
+	renderSectionAdd: function(section, prefmt, extra_class) {
 		var el = form.GridSection.prototype.renderSectionAdd.apply(section, [ extra_class ]),
 			nameEl = el.querySelector('.cbi-section-create-name');
 		ui.addValidator(nameEl, 'uciname', true, (v) => {
 			var button = el.querySelector('.cbi-section-create > .cbi-button-add');
 			var uciconfig = section.uciconfig || section.map.config;
+			var prefix = prefmt?.prefix ? prefmt.prefix : '',
+				suffix = prefmt?.suffix ? prefmt.suffix : '';
 
 			if (!v) {
 				button.disabled = true;
@@ -204,6 +206,9 @@ return baseclass.extend({
 			} else if (uci.get(uciconfig, v)) {
 				button.disabled = true;
 				return _('Expecting: %s').format(_('unique UCI identifier'));
+			} else if (uci.get(uciconfig, prefix + v + suffix)) {
+				button.disabled = true;
+				return _('Expecting: %s').format(_('unique label'));
 			} else {
 				button.disabled = null;
 				return true;
@@ -211,6 +216,13 @@ return baseclass.extend({
 		}, 'blur', 'keyup');
 
 		return el;
+	},
+
+	handleAdd: function(section, prefmt, ev, name) {
+		var prefix = prefmt?.prefix ? prefmt.prefix : '',
+			suffix = prefmt?.suffix ? prefmt.suffix : '';
+
+		return form.GridSection.prototype.handleAdd.apply(section, [ ev, prefix + name + suffix ]);
 	},
 
 	uploadCertificate: function(option, type, filename, ev) {
