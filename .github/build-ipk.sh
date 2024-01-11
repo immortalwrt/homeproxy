@@ -3,6 +3,9 @@
 #
 # Copyright (C) 2023 Tianling Shen <cnsztl@immortalwrt.org>
 
+set -o errexit
+set -o pipefail
+
 export PKG_SOURCE_DATE_EPOCH="$(date "+%s")"
 
 BASE_DIR="$(cd "$(dirname $0)"; pwd)"
@@ -54,8 +57,12 @@ cat > "$TEMP_PKG_DIR/CONTROL/control" <<-EOF
 	Description:  The modern ImmortalWrt proxy platform for ARM64/AMD64
 EOF
 
-svn co "https://github.com/openwrt/luci/trunk/modules/luci-base/src" "po2lmo"
+git clone --filter=blob:none --no-checkout "https://github.com/openwrt/luci.git" "po2lmo"
 pushd "po2lmo"
+git config core.sparseCheckout true
+echo "modules/luci-base/src" >> ".git/info/sparse-checkout"
+git checkout
+cd "modules/luci-base/src"
 make po2lmo
 ./po2lmo "$PKG_DIR/po/zh_Hans/homeproxy.po" "$TEMP_PKG_DIR/usr/lib/lua/luci/i18n/homeproxy.zh-cn.lmo"
 popd
