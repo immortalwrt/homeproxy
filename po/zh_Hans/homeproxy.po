@@ -756,7 +756,7 @@ msgstr "游戏模式 MAC 地址"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:267
 #: htdocs/luci-static/resources/view/homeproxy/node.js:947
 msgid "Generic segmentation offload"
-msgstr ""
+msgstr "通用分段卸载（GSO）"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:487
 msgid "GeoIP"
@@ -2477,36 +2477,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:268
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid "360"
-#~ msgstr "360"
-
-#~ msgid "Android"
-#~ msgstr "Android"
-
-#~ msgid "Chrome"
-#~ msgstr "Chrome"
-
-#~ msgid "Edge"
-#~ msgstr "Edge"
-
-#~ msgid "Firefox"
-#~ msgstr "Firefox"
-
-#~ msgid "LWIP"
-#~ msgstr "LWIP"
-
-#~ msgid "QQ"
-#~ msgstr "QQ"
-
-#~ msgid "Random"
-#~ msgstr "随机"
-
-#~ msgid "Randomized"
-#~ msgstr "随机生成"
-
-#~ msgid "Safari"
-#~ msgstr "Safari"
-
-#~ msgid "iOS"
-#~ msgstr "iOS"
