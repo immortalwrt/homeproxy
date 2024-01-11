@@ -1171,21 +1171,21 @@ return view.extend({
 			so = ss.option(form.ListValue, 'tls_utls', _('uTLS fingerprint'),
 				_('uTLS is a fork of "crypto/tls", which provides ClientHello fingerprinting resistance.'));
 			so.value('', _('Disable'));
-			so.value('360', _('360'));
-			so.value('android', _('Android'));
-			so.value('chrome', _('Chrome'));
-			so.value('chrome_psk', _('Chrome PSK'));
-			so.value('chrome_psk_shuffle', _('Chrome PSK Shuffle'));
-			so.value('chrome_padding_psk_shuffle', _('Chrome Padding PSK Shuffle'));
-			so.value('chrome_pq', _('Chrome pq'));
-			so.value('chrome_pq_psk', _('Chrome pq PSK'));
-			so.value('edge', _('Edge'));
-			so.value('firefox', _('Firefox'));
-			so.value('ios', _('iOS'));
-			so.value('qq', _('QQ'));
-			so.value('random', _('Random'));
-			so.value('randomized', _('Randomized'));
-			so.value('safari', _('Safari'));
+			so.value('360');
+			so.value('android');
+			so.value('chrome');
+			so.value('chrome_psk');
+			so.value('chrome_psk_shuffle');
+			so.value('chrome_padding_psk_shuffle');
+			so.value('chrome_pq');
+			so.value('chrome_pq_psk');
+			so.value('edge');
+			so.value('firefox');
+			so.value('ios');
+			so.value('qq');
+			so.value('random');
+			so.value('randomized');
+			so.value('safari');
 			so.depends({'tls': '1', 'type': /^((?!hysteria2?$).)+$/});
 			so.validate = function(section_id, value) {
 				if (section_id) {
