@@ -640,12 +640,14 @@ if (routing_mode === 'custom') {
 /* Routing rules end */
 
 /* Experimental start */
-config.experimental = {
-	cache_file: {
-		enabled: true,
-		path: HP_DIR + '/cache.db'
-	}
-};
+if (routing_mode === 'custom') {
+	config.experimental = {
+		cache_file: {
+			enabled: true,
+			path: HP_DIR + '/cache.db'
+		}
+	};
+}
 /* Experimental end */
 
 system('mkdir -p ' + RUN_DIR);
