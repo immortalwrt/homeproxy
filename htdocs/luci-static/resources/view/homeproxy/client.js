@@ -895,6 +895,92 @@ return view.extend({
 		/* DNS rules end */
 		/* Custom routing settings end */
 
+		/* Rule Set settings start */
+		s.tab('ruleset', _('Rule Set'));
+		o = s.taboption('ruleset', form.SectionValue, '_ruleset', form.GridSection, 'ruleset');
+		o.depends('routing_mode', 'custom');
+
+		ss = o.subsection;
+		ss.addremove = true;
+		ss.rowcolors = true;
+		ss.sortable = true;
+		ss.nodescriptions = true;
+		ss.modaltitle = L.bind(hp.loadModalTitle, this, _('Ruleset'), _('Add a ruleset'), data[0]);
+		ss.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
+		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
+
+		so = ss.option(form.Value, 'label', _('Label'));
+		so.load = L.bind(hp.loadDefaultLabel, this, data[0]);
+		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'ruleset', 'label');
+		so.modalonly = true;
+
+		so = ss.option(form.Flag, 'enabled', _('Enable'));
+		so.default = o.enabled;
+		so.rmempty = false;
+		so.editable = true;
+
+		so = ss.option(form.ListValue, 'type', _('Type'));
+		so.value('local', _('Local'));
+		so.value('remote', _('Remote'));
+		so.default = 'remote';
+		so.rmempty = false;
+
+		so = ss.option(form.ListValue, 'format', _('Format'));
+		so.value('source', _('Source'));
+		so.value('binary', _('Binary'));
+		so.default = 'source';
+		so.rmempty = false;
+
+		so = ss.option(form.Value, 'path', _('Path'));
+		so.datatype = 'file';
+		so.placeholder = '/etc/homeproxy/ruleset/example.json';
+		so.rmempty = false;
+		so.depends('type', 'local');
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'url', _('Ruleset URL'));
+		so.validate = function(section_id, value) {
+			if (section_id && value) {
+				try {
+					var url = new URL(value);
+					if (!url.hostname)
+						return _('Expecting: %s').format(_('valid URL'));
+				}
+				catch(e) {
+					return _('Expecting: %s').format(_('valid URL'));
+				}
+			}
+
+			return true;
+		}
+		so.rmempty = false;
+		so.depends('type', 'remote');
+		so.modalonly = true;
+
+		so = ss.option(form.ListValue, 'outbound', _('Outbound'),
+			_('Tag of the outbound to download rule-set.'));
+		so.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			this.value('direct-out', _('Direct'));
+			uci.sections(data[0], 'routing_node', (res) => {
+				if (res.enabled === '1')
+					this.value(res['.name'], res.label);
+			});
+
+			return this.super('load', section_id);
+		}
+		so.default = 'direct-out';
+		so.rmempty = false;
+		//so.editable = true;
+		so.depends('type', 'remote');
+
+		so = ss.option(form.Value, 'update_interval', _('Update interval'),
+			_('Update interval of Rule Set. <br/><code>1d</code> will be used if empty.'));
+		so.depends('type', 'remote');
+		/* Rule Set settings end */
+
 		/* ACL settings start */
 		s.tab('control', _('Access Control'));
 
