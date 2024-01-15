@@ -534,7 +534,7 @@ return view.extend({
 			delete this.keylist;
 			delete this.vallist;
 
-			this.value('null-rule', _('NULL'));
+			this.value('', _('-- Please choose --'));
 			uci.sections(data[0], 'ruleset', (res) => {
 				if (res.enabled === '1')
 					this.value(res['.name'], res.label);
@@ -831,7 +831,7 @@ return view.extend({
 			delete this.keylist;
 			delete this.vallist;
 
-			this.value('null-rule', _('NULL'));
+			this.value('', _('-- Please choose --'));
 			uci.sections(data[0], 'ruleset', (res) => {
 				if (res.enabled === '1')
 					this.value(res['.name'], res.label);
