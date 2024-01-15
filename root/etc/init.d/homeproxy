@@ -103,6 +103,7 @@ start_service() {
 				no-resolv
 				server=127.0.0.1#$dns_port
 			EOF
+			[ -d "$HP_DIR/ruleset" ] || mkdir -p "$HP_DIR/ruleset"
 			;;
 		esac
 
