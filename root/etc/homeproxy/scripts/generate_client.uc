@@ -209,8 +209,8 @@ function generate_outbound(node) {
 			padding: (node.multiplex_padding === '1'),
 			brutal: (node.multiplex_brutal === '1') ? {
 				enabled: true,
-				up_mbps: node.multiplex_brutal_up,
-				down_mbps: node.multiplex_brutal_down
+				up_mbps: strToInt(node.multiplex_brutal_up),
+				down_mbps: strToInt(node.multiplex_brutal_down)
 			} : null
 		} : null,
 		tls: (node.tls === '1') ? {
