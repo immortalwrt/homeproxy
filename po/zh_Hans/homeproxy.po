@@ -19,7 +19,7 @@ msgstr "移除了 %s 个节点"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:537
 #: htdocs/luci-static/resources/view/homeproxy/client.js:834
 msgid "-- Please choose --"
-msgstr ""
+msgstr "-- 请选择 --"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:442
 msgid "4 or 6. Not limited if empty."
@@ -73,7 +73,7 @@ msgstr "新增路由规则"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:908
 msgid "Add a rule set"
-msgstr ""
+msgstr "新增规则集"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:88
 msgid "Add a server"
@@ -197,7 +197,7 @@ msgstr "自动更新"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1255
 msgid "Auto update subscriptions."
-msgstr ""
+msgstr "自动更新订阅。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:749
 msgid "BBR"
@@ -217,8 +217,8 @@ msgid "Based on google/gvisor."
 msgstr "基于 google/gvisor。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:930
-msgid "Binary"
-msgstr ""
+msgid "Binary file"
+msgstr "二进制文件"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:366
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1000
@@ -749,7 +749,7 @@ msgstr "流控"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:928
 msgid "Format"
-msgstr ""
+msgstr "格式"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:893
 msgid "GET"
@@ -1067,7 +1067,7 @@ msgstr "加载中"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:923
 msgid "Local"
-msgstr ""
+msgstr "本地"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:953
 msgid "Local address"
@@ -1095,7 +1095,7 @@ msgstr "主节点"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:548
 msgid "Make IP CIDR in rule set used to match the source IP."
-msgstr ""
+msgstr "使规则集中的 IP CIDR 用于匹配源 IP。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:614
 msgid ""
@@ -1147,12 +1147,12 @@ msgstr "匹配端口。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:494
 msgid "Match private IP."
-msgstr ""
+msgstr "匹配私有 IP。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:483
 #: htdocs/luci-static/resources/view/homeproxy/client.js:801
 msgid "Match private source IP."
-msgstr ""
+msgstr "匹配私有源 IP。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:520
 #: htdocs/luci-static/resources/view/homeproxy/client.js:817
@@ -1171,7 +1171,7 @@ msgstr "匹配请求类型。"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:532
 #: htdocs/luci-static/resources/view/homeproxy/client.js:829
 msgid "Match rule set."
-msgstr ""
+msgstr "匹配规则集。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:478
 #: htdocs/luci-static/resources/view/homeproxy/client.js:796
@@ -1180,7 +1180,7 @@ msgstr "匹配源 IP CIDR。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:547
 msgid "Match source IP via rule set"
-msgstr ""
+msgstr "通过规则集匹配源 IP"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:505
 #: htdocs/luci-static/resources/view/homeproxy/client.js:812
@@ -1490,7 +1490,7 @@ msgstr "优先 IPv6"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:493
 msgid "Private IP"
-msgstr ""
+msgstr "私有 IP"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:726
 #: htdocs/luci-static/resources/view/homeproxy/node.js:960
@@ -1504,7 +1504,7 @@ msgstr "私钥指纹"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:482
 #: htdocs/luci-static/resources/view/homeproxy/client.js:800
 msgid "Private source IP"
-msgstr ""
+msgstr "私有源 IP"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:519
 #: htdocs/luci-static/resources/view/homeproxy/client.js:816
@@ -1656,7 +1656,7 @@ msgstr "区域 ID"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:924
 msgid "Remote"
-msgstr ""
+msgstr "远程"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1352
 msgid "Remove %s nodes"
@@ -1719,11 +1719,11 @@ msgstr "路由规则"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:899
 #: htdocs/luci-static/resources/view/homeproxy/client.js:908
 msgid "Rule set"
-msgstr ""
+msgstr "规则集"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:941
 msgid "Rule set URL"
-msgstr ""
+msgstr "规则集 URL"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:519
 msgid "SSH"
@@ -1821,14 +1821,14 @@ msgstr "Socks4A"
 msgid "Socks5"
 msgstr "Socks5"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:929
-msgid "Source"
-msgstr ""
-
 #: htdocs/luci-static/resources/view/homeproxy/client.js:477
 #: htdocs/luci-static/resources/view/homeproxy/client.js:795
 msgid "Source IP CIDR"
 msgstr "源 IP CIDR"
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:929
+msgid "Source file"
+msgstr "源文件"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:499
 #: htdocs/luci-static/resources/view/homeproxy/client.js:806
@@ -1974,7 +1974,7 @@ msgstr "用于连接到 DNS 服务器的出站标签。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:964
 msgid "Tag of the outbound to download rule set."
-msgstr ""
+msgstr "用于下载规则集的出站标签。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:868
 msgid "Tag of the target dns server."
@@ -2040,6 +2040,11 @@ msgid ""
 "><code>(source_port || source_port_range)</code> &&<br/><code>other fields</"
 "code>."
 msgstr ""
+"默认规则使用以下匹配逻辑：<br/><code>(domain || domain_suffix || "
+"domain_keyword || domain_regex || ip_cidr || ip_is_private)</code> &&<br/"
+"><code>(port || port_range)</code> &&<br/><code>(source_ip_cidr || "
+"source_ip_is_private)</code> &&<br/><code>(source_port || "
+"source_port_range)</code> &&<br/><code>other fields</code>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:734
 msgid ""
@@ -2049,6 +2054,11 @@ msgid ""
 "code> &&<br/><code>(source_port || source_port_range)</code> &&<br/"
 "><code>other fields</code>."
 msgstr ""
+"默认规则使用以下匹配逻辑：<br/><code>(domain || domain_suffix || "
+"domain_keyword || domain_regex)</code> &&<br/><code>(port || port_range)</"
+"code> &&<br/><code>(source_ip_cidr || source_ip_is_private)</code> &&<br/"
+"><code>(source_port || source_port_range)</code> &&<br/><code>other fields</"
+"code>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:680
 msgid ""
@@ -2239,11 +2249,11 @@ msgstr "更新失败。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:981
 msgid "Update interval"
-msgstr ""
+msgstr "更新间隔"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:982
 msgid "Update interval of rule set.<br/><code>1d</code> will be used if empty."
-msgstr ""
+msgstr "规则集更新间隔。<br/>留空使用 <code>1d</code>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1322
 msgid "Update nodes from subscriptions"
@@ -2523,59 +2533,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:268
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid "Auto update subscriptions, GeoIP and GeoSite."
-#~ msgstr "自动更新订阅、GeoIP 和 GeoSite。"
-
-#~ msgid "GeoIP"
-#~ msgstr "GeoIP"
-
-#~ msgid "GeoIP version"
-#~ msgstr "GeoIP 版本"
-
-#~ msgid "GeoSite version"
-#~ msgstr "GeoSite 版本"
-
-#~ msgid "Geosite"
-#~ msgstr "Geosite"
-
-#~ msgid "Match GeoIP."
-#~ msgstr "匹配 GeoIP。"
-
-#~ msgid "Match geosite."
-#~ msgstr "匹配 geosite。"
-
-#~ msgid "Match source GeoIP."
-#~ msgstr "匹配源 GeoIP。"
-
-#~ msgid "Source GeoIP"
-#~ msgstr "源 GeoIP"
-
-#~ msgid ""
-#~ "The default rule uses the following matching logic:<br/><code>(domain || "
-#~ "domain_suffix || domain_keyword || domain_regex || geosite || geoip || "
-#~ "ip_cidr)</code> &&<br/><code>(port || port_range)</code> &&<br/"
-#~ "><code>(source_geoip || source_ip_cidr)</code> &&<br/><code>(source_port "
-#~ "|| source_port_range)</code> &&<br/><code>other fields</code>."
-#~ msgstr ""
-#~ "默认规则使用以下匹配逻辑：<br/><code>(domain || domain_suffix || "
-#~ "domain_keyword || domain_regex || geosite || geoip || ip_cidr)</code> "
-#~ "&&<br/><code>(port || port_range)</code> &&<br/><code>(source_geoip || "
-#~ "source_ip_cidr)</code> &&<br/><code>(source_port || source_port_range)</"
-#~ "code> &&<br/><code>其他字段</code>."
-
-#~ msgid ""
-#~ "The default rule uses the following matching logic:<br/><code>(domain || "
-#~ "domain_suffix || domain_keyword || domain_regex || geosite)</code> &&<br/"
-#~ "><code>(port || port_range)</code> &&<br/><code>(source_geoip || "
-#~ "source_ip_cidr)</code> &&<br/><code>(source_port || source_port_range)</"
-#~ "code> &&<br/><code>other fields</code>."
-#~ msgstr ""
-#~ "默认规则使用以下匹配逻辑：<br/><code>(domain || domain_suffix || "
-#~ "domain_keyword || domain_regex || geosite)</code> &&<br/><code>(port || "
-#~ "port_range)</code> &&<br/><code>(source_geoip || source_ip_cidr)</code> "
-#~ "&&<br/><code>(source_port || source_port_range)</code> &&<br/><code>other "
-#~ "fields</code>."
-
-#~ msgid "Upstream archived. Not recommended."
-#~ msgstr "上游已存档。不建议。"

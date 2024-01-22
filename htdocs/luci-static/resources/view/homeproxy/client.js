@@ -926,8 +926,8 @@ return view.extend({
 		so.rmempty = false;
 
 		so = ss.option(form.ListValue, 'format', _('Format'));
-		so.value('source', _('Source'));
-		so.value('binary', _('Binary'));
+		so.value('source', _('Source file'));
+		so.value('binary', _('Binary file'));
 		so.default = 'source';
 		so.rmempty = false;
 

@@ -210,7 +210,7 @@ msgid "Based on google/gvisor."
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:930
-msgid "Binary"
+msgid "Binary file"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:366
@@ -1793,13 +1793,13 @@ msgstr ""
 msgid "Socks5"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:929
-msgid "Source"
-msgstr ""
-
 #: htdocs/luci-static/resources/view/homeproxy/client.js:477
 #: htdocs/luci-static/resources/view/homeproxy/client.js:795
 msgid "Source IP CIDR"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:929
+msgid "Source file"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:499
