@@ -636,6 +636,16 @@ return view.extend({
 			_('Append a <code>edns0-subnet</code> OPT extra record with the specified IP address to every query by default.<br/>' +
 			'Can be overrides by <code>servers.[].client_subnet</code> or <code>rules.[].client_subnet</code>.'));
 		so.datatype = 'or(cidr, ipaddr)';
+
+		so = ss.option(form.Flag, 'cache_file_store_rdrc', _('Store rejected DNS response cache'),
+			_('The check results of <code>Address filter DNS rule items</code> will be cached until expiration.'));
+		so.ucisection = 'experimental';
+		so.default = so.disabled;
+
+		so = ss.option(form.Value, 'cache_file_rdrc_timeout', _('RDRC timeout'),
+			_('Timeout of rejected DNS response cache. <code>7d</code> is used by default.'));
+		so.ucisection = 'experimental';
+		so.depends('cache_file_store_rdrc', '1');
 		/* DNS settings end */
 
 		/* DNS servers start */
@@ -828,7 +838,16 @@ return view.extend({
 		so = ss.option(form.Flag, 'source_ip_is_private', _('Private source IP'),
 			_('Match private source IP.'));
 		so.default = so.disabled;
-		so.rmempty = false;
+		so.modalonly = true;
+
+		so = ss.option(form.DynamicList, 'ip_cidr', _('IP CIDR'),
+			_('Address Filter Fields: Match IP CIDR with query response.'));
+		so.datatype = 'or(cidr, ipaddr)';
+		so.modalonly = true;
+
+		so = ss.option(form.Flag, 'ip_is_private', _('Private IP'),
+			_('Address Filter Fields: Match private IP with query response.'));
+		so.default = so.disabled;
 		so.modalonly = true;
 
 		so = ss.option(form.DynamicList, 'source_port', _('Source port'),
@@ -867,6 +886,11 @@ return view.extend({
 
 			return this.super('load', section_id);
 		}
+		so.modalonly = true;
+
+		so = ss.option(form.Flag, 'rule_set_ipcidr_match_source', _('Rule set IP CIDR as source IP?'),
+			_('Make <code>ipcidr</code> in rule sets match the source IP.'));
+		so.default = so.disabled;
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'invert', _('Invert'),
