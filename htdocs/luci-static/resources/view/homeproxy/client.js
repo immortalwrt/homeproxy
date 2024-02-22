@@ -631,6 +631,11 @@ return view.extend({
 			_('Make each DNS server\'s cache independent for special purposes. If enabled, will slightly degrade performance.'));
 		so.default = so.disabled;
 		so.depends('disable_cache', '0');
+
+		so = ss.option(form.Value, 'client_subnet', _('EDNS Client subnet'),
+			_('Append a <code>edns0-subnet</code> OPT extra record with the specified IP address to every query by default.<br/>' +
+			'Can be overrides by <code>servers.[].client_subnet</code> or <code>rules.[].client_subnet</code>.'));
+		so.datatype = 'or(cidr, ipaddr)';
 		/* DNS settings end */
 
 		/* DNS servers start */
@@ -721,6 +726,11 @@ return view.extend({
 		so.default = 'direct-out';
 		so.rmempty = false;
 		so.editable = true;
+
+		so = ss.option(form.Value, 'client_subnet', _('EDNS Client subnet'),
+			_('Append a <code>edns0-subnet</code> OPT extra record with the specified IP address to every query by default.<br/>' +
+			'Can be overrides by <code>rules.[].client_subnet</code>. Will overrides <code>dns.client_subnet</code>.'));
+		so.datatype = 'or(cidr, ipaddr)';
 		/* DNS servers end */
 
 		/* DNS rules start */
@@ -910,6 +920,11 @@ return view.extend({
 			_('Rewrite TTL in DNS responses.'));
 		so.datatype = 'uinteger';
 		so.modalonly = true;
+
+		so = ss.option(form.Value, 'client_subnet', _('EDNS Client subnet'),
+			_('Append a <code>edns0-subnet</code> OPT extra record with the specified IP address to every query by default.<br/>' +
+			'Will overrides <code>dns.client_subnet</code> and <code>servers.[].client_subnet</code>.'));
+		so.datatype = 'or(cidr, ipaddr)';
 		/* DNS rules end */
 		/* Custom routing settings end */
 

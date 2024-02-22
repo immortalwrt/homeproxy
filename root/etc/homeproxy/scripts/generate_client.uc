@@ -51,7 +51,7 @@ const dns_port = uci.get(uciconfig, uciinfra, 'dns_port') || '5333';
 
 let main_node, main_udp_node, dedicated_udp_node, default_outbound, sniff_override = '1',
     dns_server, dns_default_strategy, dns_default_server, dns_disable_cache, dns_disable_cache_expire,
-    dns_independent_cache, direct_domain_list;
+    dns_independent_cache, dns_client_subnet, direct_domain_list;
 
 if (routing_mode !== 'custom') {
 	main_node = uci.get(uciconfig, ucimain, 'main_node') || 'nil';
@@ -72,6 +72,7 @@ if (routing_mode !== 'custom') {
 	dns_disable_cache = uci.get(uciconfig, ucidnssetting, 'disable_cache');
 	dns_disable_cache_expire = uci.get(uciconfig, ucidnssetting, 'disable_cache_expire');
 	dns_independent_cache = uci.get(uciconfig, ucidnssetting, 'independent_cache');
+	dns_client_subnet = uci.get(uciconfig, ucidnssetting, 'client_subnet');
 
 	/* Routing settings */
 	default_outbound = uci.get(uciconfig, uciroutingsetting, 'default_outbound') || 'nil';
@@ -344,7 +345,8 @@ config.dns = {
 	strategy: dns_default_strategy,
 	disable_cache: (dns_disable_cache === '1'),
 	disable_expire: (dns_disable_cache_expire === '1'),
-	independent_cache: (dns_independent_cache === '1')
+	independent_cache: (dns_independent_cache === '1'),
+	client_subnet: dns_client_subnet
 };
 
 if (!isEmpty(main_node)) {
@@ -401,7 +403,8 @@ if (!isEmpty(main_node)) {
 			address_resolver: get_resolver(cfg.address_resolver),
 			address_strategy: cfg.address_strategy,
 			strategy: cfg.resolve_strategy,
-			detour: get_outbound(cfg.outbound)
+			detour: get_outbound(cfg.outbound),
+			client_subnet: cfg.client_subnet
 		});
 	});
 
@@ -433,7 +436,8 @@ if (!isEmpty(main_node)) {
 			outbound: get_outbound(cfg.outbound),
 			server: get_resolver(cfg.server),
 			disable_cache: (cfg.dns_disable_cache === '1') || null,
-			rewrite_ttl: strToInt(cfg.rewrite_ttl)
+			rewrite_ttl: strToInt(cfg.rewrite_ttl),
+			client_subnet: cfg.client_subnet
 		});
 	});
 
