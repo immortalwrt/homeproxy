@@ -649,7 +649,7 @@ msgstr "启用 ECH"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1152
 msgid "Enable PQ signature schemes"
-msgstr "启用 PQ 签名方案。"
+msgstr "启用 PQ 签名方案"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1029
 #: htdocs/luci-static/resources/view/homeproxy/server.js:432
@@ -2377,7 +2377,7 @@ msgstr "Xudp (Xray-core)"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:201
 msgid "You can only have 2 servers set at maximum."
-msgstr ""
+msgstr "您最多只能设置两个服务器。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:159
 msgid "You can only have one server set. It MUST support TCP query."
@@ -2537,6 +2537,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:268
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid "You can only have one server set."
-#~ msgstr "您只能设置一个服务器。"
