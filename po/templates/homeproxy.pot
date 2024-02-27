@@ -2317,7 +2317,7 @@ msgid "Xudp (Xray-core)"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:186
-msgid "You can only have one server set."
+msgid "You can only have two servers set at maximum."
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:159
