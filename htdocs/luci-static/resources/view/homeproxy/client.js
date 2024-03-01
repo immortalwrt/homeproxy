@@ -448,7 +448,8 @@ return view.extend({
 			'<code>(port || port_range)</code> &&<br/>' +
 			'<code>(source_ip_cidr || source_ip_is_private)</code> &&<br/>' +
 			'<code>(source_port || source_port_range)</code> &&<br/>' +
-			'<code>other fields</code>.'));
+			'<code>other fields</code>.<br/>' +
+			'Additionally, included rule sets can be considered merged rather than as a single rule sub-item.'));
 		so.value('default', _('Default'));
 		so.default = 'default';
 		so.rmempty = false;
@@ -752,7 +753,8 @@ return view.extend({
 			'<code>(port || port_range)</code> &&<br/>' +
 			'<code>(source_ip_cidr || source_ip_is_private)</code> &&<br/>' +
 			'<code>(source_port || source_port_range)</code> &&<br/>' +
-			'<code>other fields</code>.'));
+			'<code>other fields</code>.<br/>' +
+			'Additionally, included rule sets can be considered merged rather than as a single rule sub-item.'));
 		so.value('default', _('Default'));
 		so.default = 'default';
 		so.rmempty = false;
