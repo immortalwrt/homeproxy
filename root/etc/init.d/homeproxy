@@ -200,6 +200,7 @@ start_service() {
 				if chinadns-ng --version | grep -q "target:"; then
 					procd_append_param command --cache 10000
 					procd_append_param command --cache-stale 3600
+					procd_append_param command --verdict-cache 10000
 				fi
 
 				if [ -x "/sbin/ujail" ]; then
