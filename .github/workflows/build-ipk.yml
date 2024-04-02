@@ -55,7 +55,7 @@ jobs:
           path: .github/*.ipk
 
       - name: Publishing to GitHub Releases
-        uses: floralatin/upload-release-action@3688e13ae053ba3052eb4f0cfe03e78deb8f88d7
+        uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release'
         with:
           repo_token: ${{ github.token }}
