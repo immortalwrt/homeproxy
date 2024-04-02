@@ -180,10 +180,8 @@ start_service() {
 		# chinadns-ng
 		if [ -n "$china_dns_server" ]; then
 			local wandns="$(ifstatus wan | jsonfilter -e '@["dns-server"][0]' || echo "119.29.29.29")"
-			case "$china_dns_server" in
-			"wan") china_dns_server="$wandns" ;;
-			"wan_114") china_dns_server="$wandns,114.114.114.114" ;;
-			esac
+			china_dns_server="${china_dns_server/wan/$wandns}"
+			china_dns_server="${china_dns_server// /,}"
 
 			for i in $(seq 1 "$(grep -c "processor" "/proc/cpuinfo")"); do
 				procd_open_instance "chinadns-ng-$i"
@@ -198,6 +196,11 @@ start_service() {
 				procd_append_param command --gfwlist-file "$HP_DIR/resources/gfw_list.txt"
 				[ "$ipv6_support" -eq "1" ] || procd_append_param command --no-ipv6=tC
 				procd_append_param command --reuse-port
+
+				if chinadns-ng --version | grep -q "target:"; then
+					procd_append_param command --cache 10000
+					procd_append_param command --cache-stale 3600
+				fi
 
 				if [ -x "/sbin/ujail" ]; then
 					procd_add_jail "chinadns-ng" log
