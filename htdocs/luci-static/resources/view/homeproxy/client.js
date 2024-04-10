@@ -309,6 +309,7 @@ return view.extend({
 		so = ss.option(form.Flag, 'endpoint_independent_nat', _('Enable endpoint-independent NAT'),
 			_('Performance may degrade slightly, so it is not recommended to enable on when it is not needed.'));
 		so.default = so.enabled;
+		so.depends('tcpip_stack', 'mixed');
 		so.depends('tcpip_stack', 'gvisor');
 		so.rmempty = false;
 
