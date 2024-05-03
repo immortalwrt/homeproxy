@@ -1005,7 +1005,7 @@ msgstr "反转匹配结果"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:159
 msgid "It MUST support TCP query."
-msgstr ""
+msgstr "它必须支持 TCP 查询。"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:683
 msgid "Key path"
@@ -2333,7 +2333,7 @@ msgstr "VMess"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:160
 #: htdocs/luci-static/resources/view/homeproxy/client.js:186
 msgid "WAN DNS (read from interface)"
-msgstr ""
+msgstr "WAN DNS（从接口获取）"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1068
 msgid "WAN IP Policy"
@@ -2508,7 +2508,7 @@ msgstr "有效网址"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:206
 msgid "valid address#port"
-msgstr ""
+msgstr "有效 地址#端口"
 
 #: htdocs/luci-static/resources/homeproxy.js:240
 msgid "valid base64 key with %d characters"
