@@ -86,6 +86,7 @@ start_service() {
 					no-poll
 					no-resolv
 					server=127.0.0.1#$china_dns_port
+					server=0::1#$china_dns_port
 				EOF
 			else
 				china_dns_server=""
@@ -187,9 +188,10 @@ start_service() {
 				procd_open_instance "chinadns-ng-$i"
 
 				procd_set_param command "/usr/bin/chinadns-ng"
+				procd_append_param command --bind-addr "::"
 				procd_append_param command --bind-port "$china_dns_port"
 				procd_append_param command --china-dns "$china_dns_server"
-				procd_append_param command --trust-dns "127.0.0.1#$dns_port"
+				procd_append_param command --trust-dns "127.0.0.1#$dns_port,0::1#$dns_port"
 				procd_append_param command --ipset-name4 "inet@fw4@homeproxy_mainland_addr_v4"
 				procd_append_param command --ipset-name6 "inet@fw4@homeproxy_mainland_addr_v6"
 				procd_append_param command --chnlist-file "$HP_DIR/resources/china_list.txt"
