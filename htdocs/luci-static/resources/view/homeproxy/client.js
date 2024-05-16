@@ -638,8 +638,9 @@ return view.extend({
 			'Can be overrides by <code>servers.[].client_subnet</code> or <code>rules.[].client_subnet</code>.'));
 		so.datatype = 'or(cidr, ipaddr)';
 
-		so = ss.option(form.Flag, 'cache_file_store_rdrc', _('Store rejected DNS response cache'),
-			_('The check results of <code>Address filter DNS rule items</code> will be cached until expiration.'));
+		so = ss.option(form.Flag, 'cache_file_store_rdrc', _('Store RDRC'),
+			_('Store rejected DNS response cache.<br/>' +
+			'The check results of <code>Address filter DNS rule items</code> will be cached until expiration.'));
 		so.ucisection = 'experimental';
 		so.default = so.disabled;
 
