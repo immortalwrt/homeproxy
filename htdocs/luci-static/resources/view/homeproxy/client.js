@@ -634,8 +634,7 @@ return view.extend({
 
 		so = ss.option(form.Value, 'client_subnet', _('EDNS Client subnet'),
 			_('Append a <code>edns0-subnet</code> OPT extra record with the specified IP prefix to every query by default.<br/>' +
-			'If value is an IP address instead of prefix, <code>/32</code> or <code>/128</code> will be appended automatically.<br/>' +
-			'Can be overrides by <code>servers.[].client_subnet</code> or <code>rules.[].client_subnet</code>.'));
+			'If value is an IP address instead of prefix, <code>/32</code> or <code>/128</code> will be appended automatically.'));
 		so.datatype = 'or(cidr, ipaddr)';
 
 		so = ss.option(form.Flag, 'cache_file_store_rdrc', _('Store RDRC'),
@@ -844,12 +843,12 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.DynamicList, 'ip_cidr', _('IP CIDR'),
-			_('Address Filter Fields: Match IP CIDR with query response.'));
+			_('Match IP CIDR with query response.'));
 		so.datatype = 'or(cidr, ipaddr)';
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'ip_is_private', _('Private IP'),
-			_('Address Filter Fields: Match private IP with query response.'));
+			_('Match private IP with query response.'));
 		so.default = so.disabled;
 		so.modalonly = true;
 
