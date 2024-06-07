@@ -1748,7 +1748,7 @@ msgid "Rule set"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:893
-msgid "Rule set IP CIDR as source IP?"
+msgid "Rule set IP CIDR as source IP"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1001

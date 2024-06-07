@@ -1649,7 +1649,7 @@ msgstr "请求类型"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:646
 msgid "RDRC timeout"
-msgstr ""
+msgstr "RDRC 超时"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1197
 #: htdocs/luci-static/resources/view/homeproxy/server.js:631
@@ -1774,8 +1774,8 @@ msgid "Rule set"
 msgstr "规则集"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:893
-msgid "Rule set IP CIDR as source IP?"
-msgstr ""
+msgid "Rule set IP CIDR as source IP"
+msgstr "规则集 IP CIDR 作为源 IP"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1001
 msgid "Rule set URL"
@@ -1937,13 +1937,15 @@ msgstr "指定需要被代理的目标端口。多个端口必须用逗号隔开
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:640
 msgid "Store RDRC"
-msgstr ""
+msgstr "存储 RDRC"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:641
 msgid ""
 "Store rejected DNS response cache.<br/>The check results of <code>Address "
 "filter DNS rule items</code> will be cached until expiration."
 msgstr ""
+"存储被拒绝的 DNS 响应缓存。<br/><code>地址过滤 DNS 规则</code> 的检查结果将被"
+"缓存直到过期。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:598
 #: htdocs/luci-static/resources/view/homeproxy/server.js:196
@@ -2107,6 +2109,12 @@ msgid ""
 "code>.<br/>Additionally, included rule sets can be considered merged rather "
 "than as a single rule sub-item."
 msgstr ""
+"默认规则使用以下匹配逻辑：<br/><code>(domain || domain_suffix || "
+"domain_keyword || domain_regex || ip_cidr || ip_is_private)</code> &&<br/"
+"><code>(port || port_range)</code> &&<br/><code>(source_ip_cidr || "
+"source_ip_is_private)</code> &&<br/><code>(source_port || "
+"source_port_range)</code> &&<br/><code>其他字段</code>。此外，包含的所有规则"
+"集会被合并而不是独立生效。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:773
 msgid ""
@@ -2117,6 +2125,11 @@ msgid ""
 "><code>other fields</code>.<br/>Additionally, included rule sets can be "
 "considered merged rather than as a single rule sub-item."
 msgstr ""
+"默认规则使用以下匹配逻辑：<br/><code>(domain || domain_suffix || "
+"domain_keyword || domain_regex)</code> &&<br/><code>(port || port_range)</"
+"code> &&<br/><code>(source_ip_cidr || source_ip_is_private)</code> &&<br/"
+"><code>(source_port || source_port_range)</code> &&<br/><code>其他字段</"
+"code>。此外，包含的所有规则集会被合并而不是独立生效。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:713
 msgid ""
@@ -2217,7 +2230,7 @@ msgstr ""
 #: htdocs/luci-static/resources/view/homeproxy/client.js:647
 msgid ""
 "Timeout of rejected DNS response cache. <code>7d</code> is used by default."
-msgstr ""
+msgstr "被拒绝的 DNS 响应缓存超时。默认时长 <code>7d</code>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:409
 msgid ""

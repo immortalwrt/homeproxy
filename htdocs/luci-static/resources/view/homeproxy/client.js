@@ -890,7 +890,7 @@ return view.extend({
 		}
 		so.modalonly = true;
 
-		so = ss.option(form.Flag, 'rule_set_ipcidr_match_source', _('Rule set IP CIDR as source IP?'),
+		so = ss.option(form.Flag, 'rule_set_ipcidr_match_source', _('Rule set IP CIDR as source IP'),
 			_('Make <code>ipcidr</code> in rule sets match the source IP.'));
 		so.default = so.disabled;
 		so.modalonly = true;
