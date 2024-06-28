@@ -6,7 +6,7 @@
 set -o errexit
 set -o pipefail
 
-export PKG_SOURCE_DATE_EPOCH="$(date "+%s")"
+export PKG_SOURCE_DATE_EPOCH="$(date "%Y%m%d")"
 
 BASE_DIR="$(cd "$(dirname $0)"; pwd)"
 PKG_DIR="$BASE_DIR/.."
@@ -19,7 +19,7 @@ PKG_NAME="$(get_mk_value "PKG_NAME")"
 if [ "$RELEASE_TYPE" == "release" ]; then
 	PKG_VERSION="$(get_mk_value "PKG_VERSION")"
 else
-	PKG_VERSION="dev-$PKG_SOURCE_DATE_EPOCH-$(git rev-parse --short HEAD)"
+	PKG_VERSION="$PKG_SOURCE_DATE_EPOCH-$(git rev-parse --short HEAD)"
 fi
 
 TEMP_DIR="$(mktemp -d -p $BASE_DIR)"
