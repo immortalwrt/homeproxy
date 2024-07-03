@@ -1,0 +1,39 @@
+# JetBrains IDE 的项目配置文件目录
+.idea/
+
+# macOS 的常见垃圾文件
+.DS_Store
+._*
+.Trashes
+.Spotlight-V100
+.fseventsd
+
+# Windows 的常见垃圾文件
+Thumbs.db
+Desktop.ini
+
+# Dropbox 的常见垃圾文件
+.dropbox
+
+# Visual Studio Code 的常见垃圾文件
+.vscode/
+
+# macOS 的常见临时文件和缓存文件
+*.swp
+*.swo
+*.swn
+*.swm
+*.swl
+*.swk
+*.swf
+*.swg
+*.swa
+*.sw
+*.lock
+*~
+*.tmp
+
+# Synology DiskStation（群晖）的常见垃圾文件
+@eaDir/
+.synology/
+

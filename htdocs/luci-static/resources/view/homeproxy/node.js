@@ -520,16 +520,18 @@ return view.extend({
 			so.value('wireguard', _('WireGuard'));
 		so.value('vless', _('VLESS'));
 		so.value('vmess', _('VMess'));
+		so.value('selector', _('Selector'));
+		so.value('urltest', _('URLTest'));
 		so.rmempty = false;
 
 		so = ss.option(form.Value, 'address', _('Address'));
 		so.datatype = 'host';
-		so.depends({'type': 'direct', '!reverse': true});
+		so.depends({ 'type':  /^(direct|selector|urltest)+$/, '!reverse': true });
 		so.rmempty = false;
 
 		so = ss.option(form.Value, 'port', _('Port'));
 		so.datatype = 'port';
-		so.depends({'type': 'direct', '!reverse': true});
+		so.depends({ 'type':  /^(direct|selector|urltest)+$/, '!reverse': true });
 		so.rmempty = false;
 
 		so = ss.option(form.Value, 'username', _('Username'));
@@ -546,10 +548,10 @@ return view.extend({
 		so.depends('type', 'ssh');
 		so.depends('type', 'trojan');
 		so.depends('type', 'tuic');
-		so.depends({'type': 'shadowtls', 'shadowtls_version': '2'});
-		so.depends({'type': 'shadowtls', 'shadowtls_version': '3'});
-		so.depends({'type': 'socks', 'socks_version': '5'});
-		so.validate = function(section_id, value) {
+			so.depends({'type': 'shadowtls', 'shadowtls_version': '2'});
+			so.depends({'type': 'shadowtls', 'shadowtls_version': '3'});
+			so.depends({'type': 'socks', 'socks_version': '5'});
+			so.validate = function(section_id, value) {
 			if (section_id) {
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
 				var required_type = [ 'shadowsocks', 'shadowtls', 'trojan' ];
@@ -568,6 +570,87 @@ return view.extend({
 			return true;
 		}
 		so.modalonly = true;
+
+			/* URLTest and Selector config start */
+			so = ss.option(form.MultiValue, 'outbounds', _('Outbounds'),
+				_('choose outbounds.'));
+			so.load = function (section_id) {
+				delete this.keylist;
+				delete this.vallist;
+
+				this.value('direct-out', _('Direct'));
+				this.value('block-out', _('Block'));
+				uci.sections(data[0], 'node', (res) => {
+					this.value(res.label, res.label);
+				});
+
+				return this.super('load', section_id);
+			}
+
+			so.depends('type', 'urltest');
+			so.depends('type', 'selector');
+			so.modalonly = true;
+
+			so = ss.option(form.Value, 'url', _('Test URL'),
+				_('https://www.gstatic.com/generate_204 will be used if empty.'));
+			so.depends('type', 'urltest');
+			so.validate = function (section_id, value) {
+				if (section_id && value) {
+					try {
+						var url = new URL(value);
+						if (!url.hostname)
+							return _('Expecting: %s').format(_('valid URL'));
+					}
+					catch (e) {
+						return _('Expecting: %s').format(_('valid URL'));
+					}
+				}
+
+				return true;
+			}
+			so.modalonly = true;
+
+			so = ss.option(form.Value, 'interval', _('Interval'),
+				_('The test interval. 3m will be used if empty.'));
+			so.depends('type', 'urltest');
+			so.modalonly = true;
+
+			so = ss.option(form.Value, 'tolerance', _('Tolerance'),
+				_('The test tolerance in milliseconds. 50 will be used if empty.'));
+			so.datatype = 'uinteger';
+			so.depends('type', 'urltest');
+			so.modalonly = true;
+
+			so = ss.option(form.Value, 'idle_timeout', _('Idle timeout'),
+				_('The idle timeout. 30m will be used if empty.'));
+			so.depends('type', 'urltest');
+			so.modalonly = true;
+
+			so = ss.option(form.ListValue, 'default', _('Default outbound'),
+				_('The first outbound will be used if default.'));
+			so.load = function (section_id) {
+				delete this.keylist;
+				delete this.vallist;
+				this.value('', _('Default'));
+				this.value('direct-out', _('Direct'));
+				this.value('block-out', _('Block'));
+				uci.sections(data[0], 'node', (res) => {
+					this.value(res.label, res.label);
+				});
+
+				return this.super('load', section_id);
+			}
+			so.depends('type', 'selector');
+			so.modalonly = true;
+
+			so = ss.option(form.Flag, 'interrupt_exist_connections', _('Interrupt exist connections'),
+				_('Interrupt existing connections when the selected outbound has changed.<br/>' +
+					'Only inbound connections are affected by this setting, internal connections will always be interrupted.'));
+			so.default = so.disabled;
+			so.depends('type', 'urltest');
+			so.depends('type', 'selector');
+			so.modalonly = true;
+			/* URLTest and Selector config end */
 
 		/* Direct config */
 		so = ss.option(form.Value, 'override_address', _('Override address'),
