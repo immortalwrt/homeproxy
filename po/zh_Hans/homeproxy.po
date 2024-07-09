@@ -1710,6 +1710,10 @@ msgstr "区域 ID"
 msgid "Remote"
 msgstr "远程"
 
+#: htdocs/luci-static/resources/view/homeproxy/client.js:985
+msgid "Custom"
+msgstr "自定义"
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1344
 msgid "Remove %s nodes"
 msgstr "移除 %s 个节点"

@@ -982,8 +982,9 @@ return view.extend({
 		so = ss.option(form.ListValue, 'type', _('Type'));
 		so.value('local', _('Local'));
 		so.value('remote', _('Remote'));
-		so.default = 'remote';
-		so.rmempty = false;
+		so.value('custom', _('Custom'));
+		so.default = 'custom';
+		so.rmempty = false;	
 
 		so = ss.option(form.ListValue, 'format', _('Format'));
 		so.value('source', _('Source file'));
@@ -1041,6 +1042,36 @@ return view.extend({
 		so = ss.option(form.Value, 'update_interval', _('Update interval'),
 			_('Update interval of rule set.<br/><code>1d</code> will be used if empty.'));
 		so.depends('type', 'remote');
+
+		/* type=local && format=source  start */
+		so = ss.option(form.DynamicList, 'domain', _('Domain name'),
+			_('Match full domain.'));
+		so.datatype = 'hostname';
+		so.depends({'type': 'custom'});
+		so.modalonly = true;
+
+		so = ss.option(form.DynamicList, 'domain_suffix', _('Domain suffix'),
+			_('Match domain suffix.'));
+		so.depends({'type': 'custom'});
+		so.modalonly = true;
+
+		so = ss.option(form.DynamicList, 'domain_keyword', _('Domain keyword'),
+			_('Match domain using keyword.'));
+		so.depends({'type': 'custom'});
+		so.modalonly = true;
+
+		so = ss.option(form.DynamicList, 'domain_regex', _('Domain regex'),
+			_('Match domain using regular expression.'));
+		so.depends({'type': 'custom'});
+		so.modalonly = true;
+
+		so = ss.option(form.DynamicList, 'ip_cidr', _('IP CIDR'),
+			_('Match IP CIDR.'));
+		so.datatype = 'or(cidr, ipaddr)';
+		so.depends({'type': 'custom'});
+		so.modalonly = true;
+
+		/* type=local && format=source  end*/
 		/* Rule set settings end */
 
 		/* ACL settings start */

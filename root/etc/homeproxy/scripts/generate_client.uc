@@ -630,12 +630,37 @@ if (routing_mode === 'custom') {
 	uci.foreach(uciconfig, uciruleset, (cfg) => {
 		if (cfg.enabled !== '1')
 			return null;
+		
+		/* 若是custom规则集则生成规则文件 */
+		let ruleType = cfg.type;
+		let filepath = cfg.path;
+		if(ruleType == 'custom'){
+			let rulesContent = [];
+			push(rulesContent, {
+				domain: cfg.domain,
+				domain_suffix: cfg.domain_suffix,
+				domain_keyword: cfg.domain_keyword,
+				domain_regex: cfg.domain_regex,
+				ip_cidr: cfg.ip_cidr
+			});
+			let customFileContent = {
+				version: 1,
+				rules: rulesContent
+			};
+			/* 写入文件 */
+			let tmpCustomPath = RUN_DIR + '/tmp_custom/';
+			/* 创建文件夹 */
+			system('mkdir -p ' + tmpCustomPath);
+			filepath = tmpCustomPath + cfg['.name'] + '.json';
+			writefile(filePath, sprintf('%.J\n', removeBlankAttrs(customFileContent)));
+			ruleType = 'local';
+		}
 
 		push(config.route.rule_set, {
-			type: cfg.type,
+			type: ruleType,
 			tag: 'cfg-' + cfg['.name'] + '-rule',
 			format: cfg.format,
-			path: cfg.path,
+			path: filePath,
 			url: cfg.url,
 			download_detour: get_outbound(cfg.outbound),
 			update_interval: cfg.update_interval

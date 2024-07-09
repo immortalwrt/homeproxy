@@ -1684,6 +1684,10 @@ msgstr ""
 msgid "Remote"
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/client.js:985
+msgid "Custom"
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1344
 msgid "Remove %s nodes"
 msgstr ""
