@@ -340,6 +340,24 @@ return view.extend({
 		}
 		so.default = 'nil';
 		so.rmempty = false;
+
+		/* 添加官方规则集默认出站 */
+		so = ss.option(form.ListValue, 'official_ruleset_outbound', _('Official ruleset outbound'));
+		so.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			this.value('direct-out', _('Direct'));
+			uci.sections(data[0], 'routing_node', (res) => {
+				if (res.enabled === '1')
+					this.value(res['.name'], res.label);
+			});
+
+			return this.super('load', section_id);
+		}
+		so.default = 'direct-out';
+		so.rmempty = false;
+		
 		/* Routing settings end */
 
 		/* Routing nodes start */
@@ -545,14 +563,27 @@ return view.extend({
 			_('Match user name.'));
 		so.modalonly = true;
 
-		so = ss.option(form.MultiValue, 'rule_set', _('Rule set'),
+		so = ss.option(form.DynamicList, 'rule_set', _('Rule set'),
 			_('Match rule set.'));
+		so.modalonly = true;
+		so.validate = function(section_id, value) {
+			if (section_id) {
+				if(value && (!value.startsWith('geosite-') || !value.startsWith('geoip-'))){
+					return _('Expecting: %s').format(_('Must start with geosite- or geoip-'));
+				}
+			}
+
+			return true;
+		}
+
+		so = ss.option(form.MultiValue, 'custom_rule_set', _('Custom rule set'),
+			_('Match custom rule set.'));
 		so.load = function(section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
 			this.value('', _('-- Please choose --'));
-			uci.sections(data[0], 'ruleset', (res) => {
+			uci.sections(data[0], 'custom_ruleset', (res) => {
 				if (res.enabled === '1')
 					this.value(res['.name'], res.label);
 			});
@@ -876,12 +907,25 @@ return view.extend({
 
 		so = ss.option(form.MultiValue, 'rule_set', _('Rule set'),
 			_('Match rule set.'));
+		so.modalonly = true;
+		so.validate = function(section_id, value) {
+			if (section_id) {
+				if(value && (!value.startsWith('geosite-') || !value.startsWith('geoip-'))){
+					return _('Expecting: %s').format(_('Must start with geosite- or geoip-'));
+				}
+			}
+
+			return true;
+		}
+
+		so = ss.option(form.MultiValue, 'customt_rule_set', _('Custom rule set'),
+			_('Match custom rule set.'));
 		so.load = function(section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
 			this.value('', _('-- Please choose --'));
-			uci.sections(data[0], 'ruleset', (res) => {
+			uci.sections(data[0], 'custom_ruleset', (res) => {
 				if (res.enabled === '1')
 					this.value(res['.name'], res.label);
 			});
@@ -955,9 +999,9 @@ return view.extend({
 		/* DNS rules end */
 		/* Custom routing settings end */
 
-		/* Rule set settings start */
-		s.tab('ruleset', _('Rule set'));
-		o = s.taboption('ruleset', form.SectionValue, '_ruleset', form.GridSection, 'ruleset');
+		/* Custom rule set settings start */
+		s.tab('custom_ruleset', _('Custom rule set'));
+		o = s.taboption('custom_ruleset', form.SectionValue, '_ruleset', form.GridSection, 'custom_ruleset');
 		o.depends('routing_mode', 'custom');
 
 		ss = o.subsection;
@@ -965,13 +1009,13 @@ return view.extend({
 		ss.rowcolors = true;
 		ss.sortable = true;
 		ss.nodescriptions = true;
-		ss.modaltitle = L.bind(hp.loadModalTitle, this, _('Rule set'), _('Add a rule set'), data[0]);
+		ss.modaltitle = L.bind(hp.loadModalTitle, this, _('Custom rule set'), _('Add a rule set'), data[0]);
 		ss.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
 		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
 		so = ss.option(form.Value, 'label', _('Label'));
 		so.load = L.bind(hp.loadDefaultLabel, this, data[0]);
-		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'ruleset', 'label');
+		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'custom_ruleset', 'label');
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
@@ -1072,7 +1116,7 @@ return view.extend({
 		so.modalonly = true;
 
 		/* type=local && format=source  end*/
-		/* Rule set settings end */
+		/* Custom rule set settings end */
 
 		/* ACL settings start */
 		s.tab('control', _('Access Control'));

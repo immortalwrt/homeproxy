@@ -442,6 +442,10 @@ msgstr ""
 msgid "Default outbound"
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/client.js:345
+msgid "Official ruleset outbound"
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1300
 msgid "Default packet encoding"
 msgstr ""
@@ -1191,9 +1195,13 @@ msgstr ""
 msgid "Match query type."
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:549
+#: htdocs/luci-static/resources/view/homeproxy/client.js:567
 #: htdocs/luci-static/resources/view/homeproxy/client.js:878
 msgid "Match rule set."
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:571
+msgid "Match custom rule set."
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:495
@@ -1744,11 +1752,15 @@ msgstr ""
 msgid "Routing rule"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:548
+#: htdocs/luci-static/resources/view/homeproxy/client.js:570
 #: htdocs/luci-static/resources/view/homeproxy/client.js:877
 #: htdocs/luci-static/resources/view/homeproxy/client.js:959
 #: htdocs/luci-static/resources/view/homeproxy/client.js:968
 msgid "Rule set"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:570
+msgid "Custom Rule set"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:893
@@ -2518,6 +2530,10 @@ msgstr ""
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1269
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1272
 msgid "valid URL"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:908
+msgid "Must start with geosite- or geoip-"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:206
