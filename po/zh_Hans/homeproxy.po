@@ -1221,7 +1221,7 @@ msgstr "匹配请求类型。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:567
 #: htdocs/luci-static/resources/view/homeproxy/client.js:878
-msgid "Match rule set."
+msgid "Match custom rule set."
 msgstr "匹配规则集。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:878
@@ -1786,7 +1786,7 @@ msgid "Rule set"
 msgstr "规则集"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:570
-msgid "Custom Rule set"
+msgid "Custom rule set"
 msgstr "自定义规则集"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:893

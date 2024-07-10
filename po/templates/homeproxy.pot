@@ -1760,7 +1760,7 @@ msgid "Rule set"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:570
-msgid "Custom Rule set"
+msgid "Custom rule set"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:893

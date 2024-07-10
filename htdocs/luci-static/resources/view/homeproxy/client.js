@@ -492,6 +492,35 @@ return view.extend({
 		so.value('udp', _('UDP'));
 		so.value('', _('Both'));
 
+		so = ss.option(form.DynamicList, 'rule_set', _('Rule set'),
+		_('Match rule set.'));
+		so.modalonly = true;
+		so.validate = function(section_id, value) {
+			if (section_id) {
+				if(value && (!value.startsWith('geosite-') || !value.startsWith('geoip-'))){
+					return _('Expecting: %s').format(_('Must start with geosite- or geoip-'));
+				}
+			}
+
+			return true;
+		}
+
+		so = ss.option(form.MultiValue, 'custom_rule_set', _('Custom rule set'),
+			_('Match custom rule set.'));
+		so.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			this.value('', _('-- Please choose --'));
+			uci.sections(data[0], 'custom_ruleset', (res) => {
+				if (res.enabled === '1')
+					this.value(res['.name'], res.label);
+			});
+
+			return this.super('load', section_id);
+		}
+		so.modalonly = true;
+
 		so = ss.option(form.DynamicList, 'domain', _('Domain name'),
 			_('Match full domain.'));
 		so.datatype = 'hostname';
@@ -561,35 +590,6 @@ return view.extend({
 
 		so = ss.option(form.DynamicList, 'user', _('User'),
 			_('Match user name.'));
-		so.modalonly = true;
-
-		so = ss.option(form.DynamicList, 'rule_set', _('Rule set'),
-			_('Match rule set.'));
-		so.modalonly = true;
-		so.validate = function(section_id, value) {
-			if (section_id) {
-				if(value && (!value.startsWith('geosite-') || !value.startsWith('geoip-'))){
-					return _('Expecting: %s').format(_('Must start with geosite- or geoip-'));
-				}
-			}
-
-			return true;
-		}
-
-		so = ss.option(form.MultiValue, 'custom_rule_set', _('Custom rule set'),
-			_('Match custom rule set.'));
-		so.load = function(section_id) {
-			delete this.keylist;
-			delete this.vallist;
-
-			this.value('', _('-- Please choose --'));
-			uci.sections(data[0], 'custom_ruleset', (res) => {
-				if (res.enabled === '1')
-					this.value(res['.name'], res.label);
-			});
-
-			return this.super('load', section_id);
-		}
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'rule_set_ipcidr_match_source', _('Match source IP via rule set'),
@@ -836,6 +836,35 @@ return view.extend({
 		so.value('dns', _('DNS'));
 		so.value('stun', _('STUN'));
 
+		so = ss.option(form.MultiValue, 'rule_set', _('Rule set'),
+		_('Match rule set.'));
+		so.modalonly = true;
+		so.validate = function(section_id, value) {
+			if (section_id) {
+				if(value && !value.startsWith('geosite-') && !value.startsWith('geoip-')){
+					return _('Expecting: %s').format(_('Must start with geosite- or geoip-'));
+				}
+			}
+
+			return true;
+		}
+
+		so = ss.option(form.MultiValue, 'customt_rule_set', _('Custom rule set'),
+			_('Match custom rule set.'));
+		so.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			this.value('', _('-- Please choose --'));
+			uci.sections(data[0], 'custom_ruleset', (res) => {
+				if (res.enabled === '1')
+					this.value(res['.name'], res.label);
+			});
+
+			return this.super('load', section_id);
+		}
+		so.modalonly = true;
+
 		so = ss.option(form.DynamicList, 'domain', _('Domain name'),
 			_('Match full domain.'));
 		so.datatype = 'hostname';
@@ -903,35 +932,6 @@ return view.extend({
 
 		so = ss.option(form.DynamicList, 'user', _('User'),
 			_('Match user name.'));
-		so.modalonly = true;
-
-		so = ss.option(form.MultiValue, 'rule_set', _('Rule set'),
-			_('Match rule set.'));
-		so.modalonly = true;
-		so.validate = function(section_id, value) {
-			if (section_id) {
-				if(value && (!value.startsWith('geosite-') || !value.startsWith('geoip-'))){
-					return _('Expecting: %s').format(_('Must start with geosite- or geoip-'));
-				}
-			}
-
-			return true;
-		}
-
-		so = ss.option(form.MultiValue, 'customt_rule_set', _('Custom rule set'),
-			_('Match custom rule set.'));
-		so.load = function(section_id) {
-			delete this.keylist;
-			delete this.vallist;
-
-			this.value('', _('-- Please choose --'));
-			uci.sections(data[0], 'custom_ruleset', (res) => {
-				if (res.enabled === '1')
-					this.value(res['.name'], res.label);
-			});
-
-			return this.super('load', section_id);
-		}
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'rule_set_ipcidr_match_source', _('Rule set IP CIDR as source IP'),
