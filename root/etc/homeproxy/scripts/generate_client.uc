@@ -313,8 +313,17 @@ function get_resolver(cfg) {
 		return 'cfg-' + cfg + '-dns';
 }
 
+function arrayContains(array, element){
+	for(let i in array){
+		if(i === element){
+			return true;
+		}
+	}
+	return false;
+}
+
 function get_ruleset(cfg) {
-	if (isEmpty(cfg.rule_set) && isEmpty(cfg.custom_ruleset))
+	if (isEmpty(cfg.rule_set) && isEmpty(cfg.custom_rule_set))
 		return null;
 
 	let rules = [];
@@ -323,7 +332,8 @@ function get_ruleset(cfg) {
 	if(!isEmpty(cfg.rule_set)) {
 		for(let i in cfg.rule_set) {
 			push(rules, isEmpty(i) ? null : i);
-			if(!isEmpty(i) && !officialruleset.includes(i)){
+
+			if(!isEmpty(i) && !arrayContains(officialruleset, i)){
 				push(officialruleset, i);
 			}
 			
@@ -331,13 +341,14 @@ function get_ruleset(cfg) {
 	}
 
 	/* 添加自定义规则集 */
-	if(!isEmpty(cfg.custom_ruleset)) {
-		for (let i in cfg.custom_ruleset)
+	if(!isEmpty(cfg.custom_rule_set)) {
+		for (let i in cfg.custom_rule_set)
 			push(rules, isEmpty(i) ? null : 'cfg-' + i + '-rule');
 	}
 	
 	return rules;
 }
+
 /* Config helper end */
 
 const config = {};
@@ -650,13 +661,26 @@ if (!isEmpty(main_node)) {
 };
 
 /* Custom rule set */
+
+/* 临时通过此种方式实现 */
+function strStartsWith(str, prefix){
+	if(length(str) < length(prefix)){
+		return false;
+	}
+	let strSplit = split(str, '-');
+	if(strSplit[0] === prefix){
+		return true;
+	}
+	return false;
+}
+
 if (routing_mode === 'custom') {
 	/* 添加官方规则集 */
-	for(let ruletag of officialruleset) {
+	for(let ruletag in officialruleset) {
 		let url;
-		if(ruletag.startsWith('geosite-')){
+		if(strStartsWith(ruletag, 'geosite')){
 			url = baseofficialsiteruleseturl + ruletag + '.srs';
-		} else if(ruletag.startsWith('geoip-')){
+		} else if(strStartsWith(ruletag, 'geoip')){
 			url = baseofficialipruleseturl + ruletag + '.srs';
 		}
 		push(config.route.rule_set, {

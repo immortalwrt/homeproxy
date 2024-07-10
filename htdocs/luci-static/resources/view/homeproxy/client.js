@@ -836,7 +836,7 @@ return view.extend({
 		so.value('dns', _('DNS'));
 		so.value('stun', _('STUN'));
 
-		so = ss.option(form.MultiValue, 'rule_set', _('Rule set'),
+		so = ss.option(form.DynamicList, 'rule_set', _('Rule set'),
 			_('Match rule set.'));
 		so.modalonly = true;
 		// so.validate = function(section_id, value) {
@@ -849,7 +849,7 @@ return view.extend({
 		// 	return true;
 		// }
 
-		so = ss.option(form.MultiValue, 'customt_rule_set', _('Custom rule set'),
+		so = ss.option(form.MultiValue, 'custom_rule_set', _('Custom rule set'),
 			_('Match custom rule set.'));
 		so.load = function(section_id) {
 			delete this.keylist;
