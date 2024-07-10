@@ -493,17 +493,17 @@ return view.extend({
 		so.value('', _('Both'));
 
 		so = ss.option(form.DynamicList, 'rule_set', _('Rule set'),
-		_('Match rule set.'));
+			_('Match rule set.'));
 		so.modalonly = true;
-		so.validate = function(section_id, value) {
-			if (section_id) {
-				if(value && (!value.startsWith('geosite-') || !value.startsWith('geoip-'))){
-					return _('Expecting: %s').format(_('Must start with geosite- or geoip-'));
-				}
-			}
+		// so.validate = function(section_id, value) {
+		// 	if (section_id) {
+		// 		if(value && (!value.startsWith('geosite-') || !value.startsWith('geoip-'))){
+		// 			return _('Expecting: %s').format(_('Must start with geosite- or geoip-'));
+		// 		}
+		// 	}
 
-			return true;
-		}
+		// 	return true;
+		// }
 
 		so = ss.option(form.MultiValue, 'custom_rule_set', _('Custom rule set'),
 			_('Match custom rule set.'));
@@ -837,17 +837,17 @@ return view.extend({
 		so.value('stun', _('STUN'));
 
 		so = ss.option(form.MultiValue, 'rule_set', _('Rule set'),
-		_('Match rule set.'));
+			_('Match rule set.'));
 		so.modalonly = true;
-		so.validate = function(section_id, value) {
-			if (section_id) {
-				if(value && !value.startsWith('geosite-') && !value.startsWith('geoip-')){
-					return _('Expecting: %s').format(_('Must start with geosite- or geoip-'));
-				}
-			}
+		// so.validate = function(section_id, value) {
+		// 	if (section_id) {
+		// 		if(value && !value.startsWith('geosite-') && !value.startsWith('geoip-')){
+		// 			return _('Expecting: %s').format(_('Must start with geosite- or geoip-'));
+		// 		}
+		// 	}
 
-			return true;
-		}
+		// 	return true;
+		// }
 
 		so = ss.option(form.MultiValue, 'customt_rule_set', _('Custom rule set'),
 			_('Match custom rule set.'));
