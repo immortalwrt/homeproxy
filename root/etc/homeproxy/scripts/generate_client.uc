@@ -355,7 +355,7 @@ const config = {};
 /* Log */
 config.log = {
 	disabled: false,
-	level: 'warn',
+	level: 'info',
 	output: RUN_DIR + '/sing-box-c.log',
 	timestamp: true
 };
