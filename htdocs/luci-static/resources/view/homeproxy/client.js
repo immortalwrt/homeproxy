@@ -340,6 +340,23 @@ return view.extend({
 		}
 		so.default = 'nil';
 		so.rmempty = false;
+
+		/* 添加官方规则集默认出站 */
+		// so = ss.option(form.ListValue, 'official_ruleset_outbound', _('Official ruleset outbound'));
+		// so.load = function(section_id) {
+		// 	delete this.keylist;
+		// 	delete this.vallist;
+
+		// 	this.value('direct-out', _('Direct'));
+		// 	uci.sections(data[0], 'routing_node', (res) => {
+		// 		if (res.enabled === '1')
+		// 			this.value(res['.name'], res.label);
+		// 	});
+
+		// 	return this.super('load', section_id);
+		// }
+		// so.default = 'direct-out';
+		// so.rmempty = false;
 		/* Routing settings end */
 
 		/* Routing nodes start */
@@ -474,22 +491,22 @@ return view.extend({
 		so.value('udp', _('UDP'));
 		so.value('', _('Both'));
 
-		so = ss.option(form.DynamicList, 'domain', _('Domain name'),
-			_('Match full domain.'));
-		so.datatype = 'hostname';
-		so.modalonly = true;
+		// so = ss.option(form.DynamicList, 'domain', _('Domain name'),
+		// 	_('Match full domain.'));
+		// so.datatype = 'hostname';
+		// so.modalonly = true;
 
-		so = ss.option(form.DynamicList, 'domain_suffix', _('Domain suffix'),
-			_('Match domain suffix.'));
-		so.modalonly = true;
+		// so = ss.option(form.DynamicList, 'domain_suffix', _('Domain suffix'),
+		// 	_('Match domain suffix.'));
+		// so.modalonly = true;
 
-		so = ss.option(form.DynamicList, 'domain_keyword', _('Domain keyword'),
-			_('Match domain using keyword.'));
-		so.modalonly = true;
+		// so = ss.option(form.DynamicList, 'domain_keyword', _('Domain keyword'),
+		// 	_('Match domain using keyword.'));
+		// so.modalonly = true;
 
-		so = ss.option(form.DynamicList, 'domain_regex', _('Domain regex'),
-			_('Match domain using regular expression.'));
-		so.modalonly = true;
+		// so = ss.option(form.DynamicList, 'domain_regex', _('Domain regex'),
+		// 	_('Match domain using regular expression.'));
+		// so.modalonly = true;
 
 		so = ss.option(form.DynamicList, 'source_ip_cidr', _('Source IP CIDR'),
 			_('Match source IP CIDR.'));
@@ -502,10 +519,10 @@ return view.extend({
 		so.rmempty = false;
 		so.modalonly = true;
 
-		so = ss.option(form.DynamicList, 'ip_cidr', _('IP CIDR'),
-			_('Match IP CIDR.'));
-		so.datatype = 'or(cidr, ipaddr)';
-		so.modalonly = true;
+		// so = ss.option(form.DynamicList, 'ip_cidr', _('IP CIDR'),
+		// 	_('Match IP CIDR.'));
+		// so.datatype = 'or(cidr, ipaddr)';
+		// so.modalonly = true;
 
 		so = ss.option(form.Flag, 'ip_is_private', _('Private IP'),
 			_('Match private IP.'));
@@ -805,22 +822,22 @@ return view.extend({
 		so.value('dns', _('DNS'));
 		so.value('stun', _('STUN'));
 
-		so = ss.option(form.DynamicList, 'domain', _('Domain name'),
-			_('Match full domain.'));
-		so.datatype = 'hostname';
-		so.modalonly = true;
+		// so = ss.option(form.DynamicList, 'domain', _('Domain name'),
+		// 	_('Match full domain.'));
+		// so.datatype = 'hostname';
+		// so.modalonly = true;
 
-		so = ss.option(form.DynamicList, 'domain_suffix', _('Domain suffix'),
-			_('Match domain suffix.'));
-		so.modalonly = true;
+		// so = ss.option(form.DynamicList, 'domain_suffix', _('Domain suffix'),
+		// 	_('Match domain suffix.'));
+		// so.modalonly = true;
 
-		so = ss.option(form.DynamicList, 'domain_keyword', _('Domain keyword'),
-			_('Match domain using keyword.'));
-		so.modalonly = true;
+		// so = ss.option(form.DynamicList, 'domain_keyword', _('Domain keyword'),
+		// 	_('Match domain using keyword.'));
+		// so.modalonly = true;
 
-		so = ss.option(form.DynamicList, 'domain_regex', _('Domain regex'),
-			_('Match domain using regular expression.'));
-		so.modalonly = true;
+		// so = ss.option(form.DynamicList, 'domain_regex', _('Domain regex'),
+		// 	_('Match domain using regular expression.'));
+		// so.modalonly = true;
 
 		so = ss.option(form.DynamicList, 'port', _('Port'),
 			_('Match port.'));
@@ -842,10 +859,10 @@ return view.extend({
 		so.default = so.disabled;
 		so.modalonly = true;
 
-		so = ss.option(form.DynamicList, 'ip_cidr', _('IP CIDR'),
-			_('Match IP CIDR with query response.'));
-		so.datatype = 'or(cidr, ipaddr)';
-		so.modalonly = true;
+		// so = ss.option(form.DynamicList, 'ip_cidr', _('IP CIDR'),
+		// 	_('Match IP CIDR with query response.'));
+		// so.datatype = 'or(cidr, ipaddr)';
+		// so.modalonly = true;
 
 		so = ss.option(form.Flag, 'ip_is_private', _('Private IP'),
 			_('Match private IP with query response.'));
@@ -975,20 +992,23 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
-		so.default = o.enabled;
+		so.default = true;
 		so.rmempty = false;
 		so.editable = true;
 
 		so = ss.option(form.ListValue, 'type', _('Type'));
 		so.value('local', _('Local'));
 		so.value('remote', _('Remote'));
-		so.default = 'remote';
+		so.value('custom', _('Custom'));
+		so.default = 'custom';
 		so.rmempty = false;
 
 		so = ss.option(form.ListValue, 'format', _('Format'));
 		so.value('source', _('Source file'));
 		so.value('binary', _('Binary file'));
-		so.default = 'source';
+		so.default = 'binary';
+		so.depends('type', 'local');
+		so.depends('type', 'remote');
 		so.rmempty = false;
 
 		so = ss.option(form.Value, 'path', _('Path'));
@@ -1036,11 +1056,48 @@ return view.extend({
 		}
 		so.default = 'direct-out';
 		so.rmempty = false;
+		so.depends('type', 'custom');
 		so.depends('type', 'remote');
 
 		so = ss.option(form.Value, 'update_interval', _('Update interval'),
 			_('Update interval of rule set.<br/><code>1d</code> will be used if empty.'));
+		so.depends('type', 'custom');
 		so.depends('type', 'remote');
+
+		/* type=local && format=source  start */
+		so = ss.option(form.DynamicList, 'official_rule_set', _('Official rule set'),
+			_('Match official rule set.'));
+		so.depends({'type': 'custom'});
+		so.modalonly = true;
+
+		so = ss.option(form.DynamicList, 'domain', _('Domain name'),
+			_('Match full domain.'));
+		so.datatype = 'hostname';
+		so.depends({'type': 'custom'});
+		so.modalonly = true;
+
+		so = ss.option(form.DynamicList, 'domain_suffix', _('Domain suffix'),
+			_('Match domain suffix.'));
+		so.depends({'type': 'custom'});
+		so.modalonly = true;
+
+		so = ss.option(form.DynamicList, 'domain_keyword', _('Domain keyword'),
+			_('Match domain using keyword.'));
+		so.depends({'type': 'custom'});
+		so.modalonly = true;
+
+		so = ss.option(form.DynamicList, 'domain_regex', _('Domain regex'),
+			_('Match domain using regular expression.'));
+		so.depends({'type': 'custom'});
+		so.modalonly = true;
+
+		so = ss.option(form.DynamicList, 'ip_cidr', _('IP CIDR'),
+			_('Match IP CIDR.'));
+		so.datatype = 'or(cidr, ipaddr)';
+		so.depends({'type': 'custom'});
+		so.modalonly = true;
+
+		/* type=local && format=source  end*/
 		/* Rule set settings end */
 
 		/* ACL settings start */

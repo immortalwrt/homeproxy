@@ -39,6 +39,10 @@ const uciroutingsetting = 'routing',
 const ucinode = 'node';
 const uciruleset = 'ruleset';
 
+const baseofficialsiteruleseturl = 'https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/';
+
+const baseofficialipruleseturl = 'https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/';
+
 const routing_mode = uci.get(uciconfig, ucimain, 'routing_mode') || 'bypass_mainland_china';
 
 let wan_dns = executeCommand('ifstatus wan | jsonfilter -e \'@["dns-server"][0]\'');
@@ -305,13 +309,43 @@ function get_resolver(cfg) {
 		return 'cfg-' + cfg + '-dns';
 }
 
+/* 判断开头，临时通过此种方式实现 */
+function strStartsWith(str, prefix){
+	if(length(str) < length(prefix)){
+		return false;
+	}
+	let strSplit = split(str, '-');
+	if(strSplit[0] === prefix){
+		return true;
+	}
+	return false;
+}
+
 function get_ruleset(cfg) {
 	if (isEmpty(cfg))
 		return null;
 
 	let rules = [];
-	for (let i in cfg)
-		push(rules, isEmpty(i) ? null : 'cfg-' + i + '-rule');
+	for (let i in cfg) {
+		
+		if(isEmpty(i)){
+			continue;
+		}
+		/*判断当前ruleset类型是否为custom*/
+		let rule_set_type = uci.get(uciconfig, i, 'type');
+		let official_rule_set = uci.get(uciconfig, i, 'official_rule_set');
+		if(rule_set_type === 'custom'){
+			if(official_rule_set == null || length(official_rule_set) == 0){
+				continue;
+			}
+			for(let official_rule_set_tag in official_rule_set){
+				push(rules, isEmpty(official_rule_set_tag) ? null : official_rule_set_tag);
+			}
+		}else{
+			push(rules, isEmpty(i) ? null : 'cfg-' + i + '-rule');
+		}
+	}
+
 	return rules;
 }
 /* Config helper end */
@@ -416,16 +450,37 @@ if (!isEmpty(main_node)) {
 	uci.foreach(uciconfig, ucidnsrule, (cfg) => {
 		if (cfg.enabled !== '1')
 			return;
+		
+		/* 域名集合 */
+		let domain;
+		let domain_suffix;
+		let domain_keyword;
+		let domain_regex;
+
+		/* 获取rule_set */
+		let rule_set_list = cfg.rule_set;
+		/* 遍历检索custom规则 */
+		if(rule_set_list != null){
+			for(let rule_set_tag in rule_set_list){
+				let rule_set_type = uci.get(uciconfig, rule_set_tag, 'type');
+				if(rule_set_type === 'custom') {
+					domain = uci.get(uciconfig, rule_set_tag, 'domain');
+					domain_suffix = uci.get(uciconfig, rule_set_tag, 'domain_suffix');
+					domain_keyword = uci.get(uciconfig, rule_set_tag, 'domain_keyword');
+					domain_regex = uci.get(uciconfig, rule_set_tag, 'domain_regex');
+				}
+			}
+		}
 
 		push(config.dns.rules, {
 			ip_version: strToInt(cfg.ip_version),
 			query_type: parse_dnsquery(cfg.query_type),
 			network: cfg.network,
 			protocol: cfg.protocol,
-			domain: cfg.domain,
-			domain_suffix: cfg.domain_suffix,
-			domain_keyword: cfg.domain_keyword,
-			domain_regex: cfg.domain_regex,
+			domain: domain,
+			domain_suffix: domain_suffix,
+			domain_keyword: domain_keyword,
+			domain_regex: domain_regex,
 			port: parse_port(cfg.port),
 			port_range: cfg.port_range,
 			source_ip_cidr: cfg.source_ip_cidr,
@@ -596,14 +651,35 @@ if (!isEmpty(main_node)) {
 		if (cfg.enabled !== '1')
 			return null;
 
+		/* 域名集合 */
+		let domain;
+		let domain_suffix;
+		let domain_keyword;
+		let domain_regex;
+
+		/* 获取rule_set */
+		let rule_set_list = cfg.rule_set;
+		/* 遍历检索custom规则 */
+		if(rule_set_list != null){
+			for(let rule_set_tag in rule_set_list){
+				let rule_set_type = uci.get(uciconfig, rule_set_tag, 'type');
+				if(rule_set_type === 'custom') {
+					domain = uci.get(uciconfig, rule_set_tag, 'domain');
+					domain_suffix = uci.get(uciconfig, rule_set_tag, 'domain_suffix');
+					domain_keyword = uci.get(uciconfig, rule_set_tag, 'domain_keyword');
+					domain_regex = uci.get(uciconfig, rule_set_tag, 'domain_regex');
+				}
+			}
+		}
+
 		push(config.route.rules, {
 			ip_version: strToInt(cfg.ip_version),
 			protocol: cfg.protocol,
 			network: cfg.network,
-			domain: cfg.domain,
-			domain_suffix: cfg.domain_suffix,
-			domain_keyword: cfg.domain_keyword,
-			domain_regex: cfg.domain_regex,
+			domain: domain,
+			domain_suffix: domain_suffix,
+			domain_keyword: domain_keyword,
+			domain_regex: domain_regex,
 			source_ip_cidr: cfg.source_ip_cidr,
 			source_ip_is_private: (cfg.source_ip_is_private === '1') || null,
 			ip_cidr: cfg.ip_cidr,
@@ -631,15 +707,41 @@ if (routing_mode === 'custom') {
 		if (cfg.enabled !== '1')
 			return null;
 
-		push(config.route.rule_set, {
-			type: cfg.type,
-			tag: 'cfg-' + cfg['.name'] + '-rule',
-			format: cfg.format,
-			path: cfg.path,
-			url: cfg.url,
-			download_detour: get_outbound(cfg.outbound),
-			update_interval: cfg.update_interval
-		});
+		/* 判断是否自定义规则集，是否包含官方规则集 */
+		let type = cfg.type;
+		let official_rule_set = cfg.official_rule_set;
+		if(type === 'custom'){
+			if(official_rule_set != null){
+				for(let rule_set_tag in official_rule_set){
+					let url;
+					if(strStartsWith(rule_set_tag, 'geosite')){
+						url = baseofficialsiteruleseturl + rule_set_tag + '.srs';
+					} else if(strStartsWith(rule_set_tag, 'geoip')){
+						url = baseofficialipruleseturl + rule_set_tag + '.srs';
+					}
+
+					push(config.route.rule_set, {
+						type: 'remote',
+						tag: rule_set_tag,
+						format: 'binary',
+						url: url,
+						download_detour: get_outbound(cfg.outbound),
+						update_interval: cfg.update_interval
+					});
+				}
+			}
+		} else {
+			push(config.route.rule_set, {
+				type: cfg.type,
+				tag: 'cfg-' + cfg['.name'] + '-rule',
+				format: cfg.format,
+				path: cfg.path,
+				url: cfg.url,
+				download_detour: get_outbound(cfg.outbound),
+				update_interval: cfg.update_interval
+			});
+		}
+
 	});
 }
 /* Routing rules end */

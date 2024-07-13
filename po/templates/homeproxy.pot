@@ -1684,6 +1684,10 @@ msgstr ""
 msgid "Remote"
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/client.js:985
+msgid "Custom"
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1344
 msgid "Remove %s nodes"
 msgstr ""
@@ -1745,6 +1749,14 @@ msgstr ""
 #: htdocs/luci-static/resources/view/homeproxy/client.js:959
 #: htdocs/luci-static/resources/view/homeproxy/client.js:968
 msgid "Rule set"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:1064
+msgid "Official rule set"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:1065
+msgid "Match official rule set."
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:893
