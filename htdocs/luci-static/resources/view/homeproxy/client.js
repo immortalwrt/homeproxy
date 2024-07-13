@@ -340,24 +340,6 @@ return view.extend({
 		}
 		so.default = 'nil';
 		so.rmempty = false;
-
-		/* 添加官方规则集默认出站 */
-		so = ss.option(form.ListValue, 'official_ruleset_outbound', _('Official ruleset outbound'));
-		so.load = function(section_id) {
-			delete this.keylist;
-			delete this.vallist;
-
-			this.value('direct-out', _('Direct'));
-			uci.sections(data[0], 'routing_node', (res) => {
-				if (res.enabled === '1')
-					this.value(res['.name'], res.label);
-			});
-
-			return this.super('load', section_id);
-		}
-		so.default = 'direct-out';
-		so.rmempty = false;
-		
 		/* Routing settings end */
 
 		/* Routing nodes start */
@@ -492,35 +474,6 @@ return view.extend({
 		so.value('udp', _('UDP'));
 		so.value('', _('Both'));
 
-		so = ss.option(form.DynamicList, 'rule_set', _('Rule set'),
-			_('Match rule set.'));
-		so.modalonly = true;
-		// so.validate = function(section_id, value) {
-		// 	if (section_id) {
-		// 		if(value && (!value.startsWith('geosite-') || !value.startsWith('geoip-'))){
-		// 			return _('Expecting: %s').format(_('Must start with geosite- or geoip-'));
-		// 		}
-		// 	}
-
-		// 	return true;
-		// }
-
-		so = ss.option(form.MultiValue, 'custom_rule_set', _('Custom rule set'),
-			_('Match custom rule set.'));
-		so.load = function(section_id) {
-			delete this.keylist;
-			delete this.vallist;
-
-			this.value('', _('-- Please choose --'));
-			uci.sections(data[0], 'custom_ruleset', (res) => {
-				if (res.enabled === '1')
-					this.value(res['.name'], res.label);
-			});
-
-			return this.super('load', section_id);
-		}
-		so.modalonly = true;
-
 		so = ss.option(form.DynamicList, 'domain', _('Domain name'),
 			_('Match full domain.'));
 		so.datatype = 'hostname';
@@ -590,6 +543,22 @@ return view.extend({
 
 		so = ss.option(form.DynamicList, 'user', _('User'),
 			_('Match user name.'));
+		so.modalonly = true;
+
+		so = ss.option(form.MultiValue, 'rule_set', _('Rule set'),
+			_('Match rule set.'));
+		so.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			this.value('', _('-- Please choose --'));
+			uci.sections(data[0], 'ruleset', (res) => {
+				if (res.enabled === '1')
+					this.value(res['.name'], res.label);
+			});
+
+			return this.super('load', section_id);
+		}
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'rule_set_ipcidr_match_source', _('Match source IP via rule set'),
@@ -836,35 +805,6 @@ return view.extend({
 		so.value('dns', _('DNS'));
 		so.value('stun', _('STUN'));
 
-		so = ss.option(form.DynamicList, 'rule_set', _('Rule set'),
-			_('Match rule set.'));
-		so.modalonly = true;
-		// so.validate = function(section_id, value) {
-		// 	if (section_id) {
-		// 		if(value && !value.startsWith('geosite-') && !value.startsWith('geoip-')){
-		// 			return _('Expecting: %s').format(_('Must start with geosite- or geoip-'));
-		// 		}
-		// 	}
-
-		// 	return true;
-		// }
-
-		so = ss.option(form.MultiValue, 'custom_rule_set', _('Custom rule set'),
-			_('Match custom rule set.'));
-		so.load = function(section_id) {
-			delete this.keylist;
-			delete this.vallist;
-
-			this.value('', _('-- Please choose --'));
-			uci.sections(data[0], 'custom_ruleset', (res) => {
-				if (res.enabled === '1')
-					this.value(res['.name'], res.label);
-			});
-
-			return this.super('load', section_id);
-		}
-		so.modalonly = true;
-
 		so = ss.option(form.DynamicList, 'domain', _('Domain name'),
 			_('Match full domain.'));
 		so.datatype = 'hostname';
@@ -934,6 +874,22 @@ return view.extend({
 			_('Match user name.'));
 		so.modalonly = true;
 
+		so = ss.option(form.MultiValue, 'rule_set', _('Rule set'),
+			_('Match rule set.'));
+		so.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			this.value('', _('-- Please choose --'));
+			uci.sections(data[0], 'ruleset', (res) => {
+				if (res.enabled === '1')
+					this.value(res['.name'], res.label);
+			});
+
+			return this.super('load', section_id);
+		}
+		so.modalonly = true;
+
 		so = ss.option(form.Flag, 'rule_set_ipcidr_match_source', _('Rule set IP CIDR as source IP'),
 			_('Make <code>ipcidr</code> in rule sets match the source IP.'));
 		so.default = so.disabled;
@@ -999,9 +955,9 @@ return view.extend({
 		/* DNS rules end */
 		/* Custom routing settings end */
 
-		/* Custom rule set settings start */
-		s.tab('custom_ruleset', _('Custom rule set'));
-		o = s.taboption('custom_ruleset', form.SectionValue, '_ruleset', form.GridSection, 'custom_ruleset');
+		/* Rule set settings start */
+		s.tab('ruleset', _('Rule set'));
+		o = s.taboption('ruleset', form.SectionValue, '_ruleset', form.GridSection, 'ruleset');
 		o.depends('routing_mode', 'custom');
 
 		ss = o.subsection;
@@ -1009,13 +965,13 @@ return view.extend({
 		ss.rowcolors = true;
 		ss.sortable = true;
 		ss.nodescriptions = true;
-		ss.modaltitle = L.bind(hp.loadModalTitle, this, _('Custom rule set'), _('Add a rule set'), data[0]);
+		ss.modaltitle = L.bind(hp.loadModalTitle, this, _('Rule set'), _('Add a rule set'), data[0]);
 		ss.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
 		ss.renderSectionAdd = L.bind(hp.renderSectionAdd, this, ss);
 
 		so = ss.option(form.Value, 'label', _('Label'));
 		so.load = L.bind(hp.loadDefaultLabel, this, data[0]);
-		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'custom_ruleset', 'label');
+		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'ruleset', 'label');
 		so.modalonly = true;
 
 		so = ss.option(form.Flag, 'enabled', _('Enable'));
@@ -1026,9 +982,8 @@ return view.extend({
 		so = ss.option(form.ListValue, 'type', _('Type'));
 		so.value('local', _('Local'));
 		so.value('remote', _('Remote'));
-		so.value('custom', _('Custom'));
-		so.default = 'custom';
-		so.rmempty = false;	
+		so.default = 'remote';
+		so.rmempty = false;
 
 		so = ss.option(form.ListValue, 'format', _('Format'));
 		so.value('source', _('Source file'));
@@ -1086,37 +1041,7 @@ return view.extend({
 		so = ss.option(form.Value, 'update_interval', _('Update interval'),
 			_('Update interval of rule set.<br/><code>1d</code> will be used if empty.'));
 		so.depends('type', 'remote');
-
-		/* type=local && format=source  start */
-		so = ss.option(form.DynamicList, 'domain', _('Domain name'),
-			_('Match full domain.'));
-		so.datatype = 'hostname';
-		so.depends({'type': 'custom'});
-		so.modalonly = true;
-
-		so = ss.option(form.DynamicList, 'domain_suffix', _('Domain suffix'),
-			_('Match domain suffix.'));
-		so.depends({'type': 'custom'});
-		so.modalonly = true;
-
-		so = ss.option(form.DynamicList, 'domain_keyword', _('Domain keyword'),
-			_('Match domain using keyword.'));
-		so.depends({'type': 'custom'});
-		so.modalonly = true;
-
-		so = ss.option(form.DynamicList, 'domain_regex', _('Domain regex'),
-			_('Match domain using regular expression.'));
-		so.depends({'type': 'custom'});
-		so.modalonly = true;
-
-		so = ss.option(form.DynamicList, 'ip_cidr', _('IP CIDR'),
-			_('Match IP CIDR.'));
-		so.datatype = 'or(cidr, ipaddr)';
-		so.depends({'type': 'custom'});
-		so.modalonly = true;
-
-		/* type=local && format=source  end*/
-		/* Custom rule set settings end */
+		/* Rule set settings end */
 
 		/* ACL settings start */
 		s.tab('control', _('Access Control'));

@@ -449,10 +449,6 @@ msgstr "默认域名解析策略。"
 msgid "Default outbound"
 msgstr "默认出站"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:345
-msgid "Official ruleset outbound"
-msgstr "官方规则集出站"
-
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1300
 msgid "Default packet encoding"
 msgstr "默认包封装格式"
@@ -1219,11 +1215,7 @@ msgstr "匹配进程路径。"
 msgid "Match query type."
 msgstr "匹配请求类型。"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:567
-#: htdocs/luci-static/resources/view/homeproxy/client.js:878
-msgid "Match custom rule set."
-msgstr "匹配自定义规则集。"
-
+#: htdocs/luci-static/resources/view/homeproxy/client.js:549
 #: htdocs/luci-static/resources/view/homeproxy/client.js:878
 msgid "Match rule set."
 msgstr "匹配规则集。"
@@ -1718,10 +1710,6 @@ msgstr "区域 ID"
 msgid "Remote"
 msgstr "远程"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:985
-msgid "Custom"
-msgstr "自定义"
-
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1344
 msgid "Remove %s nodes"
 msgstr "移除 %s 个节点"
@@ -1778,16 +1766,12 @@ msgstr "路由端口"
 msgid "Routing rule"
 msgstr "路由规则"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:566
+#: htdocs/luci-static/resources/view/homeproxy/client.js:548
 #: htdocs/luci-static/resources/view/homeproxy/client.js:877
 #: htdocs/luci-static/resources/view/homeproxy/client.js:959
 #: htdocs/luci-static/resources/view/homeproxy/client.js:968
 msgid "Rule set"
 msgstr "规则集"
-
-#: htdocs/luci-static/resources/view/homeproxy/client.js:570
-msgid "Custom rule set"
-msgstr "自定义规则集"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:893
 msgid "Rule set IP CIDR as source IP"
@@ -2594,10 +2578,6 @@ msgstr "有效 IP 地址"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1272
 msgid "valid URL"
 msgstr "有效网址"
-
-#: htdocs/luci-static/resources/view/homeproxy/client.js:908
-msgid "Must start with geosite- or geoip-"
-msgstr "geosite-或geoip-开头"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:206
 msgid "valid address#port"

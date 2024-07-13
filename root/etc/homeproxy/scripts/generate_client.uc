@@ -37,12 +37,7 @@ const uciroutingsetting = 'routing',
       uciroutingrule = 'routing_rule';
 
 const ucinode = 'node';
-/* const uciruleset = 'ruleset'; */
-const ucicustomruleset = 'custom_ruleset';
-
-const baseofficialsiteruleseturl = 'https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/';
-
-const baseofficialipruleseturl = 'https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/';
+const uciruleset = 'ruleset';
 
 const routing_mode = uci.get(uciconfig, ucimain, 'routing_mode') || 'bypass_mainland_china';
 
@@ -56,9 +51,7 @@ const dns_port = uci.get(uciconfig, uciinfra, 'dns_port') || '5333';
 
 let main_node, main_udp_node, dedicated_udp_node, default_outbound, sniff_override = '1',
     dns_server, dns_default_strategy, dns_default_server, dns_disable_cache, dns_disable_cache_expire,
-    dns_independent_cache, dns_client_subnet, direct_domain_list, official_ruleset_outbound;
-
-let officialruleset = [];
+    dns_independent_cache, dns_client_subnet, direct_domain_list;
 
 if (routing_mode !== 'custom') {
 	main_node = uci.get(uciconfig, ucimain, 'main_node') || 'nil';
@@ -84,7 +77,6 @@ if (routing_mode !== 'custom') {
 	/* Routing settings */
 	default_outbound = uci.get(uciconfig, uciroutingsetting, 'default_outbound') || 'nil';
 	sniff_override = uci.get(uciconfig, uciroutingsetting, 'sniff_override');
-	official_ruleset_outbound = uci.get(uciconfig, uciroutingsetting, 'official_ruleset_outbound') || 'nil';
 }
 
 const proxy_mode = uci.get(uciconfig, ucimain, 'proxy_mode') || 'redirect_tproxy',
@@ -313,42 +305,15 @@ function get_resolver(cfg) {
 		return 'cfg-' + cfg + '-dns';
 }
 
-function arrayContains(array, element){
-	for(let i in array){
-		if(i === element){
-			return true;
-		}
-	}
-	return false;
-}
-
 function get_ruleset(cfg) {
-	if (isEmpty(cfg.rule_set) && isEmpty(cfg.custom_rule_set))
+	if (isEmpty(cfg))
 		return null;
 
 	let rules = [];
-	
-	/* 添加官方规则集 */
-	if(!isEmpty(cfg.rule_set)) {
-		for(let i in cfg.rule_set) {
-			push(rules, isEmpty(i) ? null : i);
-
-			if(!isEmpty(i) && !arrayContains(officialruleset, i)){
-				push(officialruleset, i);
-			}
-			
-		}
-	}
-
-	/* 添加自定义规则集 */
-	if(!isEmpty(cfg.custom_rule_set)) {
-		for (let i in cfg.custom_rule_set)
-			push(rules, isEmpty(i) ? null : 'cfg-' + i + '-rule');
-	}
-	
+	for (let i in cfg)
+		push(rules, isEmpty(i) ? null : 'cfg-' + i + '-rule');
 	return rules;
 }
-
 /* Config helper end */
 
 const config = {};
@@ -472,7 +437,7 @@ if (!isEmpty(main_node)) {
 			process_name: cfg.process_name,
 			process_path: cfg.process_path,
 			user: cfg.user,
-			rule_set: get_ruleset(cfg),
+			rule_set: get_ruleset(cfg.rule_set),
 			rule_set_ipcidr_match_source: (cfg.rule_set_ipcidr_match_source === '1') || null,
 			invert: (cfg.invert === '1') || null,
 			outbound: get_outbound(cfg.outbound),
@@ -650,7 +615,7 @@ if (!isEmpty(main_node)) {
 			process_name: cfg.process_name,
 			process_path: cfg.process_path,
 			user: cfg.user,
-			rule_set: get_ruleset(cfg),
+			rule_set: get_ruleset(cfg.rule_set),
 			rule_set_ipcidr_match_source: (cfg.rule_set_ipcidr_match_source === '1') || null,
 			invert: (cfg.invert === '1') || null,
 			outbound: get_outbound(cfg.outbound)
@@ -660,79 +625,24 @@ if (!isEmpty(main_node)) {
 	config.route.final = get_outbound(default_outbound);
 };
 
-/* Custom rule set */
-
-/* 临时通过此种方式实现 */
-function strStartsWith(str, prefix){
-	if(length(str) < length(prefix)){
-		return false;
-	}
-	let strSplit = split(str, '-');
-	if(strSplit[0] === prefix){
-		return true;
-	}
-	return false;
-}
-
+/* Rule set */
 if (routing_mode === 'custom') {
-	/* 添加官方规则集 */
-	for(let ruletag in officialruleset) {
-		let url;
-		if(strStartsWith(ruletag, 'geosite')){
-			url = baseofficialsiteruleseturl + ruletag + '.srs';
-		} else if(strStartsWith(ruletag, 'geoip')){
-			url = baseofficialipruleseturl + ruletag + '.srs';
-		}
-		push(config.route.rule_set, {
-			type: 'remote',
-			tag: ruletag,
-			format: 'binary',
-			url: url,
-			download_detour: get_outbound(official_ruleset_outbound)
-		});
-	}
-
-	uci.foreach(uciconfig, ucicustomruleset, (cfg) => {
+	uci.foreach(uciconfig, uciruleset, (cfg) => {
 		if (cfg.enabled !== '1')
 			return null;
-		
-		/* 若是custom规则集则生成规则文件 */
-		let ruleType = cfg.type;
-		let filepath = cfg.path;
-		if(ruleType == 'custom'){
-			let rulesContent = [];
-			push(rulesContent, {
-				domain: cfg.domain,
-				domain_suffix: cfg.domain_suffix,
-				domain_keyword: cfg.domain_keyword,
-				domain_regex: cfg.domain_regex,
-				ip_cidr: cfg.ip_cidr
-			});
-			let customFileContent = {
-				version: 1,
-				rules: rulesContent
-			};
-			/* 写入文件 */
-			let tmpCustomPath = RUN_DIR + '/tmp_custom/';
-			/* 创建文件夹 */
-			system('mkdir -p ' + tmpCustomPath);
-			filepath = tmpCustomPath + cfg['.name'] + '.json';
-			writefile(filepath, sprintf('%.J\n', removeBlankAttrs(customFileContent)));
-			ruleType = 'local';
-		}
 
 		push(config.route.rule_set, {
-			type: ruleType,
+			type: cfg.type,
 			tag: 'cfg-' + cfg['.name'] + '-rule',
 			format: cfg.format,
-			path: filepath,
+			path: cfg.path,
 			url: cfg.url,
 			download_detour: get_outbound(cfg.outbound),
 			update_interval: cfg.update_interval
 		});
 	});
 }
-/* Custom routing rules end */
+/* Routing rules end */
 
 /* Experimental start */
 if (routing_mode === 'custom') {
