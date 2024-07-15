@@ -360,6 +360,20 @@ config.log = {
 	timestamp: true
 };
 
+/* 合并两个数组 */
+function mergeArrays(arr1, arr2) {
+	if(arr2 == null){
+		return arr1;
+	}
+	if(arr1 == null && arr2 != null){
+		return arr2;
+	}
+    for (let i in arr2) {
+        arr1.push(isEmpty(i) ? null : i);
+    }
+    return arr1;
+}
+
 /* DNS start */
 /* Default settings */
 config.dns = {
@@ -456,6 +470,7 @@ if (!isEmpty(main_node)) {
 		let domain_suffix;
 		let domain_keyword;
 		let domain_regex;
+		let ip_cidr;
 
 		/* 获取rule_set */
 		let rule_set_list = cfg.rule_set;
@@ -464,10 +479,11 @@ if (!isEmpty(main_node)) {
 			for(let rule_set_tag in rule_set_list){
 				let rule_set_type = uci.get(uciconfig, rule_set_tag, 'type');
 				if(rule_set_type === 'custom') {
-					domain = uci.get(uciconfig, rule_set_tag, 'domain');
-					domain_suffix = uci.get(uciconfig, rule_set_tag, 'domain_suffix');
-					domain_keyword = uci.get(uciconfig, rule_set_tag, 'domain_keyword');
-					domain_regex = uci.get(uciconfig, rule_set_tag, 'domain_regex');
+					domain = mergeArrays(domain, uci.get(uciconfig, rule_set_tag, 'domain'));
+					domain_suffix = mergeArrays(domain_suffix, uci.get(uciconfig, rule_set_tag, 'domain_suffix'));
+					domain_keyword = mergeArrays(domain_keyword, uci.get(uciconfig, rule_set_tag, 'domain_keyword'));
+					domain_regex = mergeArrays(domain_regex, uci.get(uciconfig, rule_set_tag, 'domain_regex'));
+					ip_cidr = mergeArrays(ip_cidr, uci.get(uciconfig, rule_set_tag, 'ip_cidr'));
 				}
 			}
 		}
@@ -485,7 +501,7 @@ if (!isEmpty(main_node)) {
 			port_range: cfg.port_range,
 			source_ip_cidr: cfg.source_ip_cidr,
 			source_ip_is_private: (cfg.source_ip_is_private === '1') || null,
-			ip_cidr: cfg.ip_cidr,
+			ip_cidr: ip_cidr,
 			ip_is_private: (cfg.ip_is_private === '1') || null,
 			source_port: parse_port(cfg.source_port),
 			source_port_range: cfg.source_port_range,
@@ -656,6 +672,7 @@ if (!isEmpty(main_node)) {
 		let domain_suffix;
 		let domain_keyword;
 		let domain_regex;
+		let ip_cidr;
 
 		/* 获取rule_set */
 		let rule_set_list = cfg.rule_set;
@@ -664,10 +681,11 @@ if (!isEmpty(main_node)) {
 			for(let rule_set_tag in rule_set_list){
 				let rule_set_type = uci.get(uciconfig, rule_set_tag, 'type');
 				if(rule_set_type === 'custom') {
-					domain = uci.get(uciconfig, rule_set_tag, 'domain');
-					domain_suffix = uci.get(uciconfig, rule_set_tag, 'domain_suffix');
-					domain_keyword = uci.get(uciconfig, rule_set_tag, 'domain_keyword');
-					domain_regex = uci.get(uciconfig, rule_set_tag, 'domain_regex');
+					domain = mergeArrays(domain, uci.get(uciconfig, rule_set_tag, 'domain'));
+					domain_suffix = mergeArrays(domain_suffix, uci.get(uciconfig, rule_set_tag, 'domain_suffix'));
+					domain_keyword = mergeArrays(domain_keyword, uci.get(uciconfig, rule_set_tag, 'domain_keyword'));
+					domain_regex = mergeArrays(domain_regex, uci.get(uciconfig, rule_set_tag, 'domain_regex'));
+					ip_cidr = mergeArrays(ip_cidr, uci.get(uciconfig, rule_set_tag, 'ip_cidr'));
 				}
 			}
 		}
@@ -682,7 +700,7 @@ if (!isEmpty(main_node)) {
 			domain_regex: domain_regex,
 			source_ip_cidr: cfg.source_ip_cidr,
 			source_ip_is_private: (cfg.source_ip_is_private === '1') || null,
-			ip_cidr: cfg.ip_cidr,
+			ip_cidr: ip_cidr,
 			ip_is_private: (cfg.ip_is_private === '1') || null,
 			source_port: parse_port(cfg.source_port),
 			source_port_range: cfg.source_port_range,
