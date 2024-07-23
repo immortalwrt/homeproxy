@@ -377,6 +377,12 @@ if (!isEmpty(main_node)) {
 			server: 'default-dns'
 		});
 
+	if (routing_mode === 'gfwlist')
+		push(config.dns.rules, {
+			query_type: [64, 65],
+			server: 'block-dns'
+		});
+
 	if (isEmpty(config.dns.rules))
 		config.dns.rules = null;
 
