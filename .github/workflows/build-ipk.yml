@@ -1,33 +1,9 @@
 name: Build ipk for HomeProxy
 
 on:
-  push:
-    branches:
-      - 'main-1.0'
-    paths:
-      - 'htdocs/**'
-      - 'po/**'
-      - 'root/**'
-      - 'Makefile'
-      - '.github/**'
-
-  pull_request:
-    branches:
-      - 'master'
-      - 'dev'
-    types:
-      - opened
-      - synchronize
-      - reopened
-    paths:
-      - 'htdocs/**'
-      - 'root/**'
-      - 'Makefile'
-      - '.github/**'
-
-  release:
-    types:
-      - published
+    workflow_dispatch:
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -55,9 +31,9 @@ jobs:
 
       - name: Publishing to GitHub Releases
         uses: svenstaro/upload-release-action@v2
-        if: github.event_name == 'release'
+        if: success()
         with:
           repo_token: ${{ github.token }}
           file: .github/*.ipk
-          tag: ${{ github.ref }}
+          tag: ${{ github.ref }}-$(date +'%Y%m%d%H%M')
           file_glob: true
