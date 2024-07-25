@@ -35,5 +35,5 @@ jobs:
         with:
           repo_token: ${{ github.token }}
           file: .github/*.ipk
-          tag: ${{ github.ref }}-$(date +'%Y%m%d%H%M')
+          tag: ${{ github.ref }}
           file_glob: true
