@@ -1943,7 +1943,7 @@ msgstr ""
 #: htdocs/luci-static/resources/view/homeproxy/node.js:392
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1263
 msgid ""
-"Support Hysteria, Shadowsocks(R), Trojan, v2rayN (VMess), and XTLS (VLESS) "
+"Support Hysteria, Shadowsocks, Trojan, v2rayN (VMess), and XTLS (VLESS) "
 "online configuration delivery standard."
 msgstr ""
 

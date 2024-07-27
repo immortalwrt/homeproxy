@@ -891,7 +891,7 @@ msgstr "主机名"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:436
 #: htdocs/luci-static/resources/view/homeproxy/client.js:768
 msgid "Host Fields"
-msgstr ""
+msgstr "主机字段"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:709
 msgid "Host key"
@@ -1121,7 +1121,7 @@ msgstr "主节点"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:905
 msgid "Make <code>ipcidr</code> in rule sets match the source IP."
-msgstr ""
+msgstr "使规则集中的 <code>ipcidr</code> 用于匹配源 IP。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:571
 msgid "Make IP CIDR in rule set used to match the source IP."
@@ -1139,7 +1139,7 @@ msgstr "伪装"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:857
 msgid "Match IP CIDR with query response."
-msgstr ""
+msgstr "使用查询响应匹配 IP CIDR。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:512
 msgid "Match IP CIDR."
@@ -1181,7 +1181,7 @@ msgstr "匹配端口。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:862
 msgid "Match private IP with query response."
-msgstr ""
+msgstr "使用查询响应匹配私有 IP。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:517
 msgid "Match private IP."
@@ -1420,7 +1420,7 @@ msgstr "仅代理中国大陆"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:435
 #: htdocs/luci-static/resources/view/homeproxy/client.js:767
 msgid "Other Fields"
-msgstr ""
+msgstr "其他字段"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:389
 #: htdocs/luci-static/resources/view/homeproxy/client.js:581
@@ -1517,7 +1517,7 @@ msgstr "端口 %s 已存在！"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:437
 #: htdocs/luci-static/resources/view/homeproxy/client.js:769
 msgid "Port Fields"
-msgstr ""
+msgstr "端口字段"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:537
 #: htdocs/luci-static/resources/view/homeproxy/client.js:841
@@ -1785,12 +1785,12 @@ msgstr "规则集 URL"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:438
 #: htdocs/luci-static/resources/view/homeproxy/client.js:770
 msgid "SRC-IP Fields"
-msgstr ""
+msgstr "源 IP 字段"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:439
 #: htdocs/luci-static/resources/view/homeproxy/client.js:771
 msgid "SRC-Port Fields"
-msgstr ""
+msgstr "源端口 字段"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:515
 msgid "SSH"
@@ -1982,11 +1982,11 @@ msgstr "更新成功。"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:392
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1263
 msgid ""
-"Support Hysteria, Shadowsocks(R), Trojan, v2rayN (VMess), and XTLS (VLESS) "
+"Support Hysteria, Shadowsocks, Trojan, v2rayN (VMess), and XTLS (VLESS) "
 "online configuration delivery standard."
 msgstr ""
-"支持 Hysteria、Shadowsocks(R)、Trojan、v2rayN（VMess）和 XTLS（VLESS）在线配"
-"置交付标准。"
+"支持 Hysteria、Shadowsocks、Trojan、v2rayN（VMess）和 XTLS（VLESS）在线配置交"
+"付标准。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:294
 msgid "System"
@@ -2615,39 +2615,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:268
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid ""
-#~ "The default rule uses the following matching logic:<br/><code>(domain || "
-#~ "domain_suffix || domain_keyword || domain_regex || ip_cidr || "
-#~ "ip_is_private)</code> &&<br/><code>(port || port_range)</code> &&<br/"
-#~ "><code>(source_ip_cidr || source_ip_is_private)</code> &&<br/"
-#~ "><code>(source_port || source_port_range)</code> &&<br/><code>other "
-#~ "fields</code>."
-#~ msgstr ""
-#~ "默认规则使用以下匹配逻辑：<br/><code>(domain || domain_suffix || "
-#~ "domain_keyword || domain_regex || ip_cidr || ip_is_private)</code> &&<br/"
-#~ "><code>(port || port_range)</code> &&<br/><code>(source_ip_cidr || "
-#~ "source_ip_is_private)</code> &&<br/><code>(source_port || "
-#~ "source_port_range)</code> &&<br/><code>other fields</code>。"
-
-#~ msgid ""
-#~ "The default rule uses the following matching logic:<br/><code>(domain || "
-#~ "domain_suffix || domain_keyword || domain_regex)</code> &&<br/"
-#~ "><code>(port || port_range)</code> &&<br/><code>(source_ip_cidr || "
-#~ "source_ip_is_private)</code> &&<br/><code>(source_port || "
-#~ "source_port_range)</code> &&<br/><code>other fields</code>."
-#~ msgstr ""
-#~ "默认规则使用以下匹配逻辑：<br/><code>(domain || domain_suffix || "
-#~ "domain_keyword || domain_regex)</code> &&<br/><code>(port || port_range)</"
-#~ "code> &&<br/><code>(source_ip_cidr || source_ip_is_private)</code> &&<br/"
-#~ "><code>(source_port || source_port_range)</code> &&<br/><code>other "
-#~ "fields</code>。"
-
-#~ msgid "Use DNS server from WAN"
-#~ msgstr "使用 WAN 下发的 DNS"
-
-#~ msgid "Use DNS server from WAN + 114DNS"
-#~ msgstr "使用 WAN DNS + 114DNS"
-
-#~ msgid "You can only have one server set. It MUST support TCP query."
-#~ msgstr "您只能设置一个服务器。它必须支持 TCP 查询。"
