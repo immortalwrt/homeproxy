@@ -6,6 +6,7 @@
 
 'use strict';
 'require form';
+'require fs';
 'require network';
 'require poll';
 'require rpc';
@@ -340,6 +341,13 @@ return view.extend({
 		}
 		so.default = 'nil';
 		so.rmempty = false;
+
+		so = ss.option(form.Button, '_reload_client', _('Quick Reload'));
+		so.inputtitle = _('Reload');
+		so.inputstyle = 'apply';
+		so.onclick = function() {
+			return fs.exec('/etc/init.d/homeproxy', ['reload']);
+		};
 		/* Routing settings end */
 
 		/* Routing nodes start */
