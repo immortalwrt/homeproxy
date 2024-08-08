@@ -1252,7 +1252,7 @@ return view.extend({
 		/* Subscription nodes start */
 		for (var suburl of uci.get(data[0], 'subscription', 'subscription_url')) {
 			const url = new URL(suburl);
-			const urlhash = hp.calcStringMD5(suburl);
+			const urlhash = hp.calcStringMD5(suburl.replace(/#.*$/, ''));
 			const title = url.hash ? decodeURIComponent(url.hash.slice(1)) : url.hostname;
 
 			s.tab('sub_' + urlhash, _('Sub (%s)').format(title));
