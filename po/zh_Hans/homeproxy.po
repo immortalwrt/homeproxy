@@ -1139,7 +1139,7 @@ msgstr "伪装"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:915
 msgid "Match <code>.outbounds[].server</code> domains."
-msgstr ""
+msgstr "匹配 <code>.outbounds[].server</code> 域名。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:857
 msgid "Match IP CIDR with query response."
