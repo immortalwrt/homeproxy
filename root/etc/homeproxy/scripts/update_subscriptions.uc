@@ -484,7 +484,6 @@ function main() {
 				continue;
 
 			const label = config.label;
-			config.label = null;
 			const confHash = calcStringMD5(sprintf('%J', config)),
 			      nameHash = calcStringMD5(label);
 			config.label = label;
