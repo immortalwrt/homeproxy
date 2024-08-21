@@ -716,6 +716,13 @@ return view.extend({
 		o.depends({'network': 'tcp', '!reverse': true});
 		o.modalonly = true;
 
+		o = s.option(form.Value, 'udp_timeout', _('UDP NAT expiration time'),
+			_('In seconds. <code>300</code> is used by default.'));
+		o.datatype = 'uinteger';
+		o.default = '300';
+		o.depends({'network': 'tcp', '!reverse': true});
+		o.modalonly = true;
+
 		o = s.option(form.Flag, 'sniff_override', _('Override destination'),
 			_('Override the connection destination address with the sniffed domain.'));
 		o.rmempty = false;
