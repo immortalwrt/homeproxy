@@ -277,7 +277,7 @@ return view.extend({
 		o.depends('type', 'tuic');
 		o.modalonly = true;
 
-		o = s.option(form.ListValue, 'tuic_auth_timeout', _('Auth timeout'),
+		o = s.option(form.Value, 'tuic_auth_timeout', _('Auth timeout'),
 			_('How long the server should wait for the client to send the authentication command (in seconds).'));
 		o.datatype = 'uinteger';
 		o.default = '3';
