@@ -797,7 +797,7 @@ msgstr "游戏模式 MAC 地址"
 #: htdocs/luci-static/resources/view/homeproxy/server.js:325
 #: htdocs/luci-static/resources/view/homeproxy/server.js:327
 msgid "Generate"
-msgstr ""
+msgstr "生成"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:282
 #: htdocs/luci-static/resources/view/homeproxy/node.js:835
@@ -1012,7 +1012,7 @@ msgstr "导入分享链接"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:317
 #: htdocs/luci-static/resources/view/homeproxy/server.js:783
 msgid "In seconds. <code>300</code> is used by default."
-msgstr ""
+msgstr "单位：秒。默认使用 <code>300</code>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:645
 msgid "Independent cache per server"
@@ -1632,7 +1632,7 @@ msgstr "代理模式"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:471
 msgid "Proxy protocol"
-msgstr ""
+msgstr "代理协议"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:484
 #: htdocs/luci-static/resources/view/homeproxy/client.js:824
@@ -2317,7 +2317,7 @@ msgstr "UDP 分片"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:316
 #: htdocs/luci-static/resources/view/homeproxy/server.js:782
 msgid "UDP NAT expiration time"
-msgstr ""
+msgstr "UDP NAT 过期时间"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1123
 msgid "UDP over TCP"
@@ -2476,7 +2476,7 @@ msgstr "WireGuard 要求 base64 编码的私钥。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:472
 msgid "Write proxy protocol in the connection header."
-msgstr ""
+msgstr "在连接头中写入代理协议。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:167
 #: htdocs/luci-static/resources/view/homeproxy/client.js:190
@@ -2647,6 +2647,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:283
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid "Match outbound."
-#~ msgstr "匹配出站。"
