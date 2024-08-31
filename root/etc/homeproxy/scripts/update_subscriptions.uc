@@ -536,29 +536,26 @@ function main() {
 		if (length(node_cache[cfg.grouphash]) === 0)
 			return null;
 
+		uci.delete(uciconfig, cfg['.name']);
+
 		if (!node_cache[cfg.grouphash] || !node_cache[cfg.grouphash][cfg['.name']]) {
-			uci.delete(uciconfig, cfg['.name']);
 			removed++;
 
 			log(sprintf('Removing node: %s.', cfg.label || cfg['name']));
 		} else {
-			map(keys(node_cache[cfg.grouphash][cfg['.name']]), (v) => {
-				uci.set(uciconfig, cfg['.name'], v, node_cache[cfg.grouphash][cfg['.name']][v]);
-			});
 			node_cache[cfg.grouphash][cfg['.name']].isExisting = true;
 		}
 	});
 	for (let nodes in node_result)
 		map(nodes, (node) => {
-			if (node.isExisting)
-				return null;
-
 			const nameHash = calcStringMD5(node.label);
 			uci.set(uciconfig, nameHash, 'node');
 			map(keys(node), (v) => uci.set(uciconfig, nameHash, v, node[v]));
 
-			added++;
-			log(sprintf('Adding node: %s.', node.label));
+			if (!node.isExisting) {
+				added++;
+				log(sprintf('Adding node: %s.', node.label));
+			}
 		});
 	uci.commit(uciconfig);
 
