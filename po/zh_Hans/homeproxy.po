@@ -2262,7 +2262,7 @@ msgstr ""
 #: htdocs/luci-static/resources/view/homeproxy/client.js:167
 #: htdocs/luci-static/resources/view/homeproxy/client.js:190
 msgid "ThreatBook Public DNS (117.50.10.10)"
-msgstr ""
+msgstr "微步在线公共 DNS（117.50.10.10）"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:662
 msgid ""
@@ -2647,6 +2647,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:283
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid "Xinfeng Public DNS (114.114.114.114)"
-#~ msgstr "信风公共 DNS（114.114.114.114）"
