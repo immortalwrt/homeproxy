@@ -668,7 +668,7 @@ if (routing_mode === 'custom') {
 	config.experimental = {
 		cache_file: {
 			enabled: true,
-			path: HP_DIR + '/cache.db',
+			path: RUN_DIR + '/cache.db',
 			store_rdrc: (cache_file_store_rdrc === '1') || null,
 			rdrc_timeout: cache_file_rdrc_timeout
 		}
