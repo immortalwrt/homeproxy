@@ -106,6 +106,17 @@ return view.extend({
 		var features = data[1],
 		    hosts = data[2]?.hosts;
 
+		/* Cache all configured proxy nodes, they will be called multiple times */
+		var proxy_nodes = {};
+		uci.sections(data[0], 'node', (res) => {
+			var nodeaddr = ((res.type === 'direct') ? res.override_address : res.address) || '',
+			    nodeport = ((res.type === 'direct') ? res.override_port : res.port) || '';
+
+			proxy_nodes[res['.name']] =
+				String.format('[%s] %s', res.type, res.label || ((stubValidator.apply('ip6addr', nodeaddr) ?
+					String.format('[%s]', nodeaddr) : nodeaddr) + ':' + nodeport));
+		});
+
 		m = new form.Map('homeproxy', _('HomeProxy'),
 			_('The modern ImmortalWrt proxy platform for ARM64/AMD64.'));
 
@@ -122,17 +133,6 @@ return view.extend({
 					E('p', { id: 'service_status' }, _('Collecting data...'))
 			]);
 		}
-
-		/* Cache all configured proxy nodes, they will be called multiple times */
-		var proxy_nodes = {};
-		uci.sections(data[0], 'node', (res) => {
-			var nodeaddr = ((res.type === 'direct') ? res.override_address : res.address) || '',
-			    nodeport = ((res.type === 'direct') ? res.override_port : res.port) || '';
-
-			proxy_nodes[res['.name']] =
-				String.format('[%s] %s', res.type, res.label || ((stubValidator.apply('ip6addr', nodeaddr) ?
-					String.format('[%s]', nodeaddr) : nodeaddr) + ':' + nodeport));
-		});
 
 		s = m.section(form.NamedSection, 'config', 'homeproxy');
 
@@ -383,7 +383,7 @@ return view.extend({
 		so.editable = true;
 
 		so = ss.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
-			_('If set, the server domain name will be resolved to IP before connecting.<br/>dns.strategy will be used if empty.'));
+			_('If set, the server domain name will be resolved to IP before connecting.<br/>'));
 		for (var i in hp.dns_strategy)
 			so.value(i, hp.dns_strategy[i]);
 		so.modalonly = true;
@@ -725,7 +725,7 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'address_strategy', _('Address strategy'),
-			_('The domain strategy for resolving the domain name in the address. dns.strategy will be used if empty.'));
+			_('The domain strategy for resolving the domain name in the address.'));
 		for (var i in hp.dns_strategy)
 			so.value(i, hp.dns_strategy[i]);
 		so.modalonly = true;
