@@ -52,13 +52,12 @@ jobs:
         if: github.event_name != 'release'
         with:
           name: ${{ env.ASSET_NAME }}
-          path: .github/*.ipk
+          path: .github/${{ env.ASSET_NAME }}
 
       - name: Publishing to GitHub Releases
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release'
         with:
           repo_token: ${{ github.token }}
-          file: .github/*.ipk
+          file: .github/${{ env.ASSET_NAME }}
           tag: ${{ github.ref }}
-          file_glob: true
