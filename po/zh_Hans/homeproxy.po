@@ -975,7 +975,7 @@ msgstr "如果设置，请求的域名将在路由前被解析为 IP 地址。"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:383
 msgid ""
 "If set, the server domain name will be resolved to IP before connecting.<br/>"
-msgstr ""
+msgstr "如果设置，服务器域名将在连接前被解析为 IP。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:742
 #: htdocs/luci-static/resources/view/homeproxy/server.js:406
@@ -2162,7 +2162,7 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:725
 msgid "The domain strategy for resolving the domain name in the address."
-msgstr ""
+msgstr "用于解析本 DNS 服务器的域名的策略。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1008
 #: htdocs/luci-static/resources/view/homeproxy/server.js:570
@@ -2641,14 +2641,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:283
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid ""
-#~ "If set, the server domain name will be resolved to IP before connecting."
-#~ "<br/>dns.strategy will be used if empty."
-#~ msgstr ""
-#~ "如果设置，服务器域名将在连接前被解析为 IP。<br/>默认使用 dns.strategy。"
-
-#~ msgid ""
-#~ "The domain strategy for resolving the domain name in the address. dns."
-#~ "strategy will be used if empty."
-#~ msgstr "用于解析本 DNS 服务器的域名的策略。默认使用 dns.strategy。"
