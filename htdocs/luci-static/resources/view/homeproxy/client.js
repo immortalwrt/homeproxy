@@ -234,14 +234,11 @@ return view.extend({
 
 		o = s.taboption('routing', form.Value, 'routing_port', _('Routing ports'),
 			_('Specify target ports to be proxied. Multiple ports must be separated by commas.'));
-		o.value('all', _('All ports'));
+		o.value('', _('All ports'));
 		o.value('common', _('Common ports only (bypass P2P traffic)'));
 		o.default = 'common';
-		o.rmempty = false;
 		o.validate = function(section_id, value) {
-			if (section_id && value !== 'all' && value !== 'common') {
-				if (!value)
-					return _('Expecting: %s').format(_('valid port value'));
+			if (section_id && value && value !== 'common') {
 
 				var ports = [];
 				for (var i of value.split(',')) {
