@@ -208,7 +208,7 @@ msgstr "自动更新"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1289
 msgid "Auto update subscriptions and geodata."
-msgstr ""
+msgstr "自动更新订阅和地理数据。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:637
 msgid "BBR"
@@ -2643,6 +2643,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:283
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid "Auto update subscriptions."
-#~ msgstr "自动更新订阅。"
