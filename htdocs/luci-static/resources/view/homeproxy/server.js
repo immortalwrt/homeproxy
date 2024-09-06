@@ -148,6 +148,7 @@ return view.extend({
 			o.value('hysteria2', _('Hysteria2'));
 			o.value('naive', _('NaïveProxy'));
 		}
+		o.value('mixed', _('Mixed'));
 		o.value('shadowsocks', _('Shadowsocks'));
 		o.value('socks', _('Socks'));
 		o.value('trojan', _('Trojan'));
@@ -169,13 +170,14 @@ return view.extend({
 
 		o = s.option(form.Value, 'username', _('Username'));
 		o.depends('type', 'http');
+		o.depends('type', 'mixed');
 		o.depends('type', 'naive');
 		o.depends('type', 'socks');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'password', _('Password'));
 		o.password = true;
-		o.depends({'type': /^(http|naive|socks)$/, 'username': /[\s\S]/});
+		o.depends({'type': /^(http|mixed|naive|socks)$/, 'username': /[\s\S]/});
 		o.depends('type', 'hysteria2');
 		o.depends('type', 'shadowsocks');
 		o.depends('type', 'trojan');
@@ -194,7 +196,7 @@ return view.extend({
 		o.validate = function(section_id, value) {
 			if (section_id) {
 				var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
-				var required_type = [ 'http', 'naive', 'socks', 'shadowsocks' ];
+				var required_type = [ 'http', 'mixed', 'naive', 'socks', 'shadowsocks' ];
 
 				if (required_type.includes(type)) {
 					if (type === 'shadowsocks') {
