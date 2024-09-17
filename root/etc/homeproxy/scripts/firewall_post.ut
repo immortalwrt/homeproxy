@@ -60,7 +60,7 @@ const proxy_mode = uci.get(cfgname, 'config', 'proxy_mode') || 'redirect_tproxy'
 let self_mark, redirect_port,
     tproxy_port, tproxy_mark,
     tun_name, tun_mark;
-
+const fwmask = uci.get(cfgname, 'infra', 'fwmask') || '0xffffff00';
 if (match(proxy_mode, /redirect/)) {
 	self_mark = uci.get(cfgname, 'infra', 'self_mark') || '100';
 	redirect_port = uci.get(cfgname, 'infra', 'redirect_port') || '5331';
@@ -564,7 +564,7 @@ chain homeproxy_mangle_tun_mark {
 	udp dport != @homeproxy_routing_port counter return
 	{% endif /* routing_port */ %}
 
-	counter mark set meta mark & 0xffffff00 | {{ tun_mark }}
+	counter mark set meta mark & {{fwmask}} | {{ tun_mark }}
 }
 
 chain homeproxy_mangle_tun {
@@ -621,13 +621,13 @@ chain homeproxy_mangle_tun {
 	{% endif /* routing_mode */ %}
 
 	{% if (!isEmpty(control_info.lan_gaming_mode_ipv4_ips)): %}
-	ip saddr {{ array_to_nftarr(control_info.lan_gaming_mode_ipv4_ips) }} counter mark set meta mark & 0xffffff00 |  {{ tun_mark }}
+	ip saddr {{ array_to_nftarr(control_info.lan_gaming_mode_ipv4_ips) }} counter mark set meta mark & {{fwmask}} |  {{ tun_mark }}
 	{% endif /* lan_gaming_mode_ipv4_ips */ %}
 	{% for (let ipv6 in control_info.lan_gaming_mode_ipv6_ips): %}
-	ip6 saddr {{ resolve_ipv6(ipv6) }} counter mark set meta mark & 0xffffff00 |  {{ tun_mark }}
+	ip6 saddr {{ resolve_ipv6(ipv6) }} counter mark set meta mark & {{fwmask}} |  {{ tun_mark }}
 	{% endfor /* lan_gaming_mode_ipv6_ips */ %}
 	{% if (!isEmpty(control_info.lan_gaming_mode_mac_addrs)): %}
-	ether saddr {{ array_to_nftarr(control_info.lan_gaming_mode_mac_addrs) }} counter mark set meta mark & 0xffffff00 | {{ tun_mark }}
+	ether saddr {{ array_to_nftarr(control_info.lan_gaming_mode_mac_addrs) }} counter mark set meta mark & {{fwmask}} | {{ tun_mark }}
 	{% endif /* lan_gaming_mode_mac_addrs */ %}
 
 	counter goto homeproxy_mangle_tun_mark
