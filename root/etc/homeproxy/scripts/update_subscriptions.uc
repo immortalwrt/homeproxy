@@ -102,7 +102,7 @@ function parse_uri(uri) {
 		switch (uri[0]) {
 		case 'http':
 		case 'https':
-			url = parseURL('http://' + uri[1]);
+			url = parseURL('http://' + uri[1]) || {};
 
 			config = {
 				label: url.hash ? urldecode(url.hash) : null,
@@ -117,11 +117,11 @@ function parse_uri(uri) {
 			break;
 		case 'hysteria':
 			/* https://github.com/HyNetwork/hysteria/wiki/URI-Scheme */
-			url = parseURL('http://' + uri[1]);
+			url = parseURL('http://' + uri[1]) || {};
 			params = url.searchParams;
 
 			if (!sing_features.with_quic || (params.protocol && params.protocol !== 'udp')) {
-				log(sprintf('Skipping unsupported %s node: %s.', 'hysteria', urldecode(url.hash) || url.hostname));
+				log(sprintf('Skipping unsupported %s node: %s.', uri[0], urldecode(url.hash) || url.hostname));
 				if (!sing_features.with_quic)
 					log(sprintf('Please rebuild sing-box with %s support!', 'QUIC'));
 
@@ -149,11 +149,11 @@ function parse_uri(uri) {
 		case 'hysteria2':
 		case 'hy2':
 			/* https://v2.hysteria.network/docs/developers/URI-Scheme/ */
-			url = parseURL('http://' + uri[1]);
+			url = parseURL('http://' + uri[1]) || {};
 			params = url.searchParams;
 
 			if (!sing_features.with_quic) {
-				log(sprintf('Skipping unsupported %s node: %s.', 'hysteria2', urldecode(url.hash) || url.hostname));
+				log(sprintf('Skipping unsupported %s node: %s.', uri[0], urldecode(url.hash) || url.hostname));
 				log(sprintf('Please rebuild sing-box with %s support!', 'QUIC'));
 				return null;
 			}
@@ -179,7 +179,7 @@ function parse_uri(uri) {
 		case 'socks4a':
 		case 'socsk5':
 		case 'socks5h':
-			url = parseURL('http://' + uri[1]);
+			url = parseURL('http://' + uri[1]) || {};
 
 			config = {
 				label: url.hash ? urldecode(url.hash) : null,
@@ -207,7 +207,7 @@ function parse_uri(uri) {
 			/* https://github.com/shadowsocks/shadowsocks-org/commit/78ca46cd6859a4e9475953ed34a2d301454f579e */
 
 			/* SIP002 format https://shadowsocks.org/guide/sip002.html */
-			url = parseURL('http://' + uri[1]);
+			url = parseURL('http://' + uri[1]) || {};
 
 			let ss_userinfo = {};
 			if (url.username && url.password)
@@ -241,7 +241,7 @@ function parse_uri(uri) {
 			break;
 		case 'trojan':
 			/* https://p4gefau1t.github.io/trojan-go/developer/url/ */
-			url = parseURL('http://' + uri[1]);
+			url = parseURL('http://' + uri[1]) || {};
 			params = url.searchParams || {};
 
 			config = {
@@ -272,11 +272,11 @@ function parse_uri(uri) {
 			break;
 		case 'tuic':
 			/* https://github.com/daeuniverse/dae/discussions/182 */
-			url = parseURL('http://' + uri[1]);
+			url = parseURL('http://' + uri[1]) || {};
 			params = url.searchParams || {};
 
 			if (!sing_features.with_quic) {
-				log(sprintf('Skipping unsupported %s node: %s.', 'TUIC', urldecode(url.hash) || url.hostname));
+				log(sprintf('Skipping unsupported %s node: %s.', uri[0], urldecode(url.hash) || url.hostname));
 				log(sprintf('Please rebuild sing-box with %s support!', 'QUIC'));
 
 				return null;
@@ -299,15 +299,15 @@ function parse_uri(uri) {
 			break;
 		case 'vless':
 			/* https://github.com/XTLS/Xray-core/discussions/716 */
-			url = parseURL('http://' + uri[1]);
+			url = parseURL('http://' + uri[1]) || {};
 			params = url.searchParams;
 
 			/* Unsupported protocol */
 			if (params.type === 'kcp') {
-				log(sprintf('Skipping sunsupported %s node: %s.', 'VLESS', urldecode(url.hash) || url.hostname));
+				log(sprintf('Skipping sunsupported %s node: %s.', uri[0], urldecode(url.hash) || url.hostname));
 				return null;
 			} else if (params.type === 'quic' && ((params.quicSecurity && params.quicSecurity !== 'none') || !sing_features.with_quic)) {
-				log(sprintf('Skipping sunsupported %s node: %s.', 'VLESS', urldecode(url.hash) || url.hostname));
+				log(sprintf('Skipping sunsupported %s node: %s.', uri[0], urldecode(url.hash) || url.hostname));
 				if (!sing_features.with_quic)
 					log(sprintf('Please rebuild sing-box with %s support!', 'QUIC'));
 
@@ -356,27 +356,27 @@ function parse_uri(uri) {
 		case 'vmess':
 			/* "Lovely" shadowrocket format */
 			if (match(uri, /&/)) {
-				log(sprintf('Skipping unsupported %s format.', 'VMess'));
+				log(sprintf('Skipping unsupported %s format.', uri[0]));
 				return null;
 			}
 
 			/* https://github.com/2dust/v2rayN/wiki/%E5%88%86%E4%BA%AB%E9%93%BE%E6%8E%A5%E6%A0%BC%E5%BC%8F%E8%AF%B4%E6%98%8E(ver-2) */
 			try {
-				uri = json(decodeBase64Str(uri[1]));
+				uri = json(decodeBase64Str(uri[1])) || {};
 			} catch(e) {
-				log(sprintf('Skipping unsupported %s format.', 'VMess'));
+				log(sprintf('Skipping unsupported %s format.', uri[0]));
 				return null;
 			}
 
 			if (uri.v != '2') {
-				log(sprintf('Skipping unsupported %s format.', 'VMess'));
+				log(sprintf('Skipping unsupported %s format.', uri[0]));
 				return null;
 			/* Unsupported protocol */
 			} else if (uri.net === 'kcp') {
-				log(sprintf('Skipping unsupported %s node: %s.', 'VMess', uri.ps || uri.add));
+				log(sprintf('Skipping unsupported %s node: %s.', uri[0], uri.ps || uri.add));
 				return null;
 			} else if (uri.net === 'quic' && ((uri.type && uri.type !== 'none') || uri.path || !sing_features.with_quic)) {
-				log(sprintf('Skipping unsupported %s node: %s.', 'VMess', uri.ps || uri.add));
+				log(sprintf('Skipping unsupported %s node: %s.', uri[0], uri.ps || uri.add));
 				if (!sing_features.with_quic)
 					log(sprintf('Please rebuild sing-box with %s support!', 'QUIC'));
 
