@@ -9,6 +9,7 @@
 
 import { readfile, writefile } from 'fs';
 import { isnan } from 'math';
+import { connect } from 'ubus';
 import { cursor } from 'uci';
 
 import {
@@ -16,6 +17,8 @@ import {
 	removeBlankAttrs, validateHostname, validation,
 	HP_DIR, RUN_DIR
 } from 'homeproxy';
+
+const ubus = connect();
 
 /* UCI config start */
 const uci = cursor();
@@ -41,11 +44,9 @@ const uciruleset = 'ruleset';
 
 const routing_mode = uci.get(uciconfig, ucimain, 'routing_mode') || 'bypass_mainland_china';
 
-let wan_dns = executeCommand('ifstatus wan | jsonfilter -e \'@["dns-server"][0]\'');
-if (wan_dns.exitcode === 0 && trim(wan_dns.stdout))
-	wan_dns = trim(wan_dns.stdout);
-else
-	wan_dns = (routing_mode in ['proxy_mainland_china', 'global']) ? '208.67.222.222' : '114.114.114.114';
+let wan_dns = ubus.call('network.interface', 'status', {'interface': 'wan'})?.['dns-server']?.[0];
+if (!wan_dns)
+	wan_dns = (routing_mode in ['proxy_mainland_china', 'global']) ? '8.8.8.8' : '223.5.5.5';
 
 const dns_port = uci.get(uciconfig, uciinfra, 'dns_port') || '5333';
 
