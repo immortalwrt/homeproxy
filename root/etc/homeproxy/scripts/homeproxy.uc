@@ -206,7 +206,7 @@ export function parseURL(url) {
 		return null;
 
 	if (objurl.userinfo) {
-		objurl.userinfo = replace(objurl.userinfo, /:([^:]+)$/, (_, val) => {
+		objurl.userinfo = replace(objurl.userinfo, /:(.+)$/, (_, val) => {
 			objurl.password = val;
 			return '';
 		});
