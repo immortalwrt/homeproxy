@@ -2430,7 +2430,7 @@ msgstr "用户"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1334
 msgid "User-Agent"
-msgstr ""
+msgstr "用户代理"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:423
 #: htdocs/luci-static/resources/view/homeproxy/server.js:171
