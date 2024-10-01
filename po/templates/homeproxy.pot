@@ -5,7 +5,7 @@ msgstr "Content-Type: text/plain; charset=UTF-8"
 msgid "%s log"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1408
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1411
 msgid "%s nodes removed"
 msgstr ""
 
@@ -99,7 +99,7 @@ msgid "All ports"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:982
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1334
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1337
 msgid "Allow insecure"
 msgstr ""
 
@@ -107,7 +107,7 @@ msgstr ""
 msgid "Allow insecure connection at TLS client."
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1335
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1338
 msgid "Allow insecure connection by default when add nodes from subscriptions."
 msgstr ""
 
@@ -137,7 +137,7 @@ msgstr ""
 msgid "Alternative TLS port"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1371
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1374
 msgid "An error occurred during updating subscriptions: %s"
 msgstr ""
 
@@ -426,7 +426,7 @@ msgstr ""
 msgid "Default outbound"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1342
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1345
 msgid "Default packet encoding"
 msgstr ""
 
@@ -1318,7 +1318,7 @@ msgstr ""
 msgid "NOT RUNNING"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1348
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1351
 msgid "NOTE: Save current settings before updating subscriptions."
 msgstr ""
 
@@ -1352,11 +1352,11 @@ msgstr ""
 msgid "No additional encryption support: It's basically duplicate encryption."
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1364
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1367
 msgid "No subscription available"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1389
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1392
 msgid "No subscription node"
 msgstr ""
 
@@ -1701,11 +1701,11 @@ msgstr ""
 msgid "Remote"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1386
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1389
 msgid "Remove %s nodes"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1376
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1379
 msgid "Remove all nodes from subscriptions"
 msgstr ""
 
@@ -1804,11 +1804,11 @@ msgstr ""
 msgid "Same as main node"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1350
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1353
 msgid "Save current settings"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1347
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1350
 msgid "Save subscriptions settings"
 msgstr ""
 
@@ -2184,7 +2184,7 @@ msgid ""
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:985
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1337
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1340
 msgid ""
 "This is <strong>DANGEROUS</strong>, your traffic is almost like "
 "<strong>PLAIN TEXT</strong>! Use at your own risk!"
@@ -2292,7 +2292,7 @@ msgstr ""
 msgid "Unsupported fingerprint!"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1361
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1364
 msgid "Update %s subscriptions"
 msgstr ""
 
@@ -2308,7 +2308,7 @@ msgstr ""
 msgid "Update interval of rule set.<br/><code>1d</code> will be used if empty."
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1356
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1359
 msgid "Update nodes from subscriptions"
 msgstr ""
 
@@ -2365,6 +2365,10 @@ msgstr ""
 msgid "User"
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1334
+msgid "User-Agent"
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:423
 #: htdocs/luci-static/resources/view/homeproxy/server.js:171
 msgid "Username"
@@ -2419,7 +2423,7 @@ msgid "Write proxy protocol in the connection header."
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:828
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1345
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1348
 msgid "Xudp (Xray-core)"
 msgstr ""
 
@@ -2481,12 +2485,12 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:567
 #: htdocs/luci-static/resources/view/homeproxy/node.js:826
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1343
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1346
 msgid "none"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:827
-#: htdocs/luci-static/resources/view/homeproxy/node.js:1344
+#: htdocs/luci-static/resources/view/homeproxy/node.js:1347
 msgid "packet addr (v2ray-core v5+)"
 msgstr ""
 
