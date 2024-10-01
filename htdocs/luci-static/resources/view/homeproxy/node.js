@@ -1331,6 +1331,9 @@ return view.extend({
 		o.depends({'filter_nodes': 'disabled', '!reverse': true});
 		o.rmempty = false;
 
+		o = s.taboption('subscription', form.Value, 'user_agent', _('User-Agent'));
+		o.placeholder = 'Wget/1.21 (HomeProxy, like v2rayN)';
+
 		o = s.taboption('subscription', form.Flag, 'allow_insecure', _('Allow insecure'),
 			_('Allow insecure connection by default when add nodes from subscriptions.') +
 			'<br/>' +

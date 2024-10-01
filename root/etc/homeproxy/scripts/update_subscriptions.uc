@@ -31,6 +31,7 @@ const ucimain = 'config',
       ucisubscription = 'subscription';
 
 const allow_insecure = uci.get(uciconfig, ucisubscription, 'allow_insecure') || '0',
+      user_agent = uci.get(uciconfig, ucisubscription, 'user_agent'),
       filter_mode = uci.get(uciconfig, ucisubscription, 'filter_nodes') || 'disabled',
       filter_keywords = uci.get(uciconfig, ucisubscription, 'filter_keywords') || [],
       packet_encoding = uci.get(uciconfig, ucisubscription, 'packet_encoding') || 'xudp',
@@ -457,7 +458,7 @@ function main() {
 		const groupHash = calcStringMD5(url);
 		node_cache[groupHash] = {};
 
-		const res = wGET(url);
+		const res = wGET(url, user_agent);
 		if (isEmpty(res)) {
 			log(sprintf('Failed to fetch resources from %s.', url));
 			continue;
