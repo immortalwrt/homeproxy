@@ -11,6 +11,7 @@ on:
       - 'root/**'
       - 'Makefile'
       - '.github/**'
+      - '!.github/ISSUE_TEMPLATE/**'
 
   pull_request:
     branches:
@@ -25,6 +26,7 @@ on:
       - 'root/**'
       - 'Makefile'
       - '.github/**'
+      - '!.github/ISSUE_TEMPLATE/**'
 
   release:
     types:
