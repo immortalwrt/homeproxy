@@ -26,6 +26,44 @@ body:
       label: Steps to reproduce
       description: Steps to reproduce the reported behaviour.
   - type: textarea
+    id: lucilog
+    attributes:
+      label: HomeProxy log
+      description: |
+        The HomeProxy log file where the error occurred (use command below).
+        ```cat /var/run/homeproxy/homeproxy.log```
+    validations:
+      required: false
+  - type: textarea
+    id: corelog
+    attributes:
+      label: sing-box log
+      description: |
+        The sing-box log file where the error occurred (use command below).
+        For client: ```cat /var/run/homeproxy/sing-box-c.log```
+        For server: ```cat /var/run/homeproxy/sing-box-s.log```
+    validations:
+      required: true
+  - type: textarea
+    id: luciconfig
+    attributes:
+      label: HomeProxy configuration
+      description: |
+        The HomeProxy configuration file where the error occurred (use command below).
+        ```cat /etc/config/homeproxy```
+    validations:
+      required: true
+  - type: textarea
+    id: coreconfig
+    attributes:
+      label: sing-box configuration
+      description: |
+        The sing-box configuration file where the error occurred (use command below).
+        For client: ```cat /var/run/homeproxy/sing-box-c.json```
+        For server: ```cat /var/run/homeproxy/sing-box-s.json```
+    validations:
+      required: true
+  - type: textarea
     id: osversion
     attributes:
       label: OpenWrt/ImmortalWrt version
@@ -66,5 +104,5 @@ body:
           required: true
         - label: I confirm that I have not mixed iptables and nftables rules.
           required: true
-        - label: I confirm that I just selected all terms blindly.
+        - label: I confirm that I have selected all terms blindly.
           required: false
