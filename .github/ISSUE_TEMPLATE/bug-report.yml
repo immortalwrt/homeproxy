@@ -26,25 +26,6 @@ body:
       label: Steps to reproduce
       description: Steps to reproduce the reported behaviour.
   - type: textarea
-    id: lucilog
-    attributes:
-      label: HomeProxy log
-      description: |
-        The HomeProxy log file where the error occurred (use command below).
-        ```cat /var/run/homeproxy/homeproxy.log```
-    validations:
-      required: false
-  - type: textarea
-    id: corelog
-    attributes:
-      label: sing-box log
-      description: |
-        The sing-box log file where the error occurred (use command below).
-        For client: ```cat /var/run/homeproxy/sing-box-c.log```
-        For server: ```cat /var/run/homeproxy/sing-box-s.log```
-    validations:
-      required: true
-  - type: textarea
     id: luciconfig
     attributes:
       label: HomeProxy configuration
@@ -64,21 +45,40 @@ body:
     validations:
       required: true
   - type: textarea
-    id: osversion
+    id: lucilog
     attributes:
-      label: OpenWrt/ImmortalWrt version
+      label: HomeProxy log
       description: |
-        The OpenWrt/ImmortalWrt release or commit hash where this bug occurs (use command below).
-        ```. /etc/openwrt_release && echo $DISTRIB_RELEASE```
+        The HomeProxy log file where the error occurred (use command below).
+        ```cat /var/run/homeproxy/homeproxy.log```
+    validations:
+      required: false
+  - type: textarea
+    id: corelog
+    attributes:
+      label: sing-box log
+      description: |
+        The sing-box log file where the error occurred (use command below).
+        For client: ```cat /var/run/homeproxy/sing-box-c.log```
+        For server: ```cat /var/run/homeproxy/sing-box-s.log```
     validations:
       required: true
-  - type: textarea
+  - type: input
     id: osrelease
     attributes:
       label: OpenWrt/ImmortalWrt release
       description: |
         The OpenWrt/ImmortalWrt release or commit hash where this bug occurs (use command below).
         ```. /etc/openwrt_release && echo $DISTRIB_RELEASE```
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      description: |
+        The device exhibiting this bug (if unsure, use command below).
+        ```cat /tmp/sysinfo/model```
     validations:
       required: true
   - type: textarea
