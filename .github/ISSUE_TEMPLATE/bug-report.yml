@@ -1,0 +1,70 @@
+name: Bug report
+description: Create a bug report to help us improve.
+labels:
+  - bug
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description
+      description: A clear and concise description of the bug.
+    validations:
+      required: true
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: Actual behavior
+      description: A clear and concise description of what actually happens.
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Steps to reproduce the reported behaviour.
+  - type: textarea
+    id: osversion
+    attributes:
+      label: OpenWrt/ImmortalWrt version
+      description: |
+        The OpenWrt/ImmortalWrt release or commit hash where this bug occurs (use command below).
+        ```. /etc/openwrt_release && echo $DISTRIB_RELEASE```
+    validations:
+      required: true
+  - type: textarea
+    id: osrelease
+    attributes:
+      label: OpenWrt/ImmortalWrt release
+      description: |
+        The OpenWrt/ImmortalWrt release or commit hash where this bug occurs (use command below).
+        ```. /etc/openwrt_release && echo $DISTRIB_RELEASE```
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional information
+      description: Add any additional info you think might be helfpul.
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Terms
+      description: Please check the following before submitting the issue.
+      options:
+        - label: I confirm that the HomeProxy I installed is from official source, like GitHub artifacts or official ImmortalWrt opkg feeds.
+          required: true
+        - label: I confirm that the Homeproxy I installed does not contain Clash mode support.
+          required: true
+        - label: I confirm that the version of OpenWrt/ImmortalWrt I installed is >= 23.05.
+          required: true
+        - label: I confirm that I have installed the latest version of HomeProxy and sing-box.
+          required: true
+        - label: I confirm that I have read the sing-box documentation, understand the meaning of all the configuration items I added.
+          required: true
+        - label: I confirm that I have not mixed iptables and nftables rules.
+          required: true
+        - label: I confirm that I just selected all terms blindly.
+          required: false
