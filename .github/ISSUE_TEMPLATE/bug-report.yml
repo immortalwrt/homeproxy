@@ -69,7 +69,7 @@ body:
       label: OpenWrt/ImmortalWrt release
       description: |
         The OpenWrt/ImmortalWrt release or commit hash where this bug occurs (use command below).
-        ```. /etc/openwrt_release && echo $DISTRIB_RELEASE```
+        ```. /etc/openwrt_release && echo $DISTRIB_RELEASE $DISTRIB_REVISION```
     validations:
       required: true
   - type: input
