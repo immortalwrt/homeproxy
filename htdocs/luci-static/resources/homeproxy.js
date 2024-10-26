@@ -63,6 +63,16 @@ return baseclass.extend({
 		'1.3'
 	],
 
+	CBIStaticList: form.DynamicList.extend({
+		__name__: 'CBI.StaticList',
+
+		renderWidget: function(/* ... */) {
+			var dl = form.DynamicList.prototype.renderWidget.apply(this, arguments);
+			dl.querySelector('.add-item ul > li[data-value="-"]').remove();
+			return dl;
+		}
+	}),
+
 	calcStringMD5: function(e) {
 		/* Thanks to https://stackoverflow.com/a/41602636 */
 		function h(a, b) {

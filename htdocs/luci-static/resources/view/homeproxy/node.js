@@ -1004,7 +1004,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.depends('tls', '1');
 	o.modalonly = true;
 
-	o = s.option(form.MultiValue, 'tls_cipher_suites', _('Cipher suites'),
+	o = s.option(hp.CBIStaticList, 'tls_cipher_suites', _('Cipher suites'),
 		_('The elliptic curves that will be used in an ECDHE handshake, in preference order. If empty, the default will be used.'));
 	for (var i of hp.tls_cipher_suites)
 		o.value(i);
