@@ -687,12 +687,12 @@ msgstr ""
 msgid "Encrypt method"
 msgstr ""
 
-#: htdocs/luci-static/resources/homeproxy.js:221
-#: htdocs/luci-static/resources/homeproxy.js:255
-#: htdocs/luci-static/resources/homeproxy.js:263
-#: htdocs/luci-static/resources/homeproxy.js:272
-#: htdocs/luci-static/resources/homeproxy.js:281
-#: htdocs/luci-static/resources/homeproxy.js:283
+#: htdocs/luci-static/resources/homeproxy.js:231
+#: htdocs/luci-static/resources/homeproxy.js:265
+#: htdocs/luci-static/resources/homeproxy.js:273
+#: htdocs/luci-static/resources/homeproxy.js:282
+#: htdocs/luci-static/resources/homeproxy.js:291
+#: htdocs/luci-static/resources/homeproxy.js:293
 #: htdocs/luci-static/resources/view/homeproxy/client.js:75
 #: htdocs/luci-static/resources/view/homeproxy/client.js:176
 #: htdocs/luci-static/resources/view/homeproxy/client.js:178
@@ -726,7 +726,7 @@ msgstr ""
 msgid "External account key ID"
 msgstr ""
 
-#: htdocs/luci-static/resources/homeproxy.js:245
+#: htdocs/luci-static/resources/homeproxy.js:255
 msgid "Failed to upload %s, error: %s."
 msgstr ""
 
@@ -2431,7 +2431,7 @@ msgstr ""
 msgid "You can only have two servers set at maximum."
 msgstr ""
 
-#: htdocs/luci-static/resources/homeproxy.js:243
+#: htdocs/luci-static/resources/homeproxy.js:253
 msgid "Your %s was successfully uploaded. Size: %sB."
 msgstr ""
 
@@ -2473,8 +2473,8 @@ msgstr ""
 msgid "gVisor"
 msgstr ""
 
-#: htdocs/luci-static/resources/homeproxy.js:263
-#: htdocs/luci-static/resources/homeproxy.js:281
+#: htdocs/luci-static/resources/homeproxy.js:273
+#: htdocs/luci-static/resources/homeproxy.js:291
 #: htdocs/luci-static/resources/view/homeproxy/client.js:176
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1025
 #: htdocs/luci-static/resources/view/homeproxy/node.js:452
@@ -2524,12 +2524,12 @@ msgstr ""
 msgid "unchecked"
 msgstr ""
 
-#: htdocs/luci-static/resources/homeproxy.js:221
+#: htdocs/luci-static/resources/homeproxy.js:231
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1255
 msgid "unique UCI identifier"
 msgstr ""
 
-#: htdocs/luci-static/resources/homeproxy.js:272
+#: htdocs/luci-static/resources/homeproxy.js:282
 msgid "unique value"
 msgstr ""
 
@@ -2564,7 +2564,7 @@ msgstr ""
 msgid "valid address#port"
 msgstr ""
 
-#: htdocs/luci-static/resources/homeproxy.js:255
+#: htdocs/luci-static/resources/homeproxy.js:265
 msgid "valid base64 key with %d characters"
 msgstr ""
 
@@ -2581,6 +2581,6 @@ msgstr ""
 msgid "valid port value"
 msgstr ""
 
-#: htdocs/luci-static/resources/homeproxy.js:283
+#: htdocs/luci-static/resources/homeproxy.js:293
 msgid "valid uuid"
 msgstr ""
