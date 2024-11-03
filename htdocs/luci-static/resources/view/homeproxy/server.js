@@ -522,6 +522,7 @@ return view.extend({
 		o.depends('type', 'hysteria2');
 		o.depends('type', 'naive');
 		o.depends('type', 'trojan');
+		o.depends('type', 'tuic');
 		o.depends('type', 'vless');
 		o.depends('type', 'vmess');
 		o.rmempty = false;
