@@ -708,12 +708,12 @@ msgstr "启用 SUoT 协议，需要服务端支持。与多路复用冲突。"
 msgid "Encrypt method"
 msgstr "加密方式"
 
-#: htdocs/luci-static/resources/homeproxy.js:221
-#: htdocs/luci-static/resources/homeproxy.js:255
-#: htdocs/luci-static/resources/homeproxy.js:263
-#: htdocs/luci-static/resources/homeproxy.js:272
-#: htdocs/luci-static/resources/homeproxy.js:281
-#: htdocs/luci-static/resources/homeproxy.js:283
+#: htdocs/luci-static/resources/homeproxy.js:231
+#: htdocs/luci-static/resources/homeproxy.js:265
+#: htdocs/luci-static/resources/homeproxy.js:273
+#: htdocs/luci-static/resources/homeproxy.js:282
+#: htdocs/luci-static/resources/homeproxy.js:291
+#: htdocs/luci-static/resources/homeproxy.js:293
 #: htdocs/luci-static/resources/view/homeproxy/client.js:75
 #: htdocs/luci-static/resources/view/homeproxy/client.js:176
 #: htdocs/luci-static/resources/view/homeproxy/client.js:178
@@ -747,7 +747,7 @@ msgstr "外部账户 MAC 密钥"
 msgid "External account key ID"
 msgstr "外部账户密钥标识符"
 
-#: htdocs/luci-static/resources/homeproxy.js:245
+#: htdocs/luci-static/resources/homeproxy.js:255
 msgid "Failed to upload %s, error: %s."
 msgstr "上传 %s 失败，错误：%s。"
 
@@ -2494,7 +2494,7 @@ msgstr "Xudp (Xray-core)"
 msgid "You can only have two servers set at maximum."
 msgstr "您最多只能设置两个服务器。"
 
-#: htdocs/luci-static/resources/homeproxy.js:243
+#: htdocs/luci-static/resources/homeproxy.js:253
 msgid "Your %s was successfully uploaded. Size: %sB."
 msgstr "您的 %s 已成功上传。大小：%sB。"
 
@@ -2536,8 +2536,8 @@ msgstr "gRPC 服务名称"
 msgid "gVisor"
 msgstr "gVisor"
 
-#: htdocs/luci-static/resources/homeproxy.js:263
-#: htdocs/luci-static/resources/homeproxy.js:281
+#: htdocs/luci-static/resources/homeproxy.js:273
+#: htdocs/luci-static/resources/homeproxy.js:291
 #: htdocs/luci-static/resources/view/homeproxy/client.js:176
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1025
 #: htdocs/luci-static/resources/view/homeproxy/node.js:452
@@ -2588,12 +2588,12 @@ msgstr ""
 msgid "unchecked"
 msgstr "未检查"
 
-#: htdocs/luci-static/resources/homeproxy.js:221
+#: htdocs/luci-static/resources/homeproxy.js:231
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1255
 msgid "unique UCI identifier"
 msgstr "独立 UCI 标识"
 
-#: htdocs/luci-static/resources/homeproxy.js:272
+#: htdocs/luci-static/resources/homeproxy.js:282
 msgid "unique value"
 msgstr "独立值"
 
@@ -2628,7 +2628,7 @@ msgstr "有效网址"
 msgid "valid address#port"
 msgstr "有效 地址#端口"
 
-#: htdocs/luci-static/resources/homeproxy.js:255
+#: htdocs/luci-static/resources/homeproxy.js:265
 msgid "valid base64 key with %d characters"
 msgstr "包含 %d 个字符的有效 base64 密钥"
 
@@ -2645,6 +2645,6 @@ msgstr "有效端口范围（port1:port2）"
 msgid "valid port value"
 msgstr "有效端口值"
 
-#: htdocs/luci-static/resources/homeproxy.js:283
+#: htdocs/luci-static/resources/homeproxy.js:293
 msgid "valid uuid"
 msgstr "有效 uuid"
