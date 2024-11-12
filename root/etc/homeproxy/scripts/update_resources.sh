@@ -67,8 +67,7 @@ check_list_update() {
 		log "[$(to_upper "$listtype")] Local version: $local_list_ver, latest version: $list_ver."
 	fi
 
-	$wget "https://fastly.jsdelivr.net/gh/$listrepo@$list_sha/$listname" -O "$RUN_DIR/$listname"
-	if [ ! -s "$RUN_DIR/$listname" ]; then
+	if ! $wget "https://fastly.jsdelivr.net/gh/$listrepo@$list_sha/$listname" -O "$RUN_DIR/$listname" || [ ! -s "$RUN_DIR/$listname" ]; then
 		rm -f "$RUN_DIR/$listname"
 		log "[$(to_upper "$listtype")] Update failed."
 
