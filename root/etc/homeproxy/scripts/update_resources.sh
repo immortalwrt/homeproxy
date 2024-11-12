@@ -68,7 +68,7 @@ check_list_update() {
 	fi
 
 	$wget "https://fastly.jsdelivr.net/gh/$listrepo@$list_sha/$listname" -O "$RUN_DIR/$listname"
-	if [ ! -s "$RUN_DIR/$listname" ]; then
+	if [ $? -eq 0 ] && [ ! -s "$RUN_DIR/$listname" ]; then
 		rm -f "$RUN_DIR/$listname"
 		log "[$(to_upper "$listtype")] Update failed."
 
