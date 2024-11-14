@@ -68,20 +68,18 @@ check_list_update() {
 	fi
 
 	$wget "https://fastly.jsdelivr.net/gh/$listrepo@$list_sha/$listname" -O "$RUN_DIR/$listname"
-	if [ $? -eq 0 ] && [ ! -s "$RUN_DIR/$listname" ]; then
+	if [ $? -eq 0 ] && [ -s "$RUN_DIR/$listname" ]; then
+ 		mv -f "$RUN_DIR/$listname" "$RESOURCES_DIR/$listtype.${listname##*.}"
+		echo -e "$list_ver" > "$RESOURCES_DIR/$listtype.ver"
+		log "[$(to_upper "$listtype")] Successfully updated."
+		return 0
+  	else
 		rm -f "$RUN_DIR/$listname"
 		log "[$(to_upper "$listtype")] Update failed."
-
-		set_lock "remove" "$listtype"
 		return 1
 	fi
-
-	mv -f "$RUN_DIR/$listname" "$RESOURCES_DIR/$listtype.${listname##*.}"
-	echo -e "$list_ver" > "$RESOURCES_DIR/$listtype.ver"
-	log "[$(to_upper "$listtype")] Successfully updated."
-
-	set_lock "remove" "$listtype"
-	return 0
+ 
+	set_lock "remove" "$listtype"	
 }
 
 case "$1" in
