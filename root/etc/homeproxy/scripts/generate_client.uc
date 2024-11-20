@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: GPL-2.0-only
  *
- * Copyright (C) 2023 ImmortalWrt.org
+ * Copyright (C) 2023-2024 ImmortalWrt.org
  */
 
 'use strict';
@@ -19,6 +19,8 @@ import {
 } from 'homeproxy';
 
 const ubus = connect();
+
+const features = ubus.call('luci.homeproxy', 'singbox_get_features') || {};
 
 /* UCI config start */
 const uci = cursor();
@@ -456,7 +458,9 @@ if (!isEmpty(main_node)) {
 			process_path: cfg.process_path,
 			user: cfg.user,
 			rule_set: get_ruleset(cfg.rule_set),
-			rule_set_ipcidr_match_source: (cfg.rule_set_ipcidr_match_source === '1') || null,
+			/* rule_set_ipcidr_match_source is deprecated in sing-box 1.10.0 */
+			rule_set_ipcidr_match_source: (features.version < '1.10.0' && cfg.rule_set_ip_cidr_match_source  === '1') || null,
+			rule_set_ip_cidr_match_source: (features.version >= '1.10.0' && cfg.rule_set_ip_cidr_match_source  === '1') || null,
 			invert: (cfg.invert === '1') || null,
 			outbound: get_outbound(cfg.outbound),
 			server: get_resolver(cfg.server),
@@ -643,7 +647,9 @@ if (!isEmpty(main_node)) {
 			process_path: cfg.process_path,
 			user: cfg.user,
 			rule_set: get_ruleset(cfg.rule_set),
-			rule_set_ipcidr_match_source: (cfg.rule_set_ipcidr_match_source === '1') || null,
+			/* rule_set_ipcidr_match_source is deprecated in sing-box 1.10.0 */
+			rule_set_ipcidr_match_source: (features.version < '1.10.0' && cfg.rule_set_ip_cidr_match_source  === '1') || null,
+			rule_set_ip_cidr_match_source: (features.version >= '1.10.0' && cfg.rule_set_ip_cidr_match_source  === '1') || null,
 			invert: (cfg.invert === '1') || null,
 			outbound: get_outbound(cfg.outbound)
 		});

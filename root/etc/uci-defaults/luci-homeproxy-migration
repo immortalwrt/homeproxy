@@ -18,4 +18,6 @@ fi
 
 [ -z "$(uci -q changes "homeproxy")" ] || uci -q commit "homeproxy"
 
+sed -i "s/rule_set_ipcidr_match_source/rule_set_ip_cidr_match_source/g" "/etc/config/homeproxy"
+
 exit 0
