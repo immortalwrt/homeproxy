@@ -525,8 +525,10 @@ if (match(proxy_mode, /tun/))
 		tag: 'tun-in',
 
 		interface_name: tun_name,
-		inet4_address: tun_addr4,
-		inet6_address: (ipv6_support === '1') ? tun_addr6 : null,
+		/* inet4_address and inet6_address are deprecated in sing-box 1.10.0 */
+		inet4_address: (features.version < '1.10.0') ? tun_addr4 : null,
+		inet6_address: (features.version < '1.10.0' && ipv6_support === '1') ? tun_addr6 : null,
+		address: (features.version >= '1.10.0') ? ((ipv6_support === '1') ? [tun_addr4, tun_addr6] : [tun_addr4]) : null,
 		mtu: strToInt(tun_mtu),
 		gso: (tun_gso === '1'),
 		auto_route: false,
