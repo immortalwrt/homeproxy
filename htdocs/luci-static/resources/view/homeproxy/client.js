@@ -928,7 +928,7 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.taboption('field_other', form.MultiValue, 'outbound', _('Outbound'),
-			_('Match <code>.outbounds[].server</code> domains.'));
+			_('Match server name of outbound.'));
 		so.load = function(section_id) {
 			delete this.keylist;
 			delete this.vallist;
