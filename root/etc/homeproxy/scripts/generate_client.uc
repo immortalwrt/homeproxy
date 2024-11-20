@@ -456,6 +456,7 @@ if (!isEmpty(main_node)) {
 			source_port_range: cfg.source_port_range,
 			process_name: cfg.process_name,
 			process_path: cfg.process_path,
+			process_path_regex: cfg.process_path_regex,
 			user: cfg.user,
 			rule_set: get_ruleset(cfg.rule_set),
 			/* rule_set_ipcidr_match_source is deprecated in sing-box 1.10.0 */
@@ -645,6 +646,7 @@ if (!isEmpty(main_node)) {
 			port_range: cfg.port_range,
 			process_name: cfg.process_name,
 			process_path: cfg.process_path,
+			process_path_regex: cfg.process_path_regex,
 			user: cfg.user,
 			rule_set: get_ruleset(cfg.rule_set),
 			/* rule_set_ipcidr_match_source is deprecated in sing-box 1.10.0 */

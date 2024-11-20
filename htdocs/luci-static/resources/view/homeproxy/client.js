@@ -557,6 +557,12 @@ return view.extend({
 			_('Match process path.'));
 		so.modalonly = true;
 
+		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0) {
+			so = ss.taboption('field_other', form.DynamicList, 'process_path_regex', _('Process path (regex)'),
+				_('Match process path using regular expression.'));
+			so.modalonly = true;
+		}
+
 		so = ss.taboption('field_other', form.DynamicList, 'user', _('User'),
 			_('Match user name.'));
 		so.modalonly = true;
@@ -889,6 +895,12 @@ return view.extend({
 		so = ss.taboption('field_other', form.DynamicList, 'process_path', _('Process path'),
 			_('Match process path.'));
 		so.modalonly = true;
+
+		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0) {
+			so = ss.taboption('field_other', form.DynamicList, 'process_path_regex', _('Process path (regex)'),
+				_('Match process path using regular expression.'));
+			so.modalonly = true;
+		}
 
 		so = ss.taboption('field_other', form.DynamicList, 'user', _('User'),
 			_('Match user name.'));
