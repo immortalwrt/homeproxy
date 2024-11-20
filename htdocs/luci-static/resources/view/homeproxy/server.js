@@ -31,13 +31,13 @@ function getServiceStatus() {
 	});
 }
 
-function renderStatus(isRunning) {
-	var spanTemp = '<em><span style="color:%s"><strong>%s %s</strong></span></em>';
+function renderStatus(isRunning, version) {
+	var spanTemp = '<em><span style="color:%s"><strong>%s (sing-box v%s) %s</strong></span></em>';
 	var renderHTML;
 	if (isRunning)
-		renderHTML = spanTemp.format('green', _('HomeProxy Server'), _('RUNNING'));
+		renderHTML = spanTemp.format('green', _('HomeProxy Server'), version, _('RUNNING'));
 	else
-		renderHTML = spanTemp.format('red', _('HomeProxy Server'), _('NOT RUNNING'));
+		renderHTML = spanTemp.format('red', _('HomeProxy Server'), version, _('NOT RUNNING'));
 
 	return renderHTML;
 }
@@ -102,7 +102,7 @@ return view.extend({
 			poll.add(function () {
 				return L.resolveDefault(getServiceStatus()).then((res) => {
 					var view = document.getElementById('service_status');
-					view.innerHTML = renderStatus(res);
+					view.innerHTML = renderStatus(res, features.version);
 				});
 			});
 
