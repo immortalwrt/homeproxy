@@ -2,7 +2,7 @@
 /*
  * SPDX-License-Identifier: GPL-2.0-only
  *
- * Copyright (C) 2023 ImmortalWrt.org
+ * Copyright (C) 2023-2024 ImmortalWrt.org
  */
 
 'use strict';
@@ -161,12 +161,13 @@ const methods = {
 			const fd = popen('/usr/bin/sing-box version');
 			if (fd) {
 				for (let line = fd.read('line'); length(line); line = fd.read('line')) {
-					let tags = match(trim(line), /Tags: (.*)/);
-					if (!tags)
-						continue;
+					if (match(trim(line), /^sing-box version (.*)/))
+						features.version = match(trim(line), /^sing-box version (.*)/)[1];
 
-					for (let i in split(tags[1], ','))
-						features[i] = true;
+					let tags = match(trim(line), /^Tags: (.*)/);
+					if (tags)
+						for (let i in split(tags[1], ','))
+							features[i] = true;
 				}
 
 				fd.close();
