@@ -41,7 +41,7 @@ msgstr "留空则不校验。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:959
 msgid "Accept empty query response"
-msgstr ""
+msgstr "接受空查询响应"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1113
 msgid "Access Control"
@@ -248,7 +248,7 @@ msgstr "绑定出站流量至指定端口。留空自动检测。"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:484
 #: htdocs/luci-static/resources/view/homeproxy/client.js:850
 msgid "BitTorrent"
-msgstr ""
+msgstr "BitTorrent"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1325
 msgid "Blacklist mode"
@@ -332,7 +332,7 @@ msgstr "大陆域名列表版本"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:500
 msgid "Chromium / Cronet"
-msgstr ""
+msgstr "Chromium / Cronet"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1006
 #: htdocs/luci-static/resources/view/homeproxy/server.js:583
@@ -349,7 +349,7 @@ msgstr "清空日志"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:498
 msgid "Client"
-msgstr ""
+msgstr "客户端"
 
 #: root/usr/share/luci/menu.d/luci-app-homeproxy.json:14
 msgid "Client Settings"
@@ -426,7 +426,7 @@ msgstr "DNS01 验证"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:487
 #: htdocs/luci-static/resources/view/homeproxy/client.js:851
 msgid "DTLS"
-msgstr ""
+msgstr "DTLS"
 
 #: htdocs/luci-static/resources/homeproxy.js:17
 #: htdocs/luci-static/resources/view/homeproxy/client.js:469
@@ -783,7 +783,7 @@ msgstr "过滤节点"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:501
 msgid "Firefox / uquic firefox"
-msgstr ""
+msgstr "Firefox / uquic firefox"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:673
 #: htdocs/luci-static/resources/view/homeproxy/server.js:379
@@ -1165,11 +1165,11 @@ msgstr "使规则集中的 IP CIDR 用于匹配源 IP。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:954
 msgid "Make IP CIDR in rule sets match the source IP."
-msgstr ""
+msgstr "使规则集中的 IP CIDR 匹配源 IP。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:960
 msgid "Make IP CIDR in rule-sets accept empty query response."
-msgstr ""
+msgstr "使规则集中的 IP CIDR 接受空查询响应。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:673
 msgid ""
@@ -1240,7 +1240,7 @@ msgstr "匹配进程名。"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:583
 #: htdocs/luci-static/resources/view/homeproxy/client.js:929
 msgid "Match process path using regular expression."
-msgstr ""
+msgstr "使用正则表达式匹配进程路径。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:578
 #: htdocs/luci-static/resources/view/homeproxy/client.js:924
@@ -1277,7 +1277,7 @@ msgstr "匹配源端口。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:971
 msgid "Match the server name of outbound."
-msgstr ""
+msgstr "匹配出站的服务器名称。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:588
 #: htdocs/luci-static/resources/view/homeproxy/client.js:934
@@ -1618,7 +1618,7 @@ msgstr "进程路径"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:582
 #: htdocs/luci-static/resources/view/homeproxy/client.js:928
 msgid "Process path (regex)"
-msgstr ""
+msgstr "进程路径（正则表达式）"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:481
 #: htdocs/luci-static/resources/view/homeproxy/client.js:847
@@ -1710,7 +1710,7 @@ msgstr "请求类型"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:491
 #: htdocs/luci-static/resources/view/homeproxy/client.js:856
 msgid "RDP"
-msgstr ""
+msgstr "RDP"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:688
 msgid "RDRC timeout"
@@ -1873,7 +1873,7 @@ msgstr "SUoT 版本"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:503
 msgid "Safari / Apple Network API"
-msgstr ""
+msgstr "Safari / Apple Network API"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:505
 #: htdocs/luci-static/resources/view/homeproxy/server.js:261
@@ -1930,7 +1930,7 @@ msgstr "Shadowsocks"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:499
 msgid "Sniffed client type (QUIC client type or SSH client name)."
-msgstr ""
+msgstr "嗅探到的客户端类型（QUIC 客户端类型或 SSH 客户端名称）。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:482
 #: htdocs/luci-static/resources/view/homeproxy/client.js:848
@@ -2624,7 +2624,7 @@ msgstr "私钥"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:502
 msgid "quic-go / uquic chrome"
-msgstr ""
+msgstr "quic-go / uquic chrome"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:227
 msgid "sing-box client"
@@ -2709,9 +2709,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:293
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid "Make <code>ipcidr</code> in rule sets match the source IP."
-#~ msgstr "使规则集中的 <code>ipcidr</code> 用于匹配源 IP。"
-
-#~ msgid "Match <code>.outbounds[].server</code> domains."
-#~ msgstr "匹配 <code>.outbounds[].server</code> 域名。"
