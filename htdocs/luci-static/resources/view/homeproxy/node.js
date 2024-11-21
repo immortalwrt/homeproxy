@@ -404,7 +404,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.value('trojan', _('Trojan'));
 	if (features.with_quic)
 		o.value('tuic', _('Tuic'));
-	if (features.with_wireguard)
+	if (features.with_wireguard && features.with_gvisor)
 		o.value('wireguard', _('WireGuard'));
 	o.value('vless', _('VLESS'));
 	o.value('vmess', _('VMess'));
@@ -874,9 +874,8 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	o = s.option(form.Value, 'wireguard_mtu', _('MTU'));
 	o.datatype = 'range(0,9000)';
-	o.default = '1408';
+	o.placeholder = '1408';
 	o.depends('type', 'wireguard');
-	o.rmempty = false;
 	o.modalonly = true;
 	/* Wireguard config end */
 
