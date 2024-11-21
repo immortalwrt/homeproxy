@@ -480,10 +480,11 @@ return view.extend({
 
 		so = ss.taboption('field_other', form.MultiValue, 'protocol', _('Protocol'),
 			_('Sniffed protocol, see <a target="_blank" href="https://sing-box.sagernet.org/configuration/route/sniff/">Sniff</a> for details.'));
-		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0) {
+		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0)
 			so.value('bittorrent', _('BitTorrent'));
+		so.value('dns', _('DNS'));
+		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0)
 			so.value('dtls', _('DTLS'));
-		}
 		so.value('http', _('HTTP'));
 		so.value('quic', _('QUIC'));
 		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0) {
@@ -955,7 +956,7 @@ return view.extend({
 		so.modalonly = true;
 
 		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0) {
-			so = ss.taboption('field_other', form.Flag, 'rule_set_ip_cidr_accept_empty', _('Accept empty query response.'),
+			so = ss.taboption('field_other', form.Flag, 'rule_set_ip_cidr_accept_empty', _('Accept empty query response'),
 				_('Make IP CIDR in rule-sets accept empty query response.'));
 			so.default = so.disabled;
 			so.modalonly = true;
