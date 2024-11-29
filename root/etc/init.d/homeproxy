@@ -15,8 +15,6 @@ HP_DIR="/etc/homeproxy"
 RUN_DIR="/var/run/homeproxy"
 LOG_PATH="$RUN_DIR/homeproxy.log"
 
-UPDATE_CROND="update_crond.sh"
-
 # we don't know which is the default server, just take the first one
 DNSMASQ_UCI_CONFIG="$(uci -q show "dhcp.@dnsmasq[0]" | awk 'NR==1 {split($0, conf, /[.=]/); print conf[2]}')"
 if [ -f "/tmp/etc/dnsmasq.conf.$DNSMASQ_UCI_CONFIG" ]; then
@@ -306,7 +304,7 @@ start_service() {
 }
 
 stop_service() {
-	sed -i "/$UPDATE_CROND/d" "/etc/crontabs/root" 2>"/dev/null"
+	sed -i "/update_crond.sh/d" "/etc/crontabs/root" 2>"/dev/null"
 	/etc/init.d/cron restart >"/dev/null" 2>&1
 
 	# Setup firewall
