@@ -82,7 +82,7 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 		/* HTTP / Hysteria (2) / Mixed / Socks / Trojan / Tuic / VLESS / VMess */
 		users: (cfg.type !== 'shadowsocks') ? [
 			{
-				name: !(cfg.type in ['http', 'mixed', 'socks']) ? 'cfg-' + cfg['.name'] + '-server' : null,
+				name: !(cfg.type in ['http', 'mixed', 'naive', 'socks']) ? 'cfg-' + cfg['.name'] + '-server' : null,
 				username: cfg.username,
 				password: cfg.password,
 
