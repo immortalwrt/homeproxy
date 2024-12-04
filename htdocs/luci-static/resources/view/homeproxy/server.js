@@ -745,6 +745,7 @@ return view.extend({
 		o.depends({'tls': '1', 'tls_acme': '0', 'tls_reality': '0'});
 		o.depends({'tls': '1', 'tls_acme': null, 'tls_reality': '0'});
 		o.depends({'tls': '1', 'tls_acme': null, 'tls_reality': null});
+		o.validate = L.bind(hp.validateCertificatePath, this);
 		o.rmempty = false;
 		o.modalonly = true;
 
@@ -763,6 +764,7 @@ return view.extend({
 		o.depends({'tls': '1', 'tls_acme': '0', 'tls_reality': null});
 		o.depends({'tls': '1', 'tls_acme': null, 'tls_reality': '0'});
 		o.depends({'tls': '1', 'tls_acme': null, 'tls_reality': null});
+		o.validate = L.bind(hp.validateCertificatePath, this);
 		o.rmempty = false;
 		o.modalonly = true;
 

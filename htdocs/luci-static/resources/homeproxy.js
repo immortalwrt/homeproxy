@@ -267,6 +267,14 @@ return baseclass.extend({
 		return true;
 	},
 
+	validateCertificatePath: function(section_id, value) {
+		if (section_id && value)
+			if (!value.match(/^(\/etc\/homeproxy\/certs\/|\/etc\/acme\/|\/etc\/ssl\/).+$/))
+				return _('Expecting: %s').format(_('/etc/homeproxy/certs/..., /etc/acme/..., /etc/ssl/...'));
+
+		return true;
+	},
+
 	validateUniqueValue: function(uciconfig, ucisection, ucioption, section_id, value) {
 		if (section_id) {
 			if (!value)
