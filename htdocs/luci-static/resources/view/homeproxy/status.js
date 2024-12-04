@@ -32,7 +32,7 @@ var css = '				\
 var hp_dir = '/var/run/homeproxy';
 
 function getConnStat(self, site) {
-	var callConnStat = rpc.declare({
+	const callConnStat = rpc.declare({
 		object: 'luci.homeproxy',
 		method: 'connection_check',
 		params: ['site'],
@@ -61,14 +61,14 @@ function getConnStat(self, site) {
 }
 
 function getResVersion(self, type) {
-	var callResVersion = rpc.declare({
+	const callResVersion = rpc.declare({
 		object: 'luci.homeproxy',
 		method: 'resources_get_version',
 		params: ['type'],
 		expect: { '': {} }
 	});
 
-	var callResUpdate = rpc.declare({
+	const callResUpdate = rpc.declare({
 		object: 'luci.homeproxy',
 		method: 'resources_update',
 		params: ['type'],
@@ -114,7 +114,7 @@ function getResVersion(self, type) {
 }
 
 function getRuntimeLog(name, filename) {
-	var callLogClean = rpc.declare({
+	const callLogClean = rpc.declare({
 		object: 'luci.homeproxy',
 		method: 'log_clean',
 		params: ['type'],

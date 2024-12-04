@@ -170,7 +170,7 @@ return baseclass.extend({
 	},
 
 	getBuiltinFeatures: function() {
-		var callGetSingBoxFeatures = rpc.declare({
+		const callGetSingBoxFeatures = rpc.declare({
 			object: 'luci.homeproxy',
 			method: 'singbox_get_features',
 			expect: { '': {} }
@@ -239,7 +239,7 @@ return baseclass.extend({
 	},
 
 	uploadCertificate: function(option, type, filename, ev) {
-		var callWriteCertificate = rpc.declare({
+		const callWriteCertificate = rpc.declare({
 			object: 'luci.homeproxy',
 			method: 'certificate_write',
 			params: ['filename'],

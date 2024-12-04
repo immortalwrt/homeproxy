@@ -17,21 +17,21 @@
 'require tools.firewall as fwtool';
 'require tools.widgets as widgets';
 
-var callServiceList = rpc.declare({
+const callServiceList = rpc.declare({
 	object: 'service',
 	method: 'list',
 	params: ['name'],
 	expect: { '': {} }
 });
 
-var callReadDomainList = rpc.declare({
+const callReadDomainList = rpc.declare({
 	object: 'luci.homeproxy',
 	method: 'acllist_read',
 	params: ['type'],
 	expect: { '': {} }
 });
 
-var callWriteDomainList = rpc.declare({
+const callWriteDomainList = rpc.declare({
 	object: 'luci.homeproxy',
 	method: 'acllist_write',
 	params: ['type', 'content'],
@@ -101,7 +101,7 @@ return view.extend({
 	},
 
 	render: function(data) {
-		var m, s, o, ss, so;
+		let m, s, o, ss, so;
 
 		var features = data[1],
 		    hosts = data[2]?.hosts;

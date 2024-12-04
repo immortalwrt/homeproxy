@@ -14,7 +14,7 @@
 
 'require homeproxy as hp';
 
-var callServiceList = rpc.declare({
+const callServiceList = rpc.declare({
 	object: 'service',
 	method: 'list',
 	params: ['name'],
@@ -91,7 +91,7 @@ return view.extend({
 	},
 
 	render: function(data) {
-		var m, s, o;
+		let m, s, o;
 		var features = data[1];
 
 		m = new form.Map('homeproxy', _('HomeProxy Server'),
