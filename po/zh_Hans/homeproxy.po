@@ -23,7 +23,7 @@ msgstr "-- 请选择 --"
 
 #: htdocs/luci-static/resources/homeproxy.js:273
 msgid "/etc/homeproxy/certs/..., /etc/acme/..., /etc/ssl/..."
-msgstr ""
+msgstr "/etc/homeproxy/certs/...，/etc/acme/...，/etc/ssl/..."
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:475
 msgid "4 or 6. Not limited if empty."
