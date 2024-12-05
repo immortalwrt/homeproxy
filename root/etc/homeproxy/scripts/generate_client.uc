@@ -241,7 +241,8 @@ function generate_outbound(node) {
 				enabled: true,
 				dynamic_record_sizing_disabled: (node.tls_ech_tls_disable_drs === '1'),
 				pq_signature_schemes_enabled: (node.tls_ech_enable_pqss === '1'),
-				config: node.tls_ech_config
+				config: node.tls_ech_config,
+				config_path: node.tls_ech_config_path
 			} : null,
 			utls: !isEmpty(node.tls_utls) ? {
 				enabled: true,
