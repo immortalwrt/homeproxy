@@ -582,6 +582,7 @@ if (!isEmpty(main_node)) {
 		push(config.outbounds, generate_outbound(outbound));
 		config.outbounds[length(config.outbounds)-1].domain_strategy = cfg.domain_strategy;
 		config.outbounds[length(config.outbounds)-1].bind_interface = cfg.bind_interface;
+		config.outbounds[length(config.outbounds)-1].inet6_bind_address = trim(executeCommand('ip -6 addr show ' + cfg.bind_interface + ' | grep "inet6" | grep dynamic | awk \'{print $2}\' | cut -d\'/\' -f1').stdout);
 		config.outbounds[length(config.outbounds)-1].detour = get_outbound(cfg.outbound);
 	});
 /* Outbound end */
