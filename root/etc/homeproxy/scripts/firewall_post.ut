@@ -254,6 +254,9 @@ set homeproxy_routing_port {
 {# DNS hijack & TCP redirect #}
 chain dstnat {
 {% if (dns_hijacked !== '1'): %}
+	{% if (control_info.listen_interfaces): %}
+	meta iifname {{ array_to_nftarr(control_info.listen_interfaces) }}
+	{%- endif /* listen_interfaces */ %}
 	meta nfproto { ipv4, ipv6 } udp dport 53 counter redirect to :{{ dns_port }} comment "!{{ cfgname }}: DNS hijack"
 {% endif /* dns_hijacked */ %}
 {% if (match(proxy_mode, /redirect/)): %}
