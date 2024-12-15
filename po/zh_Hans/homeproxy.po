@@ -634,7 +634,7 @@ msgstr "ECH 配置"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1053
 msgid "ECH config path"
-msgstr ""
+msgstr "ECH 配置路径"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:677
 #: htdocs/luci-static/resources/view/homeproxy/client.js:783
@@ -2281,7 +2281,7 @@ msgstr "绑定到的网络接口。"
 msgid ""
 "The path to the ECH config, in PEM format. If empty, load from DNS will be "
 "attempted."
-msgstr ""
+msgstr "PEM 格式的 ECH 配置路径。如果为空，将尝试从 DNS 加载。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1021
 msgid "The path to the server certificate, in PEM format."
@@ -2463,7 +2463,7 @@ msgstr "使用代理更新"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1059
 msgid "Upload ECH config"
-msgstr ""
+msgstr "上传 ECH 配置"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:936
 #: htdocs/luci-static/resources/view/homeproxy/server.js:520
