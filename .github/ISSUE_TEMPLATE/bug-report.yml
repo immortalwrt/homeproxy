@@ -106,5 +106,7 @@ body:
           required: true
         - label: I confirm that I have not modified system DNS settings, or enabled any other DNS servers like MosDNS and SmartDNS.
           required: true
+        - label: I confirm that I have cleared the browser cache.
+          required: true
         - label: I confirm that I have selected all terms **blindly**.
           required: false
