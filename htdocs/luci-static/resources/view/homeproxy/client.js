@@ -480,31 +480,25 @@ return view.extend({
 
 		so = ss.taboption('field_other', form.MultiValue, 'protocol', _('Protocol'),
 			_('Sniffed protocol, see <a target="_blank" href="https://sing-box.sagernet.org/configuration/route/sniff/">Sniff</a> for details.'));
-		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0)
-			so.value('bittorrent', _('BitTorrent'));
+		so.value('bittorrent', _('BitTorrent'));
 		so.value('dns', _('DNS'));
-		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0)
-			so.value('dtls', _('DTLS'));
+		so.value('dtls', _('DTLS'));
 		so.value('http', _('HTTP'));
 		so.value('quic', _('QUIC'));
-		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0) {
-			so.value('rdp', _('RDP'));
-			so.value('ssh', _('SSH'));
-		}
+		so.value('rdp', _('RDP'));
+		so.value('ssh', _('SSH'));
 		so.value('stun', _('STUN'));
 		so.value('tls', _('TLS'));
 
-		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0) {
-			so = ss.taboption('field_other', form.Value, 'client', _('Client'),
-				_('Sniffed client type (QUIC client type or SSH client name).'));
-			so.value('chromium', _('Chromium / Cronet'));
-			so.value('firefox', _('Firefox / uquic firefox'));
-			so.value('quic-go', _('quic-go / uquic chrome'));
-			so.value('safari', _('Safari / Apple Network API'));
-			so.depends('protocol', 'quic');
-			so.depends('protocol', 'ssh');
-			so.modalonly = true;
-		}
+		so = ss.taboption('field_other', form.Value, 'client', _('Client'),
+			_('Sniffed client type (QUIC client type or SSH client name).'));
+		so.value('chromium', _('Chromium / Cronet'));
+		so.value('firefox', _('Firefox / uquic firefox'));
+		so.value('quic-go', _('quic-go / uquic chrome'));
+		so.value('safari', _('Safari / Apple Network API'));
+		so.depends('protocol', 'quic');
+		so.depends('protocol', 'ssh');
+		so.modalonly = true;
 
 		so = ss.taboption('field_other', form.ListValue, 'network', _('Network'));
 		so.value('tcp', _('TCP'));
@@ -578,11 +572,9 @@ return view.extend({
 			_('Match process path.'));
 		so.modalonly = true;
 
-		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0) {
-			so = ss.taboption('field_other', form.DynamicList, 'process_path_regex', _('Process path (regex)'),
-				_('Match process path using regular expression.'));
-			so.modalonly = true;
-		}
+		so = ss.taboption('field_other', form.DynamicList, 'process_path_regex', _('Process path (regex)'),
+			_('Match process path using regular expression.'));
+		so.modalonly = true;
 
 		so = ss.taboption('field_other', form.DynamicList, 'user', _('User'),
 			_('Match user name.'));
@@ -846,16 +838,12 @@ return view.extend({
 
 		so = ss.taboption('field_other', form.MultiValue, 'protocol', _('Protocol'),
 			_('Sniffed protocol, see <a target="_blank" href="https://sing-box.sagernet.org/configuration/route/sniff/">Sniff</a> for details.'));
-		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0) {
-			so.value('bittorrent', _('BitTorrent'));
-			so.value('dtls', _('DTLS'));
-		}
+		so.value('bittorrent', _('BitTorrent'));
+		so.value('dtls', _('DTLS'));
 		so.value('http', _('HTTP'));
 		so.value('quic', _('QUIC'));
-		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0) {
-			so.value('rdp', _('RDP'));
-			so.value('ssh', _('SSH'));
-		}
+		so.value('rdp', _('RDP'));
+		so.value('ssh', _('SSH'));
 		so.value('stun', _('STUN'));
 		so.value('tls', _('TLS'));
 
@@ -924,11 +912,9 @@ return view.extend({
 			_('Match process path.'));
 		so.modalonly = true;
 
-		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0) {
-			so = ss.taboption('field_other', form.DynamicList, 'process_path_regex', _('Process path (regex)'),
-				_('Match process path using regular expression.'));
-			so.modalonly = true;
-		}
+		so = ss.taboption('field_other', form.DynamicList, 'process_path_regex', _('Process path (regex)'),
+			_('Match process path using regular expression.'));
+		so.modalonly = true;
 
 		so = ss.taboption('field_other', form.DynamicList, 'user', _('User'),
 			_('Match user name.'));
@@ -955,12 +941,10 @@ return view.extend({
 		so.default = so.disabled;
 		so.modalonly = true;
 
-		if (features.version.localeCompare('1.10.0', undefined, { numeric: true, sensitivity: 'base' }) >= 0) {
-			so = ss.taboption('field_other', form.Flag, 'rule_set_ip_cidr_accept_empty', _('Accept empty query response'),
-				_('Make IP CIDR in rule-sets accept empty query response.'));
-			so.default = so.disabled;
-			so.modalonly = true;
-		}
+		so = ss.taboption('field_other', form.Flag, 'rule_set_ip_cidr_accept_empty', _('Accept empty query response'),
+			_('Make IP CIDR in rule-sets accept empty query response.'));
+		so.default = so.disabled;
+		so.modalonly = true;
 
 		so = ss.taboption('field_other', form.Flag, 'invert', _('Invert'),
 			_('Invert match result.'));
