@@ -401,7 +401,7 @@ chain homeproxy_mangle_mark {
 
 chain homeproxy_mangle_lanac {
 	{% if (control_info.listen_interfaces): %}
-	meta iifname != {{ array_to_nftarr(split(join(' ', control_info.listen_interfaces) + ' lo', ' ')) }} counter return
+	meta iifname != {{ array_to_nftarr([...control_info.listen_interfaces, ...filter(['lo'], ((l) => !~index(control_info.listen_interfaces, l)))]) }} counter return
 	{% endif %}
 	meta iifname != lo udp dport 53 counter return
 	meta mark {{ self_mark }} counter return
