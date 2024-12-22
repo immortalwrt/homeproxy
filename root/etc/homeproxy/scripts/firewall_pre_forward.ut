@@ -27,9 +27,6 @@
 		auto_firewall = uci.get(cfgname, 'server', 'auto_firewall') || '0';
 
 -%}
-
 {% if (tun_name): %}
-chain forward {
-	oifname {{ tun_name }} counter accept comment "!{{ cfgname }}: accept tun forward"
-}
+oifname {{ tun_name }} counter accept comment "!{{ cfgname }}: accept tun forward"
 {% endif %}

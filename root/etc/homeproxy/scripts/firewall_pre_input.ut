@@ -27,11 +27,9 @@
 		auto_firewall = uci.get(cfgname, 'server', 'auto_firewall') || '0';
 
 -%}
-
 {% if (tun_name || auto_firewall === '1'): %}
-
 {% if (tun_name): %}
-	iifname {{ tun_name }} counter accept comment "!{{ cfgname }}: accept tun input"
+iifname {{ tun_name }} counter accept comment "!{{ cfgname }}: accept tun input"
 {% endif %}
 {%
 if (auto_firewall === '1')
@@ -40,7 +38,7 @@ if (auto_firewall === '1')
 			return;
 
 		let proto = s.network || '{ tcp, udp }';
-		printf('	meta l4proto %s th dport %s counter accept comment "!%s: accept server %s"\n',
+		printf('meta l4proto %s th dport %s counter accept comment "!%s: accept server %s"\n',
 			proto, s.port, cfgname, s['.name']);
 	});
 %}
