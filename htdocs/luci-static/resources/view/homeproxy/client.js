@@ -378,22 +378,23 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'node', _('Node'),
 			_('Outbound node'));
+		so.value('urltest', _('URLTest'));
 		for (var i in proxy_nodes)
 			so.value(i, proxy_nodes[i]);
-		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'routing_node', 'node');
 		so.editable = true;
 
 		so = ss.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
 			_('If set, the server domain name will be resolved to IP before connecting.<br/>'));
 		for (var i in hp.dns_strategy)
 			so.value(i, hp.dns_strategy[i]);
+		so.depends({'node': 'urltest', '!reverse': true});
 		so.modalonly = true;
 
 		so = ss.option(widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
 			_('The network interface to bind to.'));
 		so.multiple = false;
 		so.noaliases = true;
-		so.depends('outbound', '');
+		so.depends({'outbound': '', 'node': /^((?!urltest$).)+$/});
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'outbound', _('Outbound'),
@@ -416,9 +417,12 @@ return view.extend({
 
 				var conflict = false;
 				uci.sections(data[0], 'routing_node', (res) => {
-					if (res['.name'] !== section_id)
+					if (res['.name'] !== section_id) {
 						if (res.outbound === section_id && res['.name'] == value)
 							conflict = true;
+						else if (res?.urltest_nodes?.includes(node) && res['.name'] == value)
+							conflict = true;
+					}
 				});
 				if (conflict)
 					return _('Recursive outbound detected!');
@@ -426,6 +430,66 @@ return view.extend({
 
 			return true;
 		}
+		so.depends({'node': 'urltest', '!reverse': true});
+
+		so = ss.option(hp.CBIStaticList, 'urltest_nodes', _('URLTest nodes'),
+			_('List of nodes to test.'));
+		for (var i in proxy_nodes)
+			so.value(i, proxy_nodes[i]);
+		so.depends('node', 'urltest');
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'urltest_url', _('Test URL'),
+			_('The URL to test. <code>https://www.gstatic.com/generate_204</code> will be used if empty.'));
+		so.validate = function(section_id, value) {
+			if (section_id && value) {
+				try {
+					var url = new URL(value);
+					if (!url.hostname)
+						return _('Expecting: %s').format(_('valid URL'));
+				}
+				catch(e) {
+					return _('Expecting: %s').format(_('valid URL'));
+				}
+			}
+
+			return true;
+		}
+		so.depends('node', 'urltest');
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'urltest_interval', _('Test interval'),
+			_('The test interval in seconds. <code>180</code> will be used if empty.'));
+		so.datatype = 'uinteger';
+		so.validate = function(section_id, value) {
+			if (section_id && value) {
+				var idle_timeout = this.map.lookupOption('urltest_idle_timeout', section_id)[0].formvalue(section_id) || '1800';
+				if (parseInt(value) > parseInt(idle_timeout))
+					return _('Test interval must be less or equal than idle timeout.');
+			}
+
+			return true;
+		}
+		so.depends('node', 'urltest');
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'urltest_tolerance', _('Test tolerance'),
+			_('The test tolerance in milliseconds. <code>50</code> will be used if empty.'));
+		so.datatype = 'uinteger';
+		so.depends('node', 'urltest');
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'urltest_idle_timeout', _('Idle timeout'),
+			_('The idle timeout in seconds. <code>1800</code> will be used if empty.'));
+		so.datatype = 'uinteger';
+		so.depends('node', 'urltest');
+		so.modalonly = true;
+
+		so = ss.option(form.Flag, 'urltest_interrupt_exist_connections', _('Interrupt existing connections'),
+			_('Interrupt existing connections when the selected outbound has changed.'));
+		so.default = so.disabled;
+		so.depends('node', 'urltest');
+		so.modalonly = true;
 		/* Routing nodes end */
 
 		/* Routing rules start */
@@ -580,13 +644,12 @@ return view.extend({
 			_('Match user name.'));
 		so.modalonly = true;
 
-		so = ss.taboption('field_other', form.MultiValue, 'rule_set', _('Rule set'),
+		so = ss.taboption('field_other', hp.CBIStaticList, 'rule_set', _('Rule set'),
 			_('Match rule set.'));
 		so.load = function(section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
-			this.value('', _('-- Please choose --'));
 			uci.sections(data[0], 'ruleset', (res) => {
 				if (res.enabled === '1')
 					this.value(res['.name'], res.label);
@@ -920,13 +983,12 @@ return view.extend({
 			_('Match user name.'));
 		so.modalonly = true;
 
-		so = ss.taboption('field_other', form.MultiValue, 'rule_set', _('Rule set'),
+		so = ss.taboption('field_other', hp.CBIStaticList, 'rule_set', _('Rule set'),
 			_('Match rule set.'));
 		so.load = function(section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
-			this.value('', _('-- Please choose --'));
 			uci.sections(data[0], 'ruleset', (res) => {
 				if (res.enabled === '1')
 					this.value(res['.name'], res.label);
