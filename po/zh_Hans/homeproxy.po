@@ -1060,11 +1060,11 @@ msgstr "接口控制"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:488
 msgid "Interrupt existing connections"
-msgstr ""
+msgstr "中断现有连接"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:489
 msgid "Interrupt existing connections when the selected outbound has changed."
-msgstr ""
+msgstr "当选择的出站发生变化时中断现有连接。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:665
 #: htdocs/luci-static/resources/view/homeproxy/server.js:371
@@ -1129,7 +1129,7 @@ msgstr "分配给接口的 IP（v4 或 v6）地址前缀列表。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:436
 msgid "List of nodes to test."
-msgstr ""
+msgstr "要测试的节点列表。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:977
 #: htdocs/luci-static/resources/view/homeproxy/server.js:563
@@ -2174,19 +2174,19 @@ msgstr "腾讯公共 DNS（119.29.29.29）"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:442
 msgid "Test URL"
-msgstr ""
+msgstr "测试 URL"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:461
 msgid "Test interval"
-msgstr ""
+msgstr "测试间隔"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:468
 msgid "Test interval must be less or equal than idle timeout."
-msgstr ""
+msgstr "测试间隔时间必须小于或等于空闲超时时间。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:476
 msgid "Test tolerance"
-msgstr ""
+msgstr "测试容差"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:626
 msgid "The ACME CA provider to use."
@@ -2211,6 +2211,8 @@ msgid ""
 "The URL to test. <code>https://www.gstatic.com/generate_204</code> will be "
 "used if empty."
 msgstr ""
+"用于测试的 URL。如留空，默认为 <code>https://www.gstatic.com/generate_204</"
+"code>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:774
 msgid "The address of the dns server. Support UDP, TCP, DoT, DoH and RCode."
@@ -2282,7 +2284,7 @@ msgstr "创建或选择现有 ACME 服务器帐户时使用的电子邮件地址
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:483
 msgid "The idle timeout in seconds. <code>1800</code> will be used if empty."
-msgstr ""
+msgstr "空闲超时时间（单位：秒）。如留空，默认为 <code>1800</code>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:999
 #: htdocs/luci-static/resources/view/homeproxy/server.js:576
@@ -2343,12 +2345,12 @@ msgstr "上游出站的标签。<br/>启用时，其他拨号字段将被忽略�
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:462
 msgid "The test interval in seconds. <code>180</code> will be used if empty."
-msgstr ""
+msgstr "测试间隔时间（单位：秒）。如留空，默认为 <code>180</code>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:477
 msgid ""
 "The test tolerance in milliseconds. <code>50</code> will be used if empty."
-msgstr ""
+msgstr "测试容差时间（单位：毫秒）。如留空，默认为 <code>50</code>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:745
 #: htdocs/luci-static/resources/view/homeproxy/server.js:459
@@ -2459,11 +2461,11 @@ msgstr "UDP 中继模式"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:381
 msgid "URLTest"
-msgstr ""
+msgstr "URLTest"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:435
 msgid "URLTest nodes"
-msgstr ""
+msgstr "URLTest 节点"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:626
 #: htdocs/luci-static/resources/view/homeproxy/server.js:329
@@ -2496,7 +2498,7 @@ msgstr "更新间隔"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1153
 msgid "Update interval of rule set.<br/><code>1d</code> will be used if empty."
-msgstr "规则集更新间隔。<br/>留空使用 <code>1d</code>。"
+msgstr "规则集更新间隔。<br/>如留空，默认为 <code>1d</code>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1364
 msgid "Update nodes from subscriptions"
@@ -2786,6 +2788,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:301
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid "-- Please choose --"
-#~ msgstr "-- 请选择 --"
