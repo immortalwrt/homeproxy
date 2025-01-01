@@ -300,7 +300,8 @@ start_service() {
 	fi
 
 	# Setup firewall
-	utpl -S "$HP_DIR/scripts/firewall_pre.ut" > "$RUN_DIR/fw4_pre.nft"
+	utpl -S "$HP_DIR/scripts/firewall_pre_forward.ut" > "$RUN_DIR/fw4_pre_forward.nft"
+	utpl -S "$HP_DIR/scripts/firewall_pre_input.ut" > "$RUN_DIR/fw4_pre_input.nft"
 	[ "$outbound_node" = "nil" ] || utpl -S "$HP_DIR/scripts/firewall_post.ut" > "$RUN_DIR/fw4_post.nft"
 	fw4 reload >"/dev/null" 2>&1
 
@@ -353,7 +354,8 @@ stop_service() {
 		nft flush set inet fw4 "$i"
 		nft delete set inet fw4 "$i"
 	done 2>"/dev/null"
-	echo > "$RUN_DIR/fw4_pre.nft" 2>"/dev/null"
+	echo > "$RUN_DIR/fw4_pre_forward.nft" 2>"/dev/null"
+	echo > "$RUN_DIR/fw4_pre_input.nft" 2>"/dev/null"
 	echo > "$RUN_DIR/fw4_post.nft" 2>"/dev/null"
 	fw4 reload >"/dev/null" 2>&1
 
