@@ -381,6 +381,7 @@ return view.extend({
 		so.value('urltest', _('URLTest'));
 		for (var i in proxy_nodes)
 			so.value(i, proxy_nodes[i]);
+		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'routing_node', 'node');
 		so.editable = true;
 
 		so = ss.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
