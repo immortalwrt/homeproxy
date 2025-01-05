@@ -848,6 +848,7 @@ return view.extend({
 			_('Default domain strategy for resolving the domain names.'));
 		for (var i in hp.dns_strategy)
 			so.value(i, hp.dns_strategy[i]);
+		so.editable = true;
 
 		so = ss.option(form.ListValue, 'outbound', _('Outbound'),
 			_('Tag of an outbound for connecting to the dns server.'));
