@@ -16,6 +16,8 @@ if [ "$(uci -q get homeproxy.config.routing_port)" = "all" ]; then
 	uci -q delete "homeproxy.config.routing_port"
 fi
 
+[ -z "$(uci -q show homeproxy.experimental)" ] || uci -q delete "homeproxy.experimental"
+
 [ -z "$(uci -q changes "homeproxy")" ] || uci -q commit "homeproxy"
 
 sed -i "s/rule_set_ipcidr_match_source/rule_set_ip_cidr_match_source/g" "/etc/config/homeproxy"

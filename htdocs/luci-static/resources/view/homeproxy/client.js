@@ -723,12 +723,11 @@ return view.extend({
 		so = ss.option(form.Flag, 'cache_file_store_rdrc', _('Store RDRC'),
 			_('Store rejected DNS response cache.<br/>' +
 			'The check results of <code>Address filter DNS rule items</code> will be cached until expiration.'));
-		so.ucisection = 'experimental';
 		so.default = so.disabled;
 
 		so = ss.option(form.Value, 'cache_file_rdrc_timeout', _('RDRC timeout'),
-			_('Timeout of rejected DNS response cache. <code>7d</code> is used by default.'));
-		so.ucisection = 'experimental';
+			_('Timeout of rejected DNS response cache in seconds. <code>604800 (7d)</code> is used by default.'));
+		so.datatype = 'uinteger';
 		so.depends('cache_file_store_rdrc', '1');
 		/* DNS settings end */
 
