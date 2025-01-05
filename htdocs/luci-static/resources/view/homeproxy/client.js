@@ -181,42 +181,26 @@ return view.extend({
 			return true;
 		}
 
-		if (features.hp_has_chinadns_ng) {
-			o = s.taboption('routing', form.DynamicList, 'china_dns_server', _('China DNS server'));
-			o.value('wan', _('WAN DNS (read from interface)'));
-			o.value('223.5.5.5', _('Aliyun Public DNS (223.5.5.5)'));
-			o.value('210.2.4.8', _('CNNIC Public DNS (210.2.4.8)'));
-			o.value('119.29.29.29', _('Tencent Public DNS (119.29.29.29)'));
-			o.value('117.50.10.10', _('ThreatBook Public DNS (117.50.10.10)'));
-			o.depends('routing_mode', 'bypass_mainland_china');
-			o.validate = function(section_id) {
-				if (section_id) {
-					var value = this.map.lookupOption('china_dns_server', section_id)[0].formvalue(section_id);
-					if (value.length < 1)
-						return true;
+		o = s.taboption('routing', form.Value, 'china_dns_server', _('China DNS server'));
+		o.value('wan', _('WAN DNS (read from interface)'));
+		o.value('223.5.5.5', _('Aliyun Public DNS (223.5.5.5)'));
+		o.value('210.2.4.8', _('CNNIC Public DNS (210.2.4.8)'));
+		o.value('119.29.29.29', _('Tencent Public DNS (119.29.29.29)'));
+		o.value('117.50.10.10', _('ThreatBook Public DNS (117.50.10.10)'));
+		o.depends('routing_mode', 'bypass_mainland_china');
+		o.default = '223.5.5.5';
+		o.rmempty = false;
+		o.validate = function(section_id, value) {
+			if (section_id && !['wan'].includes(value)) {
+				var ipv6_support = this.map.lookupOption('ipv6_support', section_id)[0].formvalue(section_id);
 
-					if (!features.hp_has_chinadns_ng_v2 && value.length > 2)
-						return _('You can only have two servers set at maximum.');
-
-					for (var dns of value) {
-						var ipv6_support = this.map.lookupOption('ipv6_support', section_id)[0].formvalue(section_id);
-						if (dns === 'wan') {
-							continue;
-						} else {
-							var err = _('Expecting: %s').format(_('valid address#port'));
-							dns = dns.split('#');
-							if (dns.length > 2)
-								return err;
-							if (!stubValidator.apply((ipv6_support === '1') ? 'ipaddr' : 'ip4addr', dns[0]))
-								return err;
-							if (dns[1] && !stubValidator.apply('port', dns[1]))
-								return err;
-						}
-					}
-				}
-
-				return true;
+				if (!value)
+					return _('Expecting: %s').format(_('non-empty value'));
+				else if (!stubValidator.apply((ipv6_support === '1') ? 'ipaddr' : 'ip4addr', value))
+					return _('Expecting: %s').format(_('valid IP address'));
 			}
+
+			return true;
 		}
 
 		o = s.taboption('routing', form.ListValue, 'routing_mode', _('Routing mode'));
@@ -1070,7 +1054,7 @@ return view.extend({
 		/* Custom routing settings end */
 
 		/* Rule set settings start */
-		s.tab('ruleset', _('Rule set'));
+		s.tab('ruleset', _('Rule Set'));
 		o = s.taboption('ruleset', form.SectionValue, '_ruleset', form.GridSection, 'ruleset');
 		o.depends('routing_mode', 'custom');
 
