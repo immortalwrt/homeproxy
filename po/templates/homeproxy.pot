@@ -2054,7 +2054,7 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:159
 msgid ""
-"Support UDP, TCP, DoH, DoT, DoQ. TCP protocol will be used if not specified."
+"Support UDP, TCP, DoH, DoQ, DoT. TCP protocol will be used if not specified."
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:298
@@ -2182,7 +2182,7 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:783
 msgid ""
-"The address of the dns server. Support UDP, TCP, DoH, DoT, DoQ and RCode."
+"The address of the dns server. Support UDP, TCP, DoH, DoQ, DoT and RCode."
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:677
@@ -2220,7 +2220,7 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:197
 msgid ""
-"The dns server for resolving China domains. Support UDP, TCP, DoH, DoT, DoQ."
+"The dns server for resolving China domains. Support UDP, TCP, DoH, DoQ, DoT."
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:842

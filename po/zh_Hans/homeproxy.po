@@ -2094,8 +2094,8 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:159
 msgid ""
-"Support UDP, TCP, DoH, DoT, DoQ. TCP protocol will be used if not specified."
-msgstr "支持 UDP、TCP、DoH、DoT、DoQ。如未指定则使用 TCP 协议。"
+"Support UDP, TCP, DoH, DoQ, DoT. TCP protocol will be used if not specified."
+msgstr "支持 UDP、TCP、DoH、DoQ、DoT。如未指定则使用 TCP 协议。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:298
 msgid "System"
@@ -2226,8 +2226,8 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:783
 msgid ""
-"The address of the dns server. Support UDP, TCP, DoH, DoT, DoQ and RCode."
-msgstr "DNS 服务器的地址。支持 UDP、TCP、DoH、DoT、DoQ 和 RCode。"
+"The address of the dns server. Support UDP, TCP, DoH, DoQ, DoT and RCode."
+msgstr "DNS 服务器的地址。支持 UDP、TCP、DoH、DoQ、DoT 和 RCode。"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:677
 msgid ""
@@ -2278,8 +2278,8 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:197
 msgid ""
-"The dns server for resolving China domains. Support UDP, TCP, DoH, DoT, DoQ."
-msgstr "用于解析国内域名的 DNS 服务器。支持 UDP、TCP、DoH、DoT、DoQ。"
+"The dns server for resolving China domains. Support UDP, TCP, DoH, DoQ, DoT."
+msgstr "用于解析国内域名的 DNS 服务器。支持 UDP、TCP、DoH、DoQ、DoT。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:842
 msgid "The domain strategy for resolving the domain name in the address."
@@ -2403,7 +2403,9 @@ msgstr "微步在线公共 DNS（117.50.10.10）"
 msgid ""
 "Timeout of rejected DNS response cache in seconds. <code>604800 (7d)</code> "
 "is used by default."
-msgstr "被拒绝的 DNS 响应缓存超时时间（单位：秒）。默认为 <code>604800（7 天）</code>。"
+msgstr ""
+"被拒绝的 DNS 响应缓存超时时间（单位：秒）。默认为 <code>604800（7 天）</"
+"code>。"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:485
 msgid ""
