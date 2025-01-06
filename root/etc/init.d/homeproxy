@@ -150,7 +150,7 @@ start_service() {
 			procd_add_jail "sing-box-c" log procfs
 			procd_add_jail_mount "$RUN_DIR/sing-box-c.json"
 			procd_add_jail_mount_rw "$RUN_DIR/sing-box-c.log"
-			procd_add_jail_mount_rw "$RUN_DIR/cache.db"
+			[ "$routing_mode" != "bypass_mainland_china" ] || procd_add_jail_mount_rw "$RUN_DIR/cache.db"
 			procd_add_jail_mount "$HP_DIR/certs/"
 			procd_add_jail_mount "/etc/ssl/"
 			procd_add_jail_mount "/etc/localtime"
@@ -216,10 +216,16 @@ start_service() {
 	procd_set_param respawn
 	procd_close_instance
 
-	# Prepare ruleset directory for custom routing mode
-	if [ "$routing_mode" = "custom" ]; then
+	case "$rouing_mode" in
+	"bypass_mainland_china")
+		# Prepare cache db
+		[ -e "$RUN_DIR/cache.db" ] || touch "$RUN_DIR/cache.db"
+		;;
+	"custom")
+		# Prepare ruleset directory
 		[ -d "$HP_DIR/ruleset" ] || mkdir -p "$HP_DIR/ruleset"
-	fi
+		;;
+	esac
 
 	# Update permissions for ujail
 	if [ "$outbound_node" != "nil" ]; then
