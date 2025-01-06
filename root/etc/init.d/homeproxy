@@ -216,7 +216,7 @@ start_service() {
 	procd_set_param respawn
 	procd_close_instance
 
-	case "$rouing_mode" in
+	case "$routing_mode" in
 	"bypass_mainland_china")
 		# Prepare cache db
 		[ -e "$RUN_DIR/cache.db" ] || touch "$RUN_DIR/cache.db"
