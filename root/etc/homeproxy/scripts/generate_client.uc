@@ -13,8 +13,8 @@ import { connect } from 'ubus';
 import { cursor } from 'uci';
 
 import {
-	executeCommand, isEmpty, strToBool, strToInt,
-	removeBlankAttrs, validateHostname, validation,
+	isEmpty, strToBool, strToInt,
+	removeBlankAttrs, validation,
 	HP_DIR, RUN_DIR
 } from 'homeproxy';
 

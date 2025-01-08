@@ -5,7 +5,7 @@
  */
 
 import { mkstemp } from 'fs';
-import { urldecode, urldecode_params } from 'luci.http';
+import { urldecode_params } from 'luci.http';
 
 /* Global variables start */
 export const HP_DIR = '/etc/homeproxy';

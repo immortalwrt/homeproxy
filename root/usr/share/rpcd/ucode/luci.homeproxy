@@ -7,7 +7,7 @@
 
 'use strict';
 
-import { access, error, lstat, mkstemp, popen, readfile, writefile } from 'fs';
+import { access, error, lstat, popen, readfile, writefile } from 'fs';
 
 /* Kanged from ucode/luci */
 function shellquote(s) {

@@ -11,11 +11,11 @@ import { open } from 'fs';
 import { connect } from 'ubus';
 import { cursor } from 'uci';
 
-import { urldecode, urlencode, urldecode_params } from 'luci.http';
+import { urldecode, urlencode } from 'luci.http';
 import { init_action } from 'luci.sys';
 
 import {
-	calcStringMD5, wGET, executeCommand, decodeBase64Str,
+	calcStringMD5, wGET, decodeBase64Str,
 	getTime, isEmpty, parseURL, validation,
 	HP_DIR, RUN_DIR
 } from 'homeproxy';
