@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: GPL-2.0-only
  *
- * Copyright (C) 2022-2024 ImmortalWrt.org
+ * Copyright (C) 2022-2025 ImmortalWrt.org
  */
 
 'use strict';
@@ -14,20 +14,20 @@
 'require homeproxy as hp';
 'require tools.widgets as widgets';
 
-function allowInsecureConfirm(ev, section_id, value) {
+function allowInsecureConfirm(ev, _section_id, value) {
 	if (value === '1' && !confirm(_('Are you sure to allow insecure?')))
 		ev.target.firstElementChild.checked = null;
 }
 
 function parseShareLink(uri, features) {
-	var config;
+	let config, url, params;
 
 	uri = uri.split('://');
 	if (uri[0] && uri[1]) {
 		switch (uri[0]) {
 		case 'http':
 		case 'https':
-			var url = new URL('http://' + uri[1]);
+			url = new URL('http://' + uri[1]);
 
 			config = {
 				label: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
@@ -42,8 +42,8 @@ function parseShareLink(uri, features) {
 			break;
 		case 'hysteria':
 			/* https://github.com/HyNetwork/hysteria/wiki/URI-Scheme */
-			var url = new URL('http://' + uri[1]);
-			var params = url.searchParams;
+			url = new URL('http://' + uri[1]);
+			params = url.searchParams;
 
 			/* WeChat-Video / FakeTCP are unsupported by sing-box currently */
 			if (!features.with_quic || (params.get('protocol') && params.get('protocol') !== 'udp'))
@@ -70,8 +70,8 @@ function parseShareLink(uri, features) {
 		case 'hysteria2':
 		case 'hy2':
 			/* https://v2.hysteria.network/docs/developers/URI-Scheme/ */
-			var url = new URL('http://' + uri[1]);
-			var params = url.searchParams;
+			url = new URL('http://' + uri[1]);
+			params = url.searchParams;
 
 			if (!features.with_quic)
 				return null;
@@ -97,7 +97,7 @@ function parseShareLink(uri, features) {
 		case 'socks4a':
 		case 'socsk5':
 		case 'socks5h':
-			var url = new URL('http://' + uri[1]);
+			url = new URL('http://' + uri[1]);
 
 			config = {
 				label: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
@@ -114,7 +114,7 @@ function parseShareLink(uri, features) {
 			try {
 				/* "Lovely" Shadowrocket format */
 				try {
-					var suri = uri[1].split('#'), slabel = '';
+					let suri = uri[1].split('#'), slabel = '';
 					if (suri.length <= 2) {
 						if (suri.length === 2)
 							slabel = '#' + suri[1];
@@ -123,9 +123,9 @@ function parseShareLink(uri, features) {
 				} catch(e) { }
 
 				/* SIP002 format https://shadowsocks.org/guide/sip002.html */
-				var url = new URL('http://' + uri[1]);
+				url = new URL('http://' + uri[1]);
 
-				var userinfo;
+				let userinfo;
 				if (url.username && url.password)
 					/* User info encoded with URIComponent */
 					userinfo = [url.username, decodeURIComponent(url.password)];
@@ -136,9 +136,9 @@ function parseShareLink(uri, features) {
 				if (!hp.shadowsocks_encrypt_methods.includes(userinfo[0]))
 					return null;
 
-				var plugin, plugin_opts;
+				let plugin, plugin_opts;
 				if (url.search && url.searchParams.get('plugin')) {
-					var plugin_info = url.searchParams.get('plugin').split(';');
+					let plugin_info = url.searchParams.get('plugin').split(';');
 					plugin = plugin_info[0];
 					plugin_opts = plugin_info.slice(1) ? plugin_info.slice(1).join(';') : null;
 				}
@@ -173,8 +173,8 @@ function parseShareLink(uri, features) {
 			break;
 		case 'trojan':
 			/* https://p4gefau1t.github.io/trojan-go/developer/url/ */
-			var url = new URL('http://' + uri[1]);
-			var params = url.searchParams;
+			url = new URL('http://' + uri[1]);
+			params = url.searchParams;
 
 			/* Check if password exists */
 			if (!url.username)
@@ -208,8 +208,8 @@ function parseShareLink(uri, features) {
 			break;
 		case 'tuic':
 			/* https://github.com/daeuniverse/dae/discussions/182 */
-			var url = new URL('http://' + uri[1]);
-			var params = url.searchParams;
+			url = new URL('http://' + uri[1]);
+			params = url.searchParams;
 
 			/* Check if uuid exists */
 			if (!url.username)
@@ -232,8 +232,8 @@ function parseShareLink(uri, features) {
 			break;
 		case 'vless':
 			/* https://github.com/XTLS/Xray-core/discussions/716 */
-			var url = new URL('http://' + uri[1]);
-			var params = url.searchParams;
+			url = new URL('http://' + uri[1]);
+			params = url.searchParams;
 
 			/* Unsupported protocol */
 			if (params.get('type') === 'kcp')
@@ -356,7 +356,7 @@ function parseShareLink(uri, features) {
 }
 
 function renderNodeSettings(section, data, features, main_node, routing_mode) {
-	var s = section, o;
+	let s = section, o;
 	s.rowcolors = true;
 	s.sortable = true;
 	s.nodescriptions = true;
@@ -439,12 +439,12 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.depends({'type': 'socks', 'socks_version': '5'});
 	o.validate = function(section_id, value) {
 		if (section_id) {
-			var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
-			var required_type = [ 'shadowsocks', 'shadowtls', 'trojan' ];
+			let type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
+			let required_type = [ 'shadowsocks', 'shadowtls', 'trojan' ];
 
 			if (required_type.includes(type)) {
 				if (type === 'shadowsocks') {
-					var encmode = this.map.lookupOption('shadowsocks_encrypt_method', section_id)[0].formvalue(section_id);
+					let encmode = this.map.lookupOption('shadowsocks_encrypt_method', section_id)[0].formvalue(section_id);
 					if (encmode === 'none')
 						return true;
 				}
@@ -546,7 +546,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	/* Shadowsocks config start */
 	o = s.option(form.ListValue, 'shadowsocks_encrypt_method', _('Encrypt method'));
-	for (var i of hp.shadowsocks_encrypt_methods)
+	for (let i of hp.shadowsocks_encrypt_methods)
 		o.value(i);
 	/* Stream ciphers */
 	o.value('aes-128-ctr');
@@ -720,7 +720,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.depends('type', 'vless');
 	o.depends('type', 'vmess');
 	o.onchange = function(ev, section_id, value) {
-		var desc = this.map.findElement('id', 'cbid.homeproxy.%s.transport'.format(section_id)).nextElementSibling;
+		let desc = this.map.findElement('id', 'cbid.homeproxy.%s.transport'.format(section_id)).nextElementSibling;
 		if (value === 'http')
 			desc.innerHTML = _('TLS is not enforced. If TLS is not configured, plain HTTP 1.1 is used.');
 		else if (value === 'quic')
@@ -728,7 +728,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 		else
 			desc.innerHTML = _('No TCP transport, plain HTTP is merged into the HTTP transport.');
 
-		var tls = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
+		let tls = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
 		if ((value === 'http' && tls.checked) || (value === 'grpc' && !features.with_grpc)) {
 			this.map.findElement('id', 'cbid.homeproxy.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
 				_('Specifies the period of time (in seconds) after which a health check will be performed using a ping frame if no frames have been received on the connection.<br/>' +
@@ -951,10 +951,10 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.depends('type', 'tuic');
 	o.depends('type', 'vless');
 	o.depends('type', 'vmess');
-	o.validate = function(section_id, value) {
+	o.validate = function(section_id, _value) {
 		if (section_id) {
-			var type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
-			var tls = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
+			let type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
+			let tls = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
 
 			if (['hysteria', 'hysteria2', 'shadowtls', 'tuic'].includes(type)) {
 				tls.checked = true;
@@ -990,7 +990,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o = s.option(form.ListValue, 'tls_min_version', _('Minimum TLS version'),
 		_('The minimum TLS version that is acceptable.'));
 	o.value('', _('default'));
-	for (var i of hp.tls_versions)
+	for (let i of hp.tls_versions)
 		o.value(i);
 	o.depends('tls', '1');
 	o.modalonly = true;
@@ -998,14 +998,14 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o = s.option(form.ListValue, 'tls_max_version', _('Maximum TLS version'),
 		_('The maximum TLS version that is acceptable.'));
 	o.value('', _('default'));
-	for (var i of hp.tls_versions)
+	for (let i of hp.tls_versions)
 		o.value(i);
 	o.depends('tls', '1');
 	o.modalonly = true;
 
 	o = s.option(hp.CBIStaticList, 'tls_cipher_suites', _('Cipher suites'),
 		_('The elliptic curves that will be used in an ECDHE handshake, in preference order. If empty, the default will be used.'));
-	for (var i of hp.tls_cipher_suites)
+	for (let i of hp.tls_cipher_suites)
 		o.value(i);
 	o.depends('tls', '1');
 	o.optional = true;
@@ -1144,22 +1144,22 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 }
 
 return view.extend({
-	load: function() {
+	load() {
 		return Promise.all([
 			uci.load('homeproxy'),
 			hp.getBuiltinFeatures()
 		]);
 	},
 
-	render: function(data) {
+	render(data) {
 		let m, s, o, ss, so;
-		var main_node = uci.get(data[0], 'config', 'main_node');
-		var routing_mode = uci.get(data[0], 'config', 'routing_mode');
-		var features = data[1];
+		let main_node = uci.get(data[0], 'config', 'main_node');
+		let routing_mode = uci.get(data[0], 'config', 'routing_mode');
+		let features = data[1];
 
 		/* Cache subscription information, it will be called multiple times */
-		var subinfo = [];
-		for (var suburl of (uci.get(data[0], 'subscription', 'subscription_url') || [])) {
+		let subinfo = [];
+		for (let suburl of (uci.get(data[0], 'subscription', 'subscription_url') || [])) {
 			const url = new URL(suburl);
 			const urlhash = hp.calcStringMD5(suburl.replace(/#.*$/, ''));
 			const title = url.hash ? decodeURIComponent(url.hash.slice(1)) : url.hostname;
@@ -1177,7 +1177,7 @@ return view.extend({
 		ss = renderNodeSettings(o.subsection, data, features, main_node, routing_mode);
 		ss.addremove = true;
 		ss.filter = function(section_id) {
-			for (var info of subinfo)
+			for (let info of subinfo)
 				if (info.hash === uci.get(data[0], section_id, 'grouphash'))
 					return false;
 
@@ -1186,7 +1186,7 @@ return view.extend({
 		/* Import subscription links start */
 		/* Thanks to luci-app-shadowsocks-libev */
 		ss.handleLinkImport = function() {
-			var textarea = new ui.Textarea();
+			let textarea = new ui.Textarea();
 			ui.showModal(_('Import share links'), [
 				E('p', _('Support Hysteria, Shadowsocks, Trojan, v2rayN (VMess), and XTLS (VLESS) online configuration delivery standard.')),
 				textarea.render(),
@@ -1199,25 +1199,25 @@ return view.extend({
 					E('button', {
 						class: 'btn cbi-button-action',
 						click: ui.createHandlerFn(this, function() {
-							var input_links = textarea.getValue().trim().split('\n');
+							let input_links = textarea.getValue().trim().split('\n');
 							if (input_links && input_links[0]) {
 								/* Remove duplicate lines */
 								input_links = input_links.reduce((pre, cur) =>
 									(!pre.includes(cur) && pre.push(cur), pre), []);
 
-								var allow_insecure = uci.get(data[0], 'subscription', 'allow_insecure');
-								var packet_encoding = uci.get(data[0], 'subscription', 'packet_encoding');
-								var imported_node = 0;
+								let allow_insecure = uci.get(data[0], 'subscription', 'allow_insecure');
+								let packet_encoding = uci.get(data[0], 'subscription', 'packet_encoding');
+								let imported_node = 0;
 								input_links.forEach((l) => {
-									var config = parseShareLink(l, features);
+									let config = parseShareLink(l, features);
 									if (config) {
 										if (config.tls === '1' && allow_insecure === '1')
 											config.tls_insecure = '1'
 										if (['vless', 'vmess'].includes(config.type))
 											config.packet_encoding = packet_encoding
 
-										var nameHash = hp.calcStringMD5(config.label);
-										var sid = uci.add(data[0], 'node', nameHash);
+										let nameHash = hp.calcStringMD5(config.label);
+										let sid = uci.add(data[0], 'node', nameHash);
 										Object.keys(config).forEach((k) => {
 											uci.set(data[0], sid, k, config[k]);
 										});
@@ -1245,12 +1245,12 @@ return view.extend({
 			])
 		}
 		ss.renderSectionAdd = function(/* ... */) {
-			var el = form.GridSection.prototype.renderSectionAdd.apply(this, arguments),
+			let el = form.GridSection.prototype.renderSectionAdd.apply(this, arguments),
 				nameEl = el.querySelector('.cbi-section-create-name');
 
 			ui.addValidator(nameEl, 'uciname', true, (v) => {
-				var button = el.querySelector('.cbi-section-create > .cbi-button-add');
-				var uciconfig = this.uciconfig || this.map.config;
+				let button = el.querySelector('.cbi-section-create > .cbi-button-add');
+				let uciconfig = this.uciconfig || this.map.config;
 
 				if (!v) {
 					button.disabled = true;
@@ -1296,7 +1296,7 @@ return view.extend({
 		o.rmempty = false;
 
 		o = s.taboption('subscription', form.ListValue, 'auto_update_time', _('Update time'));
-		for (var i = 0; i < 24; i++)
+		for (let i = 0; i < 24; i++)
 			o.value(i, i + ':00');
 		o.default = '2';
 		o.depends('auto_update', '1');
@@ -1311,7 +1311,7 @@ return view.extend({
 		o.validate = function(section_id, value) {
 			if (section_id && value) {
 				try {
-					var url = new URL(value);
+					let url = new URL(value);
 					if (!url.hostname)
 						return _('Expecting: %s').format(_('valid URL'));
 				}
@@ -1364,7 +1364,7 @@ return view.extend({
 		o = s.taboption('subscription', form.Button, '_update_subscriptions', _('Update nodes from subscriptions'));
 		o.inputstyle = 'apply';
 		o.inputtitle = function(section_id) {
-			var sublist = uci.get(data[0], section_id, 'subscription_url') || [];
+			let sublist = uci.get(data[0], section_id, 'subscription_url') || [];
 			if (sublist.length > 0) {
 				return _('Update %s subscriptions').format(sublist.length);
 			} else {
@@ -1384,7 +1384,7 @@ return view.extend({
 		o = s.taboption('subscription', form.Button, '_remove_subscriptions', _('Remove all nodes from subscriptions'));
 		o.inputstyle = 'reset';
 		o.inputtitle = function() {
-			var subnodes = [];
+			let subnodes = [];
 			uci.sections(data[0], 'node', (res) => {
 				if (res.grouphash)
 					subnodes = subnodes.concat(res['.name'])
@@ -1398,13 +1398,13 @@ return view.extend({
 			}
 		}
 		o.onclick = function() {
-			var subnodes = [];
+			let subnodes = [];
 			uci.sections(data[0], 'node', (res) => {
 				if (res.grouphash)
 					subnodes = subnodes.concat(res['.name'])
 			});
 
-			for (var i in subnodes)
+			for (let i in subnodes)
 				uci.remove(data[0], subnodes[i]);
 
 			if (subnodes.includes(uci.get(data[0], 'config', 'main_node')))

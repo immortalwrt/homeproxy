@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: GPL-2.0-only
  *
- * Copyright (C) 2022-2023 ImmortalWrt.org
+ * Copyright (C) 2022-2025 ImmortalWrt.org
  */
 
 'use strict';
@@ -73,7 +73,7 @@ return baseclass.extend({
 		}
 	}),
 
-	calcStringMD5: function(e) {
+	calcStringMD5(e) {
 		/* Thanks to https://stackoverflow.com/a/41602636 */
 		function h(a, b) {
 			var c, d, e, f, g;
@@ -154,7 +154,7 @@ return baseclass.extend({
 		return (p(a) + p(b) + p(c) + p(d)).toLowerCase();
 	},
 
-	decodeBase64Str: function(str) {
+	decodeBase64Str(str) {
 		if (!str)
 			return null;
 
@@ -169,7 +169,7 @@ return baseclass.extend({
 		).join(''));
 	},
 
-	getBuiltinFeatures: function() {
+	getBuiltinFeatures() {
 		const callGetSingBoxFeatures = rpc.declare({
 			object: 'luci.homeproxy',
 			method: 'singbox_get_features',
@@ -179,7 +179,7 @@ return baseclass.extend({
 		return L.resolveDefault(callGetSingBoxFeatures(), {});
 	},
 
-	generateRand: function(type, length) {
+	generateRand(type, length) {
 		var byteArr;
 		if (['base64', 'hex'].includes(type))
 			byteArr = crypto.getRandomValues(new Uint8Array(length));
@@ -201,7 +201,7 @@ return baseclass.extend({
 		};
 	},
 
-	loadDefaultLabel: function(uciconfig, ucisection) {
+	loadDefaultLabel(uciconfig, ucisection) {
 		var label = uci.get(uciconfig, ucisection, 'label');
 		if (label) {
 			return label;
@@ -211,12 +211,12 @@ return baseclass.extend({
 		}
 	},
 
-	loadModalTitle: function(title, addtitle, uciconfig, ucisection) {
+	loadModalTitle(title, addtitle, uciconfig, ucisection) {
 		var label = uci.get(uciconfig, ucisection, 'label');
 		return label ? title + ' » ' + label : addtitle;
 	},
 
-	renderSectionAdd: function(section, extra_class) {
+	renderSectionAdd(section, extra_class) {
 		var el = form.GridSection.prototype.renderSectionAdd.apply(section, [ extra_class ]),
 			nameEl = el.querySelector('.cbi-section-create-name');
 		ui.addValidator(nameEl, 'uciname', true, (v) => {
@@ -238,7 +238,7 @@ return baseclass.extend({
 		return el;
 	},
 
-	uploadCertificate: function(option, type, filename, ev) {
+	uploadCertificate(_option, type, filename, ev) {
 		const callWriteCertificate = rpc.declare({
 			object: 'luci.homeproxy',
 			method: 'certificate_write',
@@ -247,7 +247,7 @@ return baseclass.extend({
 		});
 
 		return ui.uploadFile('/tmp/homeproxy_certificate.tmp', ev.target)
-		.then(L.bind((btn, res) => {
+		.then(L.bind((_btn, res) => {
 			return L.resolveDefault(callWriteCertificate(filename), {}).then((ret) => {
 				if (ret.result === true)
 					ui.addNotification(null, E('p', _('Your %s was successfully uploaded. Size: %sB.').format(type, res.size)));
@@ -258,7 +258,7 @@ return baseclass.extend({
 		.catch((e) => { ui.addNotification(null, E('p', e.message)) });
 	},
 
-	validateBase64Key: function(length, section_id, value) {
+	validateBase64Key(length, section_id, value) {
 		/* Thanks to luci-proto-wireguard */
 		if (section_id && value)
 			if (value.length !== length || !value.match(/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/) || value[length-1] !== '=')
@@ -267,7 +267,7 @@ return baseclass.extend({
 		return true;
 	},
 
-	validateCertificatePath: function(section_id, value) {
+	validateCertificatePath(section_id, value) {
 		if (section_id && value)
 			if (!value.match(/^(\/etc\/homeproxy\/certs\/|\/etc\/acme\/|\/etc\/ssl\/).+$/))
 				return _('Expecting: %s').format(_('/etc/homeproxy/certs/..., /etc/acme/..., /etc/ssl/...'));
@@ -275,7 +275,7 @@ return baseclass.extend({
 		return true;
 	},
 
-	validateUniqueValue: function(uciconfig, ucisection, ucioption, section_id, value) {
+	validateUniqueValue(uciconfig, ucisection, ucioption, section_id, value) {
 		if (section_id) {
 			if (!value)
 				return _('Expecting: %s').format(_('non-empty value'));
@@ -295,7 +295,7 @@ return baseclass.extend({
 		return true;
 	},
 
-	validateUUID: function(section_id, value) {
+	validateUUID(section_id, value) {
 		if (section_id) {
 			if (!value)
 				return _('Expecting: %s').format(_('non-empty value'));
