@@ -646,10 +646,12 @@ config.route = {
 
 /* Routing rules */
 if (!isEmpty(main_node)) {
-	push(config.route.rules, {
-		rule_set: 'direct-domain',
-		outbound: 'direct-out'
-	});
+	/* Direct list */
+	if (length(direct_domain_list))
+		push(config.route.rules, {
+			rule_set: 'direct-domain',
+			outbound: 'direct-out'
+		});
 
 	/* Main UDP out */
 	if (dedicated_udp_node)
