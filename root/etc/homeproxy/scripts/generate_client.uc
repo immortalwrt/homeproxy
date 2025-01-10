@@ -373,20 +373,15 @@ config.dns = {
 
 if (!isEmpty(main_node)) {
 	/* Main DNS */
-	let default_final_dns = 'default-dns';
-	if (dns_server !== wan_dns) {
-		push(config.dns.servers, {
-			tag: 'main-dns',
-			address: !match(dns_server, /:\/\//) ? 'tcp://' + (validation('ip6addr', dns_server) ? `[${dns_server}]` : dns_server) : dns_server,
-			strategy: (ipv6_support !== '1') ? 'ipv4_only' : null,
-			address_resolver: 'default-dns',
-			address_strategy: (ipv6_support !== '1') ? 'ipv4_only' : null,
-			detour: 'main-out'
-		});
-
-		default_final_dns = 'main-dns';
-	}
-	config.dns.final = default_final_dns;
+	push(config.dns.servers, {
+		tag: 'main-dns',
+		address: !match(dns_server, /:\/\//) ? 'tcp://' + (validation('ip6addr', dns_server) ? `[${dns_server}]` : dns_server) : dns_server,
+		strategy: (ipv6_support !== '1') ? 'ipv4_only' : null,
+		address_resolver: 'default-dns',
+		address_strategy: (ipv6_support !== '1') ? 'ipv4_only' : null,
+		detour: 'main-out'
+	});
+	config.dns.final = 'main-dns';
 
 	/* Avoid DNS loop */
 	push(config.dns.rules, {
@@ -394,16 +389,16 @@ if (!isEmpty(main_node)) {
 		server: 'default-dns'
 	});
 
-	if (direct_domain_list)
+	if (length(direct_domain_list))
 		push(config.dns.rules, {
-			domain_keyword: direct_domain_list,
-			server: 'default-dns'
+			rule_set: 'direct-domain',
+			server: (routing_mode === 'bypass_mainland_china' ) ? 'china-dns' : 'default-dns'
 		});
 
 	/* Filter out SVCB/HTTPS queries for "exquisite" Apple devices */
-	if (routing_mode === 'gfwlist' || proxy_domain_list)
+	if (routing_mode === 'gfwlist' || length(proxy_domain_list))
 		push(config.dns.rules, {
-			domain_keyword: (routing_mode !== 'gfwlist') ? proxy_domain_list : null,
+			rule_set: (routing_mode !== 'gfwlist') ? 'proxy-domain' : null,
 			query_type: [64, 65],
 			server: 'block-dns'
 		});
@@ -415,10 +410,10 @@ if (!isEmpty(main_node)) {
 			detour: 'direct-out'
 		});
 
-		if (proxy_domain_list)
+		if (length(proxy_domain_list))
 			push(config.dns.rules, {
-				domain_keyword: proxy_domain_list,
-				server: default_final_dns
+				rule_set: 'proxy-domain',
+				server: 'main-dns'
 			});
 
 		push(config.dns.rules, {
@@ -440,6 +435,7 @@ if (!isEmpty(main_node)) {
 			server: 'china-dns'
 		});
 	}
+
 } else if (!isEmpty(default_outbound)) {
 	/* DNS servers */
 	uci.foreach(uciconfig, ucidnsserver, (cfg) => {
@@ -590,11 +586,13 @@ config.outbounds = [
 if (!isEmpty(main_node)) {
 	const main_node_cfg = uci.get_all(uciconfig, main_node) || {};
 	push(config.outbounds, generate_outbound(main_node_cfg));
+	config.outbounds[length(config.outbounds)-1].domain_strategy = (ipv6_support !== '1') ? 'prefer_ipv4' : null;
 	config.outbounds[length(config.outbounds)-1].tag = 'main-out';
 
 	if (dedicated_udp_node) {
 		const main_udp_node_cfg = uci.get_all(uciconfig, main_udp_node) || {};
 		push(config.outbounds, generate_outbound(main_udp_node_cfg));
+		config.outbounds[length(config.outbounds)-1].domain_strategy = (ipv6_support !== '1') ? 'prefer_ipv4' : null;
 		config.outbounds[length(config.outbounds)-1].tag = 'main-udp-out';
 	}
 } else if (!isEmpty(default_outbound)) {
@@ -648,12 +646,10 @@ config.route = {
 
 /* Routing rules */
 if (!isEmpty(main_node)) {
-	/* Direct list */
-	if (length(direct_domain_list))
-		push(config.route.rules, {
-			domain_keyword: direct_domain_list,
-			outbound: 'direct-out'
-		});
+	push(config.route.rules, {
+		rule_set: 'direct-domain',
+		outbound: 'direct-out'
+	});
 
 	/* Main UDP out */
 	if (dedicated_udp_node)
@@ -665,6 +661,30 @@ if (!isEmpty(main_node)) {
 	config.route.final = 'main-out';
 
 	/* Rule set */
+	/* Direct list */
+	if (length(direct_domain_list))
+		push(config.route.rule_set, {
+			type: 'inline',
+			tag: 'direct-domain',
+			rules: [
+				{
+					domain_keyword: direct_domain_list,
+				}
+			]
+		});
+
+	/* Proxy list */
+	if (length(proxy_domain_list))
+		push(config.route.rule_set, {
+			type: 'inline',
+			tag: 'proxy-domain',
+			rules: [
+				{
+					domain_keyword: proxy_domain_list,
+				}
+			]
+		});
+
 	if (routing_mode === 'bypass_mainland_china') {
 		push(config.route.rule_set, {
 			type: 'remote',
@@ -688,6 +708,9 @@ if (!isEmpty(main_node)) {
 			download_detour: 'main-out'
 		});
 	}
+
+	if (isEmpty(config.route.rule_set))
+		config.route.rule_set = null;
 } else if (!isEmpty(default_outbound)) {
 	uci.foreach(uciconfig, uciroutingrule, (cfg) => {
 		if (cfg.enabled !== '1')
