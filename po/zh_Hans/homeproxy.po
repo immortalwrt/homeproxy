@@ -218,7 +218,7 @@ msgstr "自动更新订阅和地理数据。"
 msgid "BBR"
 msgstr "BBR"
 
-#: htdocs/luci-static/resources/view/homeproxy/status.js:194
+#: htdocs/luci-static/resources/view/homeproxy/status.js:187
 msgid "BaiDu"
 msgstr "百度"
 
@@ -318,15 +318,15 @@ msgstr "检查更新"
 msgid "China DNS server"
 msgstr "国内 DNS 服务器"
 
-#: htdocs/luci-static/resources/view/homeproxy/status.js:204
+#: htdocs/luci-static/resources/view/homeproxy/status.js:197
 msgid "China IPv4 list version"
 msgstr "国内 IPv4 库版本"
 
-#: htdocs/luci-static/resources/view/homeproxy/status.js:208
+#: htdocs/luci-static/resources/view/homeproxy/status.js:201
 msgid "China IPv6 list version"
 msgstr "国内 IPv6 库版本"
 
-#: htdocs/luci-static/resources/view/homeproxy/status.js:212
+#: htdocs/luci-static/resources/view/homeproxy/status.js:205
 msgid "China list version"
 msgstr "国内域名列表版本"
 
@@ -382,7 +382,7 @@ msgstr "仅常用端口（绕过 P2P 流量）"
 msgid "Congestion control algorithm"
 msgstr "拥塞控制算法"
 
-#: htdocs/luci-static/resources/view/homeproxy/status.js:191
+#: htdocs/luci-static/resources/view/homeproxy/status.js:184
 msgid "Connection check"
 msgstr "连接检查"
 
@@ -476,7 +476,7 @@ msgstr "默认服务器名称"
 msgid "Direct"
 msgstr "直连"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:1303
+#: htdocs/luci-static/resources/view/homeproxy/client.js:1307
 msgid "Direct Domain List"
 msgstr "直连域名列表"
 
@@ -758,8 +758,8 @@ msgstr "加密方式"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1150
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1155
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1158
-#: htdocs/luci-static/resources/view/homeproxy/client.js:1296
-#: htdocs/luci-static/resources/view/homeproxy/client.js:1325
+#: htdocs/luci-static/resources/view/homeproxy/client.js:1300
+#: htdocs/luci-static/resources/view/homeproxy/client.js:1333
 #: htdocs/luci-static/resources/view/homeproxy/node.js:452
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1087
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1260
@@ -812,7 +812,7 @@ msgstr "格式"
 msgid "GET"
 msgstr "GET"
 
-#: htdocs/luci-static/resources/view/homeproxy/status.js:216
+#: htdocs/luci-static/resources/view/homeproxy/status.js:209
 msgid "GFW list version"
 msgstr "GFW 域名列表版本"
 
@@ -870,7 +870,7 @@ msgstr "全局代理 MAC 地址"
 msgid "Global settings"
 msgstr "全局设置"
 
-#: htdocs/luci-static/resources/view/homeproxy/status.js:197
+#: htdocs/luci-static/resources/view/homeproxy/status.js:190
 msgid "Google"
 msgstr "谷歌"
 
@@ -918,7 +918,7 @@ msgstr "心跳间隔"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:55
 #: htdocs/luci-static/resources/view/homeproxy/client.js:57
 #: htdocs/luci-static/resources/view/homeproxy/client.js:120
-#: htdocs/luci-static/resources/view/homeproxy/status.js:224
+#: htdocs/luci-static/resources/view/homeproxy/status.js:217
 #: root/usr/share/luci/menu.d/luci-app-homeproxy.json:3
 msgid "HomeProxy"
 msgstr "HomeProxy"
@@ -1814,7 +1814,7 @@ msgstr "保留字段字节"
 msgid "Resolve strategy"
 msgstr "解析策略"
 
-#: htdocs/luci-static/resources/view/homeproxy/status.js:201
+#: htdocs/luci-static/resources/view/homeproxy/status.js:194
 msgid "Resources management"
 msgstr "资源管理"
 
@@ -2720,11 +2720,11 @@ msgstr "私钥"
 msgid "quic-go / uquic chrome"
 msgstr "quic-go / uquic chrome"
 
-#: htdocs/luci-static/resources/view/homeproxy/status.js:227
+#: htdocs/luci-static/resources/view/homeproxy/status.js:220
 msgid "sing-box client"
 msgstr "sing-box 客户端"
 
-#: htdocs/luci-static/resources/view/homeproxy/status.js:230
+#: htdocs/luci-static/resources/view/homeproxy/status.js:223
 msgid "sing-box server"
 msgstr "sing-box 服务端"
 
@@ -2790,8 +2790,8 @@ msgstr "有效网址"
 msgid "valid base64 key with %d characters"
 msgstr "包含 %d 个字符的有效 base64 密钥"
 
-#: htdocs/luci-static/resources/view/homeproxy/client.js:1296
-#: htdocs/luci-static/resources/view/homeproxy/client.js:1325
+#: htdocs/luci-static/resources/view/homeproxy/client.js:1300
+#: htdocs/luci-static/resources/view/homeproxy/client.js:1333
 msgid "valid hostname"
 msgstr "有效主机名"
 
