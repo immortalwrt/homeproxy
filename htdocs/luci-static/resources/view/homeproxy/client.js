@@ -1278,16 +1278,20 @@ return view.extend({
 		so.monospace = true;
 		so.datatype = 'hostname';
 		so.depends({'homeproxy.config.routing_mode': 'custom', '!reverse': true});
-		so.load = function(section_id) {
+		so.load = function(/* ... */) {
 			return L.resolveDefault(callReadDomainList('proxy_list')).then((res) => {
 				return res.content;
 			}, {});
 		}
-		so.write = function(section_id, value) {
+		so.write = function(_section_id, value) {
 			return callWriteDomainList('proxy_list', value);
 		}
-		so.remove = function(section_id, value) {
-			return callWriteDomainList('proxy_list', '');
+		so.remove = function(/* ... */) {
+			let routing_mode = this.map.lookupOption('routing_mode', 'config')[0].formvalue('config');
+
+			if (routing_mode !== 'custom')
+				return callWriteDomainList('proxy_list', '');
+			return true;
 		}
 		so.validate = function(section_id, value) {
 			if (section_id && value)
@@ -1307,16 +1311,20 @@ return view.extend({
 		so.monospace = true;
 		so.datatype = 'hostname';
 		so.depends({'homeproxy.config.routing_mode': 'custom', '!reverse': true});
-		so.load = function(section_id) {
+		so.load = function(/* ... */) {
 			return L.resolveDefault(callReadDomainList('direct_list')).then((res) => {
 				return res.content;
 			}, {});
 		}
-		so.write = function(section_id, value) {
+		so.write = function(_section_id, value) {
 			return callWriteDomainList('direct_list', value);
 		}
-		so.remove = function(section_id, value) {
-			return callWriteDomainList('direct_list', '');
+		so.remove = function(/* ... */) {
+			let routing_mode = this.map.lookupOption('routing_mode', 'config')[0].formvalue('config');
+
+			if (routing_mode !== 'custom')
+				return callWriteDomainList('direct_list', '');
+			return true;
 		}
 		so.validate = function(section_id, value) {
 			if (section_id && value)
