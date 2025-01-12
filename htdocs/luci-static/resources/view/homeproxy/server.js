@@ -796,9 +796,9 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'udp_timeout', _('UDP NAT expiration time'),
-			_('In seconds. <code>300</code> is used by default.'));
+			_('In seconds.'));
 		o.datatype = 'uinteger';
-		o.default = '300';
+		o.placeholder = '300';
 		o.depends({'network': 'tcp', '!reverse': true});
 		o.modalonly = true;
 
