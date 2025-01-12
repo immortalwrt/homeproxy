@@ -619,7 +619,7 @@ if (!isEmpty(main_node)) {
 			tolerance: strToInt(main_udp_urltest_tolerance),
 			idle_timeout: (strToInt(main_udp_urltest_interval) > 1800) ? `${main_udp_urltest_interval * 2}s` : null,
 		});
-		urltest_nodes = [...urltest_nodes, ...filter(main_udp_urltest_nodes, ((l) => !~index(urltest_nodes, l)))];
+		urltest_nodes = [...urltest_nodes, ...filter(main_udp_urltest_nodes, (l) => !~index(urltest_nodes, l))];
 	} else if (dedicated_udp_node) {
 		const main_udp_node_cfg = uci.get_all(uciconfig, main_udp_node) || {};
 		push(config.outbounds, generate_outbound(main_udp_node_cfg));
@@ -650,7 +650,7 @@ if (!isEmpty(main_node)) {
 				idle_timeout: cfg.urltest_idle_timeout ? (cfg.urltest_idle_timeout + 's') : null,
 				interrupt_exist_connections: (cfg.urltest_interrupt_exist_connections === '1')
 			});
-			urltest_nodes = [...urltest_nodes, ...filter(cfg.urltest_nodes, ((l) => !~index(urltest_nodes, l)))];
+			urltest_nodes = [...urltest_nodes, ...filter(cfg.urltest_nodes, (l) => !~index(urltest_nodes, l))];
 		} else {
 			const outbound = uci.get_all(uciconfig, cfg.node) || {};
 			push(config.outbounds, generate_outbound(outbound));
@@ -661,7 +661,7 @@ if (!isEmpty(main_node)) {
 		}
 	});
 
-	for (let i in filter(urltest_nodes, ((l) => !~index(routing_nodes, l))))
+	for (let i in filter(urltest_nodes, (l) => !~index(routing_nodes, l)))
 		push(config.outbounds, generate_outbound(uci.get_all(uciconfig, i)));
 }
 /* Outbound end */

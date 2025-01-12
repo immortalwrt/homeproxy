@@ -570,7 +570,18 @@ function main() {
 	if (!isEmpty(main_node)) {
 		const first_server = uci.get_first(uciconfig, ucinode);
 		if (first_server) {
-			if (!uci.get(uciconfig, main_node)) {
+			let main_urltest_nodes;
+			if (main_node === 'urltest') {
+				main_urltest_nodes = filter(uci.get(uciconfig, ucimain, 'main_urltest_nodes'), (v) => {
+					if (!uci.get(uciconfig, v)) {
+						log(sprintf('Node %s is gone, removing from urltest list.', node));
+						return false;
+					}
+					return true;
+				});
+			}
+
+			if ((main_node === 'urltest') ? !length(main_urltest_nodes) : !uci.get(uciconfig, main_node)) {
 				uci.set(uciconfig, ucimain, 'main_node', first_server);
 				uci.commit(uciconfig);
 				need_restart = true;
@@ -579,7 +590,18 @@ function main() {
 			}
 
 			if (!isEmpty(main_udp_node) && main_udp_node !== 'same') {
-				if (!uci.get(uciconfig, main_udp_node)) {
+				let main_udp_urltest_nodes;
+				if (main_udp_node === 'urltest') {
+					main_udp_urltest_nodes = filter(uci.get(uciconfig, ucimain, 'main_udp_urltest_nodes'), (v) => {
+						if (!uci.get(uciconfig, v)) {
+							log(sprintf('Node %s is gone, removing from urltest list.', node));
+							return false;
+						}
+						return true;
+					});
+				}
+
+				if ((main_udp_node === 'urltest') ? !length(main_udp_urltest_nodes) : !uci.get(uciconfig, main_udp_node)) {
 					uci.set(uciconfig, ucimain, 'main_udp_node', first_server);
 					uci.commit(uciconfig);
 					need_restart = true;
