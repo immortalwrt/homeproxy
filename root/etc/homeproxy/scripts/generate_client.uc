@@ -392,7 +392,8 @@ if (!isEmpty(main_node)) {
 	if (length(direct_domain_list))
 		push(config.dns.rules, {
 			rule_set: 'direct-domain',
-			server: (routing_mode === 'bypass_mainland_china' ) ? 'china-dns' : 'default-dns'
+			server: (routing_mode === 'bypass_mainland_china' ) ? 'china-dns' : 'default-dns',
+			address_resolver: 'default-dns'
 		});
 
 	/* Filter out SVCB/HTTPS queries for "exquisite" Apple devices */
