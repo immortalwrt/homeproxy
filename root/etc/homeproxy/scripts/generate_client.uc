@@ -164,6 +164,8 @@ function generate_outbound(node) {
 
 		server: node.address,
 		server_port: strToInt(node.port),
+		/* Hysteria(2) */
+		server_ports: node.hysteria_hopping_port,
 
 		username: (node.type !== 'ssh') ? node.username : null,
 		user: (node.type === 'ssh') ? node.username : null,
@@ -174,6 +176,7 @@ function generate_outbound(node) {
 		override_port: strToInt(node.override_port),
 		proxy_protocol: strToInt(node.proxy_protocol),
 		/* Hysteria (2) */
+		hop_interval: node.hysteria_hop_interval ? (node.hysteria_hop_interval + 's') : null,
 		up_mbps: strToInt(node.hysteria_up_mbps),
 		down_mbps: strToInt(node.hysteria_down_mbps),
 		obfs: node.hysteria_obfs_type ? {

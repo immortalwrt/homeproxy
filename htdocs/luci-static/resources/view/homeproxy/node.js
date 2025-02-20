@@ -477,6 +477,20 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.modalonly = true;
 
 	/* Hysteria (2) config start */
+	o = s.option(form.DynamicList, 'hysteria_hopping_port', _('Hopping port'));
+	o.depends('type', 'hysteria');
+	o.depends('type', 'hysteria2');
+	o.validate = hp.validatePortRange;
+	o.modalonly = true;
+
+	o = s.option(form.Value, 'hysteria_hop_interval', _('Hop interval'),
+		_('Port hopping interval in seconds.'));
+	o.datatype = 'uinteger';
+	o.placeholder = '30';
+	o.depends({'type': 'hysteria', 'hysteria_hopping_port': /[\s\S]/});
+	o.depends({'type': 'hysteria2', 'hysteria_hopping_port': /[\s\S]/});
+	o.modalonly = true;
+
 	o = s.option(form.ListValue, 'hysteria_protocol', _('Protocol'));
 	o.value('udp');
 	/* WeChat-Video / FakeTCP are unsupported by sing-box currently
