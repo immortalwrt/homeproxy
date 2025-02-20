@@ -745,7 +745,7 @@ return view.extend({
 		o.depends({'tls': '1', 'tls_acme': '0', 'tls_reality': '0'});
 		o.depends({'tls': '1', 'tls_acme': null, 'tls_reality': '0'});
 		o.depends({'tls': '1', 'tls_acme': null, 'tls_reality': null});
-		o.validate = L.bind(hp.validateCertificatePath, this);
+		o.validate = hp.validateCertificatePath;
 		o.rmempty = false;
 		o.modalonly = true;
 
@@ -764,7 +764,7 @@ return view.extend({
 		o.depends({'tls': '1', 'tls_acme': '0', 'tls_reality': null});
 		o.depends({'tls': '1', 'tls_acme': null, 'tls_reality': '0'});
 		o.depends({'tls': '1', 'tls_acme': null, 'tls_reality': null});
-		o.validate = L.bind(hp.validateCertificatePath, this);
+		o.validate = hp.validateCertificatePath;
 		o.rmempty = false;
 		o.modalonly = true;
 
@@ -800,16 +800,6 @@ return view.extend({
 		o.datatype = 'uinteger';
 		o.placeholder = '300';
 		o.depends({'network': 'tcp', '!reverse': true});
-		o.modalonly = true;
-
-		o = s.option(form.Flag, 'sniff_override', _('Override destination'),
-			_('Override the connection destination address with the sniffed domain.'));
-		o.rmempty = false;
-
-		o = s.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
-			_('If set, the requested domain name will be resolved to IP before routing.'));
-		for (let i in hp.dns_strategy)
-			o.value(i, hp.dns_strategy[i])
 		o.modalonly = true;
 
 		o = s.option(form.ListValue, 'network', _('Network'));

@@ -467,16 +467,6 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.modalonly = true;
 
 	/* Direct config */
-	o = s.option(form.Value, 'override_address', _('Override address'),
-		_('Override the connection destination address.'));
-	o.datatype = 'host';
-	o.depends('type', 'direct');
-
-	o = s.option(form.Value, 'override_port', _('Override port'),
-		_('Override the connection destination port.'));
-	o.datatype = 'port';
-	o.depends('type', 'direct');
-
 	o = s.option(form.ListValue, 'proxy_protocol', _('Proxy protocol'),
 		_('Write proxy protocol in the connection header.'));
 	o.value('', _('Disable'));
@@ -1044,7 +1034,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 		_('The path to the server certificate, in PEM format.'));
 	o.value('/etc/homeproxy/certs/client_ca.pem');
 	o.depends('tls_self_sign', '1');
-	o.validate = L.bind(hp.validateCertificatePath, this);
+	o.validate = hp.validateCertificatePath;
 	o.rmempty = false;
 	o.modalonly = true;
 
@@ -1060,11 +1050,6 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 		o = s.option(form.Flag, 'tls_ech', _('Enable ECH'),
 			_('ECH (Encrypted Client Hello) is a TLS extension that allows a client to encrypt the first part of its ClientHello message.'));
 		o.depends('tls', '1');
-		o.default = o.disabled;
-		o.modalonly = true;
-
-		o = s.option(form.Flag, 'tls_ech_tls_disable_drs', _('Disable dynamic record sizing'));
-		o.depends('tls_ech', '1');
 		o.default = o.disabled;
 		o.modalonly = true;
 
