@@ -182,6 +182,12 @@ function generate_endpoint(node) {
 
 	return endpoint;
 }
+	
+function parse_hopping_ports(port_str) {
+    let ranges = filter(map(split(port_str, ","), s => trim(s)), s => s !== "");
+
+    return ranges.length === 1 ? ranges[0] : ranges;
+}
 
 function generate_outbound(node) {
 	if (type(node) !== 'object' || isEmpty(node))
@@ -195,7 +201,7 @@ function generate_outbound(node) {
 		server: node.address,
 		server_port: strToInt(node.port),
 		/* Hysteria(2) */
-		server_ports: node.hysteria_hopping_port,
+		server_ports: node.hysteria_hopping_port ? parse_hopping_ports(node.hysteria_hopping_port) : null,
 
 		username: (node.type !== 'ssh') ? node.username : null,
 		user: (node.type === 'ssh') ? node.username : null,
