@@ -364,6 +364,37 @@ function parseShareLink(uri, features) {
 	return config;
 }
 
+function validateHoppingPorts(section_id, value) {
+	if (section_id && value) {
+		let ports = split(value, ",").map(s => trim(s)).filter(s => s !== "");
+
+		for (let port of ports) {
+			if (/^\d+$/.test(port)) {
+				let portNum = parseInt(port);
+				if (portNum < 0 || portNum > 65535) {
+					return _('Expecting: %s').format( _('valid port range (port1:port2)'));
+				}
+				continue;
+			}
+
+			let match = port.match(/^(\d+):(\d+)$/);
+
+			if (!match) {
+				return _('Expecting: %s').format( _('valid port range (port1:port2)'));
+			}
+
+			let start = parseInt(match[1]);
+			let end = parseInt(match[2]);
+
+			if (start < 0 || start > 65535 || end < 0 || end > 65535 || start > end) {
+				return _('Expecting: %s').format( _('valid port range (port1:port2)'));
+			}
+		}
+	}
+
+	return true;
+}
+
 function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	let s = section, o;
 	s.rowcolors = true;
@@ -489,7 +520,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o = s.option(form.DynamicList, 'hysteria_hopping_port', _('Hopping port'));
 	o.depends('type', 'hysteria');
 	o.depends('type', 'hysteria2');
-	o.validate = hp.validatePortRange;
+	o.validate = validateHoppingPorts;
 	o.modalonly = true;
 
 	o = s.option(form.Value, 'hysteria_hop_interval', _('Hop interval'),

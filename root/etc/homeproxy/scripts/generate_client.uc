@@ -153,6 +153,15 @@ function parse_dnsquery(strquery) {
 
 }
 
+function parse_hopping_ports(port_str) {
+    if (!port_str)
+        return null;
+
+    let ranges = split(port_str, ",").map(s => trim(s)).filter(s => s !== "");
+
+    return ranges.length === 1 ? ranges[0] : ranges;
+}
+
 function generate_outbound(node) {
 	if (type(node) !== 'object' || isEmpty(node))
 		return null;
@@ -165,7 +174,7 @@ function generate_outbound(node) {
 		server: node.address,
 		server_port: strToInt(node.port),
 		/* Hysteria(2) */
-		server_ports: node.hysteria_hopping_port,
+		server_ports: parse_hopping_ports(node.hysteria_hopping_port),
 
 		username: (node.type !== 'ssh') ? node.username : null,
 		user: (node.type === 'ssh') ? node.username : null,
