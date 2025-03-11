@@ -835,7 +835,6 @@ msgid "Generate"
 msgstr "生成"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:307
-#: htdocs/luci-static/resources/view/homeproxy/node.js:848
 msgid "Generic segmentation offload"
 msgstr "通用分段卸载（GSO）"
 
@@ -1059,6 +1058,10 @@ msgstr "单位：秒。"
 msgid "In seconds. <code>300</code> is used by default."
 msgstr "单位：秒。默认使用 <code>300</code>。"
 
+#: htdocs/luci-static/resources/view/homeproxy/node.js:889
+msgid "In seconds. Disabled by default."
+msgstr "单位：秒。默认禁用。"
+
 #: htdocs/luci-static/resources/view/homeproxy/client.js:757
 msgid "Independent cache per server"
 msgstr "独立缓存"
@@ -1127,7 +1130,7 @@ msgstr "有时性能更好。"
 msgid "Let's Encrypt"
 msgstr "Let's Encrypt"
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:855
+#: htdocs/luci-static/resources/view/homeproxy/node.js:849
 msgid ""
 "List of IP (v4 or v6) addresses prefixes to be assigned to the interface."
 msgstr "分配给接口的 IP（v4 或 v6）地址前缀列表。"
@@ -1163,7 +1166,7 @@ msgstr "加载中"
 msgid "Local"
 msgstr "本地"
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:854
+#: htdocs/luci-static/resources/view/homeproxy/node.js:848
 msgid "Local address"
 msgstr "本地地址"
 
@@ -1175,7 +1178,7 @@ msgstr "日志文件不存在。"
 msgid "Log is empty."
 msgstr "日志为空。"
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:888
+#: htdocs/luci-static/resources/view/homeproxy/node.js:882
 msgid "MTU"
 msgstr "MTU"
 
@@ -1555,7 +1558,7 @@ msgstr "密码"
 msgid "Path"
 msgstr "路径"
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:869
+#: htdocs/luci-static/resources/view/homeproxy/node.js:863
 msgid "Peer pubkic key"
 msgstr "对端公钥"
 
@@ -1564,6 +1567,10 @@ msgid ""
 "Performance may degrade slightly, so it is not recommended to enable on when "
 "it is not needed."
 msgstr "性能可能会略有下降，建议仅在需要时开启。"
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:888
+msgid "Persistent keepalive interval"
+msgstr "持久 keepalive 间隔"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:807
 #: htdocs/luci-static/resources/view/homeproxy/server.js:458
@@ -1602,7 +1609,7 @@ msgstr "端口跳跃间隔（单位：秒）。"
 msgid "Port range"
 msgstr "端口范围"
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:876
+#: htdocs/luci-static/resources/view/homeproxy/node.js:870
 msgid "Pre-shared key"
 msgstr "预共享密钥"
 
@@ -1615,7 +1622,7 @@ msgid "Prefer IPv6"
 msgstr "优先 IPv6"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:627
-#: htdocs/luci-static/resources/view/homeproxy/node.js:861
+#: htdocs/luci-static/resources/view/homeproxy/node.js:855
 msgid "Private key"
 msgstr "私钥"
 
@@ -1806,7 +1813,7 @@ msgstr "移除 %s 个节点"
 msgid "Remove all nodes from subscriptions"
 msgstr "移除所有订阅节点"
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:883
+#: htdocs/luci-static/resources/view/homeproxy/node.js:877
 msgid "Reserved field bytes"
 msgstr "保留字段字节"
 
@@ -2620,15 +2627,15 @@ msgstr "白名单模式"
 msgid "WireGuard"
 msgstr "WireGuard"
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:870
+#: htdocs/luci-static/resources/view/homeproxy/node.js:864
 msgid "WireGuard peer public key."
 msgstr "WireGuard 对端公钥。"
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:877
+#: htdocs/luci-static/resources/view/homeproxy/node.js:871
 msgid "WireGuard pre-shared key."
 msgstr "WireGuard 预共享密钥。"
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:862
+#: htdocs/luci-static/resources/view/homeproxy/node.js:856
 msgid "WireGuard requires base64-encoded private keys."
 msgstr "WireGuard 要求 base64 编码的私钥。"
 

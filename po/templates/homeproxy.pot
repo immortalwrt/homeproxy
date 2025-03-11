@@ -814,7 +814,6 @@ msgid "Generate"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:307
-#: htdocs/luci-static/resources/view/homeproxy/node.js:848
 msgid "Generic segmentation offload"
 msgstr ""
 
@@ -1036,6 +1035,10 @@ msgstr ""
 msgid "In seconds. <code>300</code> is used by default."
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/node.js:889
+msgid "In seconds. Disabled by default."
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/client.js:757
 msgid "Independent cache per server"
 msgstr ""
@@ -1102,7 +1105,7 @@ msgstr ""
 msgid "Let's Encrypt"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:855
+#: htdocs/luci-static/resources/view/homeproxy/node.js:849
 msgid ""
 "List of IP (v4 or v6) addresses prefixes to be assigned to the interface."
 msgstr ""
@@ -1138,7 +1141,7 @@ msgstr ""
 msgid "Local"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:854
+#: htdocs/luci-static/resources/view/homeproxy/node.js:848
 msgid "Local address"
 msgstr ""
 
@@ -1150,7 +1153,7 @@ msgstr ""
 msgid "Log is empty."
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:888
+#: htdocs/luci-static/resources/view/homeproxy/node.js:882
 msgid "MTU"
 msgstr ""
 
@@ -1528,7 +1531,7 @@ msgstr ""
 msgid "Path"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:869
+#: htdocs/luci-static/resources/view/homeproxy/node.js:863
 msgid "Peer pubkic key"
 msgstr ""
 
@@ -1536,6 +1539,10 @@ msgstr ""
 msgid ""
 "Performance may degrade slightly, so it is not recommended to enable on when "
 "it is not needed."
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:888
+msgid "Persistent keepalive interval"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:807
@@ -1575,7 +1582,7 @@ msgstr ""
 msgid "Port range"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:876
+#: htdocs/luci-static/resources/view/homeproxy/node.js:870
 msgid "Pre-shared key"
 msgstr ""
 
@@ -1588,7 +1595,7 @@ msgid "Prefer IPv6"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:627
-#: htdocs/luci-static/resources/view/homeproxy/node.js:861
+#: htdocs/luci-static/resources/view/homeproxy/node.js:855
 msgid "Private key"
 msgstr ""
 
@@ -1779,7 +1786,7 @@ msgstr ""
 msgid "Remove all nodes from subscriptions"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:883
+#: htdocs/luci-static/resources/view/homeproxy/node.js:877
 msgid "Reserved field bytes"
 msgstr ""
 
@@ -2555,15 +2562,15 @@ msgstr ""
 msgid "WireGuard"
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:870
+#: htdocs/luci-static/resources/view/homeproxy/node.js:864
 msgid "WireGuard peer public key."
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:877
+#: htdocs/luci-static/resources/view/homeproxy/node.js:871
 msgid "WireGuard pre-shared key."
 msgstr ""
 
-#: htdocs/luci-static/resources/view/homeproxy/node.js:862
+#: htdocs/luci-static/resources/view/homeproxy/node.js:856
 msgid "WireGuard requires base64-encoded private keys."
 msgstr ""
 
