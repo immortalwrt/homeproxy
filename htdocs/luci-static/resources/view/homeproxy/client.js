@@ -194,7 +194,7 @@ return view.extend({
 				if (!value)
 					return _('Expecting: %s').format(_('non-empty value'));
 
-				let ipv6_support = this.map.lookupOption('ipv6_support', section_id)[0].formvalue(section_id);
+				let ipv6_support = this.section.formvalue(section_id, 'ipv6_support');
 				try {
 					let url = new URL(value.replace(/^.*:\/\//, 'http://'));
 					if (stubValidator.apply('hostname', url.hostname))
@@ -443,7 +443,7 @@ return view.extend({
 		}
 		so.validate = function(section_id, value) {
 			if (section_id && value) {
-				let node = this.map.lookupOption('node', section_id)[0].formvalue(section_id);
+				let node = this.section.formvalue(section_id, 'node');
 
 				let conflict = false;
 				uci.sections(data[0], 'routing_node', (res) => {
@@ -497,7 +497,7 @@ return view.extend({
 		so.placeholder = '180';
 		so.validate = function(section_id, value) {
 			if (section_id && value) {
-				let idle_timeout = this.map.lookupOption('urltest_idle_timeout', section_id)[0].formvalue(section_id) || '1800';
+				let idle_timeout = this.section.formvalue(section_id, 'idle_timeout') || '1800';
 				if (parseInt(value) > parseInt(idle_timeout))
 					return _('Test interval must be less or equal than idle timeout.');
 			}
@@ -1312,8 +1312,7 @@ return view.extend({
 			return callWriteDomainList('proxy_list', value);
 		}
 		so.remove = function(/* ... */) {
-			let routing_mode = this.map.lookupOption('routing_mode', 'config')[0].formvalue('config');
-
+			let routing_mode = this.section.formvalue('config', 'routing_mode');
 			if (routing_mode !== 'custom')
 				return callWriteDomainList('proxy_list', '');
 			return true;
@@ -1345,8 +1344,7 @@ return view.extend({
 			return callWriteDomainList('direct_list', value);
 		}
 		so.remove = function(/* ... */) {
-			let routing_mode = this.map.lookupOption('routing_mode', 'config')[0].formvalue('config');
-
+			let routing_mode = this.section.formvalue('config', 'routing_mode');
 			if (routing_mode !== 'custom')
 				return callWriteDomainList('direct_list', '');
 			return true;

@@ -448,12 +448,12 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.depends({'type': 'socks', 'socks_version': '5'});
 	o.validate = function(section_id, value) {
 		if (section_id) {
-			let type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
+			let type = this.section.formvalue(section_id, 'type');
 			let required_type = [ 'shadowsocks', 'shadowtls', 'trojan' ];
 
 			if (required_type.includes(type)) {
 				if (type === 'shadowsocks') {
-					let encmode = this.map.lookupOption('shadowsocks_encrypt_method', section_id)[0].formvalue(section_id);
+					let encmode = this.section.formvalue(section_id, 'shadowsocks_encrypt_method');
 					if (encmode === 'none')
 						return true;
 				}
