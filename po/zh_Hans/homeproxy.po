@@ -924,11 +924,11 @@ msgstr "HomeProxy 服务端"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:485
 msgid "Hop interval"
-msgstr ""
+msgstr "跳跃间隔"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:479
 msgid "Hopping port"
-msgstr ""
+msgstr "跳跃端口"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:778
 #: htdocs/luci-static/resources/view/homeproxy/node.js:783
@@ -950,7 +950,7 @@ msgstr "主机密钥算法"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:542
 #: htdocs/luci-static/resources/view/homeproxy/client.js:910
 msgid "Host/IP fields"
-msgstr ""
+msgstr "主机/IP 字段"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:357
 msgid ""
@@ -1053,7 +1053,7 @@ msgstr "导入分享链接"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:799
 msgid "In seconds."
-msgstr ""
+msgstr "单位：秒。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:341
 msgid "In seconds. <code>300</code> is used by default."
@@ -1212,7 +1212,7 @@ msgstr "伪装"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1074
 msgid ""
 "Match IP CIDR with query response. Current rule will be skipped if not match."
-msgstr ""
+msgstr "使用查询响应匹配 IP CIDR。如果不匹配，则跳过当前规则。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:684
 msgid "Match IP CIDR."
@@ -1251,7 +1251,7 @@ msgstr "匹配端口。"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:688
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1078
 msgid "Match private IP"
-msgstr ""
+msgstr "匹配私有 IP"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1079
 msgid "Match private IP with query response."
@@ -1260,7 +1260,7 @@ msgstr "使用查询响应匹配私有 IP。"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:680
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1070
 msgid "Match private source IP"
-msgstr ""
+msgstr "匹配私有源 IP"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:712
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1103
@@ -1595,7 +1595,7 @@ msgstr "端口字段"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:486
 msgid "Port hopping interval in seconds."
-msgstr ""
+msgstr "端口跳跃间隔（单位：秒）。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:706
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1097
@@ -1626,7 +1626,7 @@ msgstr "私钥指纹"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:544
 #: htdocs/luci-static/resources/view/homeproxy/client.js:912
 msgid "Process fields"
-msgstr ""
+msgstr "进程字段"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:711
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1102
@@ -2804,33 +2804,3 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:322
 msgid "valid uuid"
 msgstr "有效 uuid"
-
-#~ msgid "Disable dynamic record sizing"
-#~ msgstr "禁用动态记录大小"
-
-#~ msgid "Host fields"
-#~ msgstr "主机字段"
-
-#~ msgid "Match IP CIDR with query response."
-#~ msgstr "使用查询响应匹配 IP CIDR。"
-
-#~ msgid "Match private IP."
-#~ msgstr "匹配私有 IP。"
-
-#~ msgid "Match private source IP."
-#~ msgstr "匹配私有源 IP。"
-
-#~ msgid "Match source IP via rule set"
-#~ msgstr "通过规则集匹配源 IP"
-
-#~ msgid "Private IP"
-#~ msgstr "私有 IP"
-
-#~ msgid "Private source IP"
-#~ msgstr "私有源 IP"
-
-#~ msgid "SRC-IP fields"
-#~ msgstr "源 IP 字段"
-
-#~ msgid "SRC-Port fields"
-#~ msgstr "源端口字段"
