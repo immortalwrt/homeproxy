@@ -366,7 +366,7 @@ function parseShareLink(uri, features) {
 
 function validateHoppingPorts(section_id, value) {
 	if (section_id && value) {
-		let ports = split(value, ",").map(s => trim(s)).filter(s => s !== "");
+		let ports = value.split(',').map(s => s.trim()).filter(s => s !== '');
 
 		for (let port of ports) {
 			if (/^\d+$/.test(port)) {
