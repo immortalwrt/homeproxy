@@ -101,6 +101,14 @@ const proxy_mode = uci.get(uciconfig, ucimain, 'proxy_mode') || 'redirect_tproxy
       ipv6_support = uci.get(uciconfig, ucimain, 'ipv6_support') || '0',
       default_interface = uci.get(uciconfig, ucicontrol, 'bind_interface');
 
+const enable_clash_api = uci.get(uciconfig, uciexp, 'enable_clash_api'),
+ 	  external_ui = uci.get(uciconfig, uciexp, 'external_ui'),
+ 	  external_ui_download_url = uci.get(uciconfig, uciexp, 'external_ui_download_url'),
+ 	  external_ui_download_detour = uci.get(uciconfig, uciexp, 'external_ui_download_detour'),
+ 	  secret = uci.get(uciconfig, uciexp, 'secret'),
+ 	  default_mode = uci.get(uciconfig, uciexp, 'default_mode'),
+       external_controller = uci.get(uciconfig, uciexp, 'external_controller');
+
 const mixed_port = uci.get(uciconfig, uciinfra, 'mixed_port') || '5330';
 let self_mark, redirect_port, tproxy_port,
     tun_name, tun_addr4, tun_addr6, tun_mtu, tun_gso,
