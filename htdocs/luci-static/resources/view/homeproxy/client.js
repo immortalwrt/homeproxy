@@ -1200,6 +1200,62 @@ return view.extend({
 		so.placeholder = '1d';
 		so.depends('type', 'remote');
 		/* Rule set settings end */
+		
+		/* clash_api settings start */
+ 		s.tab('clash_api', _('Clash API'));
+ 		o = s.taboption('clash_api', form.SectionValue, '_experimental', form.NamedSection, 'experimental', 'homeproxy');
+ 		o.depends('routing_mode', 'custom');
+ 
+ 		ss = o.subsection;
+ 		so = ss.option(form.Flag, 'enable_clash_api', _('Enable Clash API'));
+ 		so.default = so.disabled;
+ 
+ 
+ 		so = ss.option(form.Value, 'external_controller', _('External Controller'),
+ 			_('RESTful web API listening address'));
+ 		so.rmempty = false;
+ 		so.default = '0.0.0.0:9090';
+ 		so.depends('enable_clash_api', '1');
+ 
+ 		so = ss.option(form.Value, 'secret', _('Secret'),
+ 			_('ALWAYS set a secret if RESTful API is listening on <code>0.0.0.0</code>'));
+ 		so.depends('enable_clash_api', '1');
+ 
+ 		so = ss.option(form.Value, 'external_ui', _('External UI Path'),
+ 			_('A relative path to the configuration directory or an absolute path to a directory in which you put some static web resource.'));
+ 		so.default = '/etc/homeproxy/ui/';
+ 		so.depends('enable_clash_api', '1');
+ 
+ 		so = ss.option(form.Value, 'external_ui_download_url', _('UI Download link'),
+ 			_('<code>https://github.com/MetaCubeX/Yacd-meta/archive/gh-pages.zip</code> will be used if empty.'));
+ 		so.depends('enable_clash_api', '1');
+ 
+ 		so = ss.option(form.ListValue, 'external_ui_download_detour', _('UI Download detour'),
+ 			_('Default outbound will be used if empty.'));
+ 		so.load = function (section_id) {
+ 			delete this.keylist;
+ 			delete this.vallist;
+ 
+ 			this.value('direct-out', _('Direct'));
+ 			this.value('block-out', _('Block'));
+ 			uci.sections(data[0], 'node', (res) => {
+ 				this.value(res.label, res.label);
+ 			});
+ 
+ 			return this.super('load', section_id);
+ 		}
+ 		so.depends('enable_clash_api', '1');
+ 
+ 		so = ss.option(form.Value, 'default_mode', _('Default mode'),
+ 			_('Default mode in clash, <code>Rule</code> will be used if none.'));
+ 		so.value('', _('-- Please choose --'));
+ 		so.value('direct', 'Direct');
+ 		so.value('rule', 'Rule');
+ 		so.value('global', 'Global');
+ 		so.value('script', 'Script');
+ 		so.depends('enable_clash_api', '1');
+ 		/* clash_api settings end */
+		
 
 		/* ACL settings start */
 		s.tab('control', _('Access Control'));
