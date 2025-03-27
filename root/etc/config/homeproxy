@@ -76,3 +76,6 @@ config dns_rule 'nodes_domain'
 	list outbound 'any-out'
 	option server 'default-dns'
 
+
+ config homeproxy 'experimental'
+ 	option enable_clash_api '0'
