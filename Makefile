@@ -9,7 +9,8 @@ LUCI_PKGARCH:=all
 LUCI_DEPENDS:= \
 	+sing-box \
 	+firewall4 \
-	+kmod-nft-tproxy
+	+kmod-nft-tproxy \
+	+uclient-fetch
 
 PKG_NAME:=luci-app-homeproxy
 

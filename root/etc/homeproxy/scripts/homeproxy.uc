@@ -81,7 +81,7 @@ export function wGET(url, ua) {
 	if (!ua)
 		ua = 'Wget/1.21 (HomeProxy, like v2rayN)';
 
-	const output = executeCommand(`/usr/bin/wget -qO- --user-agent ${shellQuote(ua)} --timeout=10 ${shellQuote(url)}`) || {};
+	const output = executeCommand(`/bin/uclient-fetch -qO- --user-agent ${shellQuote(ua)} --timeout=10 ${shellQuote(url)}`) || {};
 	return trim(output.stdout);
 };
 /* Utilities end */
