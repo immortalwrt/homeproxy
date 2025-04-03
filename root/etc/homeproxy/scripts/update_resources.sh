@@ -42,7 +42,7 @@ check_list_update() {
 	local listrepo="$2"
 	local listref="$3"
 	local listname="$4"
-	local github_token="$(uci -q get homeproxy.infra.github_token)"
+	local github_token="$(uci -q get homeproxy.config.github_token)"
 	local wget="wget --timeout=10 -q"
 
 	set_lock "set" "$listtype"
