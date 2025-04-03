@@ -1915,7 +1915,7 @@ msgstr "保持与主节点一致"
 #: htdocs/luci-static/resources/view/homeproxy/status.js:220
 #: htdocs/luci-static/resources/view/homeproxy/status.js:225
 msgid "Save"
-msgstr ""
+msgstr "保存"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1366
 msgid "Save current settings"
