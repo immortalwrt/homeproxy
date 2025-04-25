@@ -1,6 +1,8 @@
 name: Rescan translation
 
 on:
+  repository_dispatch:
+  workflow_dispatch:
   push:
     branches:
       - 'master'
