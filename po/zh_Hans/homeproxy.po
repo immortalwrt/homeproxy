@@ -842,7 +842,7 @@ msgstr "通用分段卸载（GSO）"
 
 #: htdocs/luci-static/resources/view/homeproxy/status.js:213
 msgid "GitHub token"
-msgstr ""
+msgstr "GitHub 令牌"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:256
 msgid "Global"
