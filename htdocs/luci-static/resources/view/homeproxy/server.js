@@ -786,6 +786,53 @@ return view.extend({
 		o.depends({'tls': '1', 'tls_key_path': '/etc/homeproxy/certs/server_privatekey.pem'});
 		o.onclick = L.bind(hp.uploadCertificate, this, _('private key'), 'server_privatekey');
 		o.modalonly = true;
+
+		o = s.option(form.TextValue, 'tls_ech_key', _('ECH key'));
+		o.placeholder = '-----BEGIN ECH KEYS-----\nACBE2+piYBLrOywCbRYU+ZpEkk8keeBlUXbKqLRmQ/68FwBL/g0ARwAAIAAgn8HI\n93RfdV/LaDk+LC9H4h+4WhVBFmWKdhiT3vvpGi8ACAABAAEAAQADABRvdXRlci1z\nbmkuYW55LmRvbWFpbgAA\n-----END ECH KEYS-----';
+		o.monospace = true;
+		o.cols = 30
+		o.rows = 3;
+		o.hp_options = {
+			type: 'ech-keypair',
+			params: '',
+			result: {
+				ech_key: o.option,
+				ech_cfg: 'tls_ech_config'
+			}
+		}
+		o.renderWidget = function(section_id, option_index, cfgvalue) {
+			let node = form.TextValue.prototype.renderWidget.apply(this, arguments);
+			const cbid = this.cbid(section_id) + '._outer_sni';
+
+			node.appendChild(E('div',  { 'class': 'control-group' }, [
+				E('input', {
+					id: cbid,
+					class: 'cbi-input-text',
+					style: 'width: 10em',
+					placeholder: 'outer-sni.any.domain'
+				}),
+				E('button', {
+					class: 'cbi-button cbi-button-add',
+					click: ui.createHandlerFn(this, function() {
+						this.hp_options.params = document.getElementById(cbid).value;
+
+						return handleGenKey.call(this, this.hp_options);
+					})
+				}, [ _('Generate') ])
+			]));
+
+			return node;
+		}
+		o.depends('tls', '1');
+		o.modalonly = true;
+
+		o = s.option(form.TextValue, 'tls_ech_config', _('ECH config'));
+		o.placeholder = '-----BEGIN ECH CONFIGS-----\nAEv+DQBHAAAgACCfwcj3dF91X8toOT4sL0fiH7haFUEWZYp2GJPe++kaLwAIAAEA\nAQABAAMAFG91dGVyLXNuaS5hbnkuZG9tYWluAAA=\n-----END ECH CONFIGS-----';
+		o.monospace = true;
+		o.cols = 30
+		o.rows = 3;
+		o.depends('tls', '1');
+		o.modalonly = true;
 		/* TLS config end */
 
 		/* Extra settings start */
