@@ -44,42 +44,53 @@ function renderStatus(isRunning, version) {
 
 function handleGenKey(option) {
 	let section_id = this.section.section;
-	let type = this.section.getOption('type').formvalue(section_id);
-	let widget = this.map.findElement('id', 'widget.cbid.homeproxy.%s.%s'.format(section_id, option));
-	let password, required_method;
+	let type = this.section.getOption('type')?.formvalue(section_id);
+	let widget = L.bind(function(option) {
+		return this.map.findElement('id', 'widget.' + this.cbid(section_id).replace(/\.[^\.]+$/, '.') + option);
+	}, this);
 
-	if (option === 'uuid')
-		required_method = 'uuid';
-	else if (type === 'shadowsocks')
-		required_method = this.section.getOption('shadowsocks_encrypt_method')?.formvalue(section_id);
+	const callSingBoxGenerator = rpc.declare({
+		object: 'luci.homeproxy',
+		method: 'singbox_generator',
+		params: ['type', 'params'],
+		expect: { '': {} }
+	});
 
-	switch (required_method) {
-		case 'aes-128-gcm':
-		case '2022-blake3-aes-128-gcm':
-			password = hp.generateRand('base64', 16);
-			break;
-		case 'aes-192-gcm':
-			password = hp.generateRand('base64', 24);
-			break;
-		case 'aes-256-gcm':
-		case 'chacha20-ietf-poly1305':
-		case 'xchacha20-ietf-poly1305':
-		case '2022-blake3-aes-256-gcm':
-		case '2022-blake3-chacha20-poly1305':
-			password = hp.generateRand('base64', 32);
-			break;
-		case 'none':
-			password = '';
-			break;
-		case 'uuid':
-			password = hp.generateRand('uuid');
-			break;
-		default:
-			password = hp.generateRand('hex', 16);
-			break;
+	if (typeof option === 'object') {
+		return callSingBoxGenerator(option.type, option.params).then((ret) => {
+			if (ret.result)
+				for (let key in option.result)
+					widget(option.result[key]).value = ret.result[key] || '';
+			else
+				ui.addNotification(null, E('p', _('Failed to generate %s, error: %s.').format(type, ret.error)));
+		});
+	} else {
+		let password, required_method;
+
+		if (option === 'uuid')
+			required_method = 'uuid';
+		else if (type === 'shadowsocks')
+			required_method = this.section.getOption('shadowsocks_encrypt_method')?.formvalue(section_id);
+
+		switch (required_method) {
+			case 'none':
+				password = '';
+				break;
+			case 'uuid':
+				password = hp.generateRand('uuid');
+				break;
+			default:
+				password = hp.generateRand('hex', 16);
+				break;
+		}
+		/* AEAD */
+		(function(length) {
+			if (length && length > 0)
+				password = hp.generateRand('base64', length);
+		}(hp.shadowsocks_encrypt_length[required_method]));
+
+		return widget(option).value = password;
 	}
-
-	return widget.value = password;
 }
 
 return view.extend({
