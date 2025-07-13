@@ -234,7 +234,7 @@ function parse_uri(uri) {
 				address: url.hostname,
 				port: url.port,
 				shadowsocks_encrypt_method: ss_userinfo[0],
-				password: ss_userinfo[1],
+				password: join(':', slice(ss_userinfo, 1)),
 				shadowsocks_plugin: ss_plugin,
 				shadowsocks_plugin_opts: ss_plugin_opts
 			};
