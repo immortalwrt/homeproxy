@@ -448,7 +448,7 @@ return view.extend({
 					if (res['.name'] !== section_id) {
 						if (res.outbound === section_id && res['.name'] == value)
 							conflict = true;
-						else if (res?.urltest_nodes?.includes(node) && res['.name'] == value)
+						else if (res.node === 'urltest' && res.urltest_nodes?.includes(node) && res['.name'] == value)
 							conflict = true;
 					}
 				});
