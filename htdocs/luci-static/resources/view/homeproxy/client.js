@@ -466,7 +466,13 @@ return view.extend({
 		for (let i in proxy_nodes)
 			so.value(i, proxy_nodes[i]);
 		so.depends('node', 'urltest');
-		so.rmempty = false;
+		so.validate = function(section_id) {
+			let value = this.section.formvalue(section_id, 'urltest_nodes');
+			if (section_id && !value.length)
+				return _('Expecting: %s').format(_('non-empty value'));
+
+			return true;
+		}
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'urltest_url', _('Test URL'),
