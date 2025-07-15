@@ -115,11 +115,11 @@ start_service() {
 				local tproxy_mark
 				config_get tproxy_mark "infra" "tproxy_mark" "101"
 
-				ip rule add fwmark "$tproxy_mark" table "$table_mark"
+				ip rule add fwmark "$tproxy_mark" table "$table_mark" priority 999
 				ip route add local 0.0.0.0/0 dev lo table "$table_mark"
 
 				if [ "$ipv6_support" -eq "1" ]; then
-					ip -6 rule add fwmark "$tproxy_mark" table "$table_mark"
+					ip -6 rule add fwmark "$tproxy_mark" table "$table_mark" priority 999
 					ip -6 route add local ::/0 dev lo table "$table_mark"
 				fi
 			fi
@@ -134,10 +134,10 @@ start_service() {
 			ip link set "$tun_name" up
 
 			ip route replace default dev "$tun_name" table "$table_mark"
-			ip rule add fwmark "$tun_mark" lookup "$table_mark"
+			ip rule add fwmark "$tun_mark" lookup "$table_mark" priority 999
 
 			ip -6 route replace default dev "$tun_name" table "$table_mark"
-			ip -6 rule add fwmark "$tun_mark" lookup "$table_mark"
+			ip -6 rule add fwmark "$tun_mark" lookup "$table_mark" priority 999
 			;;
 		esac
 
