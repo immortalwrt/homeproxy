@@ -38,17 +38,17 @@ else if (match(china_dns_server, /,/))
 else if (match(china_dns_server, / /))
 	uci.set(uciconfig, ucimain, 'china_dns_server', split(china_dns_server, ' ')[0]);
 
-/* TUN GSO is deprecated in sb 1.11 */
-const tun_gso = uci.get(uciconfig, uciinfra, 'tun_gso');
-if (tun_gso || tun_gso === '0')
-	uci.delete(uciconfig, uciinfra, 'tun_gso');
-
 /* github_token option has been moved to config section */
 const github_token = uci.get(uciconfig, uciinfra, 'github_token');
 if (github_token) {
 	uci.set(uciconfig, ucimain, 'github_token', github_token);
 	uci.delete(uciconfig, uciinfra, 'github_token')
 }
+
+/* tun_gso was deprecated in sb 1.11 */
+const tun_gso = uci.get(uciconfig, uciinfra, 'tun_gso');
+if (tun_gso || tun_gso === '0')
+	uci.delete(uciconfig, uciinfra, 'tun_gso');
 
 /* empty value defaults to all ports now */
 if (uci.get(uciconfig, ucimain, 'routing_port') === 'all')
