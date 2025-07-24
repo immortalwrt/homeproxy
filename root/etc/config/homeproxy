@@ -18,6 +18,9 @@ config homeproxy 'infra'
 	option tproxy_mark '101'
 	option tun_mark '102'
 
+config homeproxy 'migration'
+	option crontab '1'
+
 config homeproxy 'config'
 	option main_node 'nil'
 	option main_udp_node 'same'
