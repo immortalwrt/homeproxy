@@ -96,7 +96,7 @@ body:
           required: true
         - label: I confirm that the Homeproxy I installed does not contain Clash mode support.
           required: true
-        - label: I confirm that the version of OpenWrt/ImmortalWrt I installed is >= 23.05.
+        - label: I confirm that the version of OpenWrt/ImmortalWrt I installed is >= 24.10.
           required: true
         - label: I confirm that I have installed the latest version of HomeProxy and sing-box.
           required: true
