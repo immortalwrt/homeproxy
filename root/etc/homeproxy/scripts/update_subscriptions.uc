@@ -7,6 +7,7 @@
 
 'use strict';
 
+import { md5 } from 'digest';
 import { open } from 'fs';
 import { connect } from 'ubus';
 import { cursor } from 'uci';
@@ -15,9 +16,8 @@ import { urldecode, urlencode } from 'luci.http';
 import { init_action } from 'luci.sys';
 
 import {
-	calcStringMD5, wGET, decodeBase64Str,
-	getTime, isEmpty, parseURL, validation,
-	HP_DIR, RUN_DIR
+	wGET, decodeBase64Str, getTime, isEmpty, parseURL,
+	validation, HP_DIR, RUN_DIR
 } from 'homeproxy';
 
 /* UCI config start */
@@ -464,7 +464,7 @@ function main() {
 
 	for (let url in subscription_urls) {
 		url = replace(url, /#.*$/, '');
-		const groupHash = calcStringMD5(url);
+		const groupHash = md5(url);
 		node_cache[groupHash] = {};
 
 		const res = wGET(url, user_agent);
@@ -495,8 +495,8 @@ function main() {
 
 			const label = config.label;
 			config.label = null;
-			const confHash = calcStringMD5(sprintf('%J', config)),
-			      nameHash = calcStringMD5(label);
+			const confHash = md5(sprintf('%J', config)),
+			      nameHash = md5(label);
 			config.label = label;
 
 			if (filter_check(config.label))
@@ -566,7 +566,7 @@ function main() {
 			if (node.isExisting)
 				return null;
 
-			const nameHash = calcStringMD5(node.label);
+			const nameHash = md5(node.label);
 			uci.set(uciconfig, nameHash, 'node');
 			map(keys(node), (v) => uci.set(uciconfig, nameHash, v, node[v]));
 

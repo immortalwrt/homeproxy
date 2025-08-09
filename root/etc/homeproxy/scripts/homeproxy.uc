@@ -52,14 +52,6 @@ export function executeCommand(...args) {
 	};
 };
 
-export function calcStringMD5(str) {
-	if (!str || type(str) !== 'string')
-		return null;
-
-	const output = executeCommand(`/bin/echo -n ${shellQuote(str)} | /usr/bin/md5sum | /usr/bin/awk '{print $1}'`) || {};
-	return trim(output.stdout);
-};
-
 export function getTime(epoch) {
 	const local_time = localtime(epoch);
 	return replace(replace(sprintf(
