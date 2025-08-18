@@ -210,6 +210,10 @@ function generate_outbound(node) {
 		override_address: node.override_address,
 		override_port: strToInt(node.override_port),
 		proxy_protocol: strToInt(node.proxy_protocol),
+		/* AnyTLS */
+		idle_session_check_interval: node.anytls_idle_session_check_interval ? (node.anytls_idle_session_check_interval + 's') : null,
+		idle_session_timeout: node.anytls_idle_session_timeout ? (node.anytls_idle_session_timeout + 's') : null,
+		min_idle_session: strToInt(node.anytls_min_idle_session),
 		/* Hysteria (2) */
 		hop_interval: node.hysteria_hop_interval ? (node.hysteria_hop_interval + 's') : null,
 		up_mbps: strToInt(node.hysteria_up_mbps),

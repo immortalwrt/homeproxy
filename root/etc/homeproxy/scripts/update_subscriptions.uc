@@ -101,6 +101,23 @@ function parse_uri(uri) {
 		uri = split(trim(uri), '://');
 
 		switch (uri[0]) {
+		case 'anytls':
+			/* https://github.com/anytls/anytls-go/blob/v0.0.8/docs/uri_scheme.md */
+			url = parseURL('http://' + uri[1]) || {};
+			params = url.searchParams || {};
+
+			config = {
+				label: url.hash ? urldecode(url.hash) : null,
+				type: 'anytls',
+				address: url.hostname,
+				port: url.port,
+				password: urldecode(url.username),
+				tls: '1',
+				tls_sni: params.sni,
+				tls_insecure: (params.insecure === '1') ? '1' : '0'
+			};
+
+			break;
 		case 'http':
 		case 'https':
 			url = parseURL('http://' + uri[1]) || {};

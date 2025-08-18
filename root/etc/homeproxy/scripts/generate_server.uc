@@ -51,6 +51,9 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 		udp_timeout: cfg.udp_timeout ? (cfg.udp_timeout + 's') : null,
 		network: cfg.network,
 
+		/* AnyTLS */
+		padding_scheme: cfg.anytls_padding_scheme,
+
 		/* Hysteria */
 		up_mbps: strToInt(cfg.hysteria_up_mbps),
 		down_mbps: strToInt(cfg.hysteria_down_mbps),
@@ -75,7 +78,7 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 		zero_rtt_handshake: strToBool(cfg.tuic_enable_zero_rtt),
 		heartbeat: cfg.tuic_heartbeat ? (cfg.tuic_heartbeat + 's') : null,
 
-		/* HTTP / Hysteria (2) / Mixed / Socks / Trojan / Tuic / VLESS / VMess */
+		/* AnyTLS / HTTP / Hysteria (2) / Mixed / Socks / Trojan / Tuic / VLESS / VMess */
 		users: (cfg.type !== 'shadowsocks') ? [
 			{
 				name: !(cfg.type in ['http', 'mixed', 'naive', 'socks']) ? 'cfg-' + cfg['.name'] + '-server' : null,

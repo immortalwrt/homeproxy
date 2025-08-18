@@ -153,6 +153,7 @@ return view.extend({
 		o.editable = true;
 
 		o = s.option(form.ListValue, 'type', _('Type'));
+		o.value('anytls', _('AnyTLS'));
 		o.value('http', _('HTTP'));
 		if (features.with_quic) {
 			o.value('hysteria', _('Hysteria'));
@@ -188,6 +189,7 @@ return view.extend({
 
 		o = s.option(form.Value, 'password', _('Password'));
 		o.password = true;
+		o.depends('type', 'anytls');
 		o.depends({'type': /^(http|mixed|naive|socks)$/, 'username': /[\s\S]/});
 		o.depends('type', 'hysteria2');
 		o.depends('type', 'shadowsocks');
@@ -207,7 +209,7 @@ return view.extend({
 		o.validate = function(section_id, value) {
 			if (section_id) {
 				let type = this.section.formvalue(section_id, 'type');
-				let required_type = [ 'http', 'mixed', 'naive', 'socks', 'shadowsocks' ];
+				let required_type = [ 'anytls', 'http', 'mixed', 'naive', 'socks', 'shadowsocks', 'trojan' ];
 
 				if (required_type.includes(type)) {
 					if (type === 'shadowsocks') {
@@ -227,6 +229,12 @@ return view.extend({
 
 			return true;
 		}
+		o.modalonly = true;
+
+		/* AnyTLS config */
+		o = s.option(form.DynamicList, 'anytls_padding_scheme', _('Padding scheme'),
+			_('AnyTLS padding scheme in array.'));
+		o.depends('type', 'anytls');
 		o.modalonly = true;
 
 		/* Hysteria (2) config start */
@@ -539,6 +547,7 @@ return view.extend({
 		/* TLS config start */
 		o = s.option(form.Flag, 'tls', _('TLS'));
 		o.default = o.disabled;
+		o.depends('type', 'anytls');
 		o.depends('type', 'http');
 		o.depends('type', 'hysteria');
 		o.depends('type', 'hysteria2');

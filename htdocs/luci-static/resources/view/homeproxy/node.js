@@ -25,6 +25,27 @@ function parseShareLink(uri, features) {
 	uri = uri.split('://');
 	if (uri[0] && uri[1]) {
 		switch (uri[0]) {
+		case 'anytls':
+			/* https://github.com/anytls/anytls-go/blob/v0.0.8/docs/uri_scheme.md */
+			url = new URL('http://' + uri[1]);
+			params = url.searchParams;
+
+			/* Check if password exists */
+			if (!url.username)
+				return null;
+
+			config = {
+				label: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
+				type: 'anytls',
+				address: url.hostname,
+				port: url.port || '80',
+				password: url.username ? decodeURIComponent(url.username) : null,
+				tls: '1',
+				tls_sni: params.get('sni'),
+				tls_insecure: (params.get('insecure') === '1') ? '1' : '0'
+			};
+
+			break;
 		case 'http':
 		case 'https':
 			url = new URL('http://' + uri[1]);
@@ -404,6 +425,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	o = s.option(form.ListValue, 'type', _('Type'));
 	o.value('direct', _('Direct'));
+	o.value('anytls', _('AnyTLS'));
 	o.value('http', _('HTTP'));
 	if (features.with_quic) {
 		o.value('hysteria', _('Hysteria'));
@@ -440,6 +462,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	o = s.option(form.Value, 'password', _('Password'));
 	o.password = true;
+	o.depends('type', 'anytls');
 	o.depends('type', 'http');
 	o.depends('type', 'hysteria2');
 	o.depends('type', 'shadowsocks');
@@ -452,7 +475,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.validate = function(section_id, value) {
 		if (section_id) {
 			let type = this.section.formvalue(section_id, 'type');
-			let required_type = [ 'shadowsocks', 'shadowtls', 'trojan' ];
+			let required_type = [ 'anytls', 'shadowsocks', 'shadowtls', 'trojan' ];
 
 			if (required_type.includes(type)) {
 				if (type === 'shadowsocks') {
@@ -477,6 +500,29 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.value('2', _('v2'));
 	o.depends('type', 'direct');
 	o.modalonly = true;
+
+	/* AnyTLS config start */
+	o = s.option(form.Value, 'anytls_idle_session_check_interval', _('Idle session check interval'),
+		_('Interval checking for idle sessions, in seconds.'));
+	o.datatype = 'uinteger';
+	o.placeholder = '30';
+	o.depends('type', 'anytls');
+	o.modalonly = true;
+
+	o = s.option(form.Value, 'anytls_idle_session_timeout', _('Idle session check timeout'),
+		_('In the check, close sessions that have been idle for longer than this, in seconds.'));
+	o.datatype = 'uinteger';
+	o.placeholder = '30';
+	o.depends('type', 'anytls');
+	o.modalonly = true;
+
+	o = s.option(form.Value, 'anytls_min_idle_session', _('Minimum idle sessions'),
+		_('In the check, at least the first <code>n</code> idle sessions are kept open.'));
+	o.datatype = 'uinteger';
+	o.placeholder = '0';
+	o.depends('type', 'anytls');
+	o.modalonly = true;
+	/* AnyTLS config end */
 
 	/* Hysteria (2) config start */
 	o = s.option(form.DynamicList, 'hysteria_hopping_port', _('Hopping port'));
@@ -927,7 +973,8 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	o = s.option(form.Value, 'multiplex_max_streams', _('Maximum streams'),
 		_('Maximum multiplexed streams in a connection before opening a new connection.<br/>' +
-			'Conflict with <code>Maximum connections</code> and <code>Minimum streams</code>.'));
+			'Conflict with <code>%s</code> and <code>%s</code>.').format(
+				_('Maximum connections'), _('Minimum streams')));
 	o.datatype = 'uinteger';
 	o.depends({'multiplex': '1', 'multiplex_max_connections': '', 'multiplex_min_streams': ''});
 	o.modalonly = true;
@@ -959,6 +1006,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	/* TLS config start */
 	o = s.option(form.Flag, 'tls', _('TLS'));
 	o.default = o.disabled;
+	o.depends('type', 'anytls');
 	o.depends('type', 'http');
 	o.depends('type', 'hysteria');
 	o.depends('type', 'hysteria2');
@@ -972,7 +1020,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 			let type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
 			let tls = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
 
-			if (['hysteria', 'hysteria2', 'shadowtls', 'tuic'].includes(type)) {
+			if (['anytls', 'hysteria', 'hysteria2', 'shadowtls', 'tuic'].includes(type)) {
 				tls.checked = true;
 				tls.disabled = true;
 			} else {
