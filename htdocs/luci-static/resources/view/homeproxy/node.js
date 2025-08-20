@@ -601,7 +601,6 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	o = s.option(form.Flag, 'hysteria_disable_mtu_discovery', _('Disable Path MTU discovery'),
 		_('Disables Path MTU Discovery (RFC 8899). Packets will then be at most 1252 (IPv4) / 1232 (IPv6) bytes in size.'));
-	o.default = o.disabled;
 	o.depends('type', 'hysteria');
 	o.modalonly = true;
 	/* Hysteria (2) config end */
@@ -712,14 +711,12 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	o = s.option(form.Flag, 'tuic_udp_over_stream', _('UDP over stream'),
 		_('This is the TUIC port of the UDP over TCP protocol, designed to provide a QUIC stream based UDP relay mode that TUIC does not provide.'));
-	o.default = o.disabled;
 	o.depends({'type': 'tuic','tuic_udp_relay_mode': ''});
 	o.modalonly = true;
 
 	o = s.option(form.Flag, 'tuic_enable_zero_rtt', _('Enable 0-RTT handshake'),
 		_('Enable 0-RTT QUIC connection handshake on the client side. This is not impacting much on the performance, as the protocol is fully multiplexed.<br/>' +
 			'Disabling this is highly recommended, as it is vulnerable to replay attacks.'));
-	o.default = o.disabled;
 	o.depends('type', 'tuic');
 	o.modalonly = true;
 
@@ -764,7 +761,6 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	o = s.option(form.Flag, 'vmess_authenticated_length', _('Authenticated length'),
 		_('Protocol parameter. Enable length block encryption.'));
-	o.default = o.disabled;
 	o.depends('type', 'vmess');
 	o.modalonly = true;
 	/* VMess config end */
@@ -817,7 +813,6 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	if (features.with_grpc) {
 		o = s.option(form.Flag, 'grpc_permit_without_stream', _('gRPC permit without stream'),
 			_('If enabled, the client transport sends keepalive pings even with no active connections.'));
-		o.default = o.disabled;
 		o.depends('transport', 'grpc');
 		o.modalonly = true;
 	}
@@ -943,7 +938,6 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	/* Mux config start */
 	o = s.option(form.Flag, 'multiplex', _('Multiplex'));
-	o.default = o.disabled;
 	o.depends('type', 'shadowsocks');
 	o.depends('type', 'trojan');
 	o.depends('type', 'vless');
@@ -980,13 +974,11 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.modalonly = true;
 
 	o = s.option(form.Flag, 'multiplex_padding', _('Enable padding'));
-	o.default = o.disabled;
 	o.depends('multiplex', '1');
 	o.modalonly = true;
 
 	o = s.option(form.Flag, 'multiplex_brutal', _('Enable TCP Brutal'),
 		_('Enable TCP Brutal congestion control algorithm'));
-	o.default = o.disabled;
 	o.depends('multiplex', '1');
 	o.modalonly = true;
 
@@ -1005,7 +997,6 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	/* TLS config start */
 	o = s.option(form.Flag, 'tls', _('TLS'));
-	o.default = o.disabled;
 	o.depends('type', 'anytls');
 	o.depends('type', 'http');
 	o.depends('type', 'hysteria');
@@ -1046,7 +1037,6 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 		_('Allow insecure connection at TLS client.') +
 		'<br/>' +
 		_('This is <strong>DANGEROUS</strong>, your traffic is almost like <strong>PLAIN TEXT</strong>! Use at your own risk!'));
-	o.default = o.disabled;
 	o.depends('tls', '1');
 	o.onchange = allowInsecureConfirm;
 	o.modalonly = true;
@@ -1077,7 +1067,6 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	o = s.option(form.Flag, 'tls_self_sign', _('Append self-signed certificate'),
 		_('If you have the root certificate, use this option instead of allowing insecure.'));
-	o.default = o.disabled;
 	o.depends('tls_insecure', '0');
 	o.modalonly = true;
 
@@ -1101,12 +1090,10 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 		o = s.option(form.Flag, 'tls_ech', _('Enable ECH'),
 			_('ECH (Encrypted Client Hello) is a TLS extension that allows a client to encrypt the first part of its ClientHello message.'));
 		o.depends('tls', '1');
-		o.default = o.disabled;
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'tls_ech_enable_pqss', _('Enable PQ signature schemes'));
 		o.depends('tls_ech', '1');
-		o.default = o.disabled;
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'tls_ech_config_path', _('ECH config path'),
@@ -1155,7 +1142,6 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 		o.modalonly = true;
 
 		o = s.option(form.Flag, 'tls_reality', _('REALITY'));
-		o.default = o.disabled;
 		o.depends({'tls': '1', 'type': 'vless'});
 		o.modalonly = true;
 
@@ -1172,21 +1158,17 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	/* Extra settings start */
 	o = s.option(form.Flag, 'tcp_fast_open', _('TCP fast open'));
-	o.default = o.disabled;
 	o.modalonly = true;
 
 	o = s.option(form.Flag, 'tcp_multi_path', _('MultiPath TCP'));
-	o.default = o.disabled;
 	o.modalonly = true;
 
 	o = s.option(form.Flag, 'udp_fragment', _('UDP Fragment'),
 		_('Enable UDP fragmentation.'));
-	o.default = o.disabled;
 	o.modalonly = true;
 
 	o = s.option(form.Flag, 'udp_over_tcp', _('UDP over TCP'),
 		_('Enable the SUoT protocol, requires server support. Conflict with multiplex.'));
-	o.default = o.disabled;
 	o.depends('type', 'socks');
 	o.depends({'type': 'shadowsocks', 'multiplex': '0'});
 	o.modalonly = true;
@@ -1351,7 +1333,6 @@ return view.extend({
 
 		o = s.taboption('subscription', form.Flag, 'auto_update', _('Auto update'),
 			_('Auto update subscriptions and geodata.'));
-		o.default = o.disabled;
 		o.rmempty = false;
 
 		o = s.taboption('subscription', form.ListValue, 'auto_update_time', _('Update time'));
@@ -1362,7 +1343,6 @@ return view.extend({
 
 		o = s.taboption('subscription', form.Flag, 'update_via_proxy', _('Update via proxy'),
 			_('Update subscriptions via proxy.'));
-		o.default = o.disabled;
 		o.rmempty = false;
 
 		o = s.taboption('subscription', form.DynamicList, 'subscription_url', _('Subscription URL-s'),
@@ -1402,7 +1382,6 @@ return view.extend({
 			_('Allow insecure connection by default when add nodes from subscriptions.') +
 			'<br/>' +
 			_('This is <strong>DANGEROUS</strong>, your traffic is almost like <strong>PLAIN TEXT</strong>! Use at your own risk!'));
-		o.default = o.disabled;
 		o.rmempty = false;
 		o.onchange = allowInsecureConfirm;
 
