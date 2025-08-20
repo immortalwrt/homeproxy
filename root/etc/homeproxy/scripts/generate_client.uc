@@ -354,6 +354,7 @@ function get_resolver(cfg) {
 
 	switch (cfg) {
 	case 'block-dns':
+		return null;
 	case 'default-dns':
 	case 'system-dns':
 		return cfg;
@@ -397,17 +398,14 @@ config.dns = {
 	servers: [
 		{
 			tag: 'default-dns',
-			address: wan_dns,
+			type: 'udp',
+			server: wan_dns,
 			detour: 'direct-out'
 		},
 		{
 			tag: 'system-dns',
-			address: 'local',
+			type: 'local',
 			detour: 'direct-out'
-		},
-		{
-			tag: 'block-dns',
-			address: 'rcode://refused'
 		}
 	],
 	rules: [],

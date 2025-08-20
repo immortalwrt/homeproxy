@@ -72,6 +72,17 @@ if (uci.get(uciconfig, ucimain, 'routing_port') === 'all')
 if (uci.get(uciconfig, 'experimental'))
 	uci.delete(uciconfig, 'experimental');
 
+/* block-dns was removed from built-in dns servers */
+if (uci.get(uciconfig, ucidns, 'default_server') === 'block-dns') {
+	/* append a rule at last to block all DNS queries */
+	uci.set(uciconfig, '_migration_dns_final_block', ucidnsrule);
+	uci.set(uciconfig, '_migration_dns_final_block', 'label', 'migration_final_block_dns');
+	uci.set(uciconfig, '_migration_dns_final_block', 'enabled' '1');
+	uci.set(uciconfig, '_migration_dns_final_block', 'mode', 'default');
+	uci.set(uciconfig, '_migration_dns_final_block', 'server', 'block-dns');
+	uci.set(uciconfig, ucidns, 'default_server', 'default-dns');
+}
+
 /* DNS rules options */
 uci.foreach(uciconfig, ucidnsrule, (cfg) => {
 	/* rule_set_ipcidr_match_source was renamed in sb 1.10 */
