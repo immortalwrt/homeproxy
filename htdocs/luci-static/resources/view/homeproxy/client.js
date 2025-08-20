@@ -348,7 +348,7 @@ return view.extend({
 		so = ss.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
 			_('If set, the requested domain name will be resolved to IP before routing.'));
 		for (let i in hp.dns_strategy)
-			so.value(i, hp.dns_strategy[i])
+			so.value(i, hp.dns_strategy[i]);
 
 		so = ss.option(form.Flag, 'sniff_override', _('Override destination'),
 			_('Override the connection destination address with the sniffed domain.'));
@@ -935,6 +935,7 @@ return view.extend({
 		so.default = 'default';
 		so.rmempty = false;
 		so.readonly = true;
+		so.modalonly = true;
 
 		so = ss.taboption('field_other', form.ListValue, 'ip_version', _('IP version'));
 		so.value('4', _('IPv4'));
@@ -1011,6 +1012,14 @@ return view.extend({
 		}
 		so.modalonly = true;
 
+		so = ss.taboption('field_other', form.ListValue, 'action', _('Action'));
+		so.value('route', _('Route'));
+		so.value('route-options', _('Route options'));
+		so.value('reject', _('Reject'));
+		so.value('predefined', _('Predefined'));
+		so.rmempty = false;
+		so.editable = true;
+
 		so = ss.taboption('field_other', form.ListValue, 'server', _('Server'),
 			_('Tag of the target dns server.'));
 		so.load = function(section_id) {
@@ -1019,7 +1028,6 @@ return view.extend({
 
 			this.value('default-dns', _('Default DNS (issued by WAN)'));
 			this.value('system-dns', _('System DNS'));
-			this.value('block-dns', _('Block DNS queries'));
 			uci.sections(data[0], 'dns_server', (res) => {
 				if (res.enabled === '1')
 					this.value(res['.name'], res.label);
@@ -1029,23 +1037,74 @@ return view.extend({
 		}
 		so.rmempty = false;
 		so.editable = true;
+		so.depends('action', 'route');
+
+		so = ss.taboption('field_other', form.ListValue, 'domain_strategy', _('Domain strategy'),
+			_('Set domain strategy for this query.'));
+		for (let i in hp.dns_strategy)
+			so.value(i, hp.dns_strategy[i]);
+		so.depends('action', 'route');
+		so.modalonly = true;
 
 		so = ss.taboption('field_other', form.Flag, 'dns_disable_cache', _('Disable dns cache'),
 			_('Disable cache and save cache in this query.'));
-		so.depends({'server': 'block-dns', '!reverse': true});
+		so.depends('action', 'route');
+		so.depends('action', 'route-options');
 		so.modalonly = true;
 
 		so = ss.taboption('field_other', form.Value, 'rewrite_ttl', _('Rewrite TTL'),
 			_('Rewrite TTL in DNS responses.'));
 		so.datatype = 'uinteger';
-		so.depends({'server': 'block-dns', '!reverse': true});
+		so.depends('action', 'route');
+		so.depends('action', 'route-options');
 		so.modalonly = true;
 
 		so = ss.taboption('field_other', form.Value, 'client_subnet', _('EDNS Client subnet'),
 			_('Append a <code>edns0-subnet</code> OPT extra record with the specified IP prefix to every query by default.<br/>' +
 			'If value is an IP address instead of prefix, <code>/32</code> or <code>/128</code> will be appended automatically.'));
 		so.datatype = 'or(cidr, ipaddr)';
-		so.depends({'server': 'block-dns', '!reverse': true});
+		so.depends('action', 'route');
+		so.depends('action', 'route-options');
+
+		so = ss.taboption('field_other', form.ListValue, 'reject_method', _('Method'));
+		so.value('default', _('Reply with <code>REFUSED</code>'));
+		so.value('drop', _('Drop the request'));
+		so.default = 'default';
+		so.depends('action', 'drop');
+		so.modalonly = true;
+
+		so = ss.taboption('field_other', form.Flag, 'reject_no_drop', _('Don\'t drop queries'),
+			_('<code>%s</code> will be temporarily overwritten to <code>%s</code> after 50 triggers in 30s if not enabled').format(
+				_('Method'), _('Drop the request')));
+		so.depends('reeject_method', 'default');
+		so.modalonly = true;
+
+		so = ss.taboption('field_other', form.Flag, 'predefined_rcode', _('Rcode'),
+			_('The response code.'));
+		so.value('NOERROR');
+		so.value('FORMERR');
+		so.value('SERVFAIL');
+		so.value('NXDOMAIN');
+		so.value('NOTIMP');
+		so.value('REFUSED');
+		so.default = 'NOERROR';
+		so.depends('action', 'predefined');
+		so.modalonly = true;
+
+		so = ss.taboption('field_other', form.DynamicList, 'predefined_answer', _('Answer'),
+			_('List of text DNS record to respond as answers.'));
+		so.depends('action', 'predefined');
+		so.modalonly = true;
+
+		so = ss.taboption('field_other', form.DynamicList, 'predefined_ns', _('NS'),
+			_('List of text DNS record to respond as name servers.'));
+		so.depends('action', 'predefined');
+		so.modalonly = true;
+
+		so = ss.taboption('field_other', form.DynamicList, 'predefined_extra', _('Extra records'),
+			_('List of text DNS record to respond as extra records.'));
+		so.depends('action', 'predefined');
+		so.modalonly = true;
 
 		so = ss.taboption('field_host', form.DynamicList, 'domain', _('Domain name'),
 			_('Match full domain.'));
