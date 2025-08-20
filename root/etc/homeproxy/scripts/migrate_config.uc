@@ -85,6 +85,29 @@ if (uci.get(uciconfig, ucidns, 'default_server') === 'block-dns') {
 
 /* DNS rules options */
 uci.foreach(uciconfig, ucidnsrule, (cfg) => {
+	/* outbound was removed in sb 1.12 */
+	if (cfg.outbound) {
+		uci.delete(uciconfig, cfg['.name']);
+		if (!cfg.enabled)
+			return;
+
+		map(cfg.outbound, (outbound) => {
+			switch (outbound) {
+			case 'direct-out':
+			case 'block-out':
+				break;
+			case 'any-out':
+				uci.set(uciconfig, ucirouting, 'default_outbound_dns', cfg.server);
+				break;
+			default:
+				uci.set(uciconfig, cfg.outbound, 'domain_resolver', cfg.server);
+				break;
+			}
+		});
+
+		return;
+	}
+
 	/* rule_set_ipcidr_match_source was renamed in sb 1.10 */
 	if (cfg.rule_set_ipcidr_match_source === '1')
 		uci.rename(uciconfig, cfg['.name'], 'rule_set_ipcidr_match_source', 'rule_set_ip_cidr_match_source');

@@ -355,12 +355,13 @@ return view.extend({
 		so.default = so.enabled;
 		so.rmempty = false;
 
-		so = ss.option(form.ListValue, 'default_outbound', _('Default outbound'));
+		so = ss.option(form.ListValue, 'default_outbound', _('Default outbound'),
+			_('Default outbound for connections not matched by any routing rules.'));
 		so.load = function(section_id) {
 			delete this.keylist;
 			delete this.vallist;
 
-			this.value('nil', _('Disable'));
+			this.value('nil', _('Disable (the service)'));
 			this.value('direct-out', _('Direct'));
 			this.value('block-out', _('Block'));
 			uci.sections(data[0], 'routing_node', (res) => {
@@ -371,6 +372,24 @@ return view.extend({
 			return this.super('load', section_id);
 		}
 		so.default = 'nil';
+		so.rmempty = false;
+
+		so = ss.option(form.ListValue, 'default_outbound_dns', _('Default outbound DNS'),
+			_('Default DNS server for resolving domain name in the server address.'));
+		so.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			this.value('default-dns', _('Default DNS (issued by WAN)'));
+			this.value('system-dns', _('System DNS'));
+			uci.sections(data[0], 'dns_server', (res) => {
+				if (res.enabled === '1')
+					this.value(res['.name'], res.label);
+			});
+
+			return this.super('load', section_id);
+		}
+		so.default = 'default-dns';
 		so.rmempty = false;
 		/* Routing settings end */
 
@@ -406,8 +425,27 @@ return view.extend({
 		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'routing_node', 'node');
 		so.editable = true;
 
+		so = ss.option(form.ListValue, 'domain_resolver', _('Domain resolver'),
+			_('For resolving domain name in the server address.'));
+		so.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			this.value('', _('Default'));
+			this.value('default-dns', _('Default DNS (issued by WAN)'));
+			this.value('system-dns', _('System DNS'));
+			uci.sections(data[0], 'dns_server', (res) => {
+				if (res.enabled === '1')
+					this.value(res['.name'], res.label);
+			});
+
+			return this.super('load', section_id);
+		}
+		so.depends({'node': 'urltest', '!reverse': true});
+		so.modalonly = true;
+
 		so = ss.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
-			_('If set, the server domain name will be resolved to IP before connecting.<br/>'));
+			_('The domain strategy for resolving the domain name in the address.'));
 		for (let i in hp.dns_strategy)
 			so.value(i, hp.dns_strategy[i]);
 		so.depends({'node': 'urltest', '!reverse': true});
@@ -994,24 +1032,6 @@ return view.extend({
 			_('Invert match result.'));
 		so.modalonly = true;
 
-		so = ss.taboption('field_other', form.MultiValue, 'outbound', _('Outbound'),
-			_('Match the server name of outbound.'));
-		so.load = function(section_id) {
-			delete this.keylist;
-			delete this.vallist;
-
-			this.value('any-out', _('Any'));
-			this.value('direct-out', _('Direct'));
-			this.value('block-out', _('Block'));
-			uci.sections(data[0], 'routing_node', (res) => {
-				if (res.enabled === '1')
-					this.value(res['.name'], res.label);
-			});
-
-			return this.super('load', section_id);
-		}
-		so.modalonly = true;
-
 		so = ss.taboption('field_other', form.ListValue, 'action', _('Action'));
 		so.value('route', _('Route'));
 		so.value('route-options', _('Route options'));
@@ -1067,19 +1087,19 @@ return view.extend({
 		so.depends('action', 'route-options');
 
 		so = ss.taboption('field_other', form.ListValue, 'reject_method', _('Method'));
-		so.value('default', _('Reply with <code>REFUSED</code>'));
+		so.value('default', _('Reply with REFUSED'));
 		so.value('drop', _('Drop the request'));
 		so.default = 'default';
-		so.depends('action', 'drop');
+		so.depends('action', 'reject');
 		so.modalonly = true;
 
 		so = ss.taboption('field_other', form.Flag, 'reject_no_drop', _('Don\'t drop queries'),
 			_('<code>%s</code> will be temporarily overwritten to <code>%s</code> after 50 triggers in 30s if not enabled').format(
 				_('Method'), _('Drop the request')));
-		so.depends('reeject_method', 'default');
+		so.depends('reject_method', 'default');
 		so.modalonly = true;
 
-		so = ss.taboption('field_other', form.Flag, 'predefined_rcode', _('Rcode'),
+		so = ss.taboption('field_other', form.ListValue, 'predefined_rcode', _('Rcode'),
 			_('The response code.'));
 		so.value('NOERROR');
 		so.value('FORMERR');
