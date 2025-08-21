@@ -882,10 +882,16 @@ if (!isEmpty(main_node)) {
 			rule_set_ip_cidr_match_source: (cfg.rule_set_ip_cidr_match_source  === '1') || null,
 			rule_set_ip_cidr_accept_empty: (cfg.rule_set_ip_cidr_accept_empty === '1') || null,
 			invert: (cfg.invert === '1') || null,
-			action: (cfg.outbound === 'block-out') ? 'reject' : 'route',
+			action: cfg.action,
+			outbound: get_outbound(cfg.outbound),
 			override_address: cfg.override_address,
 			override_port: strToInt(cfg.override_port),
-			outbound: get_outbound(cfg.outbound),
+			udp_disable_domain_unmapping: (cfg.udp_disable_domain_unmapping === '1') || null,
+			udp_connect: (cfg.udp_connect === '1') || null,
+			udp_timeout: cfg.udp_timeout ? (cfg.udp_timeout + 's') : null,
+			tls_fragment: (cfg.tls_fragment === '1') || null,
+			tls_fragment_fallback_delay: cfg.tls_fragment_fallback_delay ? (cfg.tls_fragment_fallback_delay + 's') : null,
+			tls_record_fragment: (cfg.tls_record_fragment === '1') || null
 		});
 	});
 
