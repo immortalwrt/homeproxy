@@ -91,6 +91,10 @@ export function strToInt(str) {
 	return !isEmpty(str) ? (int(str) || null) : null;
 };
 
+export function strToTime(str) {
+	return str ? (str + 's') : null;
+};
+
 export function removeBlankAttrs(res) {
 	let content;
 

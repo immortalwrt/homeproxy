@@ -13,7 +13,7 @@ import { connect } from 'ubus';
 import { cursor } from 'uci';
 
 import {
-	isEmpty, parseURL, strToBool, strToInt,
+	isEmpty, parseURL, strToBool, strToInt, strToTime,
 	removeBlankAttrs, validation, HP_DIR, RUN_DIR
 } from 'homeproxy';
 
@@ -229,11 +229,11 @@ function generate_outbound(node) {
 		override_port: strToInt(node.override_port),
 		proxy_protocol: strToInt(node.proxy_protocol),
 		/* AnyTLS */
-		idle_session_check_interval: node.anytls_idle_session_check_interval ? (node.anytls_idle_session_check_interval + 's') : null,
-		idle_session_timeout: node.anytls_idle_session_timeout ? (node.anytls_idle_session_timeout + 's') : null,
+		idle_session_check_interval: strToTime(node.anytls_idle_session_check_interval),
+		idle_session_timeout: strToTime(node.anytls_idle_session_timeout),
 		min_idle_session: strToInt(node.anytls_min_idle_session),
 		/* Hysteria (2) */
-		hop_interval: node.hysteria_hop_interval ? (node.hysteria_hop_interval + 's') : null,
+		hop_interval: strToTime(node.hysteria_hop_interval),
 		up_mbps: strToInt(node.hysteria_up_mbps),
 		down_mbps: strToInt(node.hysteria_down_mbps),
 		obfs: node.hysteria_obfs_type ? {
@@ -263,7 +263,7 @@ function generate_outbound(node) {
 		udp_relay_mode: node.tuic_udp_relay_mode,
 		udp_over_stream: strToBool(node.tuic_udp_over_stream),
 		zero_rtt_handshake: strToBool(node.tuic_enable_zero_rtt),
-		heartbeat: node.tuic_heartbeat ? (node.tuic_heartbeat + 's') : null,
+		heartbeat: strToTime(node.tuic_heartbeat),
 		/* VLESS / VMess */
 		flow: node.vless_flow,
 		alter_id: strToInt(node.vmess_alterid),
@@ -321,8 +321,8 @@ function generate_outbound(node) {
 			max_early_data: strToInt(node.websocket_early_data),
 			early_data_header_name: node.websocket_early_data_header,
 			service_name: node.grpc_servicename,
-			idle_timeout: node.http_idle_timeout ? (node.http_idle_timeout + 's') : null,
-			ping_timeout: node.http_ping_timeout ? (node.http_ping_timeout + 's') : null,
+			idle_timeout: (node.http_idle_timeout),
+			ping_timeout: (node.http_ping_timeout),
 			permit_without_stream: strToBool(node.grpc_permit_without_stream)
 		} : null,
 		udp_over_tcp: (node.udp_over_tcp === '1') ? {
@@ -593,7 +593,7 @@ push(config.inbounds, {
 	tag: 'mixed-in',
 	listen: '::',
 	listen_port: int(mixed_port),
-	udp_timeout: udp_timeout ? (udp_timeout + 's') : null,
+	udp_timeout: strToTime(udp_timeout),
 	sniff: true,
 	sniff_override_destination: strToBool(sniff_override),
 	set_system_proxy: false
@@ -617,7 +617,7 @@ if (match(proxy_mode, /tproxy/))
 		listen: '::',
 		listen_port: int(tproxy_port),
 		network: 'udp',
-		udp_timeout: udp_timeout ? (udp_timeout + 's') : null,
+		udp_timeout: strToTime(udp_timeout),
 		sniff: true,
 		sniff_override_destination: strToBool(sniff_override)
 	});
@@ -631,7 +631,7 @@ if (match(proxy_mode, /tun/))
 		mtu: strToInt(tun_mtu),
 		auto_route: false,
 		endpoint_independent_nat: strToBool(endpoint_independent_nat),
-		udp_timeout: udp_timeout ? (udp_timeout + 's') : null,
+		udp_timeout: strToTime(udp_timeout),
 		stack: tcpip_stack,
 		sniff: true,
 		sniff_override_destination: strToBool(sniff_override)
@@ -667,7 +667,7 @@ if (!isEmpty(main_node)) {
 			type: 'urltest',
 			tag: 'main-out',
 			outbounds: map(main_urltest_nodes, (k) => `cfg-${k}-out`),
-			interval: main_urltest_interval ? (main_urltest_interval + 's') : null,
+			interval: strToTime(main_urltest_interval),
 			tolerance: strToInt(main_urltest_tolerance),
 			idle_timeout: (strToInt(main_urltest_interval) > 1800) ? `${main_urltest_interval * 2}s` : null,
 		});
@@ -692,7 +692,7 @@ if (!isEmpty(main_node)) {
 			type: 'urltest',
 			tag: 'main-udp-out',
 			outbounds: map(main_udp_urltest_nodes, (k) => `cfg-${k}-out`),
-			interval: main_udp_urltest_interval ? (main_udp_urltest_interval + 's') : null,
+			interval: strToTime(main_udp_urltest_interval),
 			tolerance: strToInt(main_udp_urltest_tolerance),
 			idle_timeout: (strToInt(main_udp_urltest_interval) > 1800) ? `${main_udp_urltest_interval * 2}s` : null,
 		});
@@ -732,9 +732,9 @@ if (!isEmpty(main_node)) {
 				tag: 'cfg-' + cfg['.name'] + '-out',
 				outbounds: map(cfg.urltest_nodes, (k) => `cfg-${k}-out`),
 				url: cfg.urltest_url,
-				interval: cfg.urltest_interval ? (cfg.urltest_interval + 's') : null,
+				interval: strToTime(cfg.urltest_interval),
 				tolerance: strToInt(cfg.urltest_tolerance),
-				idle_timeout: cfg.urltest_idle_timeout ? (cfg.urltest_idle_timeout + 's') : null,
+				idle_timeout: strToTime(cfg.urltest_idle_timeout),
 				interrupt_exist_connections: strToBool(cfg.urltest_interrupt_exist_connections)
 			});
 			urltest_nodes = [...urltest_nodes, ...filter(cfg.urltest_nodes, (l) => !~index(urltest_nodes, l))];
@@ -918,9 +918,9 @@ if (!isEmpty(main_node)) {
 			override_port: strToInt(cfg.override_port),
 			udp_disable_domain_unmapping: strToBool(cfg.udp_disable_domain_unmapping),
 			udp_connect: strToBool(cfg.udp_connect),
-			udp_timeout: cfg.udp_timeout ? (cfg.udp_timeout + 's') : null,
+			udp_timeout: strToTime(cfg.udp_timeout),
 			tls_fragment: strToBool(cfg.tls_fragment),
-			tls_fragment_fallback_delay: cfg.tls_fragment_fallback_delay ? (cfg.tls_fragment_fallback_delay + 's') : null,
+			tls_fragment_fallback_delay: strToTime(cfg.tls_fragment_fallback_delay),
 			tls_record_fragment: strToBool(cfg.tls_record_fragment)
 		});
 	});
@@ -952,7 +952,7 @@ if (routing_mode in ['bypass_mainland_china', 'custom']) {
 			enabled: true,
 			path: RUN_DIR + '/cache.db',
 			store_rdrc: strToBool(cache_file_store_rdrc),
-			rdrc_timeout: cache_file_rdrc_timeout ? (cache_file_rdrc_timeout + 's') : null,
+			rdrc_timeout: strToTime(cache_file_rdrc_timeout),
 		}
 	};
 }

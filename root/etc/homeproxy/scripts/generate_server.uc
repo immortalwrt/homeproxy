@@ -11,7 +11,7 @@ import { writefile } from 'fs';
 import { cursor } from 'uci';
 
 import {
-	isEmpty, strToBool, strToInt,
+	isEmpty, strToBool, strToInt, strToTime,
 	removeBlankAttrs, HP_DIR, RUN_DIR
 } from 'homeproxy';
 
@@ -50,7 +50,7 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 		tcp_fast_open: strToBool(cfg.tcp_fast_open),
 		tcp_multi_path: strToBool(cfg.tcp_multi_path),
 		udp_fragment: strToBool(cfg.udp_fragment),
-		udp_timeout: cfg.udp_timeout ? (cfg.udp_timeout + 's') : null,
+		udp_timeout: strToTime(cfg.udp_timeout),
 		network: cfg.network,
 
 		/* AnyTLS */
@@ -76,9 +76,9 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 
 		/* Tuic */
 		congestion_control: cfg.tuic_congestion_control,
-		auth_timeout: cfg.tuic_auth_timeout ? (cfg.tuic_auth_timeout + 's') : null,
+		auth_timeout: strToTime(cfg.tuic_auth_timeout),
 		zero_rtt_handshake: strToBool(cfg.tuic_enable_zero_rtt),
-		heartbeat: cfg.tuic_heartbeat ? (cfg.tuic_heartbeat + 's') : null,
+		heartbeat: strToTime(cfg.tuic_heartbeat),
 
 		/* AnyTLS / HTTP / Hysteria (2) / Mixed / Socks / Trojan / Tuic / VLESS / VMess */
 		users: (cfg.type !== 'shadowsocks') ? [
@@ -150,7 +150,7 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 				enabled: true,
 				private_key: cfg.tls_reality_private_key,
 				short_id: cfg.tls_reality_short_id,
-				max_time_difference: cfg.tls_reality_max_time_difference ? (cfg.max_time_difference + 's') : null,
+				max_time_difference: strToTime(cfg.tls_reality_max_time_difference),
 				handshake: {
 					server: cfg.tls_reality_server_addr,
 					server_port: strToInt(cfg.tls_reality_server_port)
@@ -169,8 +169,8 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 			max_early_data: strToInt(cfg.websocket_early_data),
 			early_data_header_name: cfg.websocket_early_data_header,
 			service_name: cfg.grpc_servicename,
-			idle_timeout: cfg.http_idle_timeout ? (cfg.http_idle_timeout + 's') : null,
-			ping_timeout: cfg.http_ping_timeout ? (cfg.http_ping_timeout + 's') : null
+			idle_timeout: strToTime(cfg.http_idle_timeout),
+			ping_timeout: strToTime(cfg.http_ping_timeout)
 		} : null
 	});
 });
