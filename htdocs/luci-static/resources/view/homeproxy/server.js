@@ -13,6 +13,7 @@
 'require view';
 
 'require homeproxy as hp';
+'require tools.widgets as widgets';
 
 const callServiceList = rpc.declare({
 	object: 'service',
@@ -858,6 +859,16 @@ return view.extend({
 		o.value('', _('Both'));
 		o.depends('type', 'naive');
 		o.depends('type', 'shadowsocks');
+		o.modalonly = true;
+
+		o = s.option(widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
+			_('The network interface to bind to.'));
+		o.multiple = false;
+		o.noaliases = true;
+		o.modalonly = true;
+
+		o = s.option(form.Flag, 'reuse_addr', _('Reuse address'),
+			_('Reuse listener address.'));
 		o.modalonly = true;
 		/* Extra settings end */
 

@@ -45,6 +45,8 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 
 		listen: cfg.address || '::',
 		listen_port: strToInt(cfg.port),
+		bind_interface: cfg.bind_interface,
+		reuse_addr: strToBool(cfg.reuse_addr),
 		tcp_fast_open: strToBool(cfg.tcp_fast_open),
 		tcp_multi_path: strToBool(cfg.tcp_multi_path),
 		udp_fragment: strToBool(cfg.udp_fragment),

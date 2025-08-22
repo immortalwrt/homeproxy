@@ -185,7 +185,7 @@ msgstr "AnyTLS"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:235
 msgid "AnyTLS padding scheme in array."
-msgstr "AnyTLS 填充方式。"
+msgstr "AnyTLS 填充方案。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:799
 #: htdocs/luci-static/resources/view/homeproxy/client.js:909
