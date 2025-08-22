@@ -13,9 +13,8 @@ import { connect } from 'ubus';
 import { cursor } from 'uci';
 
 import {
-	isEmpty, strToBool, strToInt,
-	removeBlankAttrs, validation,
-	HP_DIR, RUN_DIR
+	isEmpty, parseURL, strToBool, strToInt,
+	removeBlankAttrs, validation, HP_DIR, RUN_DIR
 } from 'homeproxy';
 
 const ubus = connect();
@@ -73,6 +72,7 @@ if (routing_mode !== 'custom') {
 		if (isEmpty(china_dns_server) || type(china_dns_server) !== 'string' || china_dns_server === 'wan')
 			china_dns_server = wan_dns;
 	}
+	dns_default_strategy = (ipv6_support !== '1') ? 'ipv4_only' : null;
 
 	direct_domain_list = trim(readfile(HP_DIR + '/resources/direct_list.txt'));
 	if (direct_domain_list)
@@ -143,6 +143,22 @@ function parse_port(strport) {
 
 	return ports;
 
+}
+
+function parse_dnserver(server_addr, default_protocol) {
+	if (isEmpty(server_addr))
+		return null;
+
+	if (!match(server_addr, /:\/\//))
+		server_addr = (default_protocol || 'udp') + '://' + server_addr;
+	server_addr = parseURL(server_addr);
+
+	return {
+		type: server_addr.protocol,
+		server: server_addr.hostname,
+		server_port: strToInt(server_addr.port),
+		path: (server_addr.pathname !== '/') ? server_addr.pathname : null,
+	}
 }
 
 function parse_dnsquery(strquery) {
@@ -420,11 +436,12 @@ if (!isEmpty(main_node)) {
 	/* Main DNS */
 	push(config.dns.servers, {
 		tag: 'main-dns',
-		address: !match(dns_server, /:\/\//) ? 'tcp://' + (validation('ip6addr', dns_server) ? `[${dns_server}]` : dns_server) : dns_server,
-		strategy: (ipv6_support !== '1') ? 'ipv4_only' : null,
-		address_resolver: 'default-dns',
-		address_strategy: (ipv6_support !== '1') ? 'ipv4_only' : null,
-		detour: 'main-out'
+		domain_resolver: {
+			server: 'default-dns',
+			strategy: (ipv6_support !== '1') ? 'ipv4_only' : null
+		},
+		detour: 'main-out',
+		...parse_dnserver(dns_server, 'tcp')
 	});
 	config.dns.final = 'main-dns';
 
@@ -446,9 +463,12 @@ if (!isEmpty(main_node)) {
 	if (routing_mode === 'bypass_mainland_china') {
 		push(config.dns.servers, {
 			tag: 'china-dns',
-			address: china_dns_server,
-			address_resolver: 'default-dns',
-			detour: 'direct-out'
+			address_resolver: {
+				server: 'default-dns',
+				strategy: 'prefer_ipv6'
+			},
+			detour: 'direct-out',
+			...parse_dnserver(china_dns_server)
 		});
 
 		if (length(proxy_domain_list))
@@ -461,7 +481,8 @@ if (!isEmpty(main_node)) {
 		push(config.dns.rules, {
 			rule_set: 'geosite-cn',
 			action: 'route',
-			server: 'china-dns'
+			server: 'china-dns',
+			strategy: 'prefer_ipv6'
 		});
 		push(config.dns.rules, {
 			type: 'logical',
@@ -476,7 +497,8 @@ if (!isEmpty(main_node)) {
 				}
 			],
 			action: 'route',
-			server: 'china-dns'
+			server: 'china-dns',
+			strategy: 'prefer_ipv6'
 		});
 	}
 } else if (!isEmpty(default_outbound)) {
@@ -487,13 +509,20 @@ if (!isEmpty(main_node)) {
 
 		push(config.dns.servers, {
 			tag: 'cfg-' + cfg['.name'] + '-dns',
-			address: cfg.address,
-			address: cfg.address,
-			address_resolver: get_resolver(cfg.address_resolver),
-			address_strategy: cfg.address_strategy,
-			strategy: cfg.resolve_strategy,
-			detour: get_outbound(cfg.outbound),
-			client_subnet: cfg.client_subnet
+			type: cfg.type,
+			server: cfg.server,
+			server_port: strToInt(cfg.server_port),
+			path: cfg.path,
+			headers: cfg.headers,
+			tls: cfg.tls_sni ? {
+				enabled: true,
+				server_name: cfg.tls_sni
+			} : null,
+			domain_resolver: {
+				server: get_resolver(cfg.address_resolver),
+				strategy: cfg.address_strategy
+			},
+			detour: get_outbound(cfg.outbound)
 		});
 	});
 
@@ -529,6 +558,7 @@ if (!isEmpty(main_node)) {
 			outbound: get_outbound(cfg.outbound),
 			action: cfg.action,
 			server: get_resolver(cfg.server),
+			strategy: cfg.domain_strategy,
 			disable_cache: (cfg.dns_disable_cache === '1') || null,
 			rewrite_ttl: strToInt(cfg.rewrite_ttl),
 			client_subnet: cfg.client_subnet,
