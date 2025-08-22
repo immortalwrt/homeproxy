@@ -727,7 +727,7 @@ return view.extend({
 		so.modalonly = true;
 
 		so = ss.taboption('field_other', form.Flag, 'tls_record_fragment', _('TLS record fragment'),
-			_('Fragment TLS handshake into multiple TLS records'));
+			_('Fragment TLS handshake into multiple TLS records.'));
 		so.depends('action', 'route');
 		so.depends('action', 'route-options');
 		so.modalonly = true;
@@ -1199,18 +1199,18 @@ return view.extend({
 
 		so = ss.taboption('field_other', form.ListValue, 'reject_method', _('Method'));
 		so.value('default', _('Reply with REFUSED'));
-		so.value('drop', _('Drop the request'));
+		so.value('drop', _('Drop requests'));
 		so.default = 'default';
 		so.depends('action', 'reject');
 		so.modalonly = true;
 
-		so = ss.taboption('field_other', form.Flag, 'reject_no_drop', _('Don\'t drop queries'),
+		so = ss.taboption('field_other', form.Flag, 'reject_no_drop', _('Don\'t drop requests'),
 			_('<code>%s</code> will be temporarily overwritten to <code>%s</code> after 50 triggers in 30s if not enabled.').format(
-				_('Method'), _('Drop the request')));
+				_('Method'), _('Drop requests')));
 		so.depends('reject_method', 'default');
 		so.modalonly = true;
 
-		so = ss.taboption('field_other', form.ListValue, 'predefined_rcode', _('Rcode'),
+		so = ss.taboption('field_other', form.ListValue, 'predefined_rcode', _('RCode'),
 			_('The response code.'));
 		so.value('NOERROR');
 		so.value('FORMERR');
