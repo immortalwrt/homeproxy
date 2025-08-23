@@ -186,8 +186,15 @@ uci.foreach(uciconfig, ucidnsrule, (cfg) => {
 	if (dns_server_migration[cfg.server]) {
 		if (dns_server_migration[cfg.server].strategy)
 			uci.set(uciconfig, cfg['.name'], 'strategy', dns_server_migration[cfg.server].strategy);
+
 		if (dns_server_migration[cfg.server].client_subnet)
 			uci.set(uciconfig, cfg['.name'], 'client_subnet', dns_server_migration[cfg.server].client_subnet);
+
+		if (dns_server_migration[cfg.server].rcode) {
+			uci.set(uciconfig, cfg['.name'], 'action', 'predefined');
+			uci.set(uciconfig, cfg['.name'], 'rcode', dns_server_migration[cfg.server].rcode);
+			uci.delete(uciconfig, cfg['.name'], 'server');
+		}
 	}
 });
 
