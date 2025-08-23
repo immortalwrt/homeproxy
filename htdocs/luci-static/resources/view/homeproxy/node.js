@@ -1049,32 +1049,30 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.onclick = L.bind(hp.uploadCertificate, this, _('certificate'), 'client_ca');
 	o.modalonly = true;
 
-	if (features.with_ech) {
-		o = s.option(form.Flag, 'tls_ech', _('Enable ECH'),
-			_('ECH (Encrypted Client Hello) is a TLS extension that allows a client to encrypt the first part of its ClientHello message.'));
-		o.depends('tls', '1');
-		o.default = o.disabled;
-		o.modalonly = true;
+	o = s.option(form.Flag, 'tls_ech', _('Enable ECH'),
+		_('ECH (Encrypted Client Hello) is a TLS extension that allows a client to encrypt the first part of its ClientHello message.'));
+	o.depends('tls', '1');
+	o.default = o.disabled;
+	o.modalonly = true;
 
-		o = s.option(form.Flag, 'tls_ech_enable_pqss', _('Enable PQ signature schemes'));
-		o.depends('tls_ech', '1');
-		o.default = o.disabled;
-		o.modalonly = true;
+	o = s.option(form.Flag, 'tls_ech_enable_pqss', _('Enable PQ signature schemes'));
+	o.depends('tls_ech', '1');
+	o.default = o.disabled;
+	o.modalonly = true;
 
-		o = s.option(form.Value, 'tls_ech_config_path', _('ECH config path'),
-			_('The path to the ECH config, in PEM format. If empty, load from DNS will be attempted.'));
-		o.value('/etc/homeproxy/certs/client_ech_conf.pem');
-		o.depends('tls_ech', '1');
-		o.modalonly = true;
+	o = s.option(form.Value, 'tls_ech_config_path', _('ECH config path'),
+		_('The path to the ECH config, in PEM format. If empty, load from DNS will be attempted.'));
+	o.value('/etc/homeproxy/certs/client_ech_conf.pem');
+	o.depends('tls_ech', '1');
+	o.modalonly = true;
 
-		o = s.option(form.Button, '_upload_ech_config', _('Upload ECH config'),
-			_('<strong>Save your configuration before uploading files!</strong>'));
-		o.inputstyle = 'action';
-		o.inputtitle = _('Upload...');
-		o.depends({'tls_ech': '1', 'tls_ech_config_path': '/etc/homeproxy/certs/client_ech_conf.pem'});
-		o.onclick = L.bind(hp.uploadCertificate, this, _('ECH config'), 'client_ech_conf');
-		o.modalonly = true;
-	}
+	o = s.option(form.Button, '_upload_ech_config', _('Upload ECH config'),
+		_('<strong>Save your configuration before uploading files!</strong>'));
+	o.inputstyle = 'action';
+	o.inputtitle = _('Upload...');
+	o.depends({'tls_ech': '1', 'tls_ech_config_path': '/etc/homeproxy/certs/client_ech_conf.pem'});
+	o.onclick = L.bind(hp.uploadCertificate, this, _('ECH config'), 'client_ech_conf');
+	o.modalonly = true;
 
 	if (features.with_utls) {
 		o = s.option(form.ListValue, 'tls_utls', _('uTLS fingerprint'),
