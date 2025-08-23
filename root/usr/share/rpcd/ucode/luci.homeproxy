@@ -222,6 +222,12 @@ const methods = {
 				fd.close();
 			}
 
+			if (features.version) {
+				const version = split(features.version, '.');
+				if (version[0] > 1 || (version[0] == 1 && version[1] >= 12))
+					features.with_ech = true;
+			}
+
 			features.hp_has_ip_full = access('/usr/libexec/ip-full');
 			features.hp_has_tcp_brutal = hasKernelModule('brutal.ko');
 			features.hp_has_tproxy = hasKernelModule('nft_tproxy.ko') || access('/etc/modules.d/nft-tproxy');
