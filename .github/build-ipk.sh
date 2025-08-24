@@ -43,7 +43,7 @@ EOF
 cat > "$TEMP_PKG_DIR/CONTROL/control" <<-EOF
 	Package: $PKG_NAME
 	Version: $PKG_VERSION
-	Depends: libc, sing-box, firewall4, kmod-nft-tproxy
+	Depends: libc, sing-box, firewall4, kmod-nft-tproxy, ucode-mod-digest
 	Source: https://github.com/immortalwrt/homeproxy
 	SourceName: $PKG_NAME
 	Section: luci
