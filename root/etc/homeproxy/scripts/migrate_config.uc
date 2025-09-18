@@ -148,10 +148,6 @@ uci.foreach(uciconfig, ucidnsserver, (cfg) => {
 		dns_server_migration[cfg['.name']].client_subnet = cfg.client_subnet;
 		uci.delete(uciconfig, cfg['.name'], 'client_subnet');
 	}
-
-	/* dns outbound defaults to direct in sb 1.12 */
-	if (cfg.outbound === 'direct-out')
-		uci.delete(uciconfig, cfg['.name'], 'outbound');
 });
 
 /* DNS rules options */
