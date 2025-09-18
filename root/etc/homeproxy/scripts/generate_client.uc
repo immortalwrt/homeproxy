@@ -421,13 +421,11 @@ config.dns = {
 		{
 			tag: 'default-dns',
 			type: 'udp',
-			server: wan_dns,
-			detour: 'direct-out'
+			server: wan_dns
 		},
 		{
 			tag: 'system-dns',
-			type: 'local',
-			detour: 'direct-out'
+			type: 'local'
 		}
 	],
 	rules: [],
@@ -473,7 +471,6 @@ if (!isEmpty(main_node)) {
 				server: 'default-dns',
 				strategy: 'prefer_ipv6'
 			},
-			detour: 'direct-out',
 			...parse_dnserver(china_dns_server)
 		});
 

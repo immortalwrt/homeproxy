@@ -65,10 +65,10 @@ if (!migration_crontab) {
 }
 
 /* log_level was introduced */
-if (isEmpty(uci.get(uciconfig, ucimain, 'log_level'))
+if (isEmpty(uci.get(uciconfig, ucimain, 'log_level')))
 	uci.set(uciconfig, ucimain, 'log_level', 'warn');
 
-if (isEmpty(uci.get(uciconfig, uciserver, 'log_level'))
+if (isEmpty(uci.get(uciconfig, uciserver, 'log_level')))
 	uci.set(uciconfig, uciserver, 'log_level', 'warn');
 
 /* empty value defaults to all ports now */
@@ -148,6 +148,10 @@ uci.foreach(uciconfig, ucidnsserver, (cfg) => {
 		dns_server_migration[cfg['.name']].client_subnet = cfg.client_subnet;
 		uci.delete(uciconfig, cfg['.name'], 'client_subnet');
 	}
+
+	/* dns outbound defaults to direct in sb 1.12 */
+	if (cfg.outbound === 'direct-out')
+		uci.delete(uciconfig, cfg['.name'], 'outbound');
 });
 
 /* DNS rules options */
