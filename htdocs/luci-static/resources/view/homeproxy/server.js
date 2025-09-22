@@ -79,7 +79,7 @@ function handleGenKey(option) {
 	if (typeof option === 'object') {
 		return callSingBoxGenerator(option.type, option.params).then((res) => {
 			if (res.result)
-				option.callback(res.result).forEach(([k, v]) => {
+				option.callback.call(this, res.result).forEach(([k, v]) => {
 					widget(k).value = v ?? '';
 				});
 			else
@@ -707,12 +707,12 @@ return view.extend({
 		o.hp_options = {
 			type: 'reality-keypair',
 			params: '',
-			callback: L.bind(function(result) {
+			callback: function(result) {
 				return [
 					[this.option, result.private_key],
 					['tls_reality_public_key', result.public_key]
 				]
-			}, o)
+			}
 		}
 		o.depends('tls_reality', '1');
 		o.rmempty = false;
@@ -790,12 +790,12 @@ return view.extend({
 		o.hp_options = {
 			type: 'ech-keypair',
 			params: '',
-			callback: L.bind(function(result) {
+			callback: function(result) {
 				return [
 					[this.option, result.ech_key],
 					['tls_ech_config', result.ech_cfg]
 				]
-			}, o)
+			}
 		}
 		o.renderWidget = function(section_id, option_index, cfgvalue) {
 			let node = form.TextValue.prototype.renderWidget.apply(this, arguments);
