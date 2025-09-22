@@ -22,6 +22,25 @@ const callServiceList = rpc.declare({
 	expect: { '': {} }
 });
 
+const CBIGenValue = form.Value.extend({
+	__name__: 'CBI.GenValue',
+
+	renderWidget(/* ... */) {
+		let node = form.Value.prototype.renderWidget.apply(this, arguments);
+
+		if (!this.password)
+			node.classList.add('control-group');
+
+		(node.querySelector('.control-group') || node).appendChild(E('button', {
+			class: 'cbi-button cbi-button-add',
+			title: _('Generate'),
+			click: ui.createHandlerFn(this, handleGenKey, this.hp_options || this.option)
+		}, [ _('Generate') ]));
+
+		return node;
+	}
+});
+
 function getServiceStatus() {
 	return L.resolveDefault(callServiceList('homeproxy'), {}).then((res) => {
 		let isRunning = false;
@@ -188,7 +207,7 @@ return view.extend({
 		o.depends('type', 'socks');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'password', _('Password'));
+		o = s.option(CBIGenValue, 'password', _('Password'));
 		o.password = true;
 		o.depends('type', 'anytls');
 		o.depends({'type': /^(http|mixed|naive|socks)$/, 'username': /[\s\S]/});
@@ -196,17 +215,6 @@ return view.extend({
 		o.depends('type', 'shadowsocks');
 		o.depends('type', 'trojan');
 		o.depends('type', 'tuic');
-		o.renderWidget = function() {
-			let node = form.Value.prototype.renderWidget.apply(this, arguments);
-
-			(node.querySelector('.control-group') || node).appendChild(E('button', {
-				'class': 'cbi-button cbi-button-apply',
-				'title': _('Generate'),
-				'click': ui.createHandlerFn(this, handleGenKey, this.option)
-			}, [ _('Generate') ]));
-
-			return node;
-		}
 		o.validate = function(section_id, value) {
 			if (section_id) {
 				let type = this.section.formvalue(section_id, 'type');
@@ -282,20 +290,9 @@ return view.extend({
 		o.depends('type', 'hysteria2');
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'hysteria_obfs_password', _('Obfuscate password'));
+		o = s.option(CBIGenValue, 'hysteria_obfs_password', _('Obfuscate password'));
 		o.depends('type', 'hysteria');
 		o.depends({'type': 'hysteria2', 'hysteria_obfs_type': /[\s\S]/});
-		o.renderWidget = function() {
-			let node = form.Value.prototype.renderWidget.apply(this, arguments);
-
-			(node.querySelector('.control-group') || node).appendChild(E('button', {
-				'class': 'cbi-button cbi-button-apply',
-				'title': _('Generate'),
-				'click': ui.createHandlerFn(this, handleGenKey, this.option)
-			}, [ _('Generate') ]));
-
-			return node;
-		}
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'hysteria_recv_window_conn', _('QUIC stream receive window'),
@@ -344,21 +341,10 @@ return view.extend({
 		o.modalonly = true;
 
 		/* Tuic config start */
-		o = s.option(form.Value, 'uuid', _('UUID'));
+		o = s.option(CBIGenValue, 'uuid', _('UUID'));
 		o.depends('type', 'tuic');
 		o.depends('type', 'vless');
 		o.depends('type', 'vmess');
-		o.renderWidget = function() {
-			let node = form.Value.prototype.renderWidget.apply(this, arguments);
-
-			(node.querySelector('.control-group') || node).appendChild(E('button', {
-				'class': 'cbi-button cbi-button-apply',
-				'title': _('Generate'),
-				'click': ui.createHandlerFn(this, handleGenKey, this.option)
-			}, [ _('Generate') ]));
-
-			return node;
-		}
 		o.validate = hp.validateUUID;
 		o.modalonly = true;
 
@@ -717,9 +703,23 @@ return view.extend({
 		o.depends({'tls': '1', 'tls_acme': null, 'type': /^(anytls|vless)$/});
 		o.modalonly = true;
 
-		o = s.option(form.Value, 'tls_reality_private_key', _('REALITY private key'));
+		o = s.option(CBIGenValue, 'tls_reality_private_key', _('REALITY private key'));
+		o.hp_options = {
+			type: 'reality-keypair',
+			params: '',
+			callback: L.bind(function(result) {
+				return [
+					[this.option, result.private_key],
+					['tls_reality_public_key', result.public_key]
+				]
+			}, o)
+		}
 		o.depends('tls_reality', '1');
 		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.Value, 'tls_reality_public_key', _('REALITY public key'));
+		o.depends('tls_reality', '1');
 		o.modalonly = true;
 
 		o = s.option(form.DynamicList, 'tls_reality_short_id', _('REALITY short ID'));
