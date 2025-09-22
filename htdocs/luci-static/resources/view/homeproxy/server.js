@@ -58,12 +58,13 @@ function handleGenKey(option) {
 	});
 
 	if (typeof option === 'object') {
-		return callSingBoxGenerator(option.type, option.params).then((ret) => {
-			if (ret.result)
-				for (let key in option.result)
-					widget(option.result[key]).value = ret.result[key] || '';
+		return callSingBoxGenerator(option.type, option.params).then((res) => {
+			if (res.result)
+				option.callback(res.result).forEach(([k, v]) => {
+					widget(k).value = v ?? '';
+				});
 			else
-				ui.addNotification(null, E('p', _('Failed to generate %s, error: %s.').format(type, ret.error)));
+				ui.addNotification(null, E('p', _('Failed to generate %s, error: %s.').format(type, res.error)));
 		});
 	} else {
 		let password, required_method;
@@ -789,10 +790,12 @@ return view.extend({
 		o.hp_options = {
 			type: 'ech-keypair',
 			params: '',
-			result: {
-				ech_key: o.option,
-				ech_cfg: 'tls_ech_config'
-			}
+			callback: L.bind(function(result) {
+				return [
+					[this.option, result.ech_key],
+					['tls_ech_config', result.ech_cfg]
+				]
+			}, o)
 		}
 		o.renderWidget = function(section_id, option_index, cfgvalue) {
 			let node = form.TextValue.prototype.renderWidget.apply(this, arguments);
