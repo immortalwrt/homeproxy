@@ -280,6 +280,7 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'hysteria_auth_payload', _('Authentication payload'));
+		o.password = true;
 		o.depends({'type': 'hysteria', 'hysteria_auth_type': /[\s\S]/});
 		o.rmempty = false;
 		o.modalonly = true;
@@ -291,6 +292,7 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(CBIGenValue, 'hysteria_obfs_password', _('Obfuscate password'));
+		o.password = true;
 		o.depends('type', 'hysteria');
 		o.depends({'type': 'hysteria2', 'hysteria_obfs_type': /[\s\S]/});
 		o.modalonly = true;
@@ -342,6 +344,7 @@ return view.extend({
 
 		/* Tuic config start */
 		o = s.option(CBIGenValue, 'uuid', _('UUID'));
+		o.password = true;
 		o.depends('type', 'tuic');
 		o.depends('type', 'vless');
 		o.depends('type', 'vmess');
@@ -642,11 +645,13 @@ return view.extend({
 			o.modalonly = true;
 
 			o = s.option(form.Value, 'tls_dns01_ali_akid', _('Access key ID'));
+			o.password = true;
 			o.depends('tls_dns01_provider', 'alidns');
 			o.rmempty = false;
 			o.modalonly = true;
 
 			o = s.option(form.Value, 'tls_dns01_ali_aksec', _('Access key secret'));
+			o.password = true;
 			o.depends('tls_dns01_provider', 'alidns');
 			o.rmempty = false;
 			o.modalonly = true;
@@ -657,6 +662,7 @@ return view.extend({
 			o.modalonly = true;
 
 			o = s.option(form.Value, 'tls_dns01_cf_api_token', _('API token'));
+			o.password = true;
 			o.depends('tls_dns01_provider', 'cloudflare');
 			o.rmempty = false;
 			o.modalonly = true;
@@ -688,11 +694,13 @@ return view.extend({
 			o.modalonly = true;
 
 			o = s.option(form.Value, 'tls_acme_ea_keyid', _('External account key ID'));
+			o.password = true;
 			o.depends('tls_acme_external_account', '1');
 			o.rmempty = false;
 			o.modalonly = true;
 
 			o = s.option(form.Value, 'tls_acme_ea_mackey', _('External account MAC key'));
+			o.password = true;
 			o.depends('tls_acme_external_account', '1');
 			o.rmempty = false;
 			o.modalonly = true;
@@ -704,6 +712,7 @@ return view.extend({
 		o.modalonly = true;
 
 		o = s.option(CBIGenValue, 'tls_reality_private_key', _('REALITY private key'));
+		o.password = true;
 		o.hp_options = {
 			type: 'reality-keypair',
 			params: '',
