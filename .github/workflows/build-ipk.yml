@@ -38,28 +38,86 @@ jobs:
 
     steps:
       - name: Checkout source tree
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Build ipk file
+      - name: Checkout apk
+        uses: actions/checkout@v5
+        with:
+          repository: 'alpinelinux/apk-tools'
+          path: 'apk-tools'
+          fetch-depth: 0
+          ref: '9331888de6bd5b280d75112e5b2f7b55684db0ec'
+
+      - name: Checkout po2lmo
+        uses: actions/checkout@v5
+        with:
+          repository: 'openwrt/luci'
+          path: 'po2lmo'
+          sparse-checkout: 'modules/luci-base/src'
+
+      - name: Setup dependencies
         env:
-          RELEASE_TYPE: ${{ github.event_name }}
+          DEBIAN_FRONTEND: noninteractive
         run: |
-          pushd .github
-          fakeroot bash build-ipk.sh
-          echo "ASSET_NAME=$(ls *.ipk)" >> $GITHUB_ENV
+          sudo -E rm -rf /var/lib/man-db/auto-update
+          sudo -E apt-get update -qq
+          sudo -E apt-get install -y build-essential curl fakeroot libssl-dev lua5.1 meson ninja-build
+
+          pushd apk-tools
+          meson setup build \
+            -Db_lto=true \
+            -Dcompressed-help=false \
+            -Ddocs=disabled \
+            -Dhelp=enabled \
+            -Dlua_version=5.1 \
+            -Ddefault_library=static \
+            -Durl_backend=wget \
+            -Dzstd=false \
+            -Dpython=disabled \
+            -Dtests=disabled \
+            -Dcrypto_backend=openssl
+          ninja -C build
+          pushd build
+          sudo -E meson install
+          popd
           popd
 
-      - name: Publishing to GitHub Artifacts
+          pushd po2lmo/modules/luci-base/src
+          make po2lmo
+          sudo -E install -m0755 -s po2lmo /usr/local/bin/po2lmo
+          popd
+
+          curl -fsSLO "https://raw.githubusercontent.com/openwrt/openwrt/master/scripts/ipkg-build"
+          sudo install -m0755 ipkg-build /usr/local/bin/ipkg-build
+
+      - name: Build ipk file
+        run: |
+          pushd .github
+          fakeroot bash build-ipk.sh apk "${{ github.event_name }}"
+          fakeroot bash build-ipk.sh ipk "${{ github.event_name }}"
+          echo "APK_ASSET_NAME=$(ls *.apk)" >> $GITHUB_ENV
+          echo "IPK_ASSET_NAME=$(ls *.ipk)" >> $GITHUB_ENV
+          popd
+
+      - name: Publishing APK files to GitHub Artifacts
         uses: actions/upload-artifact@v4
         if: github.event_name != 'release'
         with:
-          name: ${{ env.ASSET_NAME }}
-          path: .github/${{ env.ASSET_NAME }}
+          name: ${{ env.APK_ASSET_NAME }}
+          path: .github/${{ env.APK_ASSET_NAME }}
+
+      - name: Publishing IPK files to GitHub Artifacts
+        uses: actions/upload-artifact@v4
+        if: github.event_name != 'release'
+        with:
+          name: ${{ env.IPK_ASSET_NAME }}
+          path: .github/${{ env.IPK_ASSET_NAME }}
 
       - name: Publishing to GitHub Releases
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release'
         with:
           repo_token: ${{ github.token }}
-          file: .github/${{ env.ASSET_NAME }}
+          file: .github/luci-app-homeproxy_*.*
+          file_glob: true
           tag: ${{ github.ref }}
