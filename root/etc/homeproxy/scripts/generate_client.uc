@@ -811,7 +811,7 @@ if (!isEmpty(main_node)) {
 	/* Avoid DNS loop */
 	config.route.default_domain_resolver = {
 		action: 'route',
-		server: 'default-dns',
+		server: !isEmpty(china_dns_server) ? china_dns_server : 'default-dns',
 		strategy: (ipv6_support !== '1') ? 'prefer_ipv4' : null
 	};
 
