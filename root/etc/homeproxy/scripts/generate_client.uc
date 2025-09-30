@@ -157,7 +157,7 @@ function parse_dnserver(server_addr, default_protocol) {
 		return null;
 
 	if (!match(server_addr, /:\/\//))
-		server_addr = (default_protocol || 'udp') + '://' + server_addr;
+		server_addr = (default_protocol || 'udp') + '://' + (validation('ip6addr', dns_server) ? `[${dns_server}]` : dns_server);
 	server_addr = parseURL(server_addr);
 
 	return {
