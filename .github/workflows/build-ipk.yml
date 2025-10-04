@@ -77,9 +77,7 @@ jobs:
             -Dtests=disabled \
             -Dcrypto_backend=openssl
           ninja -C build
-          pushd build
-          sudo -E meson install
-          popd
+          sudo -E meson install -C build --strip
           popd
 
           pushd po2lmo/modules/luci-base/src
@@ -87,7 +85,7 @@ jobs:
           sudo -E install -m0755 -s po2lmo /usr/local/bin/po2lmo
           popd
 
-          curl -fsSLO "https://raw.githubusercontent.com/openwrt/openwrt/master/scripts/ipkg-build"
+          curl -fLO "https://raw.githubusercontent.com/openwrt/openwrt/master/scripts/ipkg-build"
           sudo install -m0755 ipkg-build /usr/local/bin/ipkg-build
 
       - name: Build ipk file
