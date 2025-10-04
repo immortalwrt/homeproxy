@@ -407,12 +407,13 @@ config.log = {
 };
 
 /* NTP */
-config.ntp = {
-	enabled: true,
-	server: ntp_server,
-	detour: 'direct-out',
-	domain_resolver: 'default-dns',
-};
+if (!isEmpty(ntp_server))
+	config.ntp = {
+		enabled: true,
+		server: ntp_server,
+		detour: 'direct-out',
+		domain_resolver: 'default-dns',
+	};
 
 /* DNS start */
 /* Default settings */
