@@ -63,6 +63,15 @@ body:
         For server: ```cat /var/run/homeproxy/sing-box-s.log```
     validations:
       required: true
+
+  - type: textarea
+    id: syslog
+    attributes:
+      label: System log
+      description: |
+        Paste system log if the daemon cannot start (use command below).
+        ```logread -e sing-box```
+
   - type: input
     id: osrelease
     attributes:
