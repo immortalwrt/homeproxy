@@ -10,6 +10,7 @@ PKG_MGR="${1:-apk}"
 RELEASE_TYPE="${2:-snapshot}"
 
 export PKG_SOURCE_DATE_EPOCH="$(date "+%s")"
+export SOURCE_DATE_EPOCH="$PKG_SOURCE_DATE_EPOCH"
 
 BASE_DIR="$(cd "$(dirname $0)"; pwd)"
 PKG_DIR="$BASE_DIR/.."
