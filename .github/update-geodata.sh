@@ -11,7 +11,7 @@ check_list_update() {
 	local listref="$3"
 	local listname="$4"
 
-	local list_info="$(curl -H "Authorization: Bearer $GITHUB_TOKEN" -fsL "https://api.github.com/repos/$listrepo/commits?sha=$listref&path=$listname&per_page=1")"
+	local list_info="$(gh api "repos/$listrepo/commits?sha=$listref&path=$listname&per_page=1")"
 	local list_sha="$(echo -e "$list_info" | jq -r ".[].sha")"
 	local list_ver="$(echo -e "$list_info" | jq -r ".[].commit.message" | grep -Eo "[0-9-]+" | tr -d '-')"
 	if [ -z "$list_sha" ] || [ -z "$list_ver" ]; then
