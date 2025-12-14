@@ -46,7 +46,7 @@ jobs:
           repository: 'alpinelinux/apk-tools'
           path: 'apk-tools'
           fetch-depth: 0
-          ref: '6ffc65c63004b8d991ead4ea0f3d80e05b06b977'
+          ref: 'd093f7c198a64bff0cd58afeaf638909fda24ca8'
 
       - name: Checkout po2lmo
         uses: actions/checkout@v5
