@@ -19,6 +19,17 @@ function allowInsecureConfirm(ev, _section_id, value) {
 		ev.target.firstElementChild.checked = null;
 }
 
+function normalizeHysteriaHoppingPort(mport) {
+	if (!mport)
+		return null;
+
+	const ports = mport.split(',')
+		.map((p) => p.trim())
+		.filter((p) => p.length)
+		.map((p) => (/^\d+$/.test(p) ? `${p}:${p}` : p.replace('-', ':')));
+	return ports.length ? ports : null;
+}
+
 function parseShareLink(uri, features) {
 	let config, url, params;
 
@@ -75,6 +86,7 @@ function parseShareLink(uri, features) {
 				type: 'hysteria',
 				address: url.hostname,
 				port: url.port || '80',
+				hysteria_hopping_port: normalizeHysteriaHoppingPort(params.get('mport')),
 				hysteria_protocol: params.get('protocol') || 'udp',
 				hysteria_auth_type: params.get('auth') ? 'string' : null,
 				hysteria_auth_payload: params.get('auth'),
@@ -105,6 +117,7 @@ function parseShareLink(uri, features) {
 				password: url.username ? (
 					decodeURIComponent(url.username + (url.password ? (':' + url.password) : ''))
 				) : null,
+				hysteria_hopping_port: normalizeHysteriaHoppingPort(params.get('mport')),
 				hysteria_obfs_type: params.get('obfs'),
 				hysteria_obfs_password: params.get('obfs-password'),
 				tls: '1',
