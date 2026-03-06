@@ -20,6 +20,8 @@ go build -o bin/homeproxy ./cmd/homeproxy && sudo cp bin/homeproxy /usr/bin/
 
 CI 会单独产出 `homeproxy-cli` 包（与 `luci-app-homeproxy` 分离），用于直接在 OpenWrt 安装：
 
+`homeproxy-cli` 是独立 IPK，不会被打进 `luci-app-homeproxy`，也不依赖你先安装 `luci-app-homeproxy` 包。
+
 ```bash
 opkg install /tmp/homeproxy-cli_*.ipk
 ```
