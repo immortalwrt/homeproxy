@@ -163,7 +163,9 @@ set homeproxy_local_addr_v6 {
 		2001:20::/28,
 		2001:db8::/28,
 		2002::/16,
+{% if (!has_fakeip): %}
 		fc00::/7,
+{% endif %}
 		fe80::/10,
 		ff00::/8
 	}
