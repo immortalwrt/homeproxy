@@ -910,6 +910,9 @@ return view.extend({
 			'If value is an IP address instead of prefix, <code>/32</code> or <code>/128</code> will be appended automatically.'));
 		so.datatype = 'or(cidr, ipaddr)';
 
+		so = ss.option(form.Flag, 'cache_file_store_fakeip', _('Store FakeIP'),
+			_('Store FakeIP records in the cache file to persist mappings across restarts.'));
+
 		so = ss.option(form.Flag, 'cache_file_store_rdrc', _('Store RDRC'),
 			_('Store rejected DNS response cache.<br/>' +
 			'The check results of <code>Address filter DNS rule items</code> will be cached until expiration.'));
@@ -951,18 +954,35 @@ return view.extend({
 		so.value('https', _('HTTPS'));
 		so.value('h3', _('HTTP/3'));
 		so.value('quic', _('QUIC'));
+		so.value('fakeip', _('FakeIP'));
 		so.default = 'udp';
 		so.rmempty = false;
 
 		so = ss.option(form.Value, 'server', _('Address'),
 			_('The address of the dns server.'));
 		so.datatype = 'or(hostname, ipaddr)';
+		so.depends({'type': 'fakeip', '!reverse': true});
 		so.rmempty = false;
 
 		so = ss.option(form.Value, 'server_port', _('Port'),
 			_('The port of the DNS server.'));
 		so.placeholder = 'auto';
 		so.datatype = 'port';
+		so.depends({'type': 'fakeip', '!reverse': true});
+
+		so = ss.option(form.Value, 'inet4_range', _('IPv4 range'),
+			_('IPv4 address range for FakeIP.'));
+		so.datatype = 'cidr4';
+		so.placeholder = '198.18.0.0/15';
+		so.depends('type', 'fakeip');
+		so.modalonly = true;
+
+		so = ss.option(form.Value, 'inet6_range', _('IPv6 range'),
+			_('IPv6 address range for FakeIP.'));
+		so.datatype = 'cidr6';
+		so.placeholder = 'fc00::/18';
+		so.depends('type', 'fakeip');
+		so.modalonly = true;
 
 		so = ss.option(form.Value, 'path', _('Path'),
 			_('The path of the DNS server.'));
@@ -987,6 +1007,7 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'address_resolver', _('Address resolver'),
 			_('Tag of a another server to resolve the domain name in the address. Required if address contains domain.'));
+		so.depends({'type': 'fakeip', '!reverse': true});
 		so.load = function(section_id) {
 			delete this.keylist;
 			delete this.vallist;
@@ -1040,6 +1061,7 @@ return view.extend({
 		}
 		so.default = 'direct-out';
 		so.rmempty = false;
+		so.depends({'type': 'fakeip', '!reverse': true});
 		so.editable = true;
 		/* DNS servers end */
 

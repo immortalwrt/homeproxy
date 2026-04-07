@@ -110,6 +110,12 @@ for (let i in control_options)
 const dns_redirect = uci.get(cfgname, 'infra', 'dns_redirect') || '1';
 const dns_hijacked = uci.get('dhcp', '@dnsmasq[0]', 'dns_redirect') || '0',
       dns_port = uci.get('dhcp', '@dnsmasq[0]', 'port') || '53';
+
+let has_fakeip = false;
+uci.foreach(cfgname, 'dns_server', (cfg) => {
+	if (cfg.type === 'fakeip' && cfg.enabled === '1')
+		has_fakeip = true;
+});
 /* UCI config end */
 -%}
 
@@ -132,7 +138,9 @@ set homeproxy_local_addr_v4 {
 		192.88.99.0/24,
 		192.168.0.0/16,
 		192.175.48.0/24,
+{% if (!has_fakeip): %}
 		198.18.0.0/15,
+{% endif %}
 		198.51.100.0/24,
 		203.0.113.0/24,
 		224.0.0.0/4,
