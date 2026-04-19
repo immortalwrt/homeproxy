@@ -1,36 +1,16 @@
 name: Build ipk for HomeProxy
 
 on:
-  push:
-    branches:
-      - 'master'
-      - 'dev'
-    paths:
-      - 'htdocs/**'
-      - 'po/**'
-      - 'root/**'
-      - 'Makefile'
-      - '.github/**'
-      - '!.github/ISSUE_TEMPLATE/**'
-
-  pull_request:
-    branches:
-      - 'master'
-      - 'dev'
-    types:
-      - opened
-      - synchronize
-      - reopened
-    paths:
-      - 'htdocs/**'
-      - 'root/**'
-      - 'Makefile'
-      - '.github/**'
-      - '!.github/ISSUE_TEMPLATE/**'
-
-  release:
-    types:
-      - published
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build'
+        required: true
+        default: 'master'
+        type: choice
+        options:
+          - master
+          - dev
 
 jobs:
   build:
@@ -39,6 +19,8 @@ jobs:
     steps:
       - name: Checkout source tree
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Checkout apk
         uses: actions/checkout@v6
