@@ -329,5 +329,71 @@ return baseclass.extend({
 		}
 
 		return true;
+	},
+
+	status() {
+		const callRCList = rpc.declare({
+			object: 'rc',
+			method: 'list',
+			params: ['name'],
+			expect: { '': {} }
+		});
+
+		return L.resolveDefault(callRCList('homeproxy'), {}).then((res) => {
+			return res?.homeproxy?.running;
+		});
+	},
+
+	reload() {
+		const callRCInit = rpc.declare({
+			object: 'rc',
+			method: 'init',
+			params: ['name', 'action'],
+			expect: { '': {} }
+		});
+
+		return callRCInit('homeproxy', 'reload');
+	},
+
+	restart() {
+		const callRCInit = rpc.declare({
+			object: 'rc',
+			method: 'init',
+			params: ['name', 'action'],
+			expect: { '': {} }
+		});
+
+		return callRCInit('homeproxy', 'restart');
+	},
+
+	updateDashboard() {
+		const callDashboardUpdate = rpc.declare({
+			object: 'luci.homeproxy',
+			method: 'dashboard_update',
+			expect: { '': {} }
+		});
+
+		return callDashboardUpdate();
+	},
+
+	async openDashboard() {
+		const dashboardEnabled = uci.get('homeproxy', 'config', 'dashboard_enabled');
+		const dashboardPort = uci.get('homeproxy', 'config', 'dashboard_port') || '9090';
+		const dashboardSecret = uci.get('homeproxy', 'config', 'dashboard_secret') || '';
+
+		if (!dashboardEnabled || dashboardEnabled !== '1') {
+			return Promise.reject(_('Dashboard is not enabled'));
+		}
+
+		const params = {
+			host: window.location.hostname,
+			hostname: window.location.hostname,
+			port: dashboardPort,
+			secret: dashboardSecret
+		};
+		const query = new URLSearchParams(params).toString();
+		const url = `http://${window.location.hostname}:${dashboardPort}/ui/?${query}`;
+		setTimeout(function() { window.open(url, '_blank') }, 0);
+		return Promise.resolve();
 	}
 });

@@ -3049,3 +3049,75 @@ msgstr ""
 #: htdocs/luci-static/resources/homeproxy.js:328
 msgid "valid uuid"
 msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:41
+msgid "HomeProxy Dashboard"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:41
+msgid "Control panel for HomeProxy service"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:45
+msgid "Status"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:48
+msgid "Core Version"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:55
+msgid "Core Status"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:67
+msgid "Reload Service"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:73
+msgid "Restart Service"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:79
+msgid "Update Dashboard"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:85
+msgid "Open Dashboard"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:90
+msgid "Dashboard Config"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:92
+msgid "Enable Dashboard"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:97
+msgid "Dashboard Type"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:105
+msgid "Dashboard Port"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:111
+msgid "Dashboard Secret"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:112
+msgid "Auto generated"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:116
+msgid "UI Path"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:121
+msgid "UI Download URL"
+msgstr ""
+
+#: htdocs/luci-static/resources/homeproxy.js:379
+msgid "Dashboard is not enabled"
+msgstr ""

@@ -248,6 +248,52 @@ const methods = {
 			} else
 				return { status: 255, error: 'illegal type' };
 		}
+	},
+
+	dashboard_update: {
+		call: function() {
+			const uci = require('uci').cursor();
+			const dashboard_type = uci.get('homeproxy', 'config', 'dashboard_type') || 'zashboard';
+			const ui_download_url = uci.get('homeproxy', 'config', 'dashboard_ui_download_url');
+			const ui_path = uci.get('homeproxy', 'config', 'dashboard_ui_path') || '/etc/homeproxy/ui';
+
+			let download_url = ui_download_url;
+			if (!download_url) {
+				switch (dashboard_type) {
+				case 'zashboard':
+					download_url = 'https://github.com/Zephyruso/zashboard/releases/latest/download/dist-cdn-fonts.zip';
+					break;
+				case 'metacubexd':
+					download_url = 'https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip';
+					break;
+				case 'yacd':
+					download_url = 'https://github.com/MetaCubeX/Yacd-meta/archive/refs/heads/gh-pages.zip';
+					break;
+				case 'razord':
+					download_url = 'https://github.com/MetaCubeX/Razord-meta/archive/refs/heads/gh-pages.zip';
+					break;
+				default:
+					download_url = 'https://github.com/Zephyruso/zashboard/releases/latest/download/dist-cdn-fonts.zip';
+				}
+			}
+
+			const github_token = uci.get('homeproxy', 'config', 'github_token');
+			const auth_header = github_token ? `-H "Authorization: token ${github_token}"` : '';
+
+			/* Create UI directory */
+			system(`mkdir -p ${ui_path}`);
+
+			/* Download and extract dashboard UI */
+			const tmp_file = '/tmp/homeproxy_dashboard.zip';
+			const cmd = `wget -q ${auth_header} -O ${tmp_file} "${download_url}" && unzip -o ${tmp_file} -d ${ui_path} && rm -f ${tmp_file}`;
+			const exit_code = system(cmd);
+
+			if (exit_code === 0) {
+				return { result: true };
+			} else {
+				return { result: false, error: 'Failed to update dashboard' };
+			}
+		}
 	}
 };
 

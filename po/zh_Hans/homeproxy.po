@@ -3119,3 +3119,75 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:328
 msgid "valid uuid"
 msgstr "有效 uuid"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:41
+msgid "HomeProxy Dashboard"
+msgstr "HomeProxy 控制面板"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:41
+msgid "Control panel for HomeProxy service"
+msgstr "HomeProxy 服务的控制面板"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:45
+msgid "Status"
+msgstr "状态"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:48
+msgid "Core Version"
+msgstr "核心版本"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:55
+msgid "Core Status"
+msgstr "核心状态"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:67
+msgid "Reload Service"
+msgstr "重载服务"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:73
+msgid "Restart Service"
+msgstr "重启服务"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:79
+msgid "Update Dashboard"
+msgstr "更新面板"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:85
+msgid "Open Dashboard"
+msgstr "打开面板"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:90
+msgid "Dashboard Config"
+msgstr "面板配置"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:92
+msgid "Enable Dashboard"
+msgstr "启用面板"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:97
+msgid "Dashboard Type"
+msgstr "面板类型"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:105
+msgid "Dashboard Port"
+msgstr "面板端口"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:111
+msgid "Dashboard Secret"
+msgstr "面板密钥"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:112
+msgid "Auto generated"
+msgstr "自动生成"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:116
+msgid "UI Path"
+msgstr "UI 路径"
+
+#: htdocs/luci-static/resources/view/homeproxy/dashboard.js:121
+msgid "UI Download URL"
+msgstr "UI 下载地址"
+
+#: htdocs/luci-static/resources/homeproxy.js:379
+msgid "Dashboard is not enabled"
+msgstr "面板未启用"
