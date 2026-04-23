@@ -108,6 +108,8 @@ const proxy_mode = uci.get(uciconfig, ucimain, 'proxy_mode') || 'redirect_tproxy
 
 const mixed_port = uci.get(uciconfig, uciinfra, 'mixed_port') || '5330';
 
+const proxy_port = '10808';
+
 let self_mark, redirect_port, tproxy_port, tun_name,
     tun_addr4, tun_addr6, tun_mtu, tcpip_stack,
     endpoint_independent_nat, udp_timeout;
@@ -610,6 +612,15 @@ push(config.inbounds, {
 	set_system_proxy: false
 });
 
+push(config.inbounds, {
+	type: 'mixed',
+	tag: 'direct-proxy-in',
+	listen: '::',
+	listen_port: int(proxy_port),
+	sniff: true,
+	sniff_override_destination: strToBool(sniff_override)
+});
+
 if (match(proxy_mode, /redirect/))
 	push(config.inbounds, {
 		type: 'redirect',
@@ -794,6 +805,10 @@ config.route = {
 		{
 			inbound: 'dns-in',
 			action: 'hijack-dns'
+		},
+		{
+			inbound: 'direct-proxy-in',
+			outbound: 'main-out'
 		}
 		/*
 		 * leave for sing-box 1.13.0
