@@ -53,6 +53,12 @@ if (github_token) {
 if (!uci.get(uciconfig, uciinfra, 'ntp_server'))
 	uci.set(uciconfig, uciinfra, 'ntp_server', 'nil');
 
+/* sniff_override was deprecated in sb 1.11 */
+if (!isEmpty(uci.get(uciconfig, uciinfra, 'sniff_override')))
+	uci.delete(uciconfig, uciinfra, 'sniff_override');
+if (!isEmpty(uci.get(uciconfig, ucirouting, 'sniff_override')))
+	uci.delete(uciconfig, ucirouting, 'sniff_override');
+
 /* tun_gso was deprecated in sb 1.11 */
 if (!isEmpty(uci.get(uciconfig, uciinfra, 'tun_gso')))
 	uci.delete(uciconfig, uciinfra, 'tun_gso');
