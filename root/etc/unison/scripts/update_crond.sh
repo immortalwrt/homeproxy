@@ -3,7 +3,7 @@
 #
 # Copyright (C) 2023 ImmortalWrt.org
 
-SCRIPTS_DIR="/etc/canto/scripts"
+SCRIPTS_DIR="/etc/unison/scripts"
 
 for i in "china_ip4" "china_ip6" "gfw_list" "china_list"; do
 	"$SCRIPTS_DIR"/update_resources.sh "$i"

@@ -11,7 +11,7 @@
 'require ui';
 'require view';
 
-'require canto as hp';
+'require unison as hp';
 'require tools.widgets as widgets';
 
 function allowInsecureConfirm(ev, _section_id, value) {
@@ -782,7 +782,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.depends('type', 'vless');
 	o.depends('type', 'vmess');
 	o.onchange = function(ev, section_id, value) {
-		let desc = this.map.findElement('id', 'cbid.canto.%s.transport'.format(section_id)).nextElementSibling;
+		let desc = this.map.findElement('id', 'cbid.unison.%s.transport'.format(section_id)).nextElementSibling;
 		if (value === 'http')
 			desc.innerHTML = _('TLS is not enforced. If TLS is not configured, plain HTTP 1.1 is used.');
 		else if (value === 'quic')
@@ -790,20 +790,20 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 		else
 			desc.innerHTML = _('No TCP transport, plain HTTP is merged into the HTTP transport.');
 
-		let tls = this.map.findElement('id', 'cbid.canto.%s.tls'.format(section_id)).firstElementChild;
+		let tls = this.map.findElement('id', 'cbid.unison.%s.tls'.format(section_id)).firstElementChild;
 		if ((value === 'http' && tls.checked) || (value === 'grpc' && !features.with_grpc)) {
-			this.map.findElement('id', 'cbid.canto.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
+			this.map.findElement('id', 'cbid.unison.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
 				_('Specifies the period of time (in seconds) after which a health check will be performed using a ping frame if no frames have been received on the connection.<br/>' +
 					'Please note that a ping response is considered a received frame, so if there is no other traffic on the connection, the health check will be executed every interval.');
 
-			this.map.findElement('id', 'cbid.canto.%s.http_ping_timeout'.format(section_id)).nextElementSibling.innerHTML =
+			this.map.findElement('id', 'cbid.unison.%s.http_ping_timeout'.format(section_id)).nextElementSibling.innerHTML =
 				_('Specifies the timeout duration (in seconds) after sending a PING frame, within which a response must be received.<br/>' +
 					'If a response to the PING frame is not received within the specified timeout duration, the connection will be closed.');
 		} else if (value === 'grpc' && features.with_grpc) {
-			this.map.findElement('id', 'cbid.canto.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
+			this.map.findElement('id', 'cbid.unison.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
 				_('If the transport doesn\'t see any activity after a duration of this time (in seconds), it pings the client to check if the connection is still active.');
 
-			this.map.findElement('id', 'cbid.canto.%s.http_ping_timeout'.format(section_id)).nextElementSibling.innerHTML =
+			this.map.findElement('id', 'cbid.unison.%s.http_ping_timeout'.format(section_id)).nextElementSibling.innerHTML =
 				_('The timeout (in seconds) that after performing a keepalive check, the client will wait for activity. If no activity is detected, the connection will be closed.');
 		}
 	}
@@ -1013,7 +1013,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.validate = function(section_id, _value) {
 		if (section_id) {
 			let type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
-			let tls = this.map.findElement('id', 'cbid.canto.%s.tls'.format(section_id)).firstElementChild;
+			let tls = this.map.findElement('id', 'cbid.unison.%s.tls'.format(section_id)).firstElementChild;
 
 			if (['anytls', 'hysteria', 'hysteria2', 'shadowtls', 'tuic'].includes(type)) {
 				tls.checked = true;
@@ -1076,7 +1076,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	o = s.option(form.Value, 'tls_cert_path', _('Certificate path'),
 		_('The path to the server certificate, in PEM format.'));
-	o.value('/etc/canto/certs/client_ca.pem');
+	o.value('/etc/unison/certs/client_ca.pem');
 	o.depends('tls_self_sign', '1');
 	o.validate = hp.validateCertificatePath;
 	o.rmempty = false;
@@ -1086,7 +1086,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 		_('<strong>Save your configuration before uploading files!</strong>'));
 	o.inputstyle = 'action';
 	o.inputtitle = _('Upload...');
-	o.depends({'tls_self_sign': '1', 'tls_cert_path': '/etc/canto/certs/client_ca.pem'});
+	o.depends({'tls_self_sign': '1', 'tls_cert_path': '/etc/unison/certs/client_ca.pem'});
 	o.onclick = L.bind(hp.uploadCertificate, this, _('certificate'), 'client_ca');
 	o.modalonly = true;
 
@@ -1097,7 +1097,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	o = s.option(form.Value, 'tls_ech_config_path', _('ECH config path'),
 		_('The path to the ECH config, in PEM format. If empty, load from DNS will be attempted.'));
-	o.value('/etc/canto/certs/client_ech_conf.pem');
+	o.value('/etc/unison/certs/client_ech_conf.pem');
 	o.depends('tls_ech', '1');
 	o.modalonly = true;
 
@@ -1105,7 +1105,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 		_('<strong>Save your configuration before uploading files!</strong>'));
 	o.inputstyle = 'action';
 	o.inputtitle = _('Upload...');
-	o.depends({'tls_ech': '1', 'tls_ech_config_path': '/etc/canto/certs/client_ech_conf.pem'});
+	o.depends({'tls_ech': '1', 'tls_ech_config_path': '/etc/unison/certs/client_ech_conf.pem'});
 	o.onclick = L.bind(hp.uploadCertificate, this, _('ECH config'), 'client_ech_conf');
 	o.modalonly = true;
 
@@ -1126,7 +1126,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 		o.depends({'tls': '1', 'type': /^((?!hysteria2?|tuic$).)+$/});
 		o.validate = function(section_id, value) {
 			if (section_id) {
-				let tls_reality = this.map.findElement('id', 'cbid.canto.%s.tls_reality'.format(section_id)).firstElementChild;
+				let tls_reality = this.map.findElement('id', 'cbid.unison.%s.tls_reality'.format(section_id)).firstElementChild;
 				if (tls_reality.checked && !value)
 					return _('Expecting: %s').format(_('non-empty value'));
 
@@ -1188,7 +1188,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 return view.extend({
 	load() {
 		return Promise.all([
-			uci.load('canto'),
+			uci.load('unison'),
 			hp.getBuiltinFeatures()
 		]);
 	},
@@ -1208,9 +1208,9 @@ return view.extend({
 			subinfo.push({ 'hash': urlhash, 'title': title });
 		}
 
-		m = new form.Map('canto', _('Edit nodes'));
+		m = new form.Map('unison', _('Edit nodes'));
 
-		s = m.section(form.NamedSection, 'subscription', 'canto');
+		s = m.section(form.NamedSection, 'subscription', 'unison');
 
 		/* Node settings start */
 		/* User nodes start */
@@ -1377,7 +1377,7 @@ return view.extend({
 		o.rmempty = false;
 
 		o = s.taboption('subscription', form.Value, 'user_agent', _('User-Agent'));
-		o.placeholder = 'Wget/1.21 (Canto, like v2rayN)';
+		o.placeholder = 'Wget/1.21 (Unison, like v2rayN)';
 
 		o = s.taboption('subscription', form.Flag, 'allow_insecure', _('Allow insecure'),
 			_('Allow insecure connection by default when add nodes from subscriptions.') +
@@ -1413,7 +1413,7 @@ return view.extend({
 			}
 		}
 		o.onclick = function() {
-			return fs.exec_direct('/etc/canto/scripts/update_subscriptions.uc').then((res) => {
+			return fs.exec_direct('/etc/unison/scripts/update_subscriptions.uc').then((res) => {
 				return location.reload();
 			}).catch((err) => {
 				ui.addNotification(null, E('p', _('An error occurred during updating subscriptions: %s').format(err)));

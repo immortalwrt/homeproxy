@@ -1,4 +1,4 @@
-name: Build ipk for Canto
+name: Build ipk for Unison
 
 on:
   push:
@@ -118,6 +118,6 @@ jobs:
         if: github.event_name == 'release'
         with:
           repo_token: ${{ github.token }}
-          file: .github/luci-app-canto_*.*
+          file: .github/luci-app-unison_*.*
           file_glob: true
           tag: ${{ github.ref }}
