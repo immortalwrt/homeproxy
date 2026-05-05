@@ -1,0 +1,31 @@
+#!/bin/sh
+
+[ -f "/www/luci-static/resources/icons/loading.gif" ] && \
+	sed -i "s,/loading.svg,/loading.gif,g" "/www/luci-static/resources/view/unison/status.js"
+
+uci -q batch <<-EOF >"/dev/null"
+	delete firewall.unison_pre
+
+	delete firewall.unison_forward
+	set firewall.unison_forward=include
+	set firewall.unison_forward.type=nftables
+	set firewall.unison_forward.path="/var/run/unison/fw4_forward.nft"
+	set firewall.unison_forward.position="chain-pre"
+	set firewall.unison_forward.chain="forward"
+
+	delete firewall.unison_input
+	set firewall.unison_input=include
+	set firewall.unison_input.type=nftables
+	set firewall.unison_input.path="/var/run/unison/fw4_input.nft"
+	set firewall.unison_input.position="chain-pre"
+	set firewall.unison_input.chain="input"
+
+	delete firewall.unison_post
+	set firewall.unison_post=include
+	set firewall.unison_post.type=nftables
+	set firewall.unison_post.path="/var/run/unison/fw4_post.nft"
+	set firewall.unison_post.position="table-post"
+	commit firewall
+EOF
+
+exit 0

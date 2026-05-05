@@ -12,14 +12,14 @@ LUCI_DEPENDS:= \
 	+kmod-nft-tproxy \
 	+ucode-mod-digest
 
-PKG_NAME:=luci-app-canto
+PKG_NAME:=luci-app-unison
 
-define Package/luci-app-canto/conffiles
-/etc/config/canto
-/etc/canto/certs/
-/etc/canto/ruleset/
-/etc/canto/resources/direct_list.txt
-/etc/canto/resources/proxy_list.txt
+define Package/luci-app-unison/conffiles
+/etc/config/unison
+/etc/unison/certs/
+/etc/unison/ruleset/
+/etc/unison/resources/direct_list.txt
+/etc/unison/resources/proxy_list.txt
 endef
 
 include $(TOPDIR)/feeds/luci/luci.mk

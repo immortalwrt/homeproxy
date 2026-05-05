@@ -338,7 +338,7 @@ bbc.pdn.tritondigital.com
 bbcchinese.com
 bbchat.tv
 bbci.co.uk
-bbs.cantonese.asia
+bbs.unisonnese.asia
 bbs.hanminzu.org
 bbs.junglobal.net
 bbs.mikocon.com
@@ -3773,7 +3773,7 @@ vmixcore.com
 vmpsoft.com
 vnet.link
 voacambodia.com
-voacantonese.com
+voaunisonnese.com
 voachinese.com
 voachineseblog.com
 voaindonesia.com

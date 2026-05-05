@@ -1,5 +1,0 @@
-#!/bin/sh
-
-ucode "/etc/canto/scripts/migrate_config.uc"
-
-exit 0

@@ -13,12 +13,12 @@ import { cursor } from 'uci';
 import {
 	isEmpty, strToBool, strToInt, strToTime,
 	removeBlankAttrs, HP_DIR, RUN_DIR
-} from 'canto';
+} from 'unison';
 
 /* UCI config start */
 const uci = cursor();
 
-const uciconfig = 'canto';
+const uciconfig = 'unison';
 uci.load(uciconfig);
 
 const uciserver = 'server';

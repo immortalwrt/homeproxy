@@ -177,7 +177,7 @@ return baseclass.extend({
 
 	getBuiltinFeatures() {
 		const callGetSingBoxFeatures = rpc.declare({
-			object: 'luci.canto',
+			object: 'luci.unison',
 			method: 'singbox_get_features',
 			expect: { '': {} }
 		});
@@ -246,13 +246,13 @@ return baseclass.extend({
 
 	uploadCertificate(_option, type, filename, ev) {
 		const callWriteCertificate = rpc.declare({
-			object: 'luci.canto',
+			object: 'luci.unison',
 			method: 'certificate_write',
 			params: ['filename'],
 			expect: { '': {} }
 		});
 
-		return ui.uploadFile('/tmp/canto_certificate.tmp', ev.target)
+		return ui.uploadFile('/tmp/unison_certificate.tmp', ev.target)
 		.then(L.bind((_btn, res) => {
 			return L.resolveDefault(callWriteCertificate(filename), {}).then((ret) => {
 				if (ret.result === true)
@@ -275,8 +275,8 @@ return baseclass.extend({
 
 	validateCertificatePath(section_id, value) {
 		if (section_id && value)
-			if (!value.match(/^(\/etc\/canto\/certs\/|\/etc\/acme\/|\/etc\/ssl\/).+$/))
-				return _('Expecting: %s').format(_('/etc/canto/certs/..., /etc/acme/..., /etc/ssl/...'));
+			if (!value.match(/^(\/etc\/unison\/certs\/|\/etc\/acme\/|\/etc\/ssl\/).+$/))
+				return _('Expecting: %s').format(_('/etc/unison/certs/..., /etc/acme/..., /etc/ssl/...'));
 
 		return true;
 	},
