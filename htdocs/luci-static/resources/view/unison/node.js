@@ -1201,10 +1201,13 @@ return view.extend({
 
 		/* Cache subscription information, it will be called multiple times */
 		let subinfo = [];
-		for (let suburl of (uci.get(data[0], 'subscription', 'subscription_url') || [])) {
+		const sub_urls = uci.get(data[0], 'subscription', 'subscription_url') || [];
+		const sub_names = uci.get(data[0], 'subscription', 'subscription_name') || [];
+		for (let i = 0; i < sub_urls.length; i++) {
+			const suburl = sub_urls[i];
 			const url = new URL(suburl);
 			const urlhash = hp.calcStringMD5(suburl.replace(/#.*$/, ''));
-			const title = url.hash ? decodeURIComponent(url.hash.slice(1)) : url.hostname;
+			const title = sub_names[i] || (url.hash ? decodeURIComponent(url.hash.slice(1)) : url.hostname);
 			subinfo.push({ 'hash': urlhash, 'title': title });
 		}
 
@@ -1362,6 +1365,10 @@ return view.extend({
 
 			return true;
 		}
+
+		o = s.taboption('subscription', form.DynamicList, 'subscription_name', _('Subscription names'),
+			_('Display name for each subscription, in the same order as the URLs above. Leave an entry blank to use the domain name.'));
+		o.placeholder = _('My Subscription');
 
 		o = s.taboption('subscription', form.ListValue, 'filter_nodes', _('Filter nodes'),
 			_('Drop/keep specific nodes from subscriptions.'));
