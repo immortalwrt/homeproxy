@@ -1,45 +1,45 @@
 {
-	"admin/services/canto": {
-		"title": "Canto",
+	"admin/services/unison": {
+		"title": "Unison",
 		"order": 10,
 		"action": {
 			"type": "firstchild"
 		},
 		"depends": {
-			"acl": [ "luci-app-canto" ],
-			"uci": { "canto": true }
+			"acl": [ "luci-app-unison" ],
+			"uci": { "unison": true }
 		}
 	},
-	"admin/services/canto/client": {
+	"admin/services/unison/client": {
 		"title": "Client Settings",
 		"order": 10,
 		"action": {
 			"type": "view",
-			"path": "canto/client"
+			"path": "unison/client"
 		}
 	},
-	"admin/services/canto/node": {
+	"admin/services/unison/node": {
 		"title": "Node Settings",
 		"order": 15,
 		"action": {
 			"type": "view",
-			"path": "canto/node"
+			"path": "unison/node"
 		}
 	},
-	"admin/services/canto/server": {
+	"admin/services/unison/server": {
 		"title": "Server Settings",
 		"order": 20,
 		"action": {
 			"type": "view",
-			"path": "canto/server"
+			"path": "unison/server"
 		}
 	},
-	"admin/services/canto/status": {
+	"admin/services/unison/status": {
 		"title": "Service Status",
 		"order": 30,
 		"action": {
 			"type": "view",
-			"path": "canto/status"
+			"path": "unison/status"
 		}
 	}
 }

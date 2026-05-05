@@ -4,9 +4,9 @@
 
 import { writefile } from 'fs';
 import { cursor } from 'uci';
-import { isEmpty, RUN_DIR } from 'canto';
+import { isEmpty, RUN_DIR } from 'unison';
 
-const cfgname = 'canto';
+const cfgname = 'unison';
 const uci = cursor();
 uci.load(cfgname);
 

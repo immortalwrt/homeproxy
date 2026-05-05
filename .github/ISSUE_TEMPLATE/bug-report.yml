@@ -28,10 +28,10 @@ body:
   - type: textarea
     id: luciconfig
     attributes:
-      label: Canto configuration
+      label: Unison configuration
       description: |
-        The Canto configuration file where the error occurred (use command below).
-        ```cat /etc/config/canto```
+        The Unison configuration file where the error occurred (use command below).
+        ```cat /etc/config/unison```
     validations:
       required: true
   - type: textarea
@@ -40,17 +40,17 @@ body:
       label: sing-box configuration
       description: |
         The sing-box configuration file where the error occurred (use command below).
-        For client: ```cat /var/run/canto/sing-box-c.json```
-        For server: ```cat /var/run/canto/sing-box-s.json```
+        For client: ```cat /var/run/unison/sing-box-c.json```
+        For server: ```cat /var/run/unison/sing-box-s.json```
     validations:
       required: true
   - type: textarea
     id: lucilog
     attributes:
-      label: Canto log
+      label: Unison log
       description: |
-        The Canto log file where the error occurred (use command below).
-        ```cat /var/run/canto/canto.log```
+        The Unison log file where the error occurred (use command below).
+        ```cat /var/run/unison/unison.log```
     validations:
       required: false
   - type: textarea
@@ -59,8 +59,8 @@ body:
       label: sing-box log
       description: |
         The sing-box log file where the error occurred (use command below).
-        For client: ```cat /var/run/canto/sing-box-c.log```
-        For server: ```cat /var/run/canto/sing-box-s.log```
+        For client: ```cat /var/run/unison/sing-box-c.log```
+        For server: ```cat /var/run/unison/sing-box-s.log```
     validations:
       required: true
 
@@ -101,13 +101,13 @@ body:
       label: Terms
       description: Please check the following before submitting the issue.
       options:
-        - label: I confirm that the Canto I installed is from official source, like GitHub artifacts or official ImmortalWrt opkg feeds.
+        - label: I confirm that the Unison I installed is from official source, like GitHub artifacts or official ImmortalWrt opkg feeds.
           required: true
         - label: I confirm that the Homeproxy I installed does not contain Clash mode support.
           required: true
         - label: I confirm that the version of OpenWrt/ImmortalWrt I installed is >= 24.10.
           required: true
-        - label: I confirm that I have installed the latest version of Canto and sing-box.
+        - label: I confirm that I have installed the latest version of Unison and sing-box.
           required: true
         - label: I confirm that I have read the sing-box documentation, understand the meaning of all the configuration items I added.
           required: true

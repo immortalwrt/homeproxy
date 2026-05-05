@@ -8,11 +8,11 @@
 'use strict';
 
 import { cursor } from 'uci';
-import { isEmpty, parseURL } from 'canto';
+import { isEmpty, parseURL } from 'unison';
 
 const uci = cursor();
 
-const uciconfig = 'canto';
+const uciconfig = 'unison';
 uci.load(uciconfig);
 
 const uciinfra = 'infra',

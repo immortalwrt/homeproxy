@@ -1,0 +1,5 @@
+#!/bin/sh
+
+ucode "/etc/unison/scripts/migrate_config.uc"
+
+exit 0

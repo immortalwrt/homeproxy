@@ -1,0 +1,24 @@
+{
+	"luci-app-unison": {
+		"description": "Grant access to unison configuration",
+		"read": {
+			"file": {
+				"/etc/unison/scripts/update_subscriptions.uc": [ "exec" ],
+				"/var/run/unison/unison.log": [ "read" ],
+				"/var/run/unison/sing-box-c.log": [ "read" ],
+				"/var/run/unison/sing-box-s.log": [ "read" ]
+			},
+			"ubus": {
+				"service": [ "list" ],
+				"luci.unison": [ "*" ]
+			},
+			"uci": [ "unison" ]
+		},
+		"write": {
+			"file": {
+				"/tmp/unison_certificate.tmp": [ "write" ]
+			},
+			"uci": [ "unison" ]
+		}
+	}
+}

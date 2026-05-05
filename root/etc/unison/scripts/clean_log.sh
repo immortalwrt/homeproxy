@@ -3,7 +3,7 @@
 #
 # Copyright (C) 2022-2023 ImmortalWrt.org
 
-NAME="canto"
+NAME="unison"
 
 log_max_size="50" #KB
 main_log_file="/var/run/$NAME/$NAME.log"
