@@ -1,45 +1,45 @@
 {
-	"admin/services/homeproxy": {
-		"title": "HomeProxy",
+	"admin/services/canto": {
+		"title": "Canto",
 		"order": 10,
 		"action": {
 			"type": "firstchild"
 		},
 		"depends": {
-			"acl": [ "luci-app-homeproxy" ],
-			"uci": { "homeproxy": true }
+			"acl": [ "luci-app-canto" ],
+			"uci": { "canto": true }
 		}
 	},
-	"admin/services/homeproxy/client": {
+	"admin/services/canto/client": {
 		"title": "Client Settings",
 		"order": 10,
 		"action": {
 			"type": "view",
-			"path": "homeproxy/client"
+			"path": "canto/client"
 		}
 	},
-	"admin/services/homeproxy/node": {
+	"admin/services/canto/node": {
 		"title": "Node Settings",
 		"order": 15,
 		"action": {
 			"type": "view",
-			"path": "homeproxy/node"
+			"path": "canto/node"
 		}
 	},
-	"admin/services/homeproxy/server": {
+	"admin/services/canto/server": {
 		"title": "Server Settings",
 		"order": 20,
 		"action": {
 			"type": "view",
-			"path": "homeproxy/server"
+			"path": "canto/server"
 		}
 	},
-	"admin/services/homeproxy/status": {
+	"admin/services/canto/status": {
 		"title": "Service Status",
 		"order": 30,
 		"action": {
 			"type": "view",
-			"path": "homeproxy/status"
+			"path": "canto/status"
 		}
 	}
 }

@@ -3,7 +3,7 @@
 #
 # Copyright (C) 2022-2025 ImmortalWrt.org
 
-NAME="homeproxy"
+NAME="canto"
 
 RESOURCES_DIR="/etc/$NAME/resources"
 mkdir -p "$RESOURCES_DIR"
@@ -26,7 +26,7 @@ check_list_update() {
 	local listref="$3"
 	local listname="$4"
 	local lock="$RUN_DIR/update_resources-$listtype.lock"
-	local github_token="$(uci -q get homeproxy.config.github_token)"
+	local github_token="$(uci -q get canto.config.github_token)"
 	local wget="wget --timeout=10 -q"
 
 	exec 200>"$lock"

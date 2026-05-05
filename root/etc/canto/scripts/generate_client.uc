@@ -15,16 +15,16 @@ import { cursor } from 'uci';
 import {
 	isEmpty, parseURL, strToBool, strToInt, strToTime,
 	removeBlankAttrs, validation, HP_DIR, RUN_DIR
-} from 'homeproxy';
+} from 'canto';
 
 const ubus = connect();
 
-/* const features = ubus.call('luci.homeproxy', 'singbox_get_features') || {}; */
+/* const features = ubus.call('luci.canto', 'singbox_get_features') || {}; */
 
 /* UCI config start */
 const uci = cursor();
 
-const uciconfig = 'homeproxy';
+const uciconfig = 'canto';
 uci.load(uciconfig);
 
 const uciinfra = 'infra',

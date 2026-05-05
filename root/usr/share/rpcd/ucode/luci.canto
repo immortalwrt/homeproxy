@@ -18,8 +18,8 @@ function hasKernelModule(kmod) {
 	return (system(sprintf('[ -e "/lib/modules/$(uname -r)"/%s ]', shellquote(kmod))) === 0);
 }
 
-const HP_DIR = '/etc/homeproxy';
-const RUN_DIR = '/var/run/homeproxy';
+const HP_DIR = '/etc/canto';
+const RUN_DIR = '/var/run/canto';
 
 const methods = {
 	acllist_read: {
@@ -60,7 +60,7 @@ const methods = {
 		args: { filename: 'filename' },
 		call: function(req) {
 			const writeCertificate = (filename, priv) => {
-				const tmpcert = '/tmp/homeproxy_certificate.tmp';
+				const tmpcert = '/tmp/canto_certificate.tmp';
 				const filestat = lstat(tmpcert);
 
 				if (!filestat || filestat.type !== 'file' || filestat.size <= 0) {
@@ -144,7 +144,7 @@ const methods = {
 	log_clean: {
 		args: { type: 'type' },
 		call: function(req) {
-			if (!(req.args?.type in ['homeproxy', 'sing-box-c', 'sing-box-s']))
+			if (!(req.args?.type in ['canto', 'sing-box-c', 'sing-box-s']))
 				return { result: false, error: 'illegal type' };
 
 			const filestat = lstat(`${RUN_DIR}/${req.args?.type}.log`);
@@ -251,4 +251,4 @@ const methods = {
 	}
 };
 
-return { 'luci.homeproxy': methods };
+return { 'luci.canto': methods };

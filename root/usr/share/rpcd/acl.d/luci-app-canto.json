@@ -1,24 +1,24 @@
 {
-	"luci-app-homeproxy": {
-		"description": "Grant access to homeproxy configuration",
+	"luci-app-canto": {
+		"description": "Grant access to canto configuration",
 		"read": {
 			"file": {
-				"/etc/homeproxy/scripts/update_subscriptions.uc": [ "exec" ],
-				"/var/run/homeproxy/homeproxy.log": [ "read" ],
-				"/var/run/homeproxy/sing-box-c.log": [ "read" ],
-				"/var/run/homeproxy/sing-box-s.log": [ "read" ]
+				"/etc/canto/scripts/update_subscriptions.uc": [ "exec" ],
+				"/var/run/canto/canto.log": [ "read" ],
+				"/var/run/canto/sing-box-c.log": [ "read" ],
+				"/var/run/canto/sing-box-s.log": [ "read" ]
 			},
 			"ubus": {
 				"service": [ "list" ],
-				"luci.homeproxy": [ "*" ]
+				"luci.canto": [ "*" ]
 			},
-			"uci": [ "homeproxy" ]
+			"uci": [ "canto" ]
 		},
 		"write": {
 			"file": {
-				"/tmp/homeproxy_certificate.tmp": [ "write" ]
+				"/tmp/canto_certificate.tmp": [ "write" ]
 			},
-			"uci": [ "homeproxy" ]
+			"uci": [ "canto" ]
 		}
 	}
 }

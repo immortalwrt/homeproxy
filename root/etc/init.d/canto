@@ -8,19 +8,19 @@ USE_PROCD=1
 START=99
 STOP=10
 
-CONF="homeproxy"
+CONF="canto"
 PROG="/usr/bin/sing-box"
 
-HP_DIR="/etc/homeproxy"
-RUN_DIR="/var/run/homeproxy"
-LOG_PATH="$RUN_DIR/homeproxy.log"
+HP_DIR="/etc/canto"
+RUN_DIR="/var/run/canto"
+LOG_PATH="$RUN_DIR/canto.log"
 
 # we don't know which is the default server, just take the first one
 DNSMASQ_UCI_CONFIG="$(uci -q show "dhcp.@dnsmasq[0]" | awk 'NR==1 {split($0, conf, /[.=]/); print conf[2]}')"
 if [ -f "/tmp/etc/dnsmasq.conf.$DNSMASQ_UCI_CONFIG" ]; then
-	DNSMASQ_DIR="$(awk -F '=' '/^conf-dir=/ {print $2}' "/tmp/etc/dnsmasq.conf.$DNSMASQ_UCI_CONFIG")/dnsmasq-homeproxy.d"
+	DNSMASQ_DIR="$(awk -F '=' '/^conf-dir=/ {print $2}' "/tmp/etc/dnsmasq.conf.$DNSMASQ_UCI_CONFIG")/dnsmasq-canto.d"
 else
-	DNSMASQ_DIR="/tmp/dnsmasq.d/dnsmasq-homeproxy.d"
+	DNSMASQ_DIR="/tmp/dnsmasq.d/dnsmasq-canto.d"
 fi
 
 log() {
@@ -77,7 +77,7 @@ start_service() {
 		config_get_bool ipv6_support "config" "ipv6_support" "0"
 		config_get dns_port "infra" "dns_port" "5333"
 		mkdir -p "$DNSMASQ_DIR"
-		echo -e "conf-dir=$DNSMASQ_DIR" > "$DNSMASQ_DIR/../dnsmasq-homeproxy.conf"
+		echo -e "conf-dir=$DNSMASQ_DIR" > "$DNSMASQ_DIR/../dnsmasq-canto.conf"
 		case "$routing_mode" in
 		"bypass_mainland_china"|"custom"|"global")
 			cat <<-EOF >> "$DNSMASQ_DIR/redirect-dns.conf"
@@ -88,8 +88,8 @@ start_service() {
 			;;
 		"gfwlist")
 			local gfw_nftset_v6
-			[ "$ipv6_support" -eq "0" ] || gfw_nftset_v6=",6#inet#fw4#homeproxy_gfw_list_v6"
-			sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#homeproxy_gfw_list_v4$gfw_nftset_v6/g" \
+			[ "$ipv6_support" -eq "0" ] || gfw_nftset_v6=",6#inet#fw4#canto_gfw_list_v6"
+			sed -r -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#canto_gfw_list_v4$gfw_nftset_v6/g" \
 				"$HP_DIR/resources/gfw_list.txt" > "$DNSMASQ_DIR/gfw_list.conf"
 			;;
 		"proxy_mainland_china")
@@ -100,8 +100,8 @@ start_service() {
 
 		if [ "$routing_mode" != "custom" ] && [ -s "$HP_DIR/resources/proxy_list.txt" ]; then
 			local wan_nftset_v6
-			[ "$ipv6_support" -eq "0" ] || wan_nftset_v6=",6#inet#fw4#homeproxy_wan_proxy_addr_v6"
-			sed -r -e '/^\s*$/d' -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#homeproxy_wan_proxy_addr_v4$wan_nftset_v6/g" \
+			[ "$ipv6_support" -eq "0" ] || wan_nftset_v6=",6#inet#fw4#canto_wan_proxy_addr_v6"
+			sed -r -e '/^\s*$/d' -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#canto_wan_proxy_addr_v4$wan_nftset_v6/g" \
 				"$HP_DIR/resources/proxy_list.txt" > "$DNSMASQ_DIR/proxy_list.conf"
 		fi
 		/etc/init.d/dnsmasq restart >"/dev/null" 2>&1
@@ -161,7 +161,7 @@ start_service() {
 			procd_add_jail_mount "/etc/ssl/"
 			procd_add_jail_mount "/etc/localtime"
 			procd_add_jail_mount "/etc/TZ"
-			procd_set_param capabilities "/etc/capabilities/homeproxy.json"
+			procd_set_param capabilities "/etc/capabilities/canto.json"
 			procd_set_param no_new_privs 1
 			procd_set_param user sing-box
 			procd_set_param group sing-box
@@ -205,7 +205,7 @@ start_service() {
 			procd_add_jail_mount "/etc/ssl/"
 			procd_add_jail_mount "/etc/localtime"
 			procd_add_jail_mount "/etc/TZ"
-			procd_set_param capabilities "/etc/capabilities/homeproxy.json"
+			procd_set_param capabilities "/etc/capabilities/canto.json"
 			procd_set_param no_new_privs 1
 			procd_set_param user sing-box
 			procd_set_param group sing-box
@@ -280,22 +280,22 @@ stop_service() {
 	ip -6 rule del fwmark "$tun_mark" table "$table_mark" 2>"/dev/null"
 
 	# Nftables rules
-	for i in "homeproxy_dstnat_redir" "homeproxy_output_redir" \
-		 "homeproxy_redirect" "homeproxy_redirect_proxy" \
-		 "homeproxy_redirect_proxy_port" "homeproxy_redirect_lanac" \
-		 "homeproxy_mangle_prerouting" "homeproxy_mangle_output" \
-		 "homeproxy_mangle_tproxy" "homeproxy_mangle_tproxy_port" \
-		 "homeproxy_mangle_tproxy_lanac" "homeproxy_mangle_mark" \
-		 "homeproxy_mangle_tun" "homeproxy_mangle_tun_mark"; do
+	for i in "canto_dstnat_redir" "canto_output_redir" \
+		 "canto_redirect" "canto_redirect_proxy" \
+		 "canto_redirect_proxy_port" "canto_redirect_lanac" \
+		 "canto_mangle_prerouting" "canto_mangle_output" \
+		 "canto_mangle_tproxy" "canto_mangle_tproxy_port" \
+		 "canto_mangle_tproxy_lanac" "canto_mangle_mark" \
+		 "canto_mangle_tun" "canto_mangle_tun_mark"; do
 		nft flush chain inet fw4 "$i"
 		nft delete chain inet fw4 "$i"
 	done 2>"/dev/null"
-	for i in "homeproxy_local_addr_v4" "homeproxy_local_addr_v6" \
-		 "homeproxy_gfw_list_v4" "homeproxy_gfw_list_v6" \
-		 "homeproxy_mainland_addr_v4" "homeproxy_mainland_addr_v6" \
-		 "homeproxy_wan_proxy_addr_v4" "homeproxy_wan_proxy_addr_v6" \
-		 "homeproxy_wan_direct_addr_v4" "homeproxy_wan_direct_addr_v6" \
-		 "homeproxy_routing_port"; do
+	for i in "canto_local_addr_v4" "canto_local_addr_v6" \
+		 "canto_gfw_list_v4" "canto_gfw_list_v6" \
+		 "canto_mainland_addr_v4" "canto_mainland_addr_v6" \
+		 "canto_wan_proxy_addr_v4" "canto_wan_proxy_addr_v6" \
+		 "canto_wan_direct_addr_v4" "canto_wan_direct_addr_v6" \
+		 "canto_routing_port"; do
 		nft flush set inet fw4 "$i"
 		nft delete set inet fw4 "$i"
 	done 2>"/dev/null"
@@ -305,7 +305,7 @@ stop_service() {
 	fw4 reload >"/dev/null" 2>&1
 
 	# Remove DNS hijack
-	rm -rf "$DNSMASQ_DIR/../dnsmasq-homeproxy.conf" "$DNSMASQ_DIR"
+	rm -rf "$DNSMASQ_DIR/../dnsmasq-canto.conf" "$DNSMASQ_DIR"
 	/etc/init.d/dnsmasq restart >"/dev/null" 2>&1
 
 	rm -f "$RUN_DIR/sing-box-c.json" "$RUN_DIR/sing-box-c.log" \

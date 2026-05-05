@@ -12,7 +12,7 @@
 'require ui';
 'require view';
 
-'require homeproxy as hp';
+'require canto as hp';
 'require tools.widgets as widgets';
 
 const callServiceList = rpc.declare({
@@ -42,10 +42,10 @@ const CBIGenValue = form.Value.extend({
 });
 
 function getServiceStatus() {
-	return L.resolveDefault(callServiceList('homeproxy'), {}).then((res) => {
+	return L.resolveDefault(callServiceList('canto'), {}).then((res) => {
 		let isRunning = false;
 		try {
-			isRunning = res['homeproxy']['instances']['sing-box-s']['running'];
+			isRunning = res['canto']['instances']['sing-box-s']['running'];
 		} catch (e) { }
 		return isRunning;
 	});
@@ -55,9 +55,9 @@ function renderStatus(isRunning, version) {
 	let spanTemp = '<em><span style="color:%s"><strong>%s (sing-box v%s) %s</strong></span></em>';
 	let renderHTML;
 	if (isRunning)
-		renderHTML = spanTemp.format('green', _('HomeProxy Server'), version, _('RUNNING'));
+		renderHTML = spanTemp.format('green', _('Canto Server'), version, _('RUNNING'));
 	else
-		renderHTML = spanTemp.format('red', _('HomeProxy Server'), version, _('NOT RUNNING'));
+		renderHTML = spanTemp.format('red', _('Canto Server'), version, _('NOT RUNNING'));
 
 	return renderHTML;
 }
@@ -70,7 +70,7 @@ function handleGenKey(option) {
 	}, this);
 
 	const callSingBoxGenerator = rpc.declare({
-		object: 'luci.homeproxy',
+		object: 'luci.canto',
 		method: 'singbox_generator',
 		params: ['type', 'params'],
 		expect: { '': {} }
@@ -117,7 +117,7 @@ function handleGenKey(option) {
 return view.extend({
 	load() {
 		return Promise.all([
-			uci.load('homeproxy'),
+			uci.load('canto'),
 			hp.getBuiltinFeatures()
 		]);
 	},
@@ -126,7 +126,7 @@ return view.extend({
 		let m, s, o;
 		let features = data[1];
 
-		m = new form.Map('homeproxy', _('HomeProxy Server'),
+		m = new form.Map('canto', _('Canto Server'),
 			_('The modern ImmortalWrt proxy platform for ARM64/AMD64.'));
 
 		s = m.section(form.TypedSection);
@@ -143,7 +143,7 @@ return view.extend({
 			]);
 		}
 
-		s = m.section(form.NamedSection, 'server', 'homeproxy', _('Global settings'));
+		s = m.section(form.NamedSection, 'server', 'canto', _('Global settings'));
 
 		o = s.option(form.Flag, 'enabled', _('Enable'));
 		o.rmempty = false;
@@ -408,7 +408,7 @@ return view.extend({
 		o.depends('type', 'vless');
 		o.depends('type', 'vmess');
 		o.onchange = function(ev, section_id, value) {
-			let desc = this.map.findElement('id', 'cbid.homeproxy.%s.transport'.format(section_id)).nextElementSibling;
+			let desc = this.map.findElement('id', 'cbid.canto.%s.transport'.format(section_id)).nextElementSibling;
 			if (value === 'http')
 				desc.innerHTML = _('TLS is not enforced. If TLS is not configured, plain HTTP 1.1 is used.');
 			else if (value === 'quic')
@@ -416,12 +416,12 @@ return view.extend({
 			else
 				desc.innerHTML = _('No TCP transport, plain HTTP is merged into the HTTP transport.');
 
-			let tls_element = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
+			let tls_element = this.map.findElement('id', 'cbid.canto.%s.tls'.format(section_id)).firstElementChild;
 			if ((value === 'http' && tls_element.checked) || (value === 'grpc' && !features.with_grpc))
-				this.map.findElement('id', 'cbid.homeproxy.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
+				this.map.findElement('id', 'cbid.canto.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
 					_('Specifies the time (in seconds) until idle clients should be closed with a GOAWAY frame. PING frames are not considered as activity.');
 			else if (value === 'grpc' && features.with_grpc)
-				this.map.findElement('id', 'cbid.homeproxy.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
+				this.map.findElement('id', 'cbid.canto.%s.http_idle_timeout'.format(section_id)).nextElementSibling.innerHTML =
 					_('If the transport doesn\'t see any activity after a duration of this time (in seconds), it pings the client to check if the connection is still active.');
 		}
 		o.modalonly = true;
@@ -543,7 +543,7 @@ return view.extend({
 		o.validate = function(section_id, value) {
 			if (section_id) {
 				let type = this.map.lookupOption('type', section_id)[0].formvalue(section_id);
-				let tls = this.map.findElement('id', 'cbid.homeproxy.%s.tls'.format(section_id)).firstElementChild;
+				let tls = this.map.findElement('id', 'cbid.canto.%s.tls'.format(section_id)).firstElementChild;
 
 				if (['hysteria', 'hysteria2', 'tuic'].includes(type)) {
 					tls.checked = true;
@@ -755,7 +755,7 @@ return view.extend({
 
 		o = s.option(form.Value, 'tls_cert_path', _('Certificate path'),
 			_('The server public key, in PEM format.'));
-		o.value('/etc/homeproxy/certs/server_publickey.pem');
+		o.value('/etc/canto/certs/server_publickey.pem');
 		o.depends({'tls': '1', 'tls_acme': '0', 'tls_reality': null});
 		o.depends({'tls': '1', 'tls_acme': '0', 'tls_reality': '0'});
 		o.depends({'tls': '1', 'tls_acme': null, 'tls_reality': '0'});
@@ -768,13 +768,13 @@ return view.extend({
 			_('<strong>Save your configuration before uploading files!</strong>'));
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
-		o.depends({'tls': '1', 'tls_cert_path': '/etc/homeproxy/certs/server_publickey.pem'});
+		o.depends({'tls': '1', 'tls_cert_path': '/etc/canto/certs/server_publickey.pem'});
 		o.onclick = L.bind(hp.uploadCertificate, this, _('certificate'), 'server_publickey');
 		o.modalonly = true;
 
 		o = s.option(form.Value, 'tls_key_path', _('Key path'),
 			_('The server private key, in PEM format.'));
-		o.value('/etc/homeproxy/certs/server_privatekey.pem');
+		o.value('/etc/canto/certs/server_privatekey.pem');
 		o.depends({'tls': '1', 'tls_acme': '0', 'tls_reality': '0'});
 		o.depends({'tls': '1', 'tls_acme': '0', 'tls_reality': null});
 		o.depends({'tls': '1', 'tls_acme': null, 'tls_reality': '0'});
@@ -787,7 +787,7 @@ return view.extend({
 			_('<strong>Save your configuration before uploading files!</strong>'));
 		o.inputstyle = 'action';
 		o.inputtitle = _('Upload...');
-		o.depends({'tls': '1', 'tls_key_path': '/etc/homeproxy/certs/server_privatekey.pem'});
+		o.depends({'tls': '1', 'tls_key_path': '/etc/canto/certs/server_privatekey.pem'});
 		o.onclick = L.bind(hp.uploadCertificate, this, _('private key'), 'server_privatekey');
 		o.modalonly = true;
 

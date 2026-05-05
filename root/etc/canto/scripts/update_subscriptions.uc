@@ -18,12 +18,12 @@ import { init_action } from 'luci.sys';
 import {
 	wGET, decodeBase64Str, getTime, isEmpty, parseURL,
 	validation, HP_DIR, RUN_DIR
-} from 'homeproxy';
+} from 'canto';
 
 /* UCI config start */
 const uci = cursor();
 
-const uciconfig = 'homeproxy';
+const uciconfig = 'canto';
 uci.load(uciconfig);
 
 const ucimain = 'config',
@@ -69,13 +69,13 @@ const node_cache = {},
       node_result = [];
 
 const ubus = connect();
-const sing_features = ubus.call('luci.homeproxy', 'singbox_get_features', {}) || {};
+const sing_features = ubus.call('luci.canto', 'singbox_get_features', {}) || {};
 /* Common var end */
 
 /* Log */
 system(`mkdir -p ${RUN_DIR}`);
 function log(...args) {
-	const logfile = open(`${RUN_DIR}/homeproxy.log`, 'a');
+	const logfile = open(`${RUN_DIR}/canto.log`, 'a');
 	logfile.write(`${getTime()} [SUBSCRIBE] ${join(' ', args)}\n`);
 	logfile.close();
 }
@@ -476,7 +476,7 @@ function parse_uri(uri) {
 function main() {
 	if (via_proxy !== '1') {
 		log('Stopping service...');
-		init_action('homeproxy', 'stop');
+		init_action('canto', 'stop');
 	}
 
 	for (let url in subscription_urls) {
@@ -547,7 +547,7 @@ function main() {
 
 		if (via_proxy !== '1') {
 			log('Starting service...');
-			init_action('homeproxy', 'start');
+			init_action('canto', 'start');
 		}
 
 		return false;
@@ -647,8 +647,8 @@ function main() {
 
 	if (need_restart) {
 		log('Restarting service...');
-		init_action('homeproxy', 'stop');
-		init_action('homeproxy', 'start');
+		init_action('canto', 'stop');
+		init_action('canto', 'start');
 	}
 
 	log(sprintf('%s nodes added, %s removed.', added, removed));
@@ -664,6 +664,6 @@ if (!isEmpty(subscription_urls))
 		log(e.stacktrace[0].context);
 
 		log('Restarting service...');
-		init_action('homeproxy', 'stop');
-		init_action('homeproxy', 'start');
+		init_action('canto', 'stop');
+		init_action('canto', 'start');
 	}
