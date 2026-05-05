@@ -1,7 +1,7 @@
 #!/bin/bash
 
 BASE_DIR="$(cd "$(dirname $0)"; pwd)"
-RESOURCES_DIR="$BASE_DIR/../root/etc/homeproxy/resources"
+RESOURCES_DIR="$BASE_DIR/../root/etc/canto/resources"
 
 TEMP_DIR="$(mktemp -d -p $BASE_DIR)"
 

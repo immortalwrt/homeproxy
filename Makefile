@@ -12,14 +12,14 @@ LUCI_DEPENDS:= \
 	+kmod-nft-tproxy \
 	+ucode-mod-digest
 
-PKG_NAME:=luci-app-homeproxy
+PKG_NAME:=luci-app-canto
 
-define Package/luci-app-homeproxy/conffiles
-/etc/config/homeproxy
-/etc/homeproxy/certs/
-/etc/homeproxy/ruleset/
-/etc/homeproxy/resources/direct_list.txt
-/etc/homeproxy/resources/proxy_list.txt
+define Package/luci-app-canto/conffiles
+/etc/config/canto
+/etc/canto/certs/
+/etc/canto/ruleset/
+/etc/canto/resources/direct_list.txt
+/etc/canto/resources/proxy_list.txt
 endef
 
 include $(TOPDIR)/feeds/luci/luci.mk
