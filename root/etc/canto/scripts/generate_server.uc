@@ -13,12 +13,12 @@ import { cursor } from 'uci';
 import {
 	isEmpty, strToBool, strToInt, strToTime,
 	removeBlankAttrs, HP_DIR, RUN_DIR
-} from 'homeproxy';
+} from 'canto';
 
 /* UCI config start */
 const uci = cursor();
 
-const uciconfig = 'homeproxy';
+const uciconfig = 'canto';
 uci.load(uciconfig);
 
 const uciserver = 'server';

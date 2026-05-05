@@ -8,11 +8,11 @@
 'use strict';
 
 import { cursor } from 'uci';
-import { isEmpty, parseURL } from 'homeproxy';
+import { isEmpty, parseURL } from 'canto';
 
 const uci = cursor();
 
-const uciconfig = 'homeproxy';
+const uciconfig = 'canto';
 uci.load(uciconfig);
 
 const uciinfra = 'infra',
