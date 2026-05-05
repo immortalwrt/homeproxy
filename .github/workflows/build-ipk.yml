@@ -35,6 +35,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout source tree
@@ -121,3 +123,37 @@ jobs:
           file: .github/luci-app-unison_*.*
           file_glob: true
           tag: ${{ github.ref }}
+
+      - name: Generate signed APK repository index
+        if: github.event_name == 'release'
+        env:
+          APK_SIGNING_KEY: ${{ secrets.APK_SIGNING_KEY }}
+        run: |
+          echo "$APK_SIGNING_KEY" > /tmp/signing.pem
+          chmod 600 /tmp/signing.pem
+          apk mkndx --sign-key /tmp/signing.pem \
+            -o .github/APKINDEX.tar.gz \
+            .github/*.apk
+          rm -f /tmp/signing.pem
+
+      - name: Deploy APK repository to GitHub Pages
+        if: github.event_name == 'release'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin
+          if git ls-remote --exit-code --heads origin gh-pages; then
+            git worktree add /tmp/gh-pages origin/gh-pages
+          else
+            git worktree add --orphan -b gh-pages /tmp/gh-pages
+          fi
+
+          cp .github/*.apk /tmp/gh-pages/
+          cp .github/APKINDEX.tar.gz /tmp/gh-pages/
+
+          cd /tmp/gh-pages
+          git add .
+          git diff-index --quiet HEAD 2>/dev/null || \
+            git commit -m "deploy: APK repository for ${{ github.ref_name }}"
+          git push origin gh-pages

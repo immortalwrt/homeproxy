@@ -29,12 +29,36 @@ A modern OpenWrt proxy platform for ARM64/AMD64, built as a LuCI frontend for [s
 
 ## Installation
 
-### Pre-built IPK
+### APK feed (recommended — supports automatic updates)
 
-Download the latest `.ipk` from the [Releases](../../releases) page and install it:
+**1. Add the signing key to your router:**
 
 ```sh
-opkg install luci-app-unison_*.ipk
+wget -O /etc/apk/keys/luci-app-unison.pub \
+  https://raw.githubusercontent.com/lfntn/unison/master/keys/luci-app-unison.pub
+```
+
+**2. Add the repository:**
+
+```sh
+echo "https://lfntn.github.io/unison" >> /etc/apk/repositories
+```
+
+**3. Install:**
+
+```sh
+apk update
+apk add luci-app-unison
+```
+
+Future updates are picked up automatically with `apk upgrade`.
+
+### Manual APK install
+
+Download the latest `.apk` from the [Releases](../../releases) page and install it:
+
+```sh
+apk add --allow-untrusted luci-app-unison_*.apk
 ```
 
 ### Build from source
