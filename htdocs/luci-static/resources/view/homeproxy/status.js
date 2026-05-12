@@ -121,7 +121,7 @@ function getRuntimeLog(o, name, _option_index, section_id, _in_table) {
 	case 'homeproxy':
 		section = null;
 		break;
-	case 'sing-box-c':
+	case 'hiddify-c':
 		section = 'config';
 		break;
 	case 'sing-box-s':
@@ -281,8 +281,8 @@ return view.extend({
 		o = s.option(form.DummyValue, '_homeproxy_logview');
 		o.render = L.bind(getRuntimeLog, this, o, _('HomeProxy'));
 
-		o = s.option(form.DummyValue, '_sing-box-c_logview');
-		o.render = L.bind(getRuntimeLog, this, o, _('sing-box client'));
+		o = s.option(form.DummyValue, '_hiddify-c_logview');
+		o.render = L.bind(getRuntimeLog, this, o, _('hiddify-core client'));
 
 		o = s.option(form.DummyValue, '_sing-box-s_logview');
 		o.render = L.bind(getRuntimeLog, this, o, _('sing-box server'));

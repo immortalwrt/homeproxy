@@ -144,7 +144,7 @@ const methods = {
 	log_clean: {
 		args: { type: 'type' },
 		call: function(req) {
-			if (!(req.args?.type in ['homeproxy', 'sing-box-c', 'sing-box-s']))
+			if (!(req.args?.type in ['homeproxy', 'hiddify-c', 'sing-box-s']))
 				return { result: false, error: 'illegal type' };
 
 			const filestat = lstat(`${RUN_DIR}/${req.args?.type}.log`);
@@ -207,11 +207,11 @@ const methods = {
 		call: function() {
 			let features = {};
 
-			const fd = popen('/usr/bin/sing-box version');
+			const fd = popen('/usr/bin/hiddify-core version');
 			if (fd) {
 				for (let line = fd.read('line'); length(line); line = fd.read('line')) {
-					if (match(trim(line), /^sing-box version (.*)/))
-						features.version = match(trim(line), /^sing-box version (.*)/)[1];
+					if (match(trim(line), /^hiddify-core version v?(\S+)/))
+						features.version = match(trim(line), /^hiddify-core version v?(\S+)/)[1];
 
 					let tags = match(trim(line), /^Tags: (.*)/);
 					if (tags)

@@ -7,7 +7,6 @@ include $(TOPDIR)/rules.mk
 LUCI_TITLE:=The modern ImmortalWrt proxy platform for ARM64/AMD64
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:= \
-	+sing-box \
 	+firewall4 \
 	+kmod-nft-tproxy \
 	+ucode-mod-digest

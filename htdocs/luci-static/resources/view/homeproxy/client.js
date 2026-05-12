@@ -42,14 +42,14 @@ function getServiceStatus() {
 	return L.resolveDefault(callServiceList('homeproxy'), {}).then((res) => {
 		let isRunning = false;
 		try {
-			isRunning = res['homeproxy']['instances']['sing-box-c']['running'];
+			isRunning = res['homeproxy']['instances']['hiddify-c']['running'];
 		} catch (e) { }
 		return isRunning;
 	});
 }
 
 function renderStatus(isRunning, version) {
-	let spanTemp = '<em><span style="color:%s"><strong>%s (sing-box v%s) %s</strong></span></em>';
+	let spanTemp = '<em><span style="color:%s"><strong>%s (hiddify-core v%s) %s</strong></span></em>';
 	let renderHTML;
 	if (isRunning)
 		renderHTML = spanTemp.format('green', _('HomeProxy'), version, _('RUNNING'));
