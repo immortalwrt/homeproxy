@@ -39,10 +39,10 @@ jobs:
 
     steps:
       - name: Checkout source tree
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Checkout apk
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: 'alpinelinux/apk-tools'
           path: 'apk-tools'
@@ -50,7 +50,7 @@ jobs:
           ref: 'b5a31c0d865342ad80be10d68f1bb3d3ad9b0866'
 
       - name: Checkout po2lmo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: 'openwrt/luci'
           path: 'po2lmo'
@@ -99,7 +99,7 @@ jobs:
           popd
 
       - name: Publishing APK files to GitHub Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: github.event_name != 'release'
         with:
           name: ${{ env.APK_ASSET_NAME }}
@@ -107,7 +107,7 @@ jobs:
           archive: false
 
       - name: Publishing IPK files to GitHub Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: github.event_name != 'release'
         with:
           name: ${{ env.IPK_ASSET_NAME }}
