@@ -119,6 +119,6 @@ jobs:
         if: github.event_name == 'release'
         with:
           repo_token: ${{ github.token }}
-          file: .github/luci-app-homeproxy_*.*
+          file: .github/luci-app-homeproxy-hiddify_*.*
           file_glob: true
           tag: ${{ github.ref }}

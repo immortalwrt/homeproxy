@@ -97,11 +97,11 @@ default_prerm' > "$TEMP_DIR/pre-deinstall"
 	apk mkpkg \
 		--info "name:$PKG_NAME" \
 		--info "version:$PKG_VERSION" \
-		--info "description:The modern ImmortalWrt proxy platform for ARM64/AMD64" \
+		--info "description:The modern ImmortalWrt hiddify-core based proxy platform for ARM64/AMD64" \
 		--info "arch:all" \
-		--info "origin:https://github.com/immortalwrt/homeproxy" \
+		--info "origin:https://github.com/1andrevich/homeproxy-hiddify" \
 		--info "url:" \
-		--info "maintainer:Tianling Shen <cnsztl@immortalwrt.org>" \
+		--info "maintainer:1andrevich <1andrevich.recede274@passmail.net>" \
 		--info "provides:" \
 		--script "post-install:$TEMP_DIR/post-install" \
 		--script "post-upgrade:$TEMP_DIR/post-upgrade" \
@@ -118,14 +118,14 @@ else
 		Package: $PKG_NAME
 		Version: $PKG_VERSION
 		Depends: libc, firewall4, kmod-nft-tproxy, ucode-mod-digest
-		Source: https://github.com/immortalwrt/homeproxy
+		Source: https://github.com/1andrevich/homeproxy-hiddify
 		SourceName: $PKG_NAME
 		Section: luci
 		SourceDateEpoch: $PKG_SOURCE_DATE_EPOCH
-		Maintainer: Tianling Shen <cnsztl@immortalwrt.org>
+		Maintainer: 1andrevich <1andrevich.recede274@passmail.net>
 		Architecture: all
 		Installed-Size: TO-BE-FILLED-BY-IPKG-BUILD
-		Description:  The modern ImmortalWrt proxy platform for ARM64/AMD64
+		Description:  The modern ImmortalWrt hiddify-core based proxy platform for ARM64/AMD64
 	EOF
 	chmod 0644 "$TEMP_PKG_DIR/CONTROL/control"
 

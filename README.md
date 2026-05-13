@@ -33,7 +33,7 @@ For now, configuration should be done through the core configuration file.
 Download the latest `.ipk` from [Releases](https://github.com/1andrevich/homeproxy-hiddify/releases) and install it on your router:
 
 ```sh
-opkg install luci-app-homeproxy_*.ipk
+opkg install luci-app-homeproxy-hiddify_*.ipk
 ```
 
 Or install directly:
@@ -59,7 +59,7 @@ chmod +x /usr/bin/hiddify-core
 rm /tmp/hiddify-core.tar.gz
 ```
 
-Check your architecture with `uname -m`.
+Check your architecture with `uname -m`and `opkg print-architecture` .
 
 ### 3. Add your proxy config
 
@@ -73,6 +73,58 @@ Place your sing-box compatible JSON config at `/etc/homeproxy/hiddify-c.json`.
 >     ...
 > }
 > ```
+
+Also add (or merge) the following sections into your config:
+
+**Log:**
+```json
+"log": {
+    "disabled": false,
+    "level": "warn",
+    "output": "/var/run/homeproxy/hiddify-c.log",
+    "timestamp": true
+}
+```
+
+**Inbounds:**
+```json
+"inbounds": [
+    {
+        "type": "direct",
+        "tag": "dns-in",
+        "listen": "::",
+        "listen_port": 5333
+    },
+    {
+        "type": "mixed",
+        "tag": "mixed-in",
+        "listen": "::",
+        "listen_port": 5330,
+        "udp_timeout": "300s",
+        "sniff": true,
+        "sniff_override_destination": true,
+        "set_system_proxy": false
+    },
+    {
+        "type": "redirect",
+        "tag": "redirect-in",
+        "listen": "::",
+        "listen_port": 5331,
+        "sniff": true,
+        "sniff_override_destination": true
+    },
+    {
+        "type": "tproxy",
+        "tag": "tproxy-in",
+        "listen": "::",
+        "listen_port": 5332,
+        "network": "udp",
+        "udp_timeout": "300s",
+        "sniff": true,
+        "sniff_override_destination": true
+    }
+]
+```
 
 ### 4. Start the service
 
