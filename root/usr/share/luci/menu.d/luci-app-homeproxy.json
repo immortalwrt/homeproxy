@@ -1,6 +1,6 @@
 {
 	"admin/services/homeproxy": {
-		"title": "HomeProxy",
+		"title": "HomeProxy-Hiddify",
 		"order": 10,
 		"action": {
 			"type": "firstchild"
