@@ -89,6 +89,9 @@ jobs:
           curl -fLO "https://raw.githubusercontent.com/openwrt/openwrt/master/scripts/ipkg-build"
           sudo install -m0755 ipkg-build /usr/local/bin/ipkg-build
 
+      - name: Generate release tag
+        run: echo "RELEASE_TAG=$(date -u +%Y.%m.%d-%H%M%S)" >> $GITHUB_ENV
+
       - name: Build ipk file
         run: |
           pushd .github
@@ -113,6 +116,19 @@ jobs:
           name: ${{ env.IPK_ASSET_NAME }}
           path: .github/${{ env.IPK_ASSET_NAME }}
           archive: false
+
+      - name: Publishing draft pre-release to GitHub Releases
+        uses: svenstaro/upload-release-action@v2
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        with:
+          repo_token: ${{ github.token }}
+          file: .github/luci-app-homeproxy-hiddify_*.*
+          file_glob: true
+          tag: ${{ env.RELEASE_TAG }}
+          release_name: ${{ env.RELEASE_TAG }}
+          prerelease: true
+          draft: true
+          body: ""
 
       - name: Publishing to GitHub Releases
         uses: svenstaro/upload-release-action@v2
