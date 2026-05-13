@@ -36,6 +36,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout source tree
@@ -117,12 +119,6 @@ jobs:
           name: ${{ env.IPK_ASSET_NAME }}
           path: .github/${{ env.IPK_ASSET_NAME }}
           archive: false
-
-      - name: Create and push release tag
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-        run: |
-          git tag ${{ steps.tag.outputs.release_tag }}
-          git push origin ${{ steps.tag.outputs.release_tag }}
 
       - name: Publishing draft pre-release to GitHub Releases
         uses: svenstaro/upload-release-action@v2
