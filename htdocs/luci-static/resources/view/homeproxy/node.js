@@ -7,6 +7,7 @@
 'use strict';
 'require form';
 'require fs';
+'require rpc';
 'require uci';
 'require ui';
 'require view';
@@ -434,6 +435,8 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	}
 	o.value('shadowsocks', _('Shadowsocks'));
 	o.value('shadowtls', _('ShadowTLS'));
+	if (features.with_naive_outbound)
+		o.value('naive', _('NaïveProxy'));
 	o.value('socks', _('Socks'));
 	o.value('ssh', _('SSH'));
 	o.value('trojan', _('Trojan'));
@@ -457,6 +460,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 
 	o = s.option(form.Value, 'username', _('Username'));
 	o.depends('type', 'http');
+	o.depends('type', 'naive');
 	o.depends('type', 'socks');
 	o.depends('type', 'ssh');
 	o.modalonly = true;
@@ -466,6 +470,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.depends('type', 'anytls');
 	o.depends('type', 'http');
 	o.depends('type', 'hysteria2');
+	o.depends('type', 'naive');
 	o.depends('type', 'shadowsocks');
 	o.depends('type', 'ssh');
 	o.depends('type', 'trojan');
@@ -778,6 +783,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.value('httpupgrade', _('HTTPUpgrade'));
 	o.value('quic', _('QUIC'));
 	o.value('ws', _('WebSocket'));
+	o.value('xhttp', _('XHTTP'));
 	o.depends('type', 'trojan');
 	o.depends('type', 'vless');
 	o.depends('type', 'vmess');
@@ -826,6 +832,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o = s.option(form.DynamicList, 'http_host', _('Host'));
 	o.datatype = 'hostname';
 	o.depends('transport', 'http');
+	o.depends('transport', 'xhttp');
 	o.modalonly = true;
 
 	o = s.option(form.Value, 'httpupgrade_host', _('Host'));
@@ -836,6 +843,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o = s.option(form.Value, 'http_path', _('Path'));
 	o.depends('transport', 'http');
 	o.depends('transport', 'httpupgrade');
+	o.depends('transport', 'xhttp');
 	o.modalonly = true;
 
 	o = s.option(form.Value, 'http_method', _('Method'));
@@ -882,6 +890,23 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.depends('transport', 'ws');
 	o.modalonly = true;
 	/* WebSocket config end */
+
+	/* XHTTP config start */
+	o = s.option(form.ListValue, 'xhttp_mode', _('XHTTP mode'));
+	o.value('auto', _('Auto'));
+	o.value('packet-up', _('Packet up'));
+	o.value('packet-down', _('Packet down'));
+	o.value('stream-up', _('Stream up'));
+	o.value('stream-down', _('Stream down'));
+	o.value('bidi', _('Bidi'));
+	o.depends('transport', 'xhttp');
+	o.modalonly = true;
+
+	o = s.option(form.Value, 'xhttp_headers', _('Extra headers'),
+		_('JSON object, e.g. {"X-Header": "value"}. Leave empty for none.'));
+	o.depends('transport', 'xhttp');
+	o.modalonly = true;
+	/* XHTTP config end */
 
 	o = s.option(form.ListValue, 'packet_encoding', _('Packet encoding'));
 	o.value('', _('none'));
@@ -1005,6 +1030,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.depends('type', 'http');
 	o.depends('type', 'hysteria');
 	o.depends('type', 'hysteria2');
+	o.depends('type', 'naive');
 	o.depends('type', 'shadowtls');
 	o.depends('type', 'trojan');
 	o.depends('type', 'tuic');
@@ -1413,7 +1439,12 @@ return view.extend({
 			}
 		}
 		o.onclick = function() {
-			return fs.exec_direct('/etc/homeproxy/scripts/update_subscriptions.uc').then((res) => {
+			const callSubUpdate = rpc.declare({
+				object: 'luci.homeproxy',
+				method: 'subscription_update',
+				expect: { '': {} }
+			});
+			return callSubUpdate().then((res) => {
 				return location.reload();
 			}).catch((err) => {
 				ui.addNotification(null, E('p', _('An error occurred during updating subscriptions: %s').format(err)));

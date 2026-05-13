@@ -36,12 +36,21 @@ start_service() {
 
 	mkdir -p "$RUN_DIR"
 
-	# Copy persistent config to tmpfs on each start
-	if [ -e "$HP_DIR/hiddify-c.json" ]; then
-		cp "$HP_DIR/hiddify-c.json" "$RUN_DIR/hiddify-c.json"
-	elif [ ! -e "$RUN_DIR/hiddify-c.json" ]; then
-		log "Error: client config not found. Place your config at $HP_DIR/hiddify-c.json"
-		return 1
+	# Generate or copy client config
+	if [ "$routing_mode" = "custom_json" ]; then
+		if [ -e "$HP_DIR/hiddify-c.json" ]; then
+			cp "$HP_DIR/hiddify-c.json" "$RUN_DIR/hiddify-c.json"
+		elif [ ! -e "$RUN_DIR/hiddify-c.json" ]; then
+			log "Error: client config not found. Place your config at $HP_DIR/hiddify-c.json"
+			return 1
+		fi
+	else
+		rm -f "$RUN_DIR/hiddify-c.json"
+		ucode "$HP_DIR/scripts/generate_client.uc"
+		if [ ! -e "$RUN_DIR/hiddify-c.json" ]; then
+			log "Error: failed to generate client config."
+			return 1
+		fi
 	fi
 
 	# DNSMasq rules
@@ -51,7 +60,7 @@ start_service() {
 	mkdir -p "$DNSMASQ_DIR"
 	echo -e "conf-dir=$DNSMASQ_DIR" > "$DNSMASQ_DIR/../dnsmasq-homeproxy.conf"
 	case "$routing_mode" in
-	"bypass_mainland_china"|"custom"|"global")
+	"bypass_mainland_china"|"custom"|"custom_json"|"global")
 		cat <<-EOF >> "$DNSMASQ_DIR/redirect-dns.conf"
 			no-poll
 			no-resolv

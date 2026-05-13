@@ -237,6 +237,13 @@ const methods = {
 		}
 	},
 
+	subscription_update: {
+		call: function() {
+			const exit_code = system(`ucode ${HP_DIR}/scripts/update_subscriptions.uc`);
+			return { status: exit_code };
+		}
+	},
+
 	resources_get_version: {
 		args: { type: 'type' },
 		call: function(req) {

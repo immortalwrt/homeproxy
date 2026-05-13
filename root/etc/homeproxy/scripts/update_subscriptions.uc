@@ -12,7 +12,7 @@ import { open } from 'fs';
 import { connect } from 'ubus';
 import { cursor } from 'uci';
 
-import { urldecode, urlencode } from 'luci.http';
+import { urldecode, urlencode, urldecode_params } from 'luci.http';
 import { init_action } from 'luci.sys';
 
 import {
@@ -192,6 +192,22 @@ function parse_uri(uri) {
 			};
 
 			break;
+		case 'naive':
+		case 'naive+http':
+		case 'naive+https':
+			url = parseURL('http://' + uri[1]) || {};
+
+			config = {
+				label: url.hash ? urldecode(url.hash) : null,
+				type: 'naive',
+				address: url.hostname,
+				port: url.port,
+				username: url.username ? urldecode(url.username) : null,
+				password: url.password ? urldecode(url.password) : null,
+				tls: (uri[0] === 'naive+https') ? '1' : '0'
+			};
+
+			break;
 		case 'socks':
 		case 'socks4':
 		case 'socks4a':
@@ -257,6 +273,19 @@ function parse_uri(uri) {
 			};
 
 			break;
+		case 'ssh':
+			url = parseURL('http://' + uri[1]) || {};
+
+			config = {
+				label: url.hash ? urldecode(url.hash) : null,
+				type: 'ssh',
+				address: url.hostname,
+				port: url.port,
+				username: url.username ? urldecode(url.username) : null,
+				password: url.password ? urldecode(url.password) : null
+			};
+
+			break;
 		case 'trojan':
 			/* https://p4gefau1t.github.io/trojan-go/developer/url/ */
 			url = parseURL('http://' + uri[1]) || {};
@@ -268,13 +297,29 @@ function parse_uri(uri) {
 				address: url.hostname,
 				port: url.port,
 				password: urldecode(url.username),
-				transport: (params.type !== 'tcp') ? params.type : null,
+				transport: (params.type && params.type !== 'tcp') ? params.type : null,
 				tls: '1',
-				tls_sni: params.sni
+				tls_sni: params.sni,
+				tls_alpn: params.alpn ? split(urldecode(params.alpn), ',') : null,
+				tls_reality: (params.security === 'reality') ? '1' : '0',
+				tls_reality_public_key: params.pbk ? urldecode(params.pbk) : null,
+				tls_reality_short_id: params.sid,
+				tls_utls: sing_features.with_utls ? params.fp : null
 			};
 			switch(params.type) {
 			case 'grpc':
 				config.grpc_servicename = params.serviceName;
+				break;
+			case 'http':
+			case 'tcp':
+				if (params.type === 'http' || params.headerType === 'http') {
+					config.http_host = params.host ? split(urldecode(params.host), ',') : null;
+					config.http_path = params.path ? urldecode(params.path) : null;
+				}
+				break;
+			case 'httpupgrade':
+				config.httpupgrade_host = params.host ? urldecode(params.host) : null;
+				config.http_path = params.path ? urldecode(params.path) : null;
 				break;
 			case 'ws':
 				config.ws_host = params.host ? urldecode(params.host) : null;
@@ -285,6 +330,25 @@ function parse_uri(uri) {
 					config.ws_path = split(config.ws_path, '?ed=')[0];
 				}
 				break;
+			case 'xhttp':
+				config.http_path = params.path ? urldecode(params.path) : null;
+				config.http_host = params.host ? urldecode(params.host) : null;
+				config.xhttp_mode = params.mode || null;
+				break;
+			}
+
+			if (params.hiddify === '1') {
+				if (params.fragment) {
+					const fparts = split(urldecode(params.fragment), ',');
+					if (length(fparts) >= 2) {
+						config.tls_fragment = '1';
+						config.tls_fragment_size = fparts[0];
+						config.tls_fragment_sleep = fparts[1];
+						config.tls_fragment_type = fparts[2] || null;
+					}
+				}
+				if (params.allowInsecure === 'true' || params.insecure === 'true')
+					config.tls_insecure = '1';
 			}
 
 			break;
@@ -372,6 +436,52 @@ function parse_uri(uri) {
 					config.ws_path = split(config.ws_path, '?ed=')[0];
 				}
 				break;
+			case 'xhttp':
+				config.http_path = params.path ? urldecode(params.path) : null;
+				config.http_host = params.host ? urldecode(params.host) : null;
+				config.xhttp_mode = params.mode || null;
+				break;
+			}
+
+			if (params.hiddify === '1') {
+				if (params.fragment) {
+					const fparts = split(urldecode(params.fragment), ',');
+					if (length(fparts) >= 2) {
+						config.tls_fragment = '1';
+						config.tls_fragment_size = fparts[0];
+						config.tls_fragment_sleep = fparts[1];
+						config.tls_fragment_type = fparts[2] || null;
+					}
+				}
+				if (params.allowInsecure === 'true' || params.insecure === 'true')
+					config.tls_insecure = '1';
+				if (params.extra) {
+					try {
+						const extra = json(urldecode(params.extra));
+						if (extra.headers && length(keys(extra.headers)) > 0)
+							config.xhttp_headers = sprintf('%J', extra.headers);
+						if (extra.downloadSettings) {
+							const dl = extra.downloadSettings;
+							config.xhttp_download_server = dl.address;
+							config.xhttp_download_port = String(dl.port);
+							if (dl.xhttpSettings) {
+								config.xhttp_download_path = dl.xhttpSettings.path;
+								config.xhttp_download_host = dl.xhttpSettings.host;
+								config.xhttp_download_mode = dl.xhttpSettings.mode;
+							}
+							config.xhttp_download_security = dl.security;
+							if (dl.security === 'reality' && dl.realitySettings) {
+								config.xhttp_download_sni = dl.realitySettings.serverName;
+								config.xhttp_download_fp = dl.realitySettings.fingerprint;
+								config.xhttp_download_pbk = dl.realitySettings.publicKey;
+								config.xhttp_download_sid = dl.realitySettings.shortId;
+							} else if (dl.security === 'tls' && dl.tlsSettings) {
+								config.xhttp_download_sni = dl.tlsSettings.serverName;
+								config.xhttp_download_alpn = dl.tlsSettings.alpn;
+							}
+						}
+					} catch(e) {}
+				}
 			}
 
 			break;
@@ -455,6 +565,59 @@ function parse_uri(uri) {
 			}
 
 			break;
+		case 'wg':
+		case 'wireguard':
+			/* Manual parse: WireGuard private key may contain URL-encoded chars
+			 * incompatible with parseURL's userinfo regex */
+			let wg_str = trim(uri[1]);
+			let wg_label = null;
+
+			const wg_hash = index(wg_str, '#');
+			if (wg_hash >= 0) {
+				wg_label = urldecode(substr(wg_str, wg_hash + 1));
+				wg_str = substr(wg_str, 0, wg_hash);
+			}
+
+			let wg_params = {};
+			const wg_q = index(wg_str, '?');
+			if (wg_q >= 0) {
+				wg_params = urldecode_params(substr(wg_str, wg_q + 1)) || {};
+				wg_str = substr(wg_str, 0, wg_q);
+			}
+
+			/* Strip trailing slash left by "KEY@HOST:PORT/?params" format */
+			wg_str = replace(wg_str, /\/+$/, '');
+
+			const wg_at = index(wg_str, '@');
+			let wg_priv_key = null, wg_host = null, wg_port = null;
+			if (wg_at >= 0) {
+				wg_priv_key = urldecode(substr(wg_str, 0, wg_at));
+				const wg_hp_parts = split(substr(wg_str, wg_at + 1), ':');
+				wg_port = pop(wg_hp_parts);
+				wg_host = join(':', wg_hp_parts) || null;
+			} else {
+				/* wg://HOST:PORT?privateKey=...&publicKey=... format (no userinfo) */
+				const wg_hp_parts = split(wg_str, ':');
+				wg_port = pop(wg_hp_parts);
+				wg_host = join(':', wg_hp_parts) || null;
+				wg_priv_key = wg_params.privateKey || wg_params.privatekey || null;
+			}
+
+			const wg_local_addr = wg_params.address || wg_params.ip || null;
+			config = {
+				label: wg_label,
+				type: 'wireguard',
+				address: wg_host,
+				port: wg_port,
+				wireguard_private_key: wg_priv_key,
+				wireguard_peer_public_key: wg_params.publicKey || wg_params.publickey || null,
+				wireguard_pre_shared_key: wg_params.presharedKey || wg_params.presharedkey || null,
+				wireguard_local_address: wg_local_addr ? split(wg_local_addr, ',') : null,
+				wireguard_mtu: wg_params.mtu || null,
+				wireguard_reserved: wg_params.reserved ? split(wg_params.reserved, ',') : null
+			};
+
+			break;
 		}
 	}
 
@@ -498,8 +661,11 @@ function main() {
 			if (nodes[0].server && nodes[0].method)
 				map(nodes, (_, i) => nodes[i].nodetype = 'sip008');
 		} catch(e) {
-			nodes = decodeBase64Str(res);
-			nodes = nodes ? split(trim(replace(nodes, / /g, '_')), '\n') : [];
+			const decoded = decodeBase64Str(res);
+			if (decoded)
+				nodes = split(trim(replace(decoded, / /g, '_')), '\n');
+			else
+				nodes = split(trim(res), '\n');
 		}
 
 		let count = 0;

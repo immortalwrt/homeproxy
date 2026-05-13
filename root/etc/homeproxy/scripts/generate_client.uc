@@ -220,7 +220,6 @@ function generate_outbound(node) {
 	const outbound = {
 		type: node.type,
 		tag: 'cfg-' + node['.name'] + '-out',
-		routing_mark: strToInt(self_mark),
 
 		server: node.address,
 		server_port: strToInt(node.port),
@@ -292,11 +291,16 @@ function generate_outbound(node) {
 				down_mbps: strToInt(node.multiplex_brutal_down)
 			} : null
 		} : null,
+		tls_fragment: (node.tls_fragment === '1') ? {
+			enabled: true,
+			size: node.tls_fragment_size,
+			sleep: node.tls_fragment_sleep
+		} : null,
 		tls: (node.tls === '1') ? {
 			enabled: true,
 			server_name: node.tls_sni,
 			insecure: strToBool(node.tls_insecure),
-			alpn: node.tls_alpn,
+			alpn: node.tls_alpn ? (type(node.tls_alpn) === 'array' ? node.tls_alpn : [node.tls_alpn]) : null,
 			min_version: node.tls_min_version,
 			max_version: node.tls_max_version,
 			cipher_suites: node.tls_cipher_suites,
@@ -320,9 +324,8 @@ function generate_outbound(node) {
 			type: node.transport,
 			host: node.http_host || node.httpupgrade_host,
 			path: node.http_path || node.ws_path,
-			headers: node.ws_host ? {
-				Host: node.ws_host
-			} : null,
+			mode: (node.transport === 'xhttp') ? (node.xhttp_mode || 'auto') : null,
+			headers: node.xhttp_headers ? json(node.xhttp_headers) : (node.ws_host ? { Host: node.ws_host } : null),
 			method: node.http_method,
 			max_early_data: strToInt(node.websocket_early_data),
 			early_data_header_name: node.websocket_early_data_header,
@@ -402,7 +405,7 @@ const config = {};
 config.log = {
 	disabled: false,
 	level: log_level,
-	output: RUN_DIR + '/sing-box-c.log',
+	output: RUN_DIR + '/hiddify-c.log',
 	timestamp: true
 };
 
@@ -656,8 +659,7 @@ config.endpoints = [];
 config.outbounds = [
 	{
 		type: 'direct',
-		tag: 'direct-out',
-		routing_mark: strToInt(self_mark)
+		tag: 'direct-out'
 	},
 	{
 		type: 'block',
@@ -804,7 +806,8 @@ config.route = {
 	],
 	rule_set: [],
 	auto_detect_interface: isEmpty(default_interface) ? true : null,
-	default_interface: default_interface
+	default_interface: default_interface,
+	default_mark: strToInt(self_mark)
 };
 
 /* Routing rules */
@@ -972,4 +975,4 @@ if (routing_mode in ['bypass_mainland_china', 'custom']) {
 /* Experimental end */
 
 system('mkdir -p ' + RUN_DIR);
-writefile(RUN_DIR + '/sing-box-c.json', sprintf('%.J\n', removeBlankAttrs(config)));
+writefile(RUN_DIR + '/hiddify-c.json', sprintf('%.J\n', removeBlankAttrs(config)));

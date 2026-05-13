@@ -125,7 +125,7 @@ return view.extend({
 		for (let i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
 		o.default = 'nil';
-		o.depends({'routing_mode': 'custom', '!reverse': true});
+		o.depends({'routing_mode': /^((?!custom).)+$/});
 		o.rmempty = false;
 
 		o = s.taboption('routing', hp.CBIStaticList, 'main_urltest_nodes', _('URLTest nodes'),
@@ -188,7 +188,7 @@ return view.extend({
 		o.value('117.50.10.10', _('ThreatBook Public DNS (117.50.10.10)'));
 		o.default = '8.8.8.8';
 		o.rmempty = false;
-		o.depends({'routing_mode': 'custom', '!reverse': true});
+		o.depends({'routing_mode': /^((?!custom).)+$/});
 		o.validate = function(section_id, value) {
 			if (section_id && !['wan'].includes(value)) {
 				if (!value)
@@ -254,10 +254,11 @@ return view.extend({
 		o.value('proxy_mainland_china', _('Only proxy mainland China'));
 		o.value('custom', _('Custom routing'));
 		o.value('global', _('Global'));
+		o.value('custom_json', _('Custom JSON'));
 		o.default = 'bypass_mainland_china';
 		o.rmempty = false;
 		o.onchange = function(ev, section_id, value) {
-			if (section_id && value === 'custom')
+			if (section_id && (value === 'custom' || value === 'custom_json'))
 				this.map.save(null, true);
 		}
 
@@ -280,6 +281,7 @@ return view.extend({
 
 			return true;
 		}
+		o.depends({'routing_mode': 'custom_json', '!reverse': true});
 
 		o = s.taboption('routing', form.ListValue, 'proxy_mode', _('Proxy mode'));
 		o.value('redirect', _('Redirect TCP'));
@@ -293,10 +295,12 @@ return view.extend({
 		}
 		o.default = 'redirect_tproxy';
 		o.rmempty = false;
+		o.depends({'routing_mode': 'custom_json', '!reverse': true});
 
 		o = s.taboption('routing', form.Flag, 'ipv6_support', _('IPv6 support'));
 		o.default = o.enabled;
 		o.rmempty = false;
+		o.depends({'routing_mode': 'custom_json', '!reverse': true});
 
 		/* Custom routing settings start */
 		/* Routing settings start */
