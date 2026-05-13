@@ -133,7 +133,7 @@ const methods = {
 				url = 'https://www.google.com';
 				break;
 			case 'yandex':
-				url = 'https://www.yandex.com';
+				url = 'https://www.yandex.ru';
 				break;
 			case 'speedtest':
 				url = 'https://www.speedtest.net';
