@@ -46,8 +46,8 @@ opkg install /tmp/homeproxy.ipk
 
 ### 2. Install hiddify-core binary
 
-Download the appropriate binary for your router architecture from [hiddify-core releases](https://github.com/hiddify/hiddify-core/releases):
-For OpenWRT - musl only
+Download the appropriate binary for your router architecture from [hiddify-core releases](https://github.com/hiddify/hiddify-core/releases): \
+`For OpenWRT - musl only`
 
 ```sh
 # Example for aarch64 (ARM64 routers)
