@@ -132,6 +132,12 @@ const methods = {
 			case 'google':
 				url = 'https://www.google.com';
 				break;
+			case 'yandex':
+				url = 'https://www.yandex.com';
+				break;
+			case 'speedtest':
+				url = 'https://www.speedtest.net';
+				break;
 			default:
 				return { result: false, error: 'illegal site' };
 				break;

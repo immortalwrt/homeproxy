@@ -238,6 +238,12 @@ return view.extend({
 		o = s.option(form.DummyValue, '_check_google', _('Google'));
 		o.cfgvalue = L.bind(getConnStat, this, o, 'google');
 
+		o = s.option(form.DummyValue, '_check_yandex', _('Yandex'));
+		o.cfgvalue = L.bind(getConnStat, this, o, 'yandex');
+
+		o = s.option(form.DummyValue, '_check_speedtest', _('Speedtest'));
+		o.cfgvalue = L.bind(getConnStat, this, o, 'speedtest');
+
 		s = m.section(form.NamedSection, 'config', 'homeproxy', _('Resources management'));
 		s.anonymous = true;
 
