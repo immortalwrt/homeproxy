@@ -1,10 +1,9 @@
-name: Build ipk for HomeProxy
+name: Build ipk for HomeProxy hiddify
 
 on:
   push:
     branches:
       - 'master'
-      - 'dev'
     paths:
       - 'htdocs/**'
       - 'po/**'
@@ -16,7 +15,6 @@ on:
   pull_request:
     branches:
       - 'master'
-      - 'dev'
     types:
       - opened
       - synchronize
@@ -28,9 +26,6 @@ on:
       - '.github/**'
       - '!.github/ISSUE_TEMPLATE/**'
 
-  release:
-    types:
-      - published
   workflow_dispatch:
   
 jobs:
