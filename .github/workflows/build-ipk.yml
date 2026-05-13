@@ -90,7 +90,8 @@ jobs:
           sudo install -m0755 ipkg-build /usr/local/bin/ipkg-build
 
       - name: Generate release tag
-        run: echo "RELEASE_TAG=$(date -u +%Y.%m.%d-%H%M%S)" >> $GITHUB_ENV
+        id: tag
+        run: echo "release_tag=$(date -u +%Y.%m.%d-%H%M%S)" >> $GITHUB_OUTPUT
 
       - name: Build ipk file
         run: |
@@ -117,6 +118,12 @@ jobs:
           path: .github/${{ env.IPK_ASSET_NAME }}
           archive: false
 
+      - name: Create and push release tag
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: |
+          git tag ${{ steps.tag.outputs.release_tag }}
+          git push origin ${{ steps.tag.outputs.release_tag }}
+
       - name: Publishing draft pre-release to GitHub Releases
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
@@ -124,8 +131,8 @@ jobs:
           repo_token: ${{ github.token }}
           file: .github/luci-app-homeproxy-hiddify_*.*
           file_glob: true
-          tag: ${{ env.RELEASE_TAG }}
-          release_name: ${{ env.RELEASE_TAG }}
+          tag: ${{ steps.tag.outputs.release_tag }}
+          release_name: ${{ steps.tag.outputs.release_tag }}
           prerelease: true
           draft: true
           body: ""
