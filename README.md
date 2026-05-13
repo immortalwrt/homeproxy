@@ -5,21 +5,20 @@ A modern ImmortalWrt proxy platform powered by [hiddify-core](https://github.com
 ## Overview
 
 HomeProxy Hiddify is a feature-rich proxy management system built on the ImmortalWrt platform. 
-Multi-Protocol Support: Naive, Mieru, Hysteria, SOCKS, Shadowsocks, ShadowTLS, Tor, Trojan, VLess, VMess, WireGuard, SSH and more.
+Multi-Protocol Support: Naive, Mieru, Hysteria, SOCKS, Shadowsocks, ShadowTLS, Tor, Trojan, VLess (XHTTP), VMess, WireGuard, SSH and more.
 
 ## Key Features
 
-- **Modern Web Interface** - Clean and responsive UI for easy proxy management (TBD)
+- **Modern Web Interface** - Clean and responsive UI for easy proxy management
 - **Multi-Protocol Support** - Support for various proxy protocols via hiddify-core
-- **Node Management** - Efficiently manage multiple proxy nodes (TBD)
-- **ACL (Access Control Lists)** - Advanced traffic routing and filtering rules (TBD)
-- **NFT Rules** - Network filter table rule management for fine-grained traffic control (TBD)
-- **Subscription Support** - Built-in subscription management for proxy nodes (TBD)
+- **Node Management** - Efficiently manage multiple proxy nodes
+- **ACL (Access Control Lists)** - Advanced traffic routing and filtering rules
+- **NFT Rules** - Network filter table rule management for fine-grained traffic control
+- **Subscription Support** - Built-in subscription management for proxy nodes
 
 ## ⚠️ Early Stage Project
 
 This project is currently in an **early stage of development**. The web UI configuration is still being developed and will be improved in future versions. 
-For now, configuration should be done through the core configuration file.
 
 
 ## Prerequisites
@@ -63,6 +62,7 @@ Check your architecture with `uname -m`and `opkg print-architecture` .
 
 ### 3. Add your proxy config
 
+With Routing Mode "Custom JSON" enabled,
 Place your sing-box compatible JSON config at `/etc/homeproxy/hiddify-c.json`.
 
 > **Required:** add `"default_mark": 100` inside the `"route": {}` section to prevent tproxy routing loops:
