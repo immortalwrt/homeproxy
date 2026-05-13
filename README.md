@@ -40,7 +40,7 @@ Or install directly:
 
 ```sh
 curl -Lo /tmp/homeproxy.ipk \
-  https://github.com/1andrevich/homeproxy-hiddify/releases/latest/download/luci-app-homeproxy_latest_all.ipk
+  https://github.com/1andrevich/homeproxy-hiddify/releases/latest/download/luci-app-homeproxy-hiddify_latest_all.ipk
 opkg install /tmp/homeproxy.ipk
 ```
 

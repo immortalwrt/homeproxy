@@ -361,7 +361,7 @@ msgstr ""
 msgid "Client"
 msgstr ""
 
-#: root/usr/share/luci/menu.d/luci-app-homeproxy.json:14
+#: root/usr/share/luci/menu.d/luci-app-homeproxy-hiddify.json:14
 msgid "Client Settings"
 msgstr ""
 
@@ -959,7 +959,7 @@ msgstr ""
 msgid "Google Public DNS (8.8.8.8)"
 msgstr ""
 
-#: root/usr/share/rpcd/acl.d/luci-app-homeproxy.json:3
+#: root/usr/share/rpcd/acl.d/luci-app-homeproxy-hiddify.json:3
 msgid "Grant access to homeproxy configuration"
 msgstr ""
 
@@ -1012,7 +1012,7 @@ msgstr ""
 #: htdocs/luci-static/resources/view/homeproxy/client.js:57
 #: htdocs/luci-static/resources/view/homeproxy/client.js:101
 #: htdocs/luci-static/resources/view/homeproxy/status.js:282
-#: root/usr/share/luci/menu.d/luci-app-homeproxy.json:3
+#: root/usr/share/luci/menu.d/luci-app-homeproxy-hiddify.json:3
 msgid "HomeProxy"
 msgstr ""
 
@@ -1609,7 +1609,7 @@ msgstr ""
 msgid "Node"
 msgstr ""
 
-#: root/usr/share/luci/menu.d/luci-app-homeproxy.json:22
+#: root/usr/share/luci/menu.d/luci-app-homeproxy-hiddify.json:22
 msgid "Node Settings"
 msgstr ""
 
@@ -2129,7 +2129,7 @@ msgstr ""
 msgid "Server"
 msgstr ""
 
-#: root/usr/share/luci/menu.d/luci-app-homeproxy.json:30
+#: root/usr/share/luci/menu.d/luci-app-homeproxy-hiddify.json:30
 msgid "Server Settings"
 msgstr ""
 
@@ -2143,7 +2143,7 @@ msgstr ""
 msgid "Server settings"
 msgstr ""
 
-#: root/usr/share/luci/menu.d/luci-app-homeproxy.json:38
+#: root/usr/share/luci/menu.d/luci-app-homeproxy-hiddify.json:38
 msgid "Service Status"
 msgstr ""
 

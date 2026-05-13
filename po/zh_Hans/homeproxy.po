@@ -372,7 +372,7 @@ msgstr "清空日志"
 msgid "Client"
 msgstr "客户端"
 
-#: root/usr/share/luci/menu.d/luci-app-homeproxy.json:14
+#: root/usr/share/luci/menu.d/luci-app-homeproxy-hiddify.json:14
 msgid "Client Settings"
 msgstr "客户端设置"
 
@@ -982,7 +982,7 @@ msgstr "谷歌"
 msgid "Google Public DNS (8.8.8.8)"
 msgstr "谷歌公共 DNS（8.8.8.8）"
 
-#: root/usr/share/rpcd/acl.d/luci-app-homeproxy.json:3
+#: root/usr/share/rpcd/acl.d/luci-app-homeproxy-hiddify.json:3
 msgid "Grant access to homeproxy configuration"
 msgstr "授予 homeproxy 访问 UCI 配置的权限"
 
@@ -1035,7 +1035,7 @@ msgstr "心跳间隔"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:57
 #: htdocs/luci-static/resources/view/homeproxy/client.js:101
 #: htdocs/luci-static/resources/view/homeproxy/status.js:282
-#: root/usr/share/luci/menu.d/luci-app-homeproxy.json:3
+#: root/usr/share/luci/menu.d/luci-app-homeproxy-hiddify.json:3
 msgid "HomeProxy"
 msgstr "HomeProxy"
 
@@ -1640,7 +1640,7 @@ msgstr "找不到有效分享链接。"
 msgid "Node"
 msgstr "节点"
 
-#: root/usr/share/luci/menu.d/luci-app-homeproxy.json:22
+#: root/usr/share/luci/menu.d/luci-app-homeproxy-hiddify.json:22
 msgid "Node Settings"
 msgstr "节点设置"
 
@@ -2160,7 +2160,7 @@ msgstr "保存订阅设置"
 msgid "Server"
 msgstr "服务器"
 
-#: root/usr/share/luci/menu.d/luci-app-homeproxy.json:30
+#: root/usr/share/luci/menu.d/luci-app-homeproxy-hiddify.json:30
 msgid "Server Settings"
 msgstr "服务器设置"
 
@@ -2174,7 +2174,7 @@ msgstr "当 ClientHello 的 ServerName 字段为空时，选择证书所使用�
 msgid "Server settings"
 msgstr "服务器设置"
 
-#: root/usr/share/luci/menu.d/luci-app-homeproxy.json:38
+#: root/usr/share/luci/menu.d/luci-app-homeproxy-hiddify.json:38
 msgid "Service Status"
 msgstr "服务状态"
 
