@@ -52,9 +52,9 @@ function renderStatus(isRunning, version) {
 	let spanTemp = '<em><span style="color:%s"><strong>%s (hiddify-core v%s) %s</strong></span></em>';
 	let renderHTML;
 	if (isRunning)
-		renderHTML = spanTemp.format('green', _('HomeProxy'), version, _('RUNNING'));
+		renderHTML = spanTemp.format('green', _('HomeProxy-hiddify'), version, _('RUNNING'));
 	else
-		renderHTML = spanTemp.format('red', _('HomeProxy'), version, _('NOT RUNNING'));
+		renderHTML = spanTemp.format('red', _('HomeProxy-hiddify'), version, _('NOT RUNNING'));
 
 	return renderHTML;
 }
@@ -98,8 +98,8 @@ return view.extend({
 					String.format('[%s]', nodeaddr) : nodeaddr) + ':' + nodeport));
 		});
 
-		m = new form.Map('homeproxy', _('HomeProxy'),
-			_('The modern ImmortalWrt proxy platform for ARM64/AMD64.'));
+		m = new form.Map('homeproxy', _('HomeProxy-hiddify'),
+			_('The modern ImmortalWrt proxy platform based on hiddify-core.'));
 
 		s = m.section(form.TypedSection);
 		s.render = function () {
