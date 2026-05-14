@@ -222,7 +222,7 @@ function generate_outbound(node) {
 		tag: 'cfg-' + node['.name'] + '-out',
 
 		server: node.address,
-		server_port: strToInt(node.port),
+		server_port: (node.type === 'mieru') ? 0 : strToInt(node.port),
 		/* Hysteria(2) */
 		server_ports: node.hysteria_hopping_port,
 
@@ -257,6 +257,12 @@ function generate_outbound(node) {
 		plugin_opts: node.shadowsocks_plugin_opts,
 		/* ShadowTLS / Socks */
 		version: (node.type === 'shadowtls') ? strToInt(node.shadowtls_version) : ((node.type === 'socks') ? node.socks_version : null),
+		/* Mieru */
+		portBindings: (node.type === 'mieru' && node.mieru_protocol && node.mieru_port_range) ? [
+			{ protocol: node.mieru_protocol, portRange: node.mieru_port_range }
+		] : null,
+		multiplexing: (node.type === 'mieru') ? node.mieru_multiplexing : null,
+		handshake_mode: (node.type === 'mieru') ? node.mieru_handshake_mode : null,
 		/* SSH */
 		client_version: node.ssh_client_version,
 		host_key: node.ssh_host_key,
@@ -334,10 +340,15 @@ function generate_outbound(node) {
 			ping_timeout: (node.http_ping_timeout),
 			permit_without_stream: strToBool(node.grpc_permit_without_stream)
 		} : null,
-		udp_over_tcp: (node.udp_over_tcp === '1') ? {
+		/* NaiveProxy */
+		quic: (node.type === 'naive') ? strToBool(node.naive_quic) : null,
+		extra_headers: (node.type === 'naive') ? (node.naive_extra_headers ? json(node.naive_extra_headers) : null) : null,
+		udp_over_tcp: (node.type === 'naive') ? strToBool(node.naive_udp_over_tcp) :
+		              (node.type === 'ssh') ? (node.ssh_udp_over_tcp !== '0' ? true : null) :
+		              ((node.udp_over_tcp === '1') ? {
 			enabled: true,
 			version: strToInt(node.udp_over_tcp_version)
-		} : null,
+		} : null),
 		tcp_fast_open: strToBool(node.tcp_fast_open),
 		tcp_multi_path: strToBool(node.tcp_multi_path),
 		udp_fragment: strToBool(node.udp_fragment)

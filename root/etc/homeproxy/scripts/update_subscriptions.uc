@@ -196,6 +196,17 @@ function parse_uri(uri) {
 		case 'naive+http':
 		case 'naive+https':
 			url = parseURL('http://' + uri[1]) || {};
+			params = url.searchParams || {};
+
+			let naive_extra_headers = null;
+			if (params.header) {
+				const hdr = split(params.header, ':', 2);
+				if (length(hdr) === 2) {
+					let hdrs = {};
+					hdrs[trim(hdr[0])] = trim(hdr[1]);
+					naive_extra_headers = sprintf('%J', hdrs);
+				}
+			}
 
 			config = {
 				label: url.hash ? urldecode(url.hash) : null,
@@ -204,7 +215,11 @@ function parse_uri(uri) {
 				port: url.port,
 				username: url.username ? urldecode(url.username) : null,
 				password: url.password ? urldecode(url.password) : null,
-				tls: (uri[0] === 'naive+https') ? '1' : '0'
+				tls: (uri[0] === 'naive+https' || params.security === 'tls') ? '1' : '0',
+				tls_sni: params.sni || url.hostname,
+				naive_udp_over_tcp: (params.uot === '1') ? '1' : null,
+				naive_quic: (params.quic === '1') ? '1' : null,
+				naive_extra_headers: naive_extra_headers
 			};
 
 			break;
@@ -274,15 +289,62 @@ function parse_uri(uri) {
 
 			break;
 		case 'ssh':
-			url = parseURL('http://' + uri[1]) || {};
+			/* Manual parse to avoid parseURL corruption on long base64 query values */
+			let ssh_str = trim(uri[1]);
+			let ssh_label = null;
+
+			const ssh_hash_idx = index(ssh_str, '#');
+			if (ssh_hash_idx >= 0) {
+				ssh_label = urldecode(substr(ssh_str, ssh_hash_idx + 1));
+				ssh_str = substr(ssh_str, 0, ssh_hash_idx);
+			}
+
+			let ssh_params = {};
+			const ssh_q = index(ssh_str, '?');
+			if (ssh_q >= 0) {
+				ssh_params = urldecode_params(substr(ssh_str, ssh_q + 1)) || {};
+				ssh_str = substr(ssh_str, 0, ssh_q);
+			}
+			ssh_str = replace(ssh_str, /\/+$/, '');
+
+			const ssh_at = index(ssh_str, '@');
+			let ssh_user = null, ssh_pass = null, ssh_host = null, ssh_port = null;
+			if (ssh_at >= 0) {
+				const ssh_userinfo = substr(ssh_str, 0, ssh_at);
+				const ssh_hostport = substr(ssh_str, ssh_at + 1);
+				const ssh_colon = index(ssh_userinfo, ':');
+				if (ssh_colon >= 0) {
+					ssh_user = urldecode(substr(ssh_userinfo, 0, ssh_colon));
+					ssh_pass = urldecode(substr(ssh_userinfo, ssh_colon + 1));
+				} else {
+					ssh_user = urldecode(ssh_userinfo);
+				}
+				const ssh_hp = split(ssh_hostport, ':');
+				ssh_port = pop(ssh_hp);
+				ssh_host = join(':', ssh_hp) || null;
+			}
+
+			let ssh_host_key = null;
+			/* Hiddify: hk=key1\n,key2\n,key3\n — urldecode_params already decodes values */
+			const raw_hk = ssh_params.hk || ssh_params.host_key || ssh_params.hostKey;
+			if (raw_hk) {
+				const ssh_hk_lines = filter(split(raw_hk, ','), (l) => length(trim(l)) > 0);
+				ssh_host_key = length(ssh_hk_lines) ? ssh_hk_lines : null;
+			}
 
 			config = {
-				label: url.hash ? urldecode(url.hash) : null,
+				label: ssh_label,
 				type: 'ssh',
-				address: url.hostname,
-				port: url.port,
-				username: url.username ? urldecode(url.username) : null,
-				password: url.password ? urldecode(url.password) : null
+				address: ssh_host,
+				port: ssh_port,
+				username: ssh_user,
+				password: length(ssh_pass) ? ssh_pass : null,
+				/* Hiddify uses pk= (short) or private_key= ; urldecode_params already decoded */
+				ssh_priv_key: ssh_params.pk || ssh_params.private_key || ssh_params.privateKey || null,
+				ssh_priv_key_pp: length(ssh_params.passphrase) ? ssh_params.passphrase : null,
+				ssh_host_key: ssh_host_key,
+				/* Hiddify always enables udp_over_tcp for SSH; only disable if explicitly set to 0 */
+				ssh_udp_over_tcp: (ssh_params.uot === '0' || ssh_params.udp_over_tcp in ['0', 'false']) ? null : '1'
 			};
 
 			break;
@@ -373,6 +435,8 @@ function parse_uri(uri) {
 				password: url.password ? urldecode(url.password) : null,
 				tuic_congestion_control: params.congestion_control,
 				tuic_udp_relay_mode: params.udp_relay_mode,
+				tuic_enable_zero_rtt: params.zero_rtt_handshake || null,
+				tuic_heartbeat: params.heartbeat || null,
 				tls: '1',
 				tls_sni: params.sni,
 				tls_alpn: params.alpn ? split(urldecode(params.alpn), ',') : null,
@@ -565,6 +629,25 @@ function parse_uri(uri) {
 			}
 
 			break;
+		case 'mieru':
+			/* https://github.com/enfein/mieru */
+			url = parseURL('http://' + uri[1]) || {};
+			params = url.searchParams || {};
+
+			config = {
+				label: url.hash ? urldecode(url.hash) : null,
+				type: 'mieru',
+				address: url.hostname,
+				port: '0',
+				username: url.username ? urldecode(url.username) : null,
+				password: url.password ? urldecode(url.password) : null,
+				mieru_protocol: params.protocol || null,
+				mieru_port_range: params.port || null,
+				mieru_multiplexing: params.multiplexing || null,
+				mieru_handshake_mode: params['handshake-mode'] || null
+			};
+
+			break;
 		case 'wg':
 		case 'wireguard':
 			/* Manual parse: WireGuard private key may contain URL-encoded chars
@@ -625,7 +708,7 @@ function parse_uri(uri) {
 		if (config.address)
 			config.address = replace(config.address, /\[|\]/g, '');
 
-		if (!validation('host', config.address) || !validation('port', config.port)) {
+		if (!validation('host', config.address) || (config.type !== 'mieru' && !validation('port', config.port))) {
 			log(sprintf('Skipping invalid %s node: %s.', config.type, config.label || 'NULL'));
 			return null;
 		} else if (!config.label)
@@ -735,13 +818,19 @@ function main() {
 
 			log(sprintf('Removing node: %s.', cfg.label || cfg['name']));
 		} else {
+			const cached = node_cache[cfg.grouphash][cfg['.name']];
 			map(keys(cfg), (v) => {
-				if (v in node_cache[cfg.grouphash][cfg['.name']])
-					uci.set(uciconfig, cfg['.name'], v, node_cache[cfg.grouphash][cfg['.name']][v]);
+				if (v in cached)
+					uci.set(uciconfig, cfg['.name'], v, cached[v]);
 				else
 					uci.delete(uciconfig, cfg['.name'], v);
 			});
-			node_cache[cfg.grouphash][cfg['.name']].isExisting = true;
+			/* Also push new fields added by updated parsers to existing nodes */
+			map(keys(cached), (v) => {
+				if (!(v in cfg) && cached[v] !== null)
+					uci.set(uciconfig, cfg['.name'], v, cached[v]);
+			});
+			cached.isExisting = true;
 		}
 	});
 	for (let nodes in node_result)
