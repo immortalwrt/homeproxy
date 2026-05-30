@@ -122,6 +122,14 @@ msgstr ""
 msgid "Allow access from the Internet."
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/server.js:168
+msgid "Proxy via main node"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/server.js:169
+msgid "Route traffic through the client's main proxy node."
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1040
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1382
 msgid "Allow insecure"

@@ -131,6 +131,14 @@ msgstr "所有端口"
 msgid "Allow access from the Internet."
 msgstr "允许来自互联网的访问。"
 
+#: htdocs/luci-static/resources/view/homeproxy/server.js:168
+msgid "Proxy via main node"
+msgstr "通过主节点代理"
+
+#: htdocs/luci-static/resources/view/homeproxy/server.js:169
+msgid "Route traffic through the client's main proxy node."
+msgstr "将流量路由到客户端的主代理节点。"
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1040
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1382
 msgid "Allow insecure"

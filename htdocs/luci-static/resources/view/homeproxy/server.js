@@ -172,6 +172,12 @@ return view.extend({
 			_('Allow access from the Internet.'));
 		o.editable = true;
 
+		o = s.option(form.Flag, 'proxy_via_main', _('Proxy via main node'));
+		o.default = o.disabled;
+		o.rmempty = false;
+		o.editable = true;
+		o.description = _('Route traffic through the client\'s main proxy node.');
+
 		o = s.option(form.ListValue, 'type', _('Type'));
 		o.value('anytls', _('AnyTLS'));
 		o.value('http', _('HTTP'));

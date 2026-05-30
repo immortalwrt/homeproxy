@@ -178,6 +178,85 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 	});
 });
 
+/* Outbounds and routing for proxy_via_main */
+config.outbounds = [];
+config.route = {
+	rules: []
+};
+
+const main_node = uci.get(uciconfig, 'config', 'main_node');
+
+uci.foreach(uciconfig, uciserver, (cfg) => {
+	if (cfg.enabled !== '1' || cfg.proxy_via_main !== '1')
+		return;
+
+	/* Skip if no main node configured */
+	if (isEmpty(main_node) || main_node === 'nil')
+		return;
+
+	/* Get main node configuration from client */
+	const main_node_cfg = uci.get_all(uciconfig, main_node) || {};
+	if (isEmpty(main_node_cfg))
+		return;
+
+	/* Generate outbound based on client's main node */
+	const outbound = {
+		type: main_node_cfg.type,
+		tag: 'cfg-' + cfg['.name'] + '-via-main-out',
+
+		server: main_node_cfg.address,
+		server_port: strToInt(main_node_cfg.port),
+		server_ports: main_node_cfg.hysteria_hopping_port,
+
+		username: (main_node_cfg.type !== 'ssh') ? main_node_cfg.username : null,
+		user: (main_node_cfg.type === 'ssh') ? main_node_cfg.username : null,
+		password: main_node_cfg.password,
+
+		method: (main_node_cfg.type === 'shadowsocks') ? main_node_cfg.shadowsocks_encrypt_method : null,
+		plugin: main_node_cfg.shadowsocks_plugin,
+		plugin_opts: main_node_cfg.shadowsocks_plugin_opts,
+
+		version: (main_node_cfg.type === 'shadowtls') ? strToInt(main_node_cfg.shadowtls_version) : ((main_node_cfg.type === 'socks') ? main_node_cfg.socks_version : null),
+
+		uuid: main_node_cfg.uuid,
+		congestion_control: main_node_cfg.tuic_congestion_control,
+		udp_relay_mode: main_node_cfg.tuic_udp_relay_mode,
+		udp_over_stream: strToBool(main_node_cfg.tuic_udp_over_stream),
+		zero_rtt_handshake: strToBool(main_node_cfg.tuic_enable_zero_rtt),
+		heartbeat: strToTime(main_node_cfg.tuic_heartbeat),
+
+		flow: main_node_cfg.vless_flow,
+		alter_id: strToInt(main_node_cfg.vmess_alterid),
+		security: main_node_cfg.vmess_encrypt,
+		global_padding: strToBool(main_node_cfg.vmess_global_padding),
+		authenticated_length: strToBool(main_node_cfg.vmess_authenticated_length),
+		packet_encoding: main_node_cfg.packet_encoding,
+
+		tls: (main_node_cfg.tls === '1') ? {
+			enabled: true,
+			server_name: main_node_cfg.tls_sni,
+			insecure: strToBool(main_node_cfg.tls_insecure),
+			alpn: main_node_cfg.tls_alpn,
+			min_version: main_node_cfg.tls_min_version,
+			max_version: main_node_cfg.tls_max_version,
+			cipher_suites: main_node_cfg.tls_cipher_suites,
+			certificate_path: main_node_cfg.tls_cert_path
+		} : null,
+
+		tcp_fast_open: strToBool(main_node_cfg.tcp_fast_open),
+		udp_fragment: strToBool(main_node_cfg.udp_fragment)
+	};
+
+	push(config.outbounds, outbound);
+
+	/* Add routing rule: inbound -> outbound */
+	push(config.route.rules, {
+		inbound: 'cfg-' + cfg['.name'] + '-in',
+		action: 'route',
+		outbound: 'cfg-' + cfg['.name'] + '-via-main-out'
+	});
+});
+
 if (length(config.inbounds) === 0)
 	exit(1);
 
