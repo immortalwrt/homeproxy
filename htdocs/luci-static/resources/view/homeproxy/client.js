@@ -59,6 +59,26 @@ function renderStatus(isRunning, version) {
 	return renderHTML;
 }
 
+function parseController(value) {
+	let result = {
+		hostname: '',
+		port: '',
+		https: false
+	};
+
+	if (!value)
+		return result;
+
+	try {
+		let url = new URL(value.match(/^https?:\/\//) ? value : 'http://' + value);
+		result.hostname = url.hostname;
+		result.port = url.port;
+		result.https = url.protocol === 'https:';
+	} catch(e) { }
+
+	return result;
+}
+
 let stubValidator = {
 	factory: validation,
 	apply(type, value, args) {
@@ -98,6 +118,116 @@ return view.extend({
 					String.format('[%s]', nodeaddr) : nodeaddr) + ':' + nodeport));
 		});
 
+		let dashboardBaseUrl = function() {
+			let dashboard = uci.get(data[0], 'config', 'metacubexd_url') || 'https://metacubexd.pages.dev/#/overview',
+			    hash = dashboard.indexOf('#');
+
+			if (hash >= 0)
+				dashboard = dashboard.slice(0, hash);
+
+			return dashboard.replace(/\/+$/, '');
+		};
+
+		let dashboardConfiguredUrl = function() {
+			return uci.get(data[0], 'config', 'metacubexd_url') || 'https://metacubexd.pages.dev/#/overview';
+		};
+
+		let dashboardSetupUrl = function() {
+			let enabled = uci.get(data[0], 'config', 'clash_api_enabled') === '1',
+			    controller = parseController(uci.get(data[0], 'config', 'clash_api_external_controller') || '0.0.0.0:9090'),
+			    secret = uci.get(data[0], 'config', 'clash_api_secret') || '';
+
+			if (!enabled || !controller.hostname)
+				return null;
+
+			if (controller.hostname === '0.0.0.0' || controller.hostname === '[::]' || controller.hostname === '::')
+				controller.hostname = window.location.hostname;
+
+			let dashboard = dashboardConfiguredUrl(),
+			    base = dashboardBaseUrl();
+
+			if (dashboard.includes('yacd.metacubex.one'))
+				return dashboard;
+
+			let params = new URLSearchParams();
+			params.set('hostname', controller.hostname);
+			if (controller.port)
+				params.set('port', controller.port);
+			params.set(controller.https ? 'https' : 'http', '1');
+			if (secret)
+				params.set('secret', secret);
+
+			return base + '/#/setup?' + params.toString();
+		};
+
+		let renderDashboardButton = function() {
+			let url = dashboardSetupUrl();
+
+			if (!url)
+				return null;
+
+			return E('a', {
+				'class': 'btn cbi-button cbi-button-action',
+				'href': url,
+				'target': '_blank',
+				'rel': 'noreferrer noopener'
+			}, [ _('Open dashboard') ]);
+		};
+
+		let routingNodeName = function(res) {
+			let type = _('Routing node');
+			if (res.node === 'urltest')
+				type = _('URLTest');
+			else if (res.node === 'selector')
+				type = _('Selector');
+
+			return String.format('[%s] %s',
+				type, res.label || res['.name']);
+		};
+
+		let addSelectableOutbounds = function(option, section_id, include_routing_nodes) {
+			for (let i in proxy_nodes)
+				option.value(i, proxy_nodes[i]);
+
+			if (!include_routing_nodes)
+				return;
+
+			uci.sections(data[0], 'routing_node', (res) => {
+				if (res.enabled === '1' && res['.name'] !== section_id)
+					option.value(res['.name'], routingNodeName(res));
+			});
+		};
+
+		let selectorHasPath = function(start, target, seen) {
+			if (!start || !target)
+				return false;
+			if (start === target)
+				return true;
+			if (seen[start])
+				return false;
+
+			seen[start] = true;
+
+			let found = false;
+			uci.sections(data[0], 'routing_node', (res) => {
+				if (found || res['.name'] !== start)
+					return;
+
+				let nodes = res.node === 'urltest' ? res.urltest_nodes : res.selector_nodes;
+				for (let i in (nodes || [])) {
+					if (nodes[i] === target || selectorHasPath(nodes[i], target, seen)) {
+						found = true;
+						return;
+					}
+				}
+
+				if (res.outbound === target || selectorHasPath(res.outbound, target, seen))
+					found = true;
+			});
+
+			return found;
+		};
+
 		m = new form.Map('homeproxy', _('HomeProxy'),
 			_('The modern ImmortalWrt proxy platform for ARM64/AMD64.'));
 
@@ -111,7 +241,8 @@ return view.extend({
 			});
 
 			return E('div', { class: 'cbi-section', id: 'status_bar' }, [
-					E('p', { id: 'service_status' }, _('Collecting data...'))
+					E('p', { id: 'service_status' }, _('Collecting data...')),
+					renderDashboardButton() || ''
 			]);
 		}
 
@@ -419,6 +550,7 @@ return view.extend({
 		so = ss.option(form.ListValue, 'node', _('Node'),
 			_('Outbound node'));
 		so.value('urltest', _('URLTest'));
+		so.value('selector', _('Selector'));
 		for (let i in proxy_nodes)
 			so.value(i, proxy_nodes[i]);
 		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'routing_node', 'node');
@@ -440,21 +572,21 @@ return view.extend({
 
 			return this.super('load', section_id);
 		}
-		so.depends({'node': 'urltest', '!reverse': true});
+		so.depends({'node': /^((?!(urltest|selector)$).)+$/});
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'domain_strategy', _('Domain strategy'),
 			_('The domain strategy for resolving the domain name in the address.'));
 		for (let i in hp.dns_strategy)
 			so.value(i, hp.dns_strategy[i]);
-		so.depends({'node': 'urltest', '!reverse': true});
+		so.depends({'node': /^((?!(urltest|selector)$).)+$/});
 		so.modalonly = true;
 
 		so = ss.option(widgets.DeviceSelect, 'bind_interface', _('Bind interface'),
 			_('The network interface to bind to.'));
 		so.multiple = false;
 		so.noaliases = true;
-		so.depends({'outbound': '', 'node': /^((?!urltest$).)+$/});
+		so.depends({'outbound': '', 'node': /^((?!(urltest|selector)$).)+$/});
 		so.modalonly = true;
 
 		so = ss.option(form.ListValue, 'outbound', _('Outbound'),
@@ -482,6 +614,8 @@ return view.extend({
 							conflict = true;
 						else if (res.node === 'urltest' && res.urltest_nodes?.includes(node) && res['.name'] == value)
 							conflict = true;
+						else if (res.node === 'selector' && res.selector_nodes?.includes(node) && res['.name'] == value)
+							conflict = true;
 					}
 				});
 				if (conflict)
@@ -490,7 +624,7 @@ return view.extend({
 
 			return true;
 		}
-		so.depends({'node': 'urltest', '!reverse': true});
+		so.depends({'node': /^((?!(urltest|selector)$).)+$/});
 		so.editable = true;
 
 		so = ss.option(hp.CBIStaticList, 'urltest_nodes', _('URLTest nodes'),
@@ -505,6 +639,47 @@ return view.extend({
 
 			return true;
 		}
+		so.modalonly = true;
+
+		so = ss.option(hp.CBIStaticList, 'selector_nodes', _('Selector nodes'),
+			_('List of manually selectable nodes.'));
+		so.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			addSelectableOutbounds(this, section_id, true);
+
+			return this.super('load', section_id);
+		}
+		so.depends('node', 'selector');
+		so.validate = function(section_id) {
+			let value = this.section.formvalue(section_id, 'selector_nodes');
+			if (section_id && !value.length)
+				return _('Expecting: %s').format(_('non-empty value'));
+			for (let i in value)
+				if (selectorHasPath(value[i], section_id, {}))
+					return _('Recursive outbound detected!');
+
+			return true;
+		}
+		so.modalonly = true;
+
+		so = ss.option(form.ListValue, 'selector_default', _('Default selector node'));
+		so.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			this.value('', _('Default'));
+			addSelectableOutbounds(this, section_id, true);
+
+			return this.super('load', section_id);
+		}
+		so.depends('node', 'selector');
+		so.modalonly = true;
+
+		so = ss.option(form.Flag, 'selector_interrupt_exist_connections', _('Interrupt existing connections'),
+			_('Interrupt existing connections when the selected outbound has changed.'));
+		so.depends('node', 'selector');
 		so.modalonly = true;
 
 		so = ss.option(form.Value, 'urltest_url', _('Test URL'),
@@ -682,10 +857,7 @@ return view.extend({
 			delete this.vallist;
 
 			this.value('direct-out', _('Direct'));
-			uci.sections(data[0], 'routing_node', (res) => {
-				if (res.enabled === '1')
-					this.value(res['.name'], res.label);
-			});
+			addSelectableOutbounds(this, section_id, true);
 
 			return this.super('load', section_id);
 		}

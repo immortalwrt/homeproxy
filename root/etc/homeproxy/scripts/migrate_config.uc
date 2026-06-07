@@ -75,6 +75,29 @@ if (isEmpty(uci.get(uciconfig, ucimain, 'log_level')))
 if (isEmpty(uci.get(uciconfig, uciserver, 'log_level')))
 	uci.set(uciconfig, uciserver, 'log_level', 'warn');
 
+/* Clash API dashboard integration */
+if (isEmpty(uci.get(uciconfig, ucimain, 'clash_api_enabled')))
+	uci.set(uciconfig, ucimain, 'clash_api_enabled', '0');
+
+if (isEmpty(uci.get(uciconfig, ucimain, 'clash_api_external_controller')))
+	uci.set(uciconfig, ucimain, 'clash_api_external_controller', '0.0.0.0:9090');
+
+if (isEmpty(uci.get(uciconfig, ucimain, 'clash_api_default_mode')))
+	uci.set(uciconfig, ucimain, 'clash_api_default_mode', 'Rule');
+
+if (isEmpty(uci.get(uciconfig, ucimain, 'clash_api_allow_origin'))) {
+	uci.add_list(uciconfig, ucimain, 'clash_api_allow_origin', 'https://metacubex.github.io');
+	uci.add_list(uciconfig, ucimain, 'clash_api_allow_origin', 'https://metacubexd.pages.dev');
+	uci.add_list(uciconfig, ucimain, 'clash_api_allow_origin', 'http://d.metacubex.one');
+	uci.add_list(uciconfig, ucimain, 'clash_api_allow_origin', 'https://yacd.metacubex.one');
+}
+
+if (isEmpty(uci.get(uciconfig, ucimain, 'clash_api_allow_private_network')))
+	uci.set(uciconfig, ucimain, 'clash_api_allow_private_network', '1');
+
+if (isEmpty(uci.get(uciconfig, ucimain, 'metacubexd_url')))
+	uci.set(uciconfig, ucimain, 'metacubexd_url', 'https://metacubexd.pages.dev/#/overview');
+
 /* empty value defaults to all ports now */
 if (uci.get(uciconfig, ucimain, 'routing_port') === 'all')
 	uci.delete(uciconfig, ucimain, 'routing_port');

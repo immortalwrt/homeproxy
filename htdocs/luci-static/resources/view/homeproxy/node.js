@@ -638,6 +638,69 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.depends('shadowsocks_plugin', 'obfs-local');
 	o.depends('shadowsocks_plugin', 'v2ray-plugin');
 	o.modalonly = true;
+
+	o = s.option(form.Flag, 'shadowtls_enabled', _('Enable ShadowTLS'));
+	o.depends('type', 'shadowsocks');
+	o.rmempty = false;
+	o.load = function(section_id) {
+		let enabled = uci.get(data[0], section_id, 'shadowtls_enabled');
+		if (enabled != null)
+			return enabled;
+
+		return uci.get(data[0], section_id, 'shadowtls_address') ? '1' : '0';
+	}
+	o.modalonly = true;
+
+	o = s.option(form.Value, 'shadowtls_address', _('ShadowTLS address'));
+	o.datatype = 'host';
+	o.depends({'type': 'shadowsocks', 'shadowtls_enabled': '1'});
+	o.validate = function(section_id, value) {
+		if (section_id) {
+			let type = this.section.formvalue(section_id, 'type');
+			let enabled = this.section.formvalue(section_id, 'shadowtls_enabled');
+			if (type === 'shadowsocks' && enabled === '1' && !value)
+				return _('Expecting: %s').format(_('non-empty value'));
+		}
+
+		return true;
+	}
+	o.modalonly = true;
+
+	o = s.option(form.Value, 'shadowtls_port', _('ShadowTLS port'));
+	o.datatype = 'port';
+	o.placeholder = '443';
+	o.depends({'type': 'shadowsocks', 'shadowtls_enabled': '1'});
+	o.validate = function(section_id, value) {
+		if (section_id) {
+			let type = this.section.formvalue(section_id, 'type');
+			let enabled = this.section.formvalue(section_id, 'shadowtls_enabled');
+			if (type === 'shadowsocks' && enabled === '1' && !value)
+				return _('Expecting: %s').format(_('non-empty value'));
+		}
+
+		return true;
+	}
+	o.modalonly = true;
+
+	o = s.option(form.Value, 'shadowtls_password', _('ShadowTLS password'));
+	o.password = true;
+	o.depends({'type': 'shadowsocks', 'shadowtls_enabled': '1'});
+	o.validate = function(section_id, value) {
+		if (section_id) {
+			let type = this.section.formvalue(section_id, 'type');
+			let enabled = this.section.formvalue(section_id, 'shadowtls_enabled');
+			if (type === 'shadowsocks' && enabled === '1' && !value)
+				return _('Expecting: %s').format(_('non-empty value'));
+		}
+
+		return true;
+	}
+	o.modalonly = true;
+
+	o = s.option(form.Value, 'shadowtls_sni', _('ShadowTLS server name'));
+	o.datatype = 'hostname';
+	o.depends({'type': 'shadowsocks', 'shadowtls_enabled': '1'});
+	o.modalonly = true;
 	/* Shadowsocks config end */
 
 	/* ShadowTLS config */
@@ -647,6 +710,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.value('3', _('v3'));
 	o.default = '1';
 	o.depends('type', 'shadowtls');
+	o.depends({'type': 'shadowsocks', 'shadowtls_enabled': '1'});
 	o.rmempty = false;
 	o.modalonly = true;
 

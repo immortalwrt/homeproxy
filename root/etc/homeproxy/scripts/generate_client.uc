@@ -137,6 +137,13 @@ if (match(proxy_mode), /tun/) {
 }
 
 const log_level = uci.get(uciconfig, ucimain, 'log_level') || 'warn';
+
+const clash_api_enabled = uci.get(uciconfig, ucimain, 'clash_api_enabled') || '0',
+      clash_api_external_controller = uci.get(uciconfig, ucimain, 'clash_api_external_controller') || '0.0.0.0:9090',
+      clash_api_secret = uci.get(uciconfig, ucimain, 'clash_api_secret'),
+      clash_api_default_mode = uci.get(uciconfig, ucimain, 'clash_api_default_mode') || 'Rule',
+      clash_api_allow_origin = uci.get(uciconfig, ucimain, 'clash_api_allow_origin') || [],
+      clash_api_allow_private_network = uci.get(uciconfig, ucimain, 'clash_api_allow_private_network') || '1';
 /* UCI config end */
 
 /* Config helper start */
@@ -343,6 +350,121 @@ function generate_outbound(node) {
 	return outbound;
 }
 
+function generate_shadowtls_outbound(node, tag) {
+	if (type(node) !== 'object' || node.shadowtls_enabled === '0' || isEmpty(node.shadowtls_address))
+		return null;
+
+	return {
+		type: 'shadowtls',
+		tag: tag,
+		routing_mark: strToInt(self_mark),
+		server: node.shadowtls_address,
+		server_port: strToInt(node.shadowtls_port),
+		version: strToInt(node.shadowtls_version),
+		password: node.shadowtls_password,
+		tls: {
+			enabled: true,
+			server_name: node.shadowtls_sni
+		}
+	};
+}
+
+function has_shadowtls_detour(node) {
+	return type(node) === 'object' &&
+	       node.type === 'shadowsocks' &&
+	       node.shadowtls_enabled !== '0' &&
+	       !isEmpty(node.shadowtls_address);
+}
+
+function apply_routing_node_options(outbound, cfg) {
+	if (type(outbound) !== 'object' || type(cfg) !== 'object' || isEmpty(cfg))
+		return;
+
+	outbound.bind_interface = cfg.bind_interface;
+	if (cfg.outbound)
+		outbound.detour = get_outbound(cfg.outbound);
+	if (cfg.domain_resolver)
+		outbound.domain_resolver = {
+			server: get_resolver(cfg.domain_resolver),
+			strategy: cfg.domain_strategy
+		};
+}
+
+function push_node_outbound(client_config, node, tag, routing_cfg) {
+	if (type(node) !== 'object' || isEmpty(node))
+		return;
+
+	if (node.type === 'wireguard') {
+		push(client_config.endpoints, generate_endpoint(node));
+		client_config.endpoints[length(client_config.endpoints)-1].tag = tag;
+		apply_routing_node_options(client_config.endpoints[length(client_config.endpoints)-1], routing_cfg);
+	} else {
+		let outbound = generate_outbound(node);
+		if (has_shadowtls_detour(node)) {
+			const shadowtls_tag = tag + '-shadowtls';
+			let shadowtls_outbound = generate_shadowtls_outbound(node, shadowtls_tag);
+			apply_routing_node_options(shadowtls_outbound, routing_cfg);
+			outbound.detour = shadowtls_tag;
+			push(client_config.outbounds, shadowtls_outbound);
+		} else {
+			apply_routing_node_options(outbound, routing_cfg);
+		}
+		push(client_config.outbounds, outbound);
+		client_config.outbounds[length(client_config.outbounds)-1].tag = tag;
+	}
+}
+
+function is_builtin_outbound(target) {
+	return target in ['block-out', 'direct-out'];
+}
+
+function is_node_section(target) {
+	const node = uci.get_all(uciconfig, target) || {};
+
+	return node['.type'] === ucinode;
+}
+
+function get_routing_target_outbound(target) {
+	const match_target = match(target || '', /^cfg-(.+)-out$/);
+	if (match_target)
+		target = match_target[1];
+
+	if (isEmpty(target))
+		return null;
+	else if (is_builtin_outbound(target))
+		return target;
+
+	const routing_node = uci.get(uciconfig, target, 'node');
+	if (isEmpty(routing_node) || routing_node === 'urltest' || routing_node === 'selector')
+		return 'cfg-' + target + '-out';
+
+	return 'cfg-' + routing_node + '-out';
+}
+
+function push_routing_target_outbound(client_config, target, routing_nodes) {
+	const match_target = match(target || '', /^cfg-(.+)-out$/);
+	if (match_target)
+		target = match_target[1];
+
+	if (isEmpty(target) || ~index(routing_nodes, target))
+		return;
+	else if (is_builtin_outbound(target))
+		return;
+
+	const routing_node = uci.get(uciconfig, target, 'node');
+	if (isEmpty(routing_node)) {
+		if (is_node_section(target)) {
+			const node = uci.get_all(uciconfig, target) || {};
+			push_node_outbound(client_config, node, 'cfg-' + target + '-out');
+			push(routing_nodes, target);
+		}
+	} else if (!(routing_node in ['urltest', 'selector'])) {
+		push_routing_target_outbound(client_config, routing_node, routing_nodes);
+	} else {
+		return;
+	}
+}
+
 function get_outbound(cfg) {
 	if (isEmpty(cfg))
 		return null;
@@ -362,12 +484,14 @@ function get_outbound(cfg) {
 			return cfg;
 		default:
 			const node = uci.get(uciconfig, cfg, 'node');
-			if (isEmpty(node))
-				die(sprintf("%s's node is missing, please check your configuration.", cfg));
-			else if (node === 'urltest')
+			if (node === 'urltest' || node === 'selector')
+				return 'cfg-' + cfg + '-out';
+			else if (!isEmpty(node))
+				return 'cfg-' + node + '-out';
+			else if (is_node_section(cfg))
 				return 'cfg-' + cfg + '-out';
 			else
-				return 'cfg-' + node + '-out';
+				die(sprintf("%s's node is missing, please check your configuration.", cfg));
 		}
 	}
 }
@@ -685,13 +809,7 @@ if (!isEmpty(main_node)) {
 		urltest_nodes = main_urltest_nodes;
 	} else {
 		const main_node_cfg = uci.get_all(uciconfig, main_node) || {};
-		if (main_node_cfg.type === 'wireguard') {
-			push(config.endpoints, generate_endpoint(main_node_cfg));
-			config.endpoints[length(config.endpoints)-1].tag = 'main-out';
-		} else {
-			push(config.outbounds, generate_outbound(main_node_cfg));
-			config.outbounds[length(config.outbounds)-1].tag = 'main-out';
-		}
+		push_node_outbound(config, main_node_cfg, 'main-out');
 	}
 
 	if (main_udp_node === 'urltest') {
@@ -710,27 +828,15 @@ if (!isEmpty(main_node)) {
 		urltest_nodes = [...urltest_nodes, ...filter(main_udp_urltest_nodes, (l) => !~index(urltest_nodes, l))];
 	} else if (dedicated_udp_node) {
 		const main_udp_node_cfg = uci.get_all(uciconfig, main_udp_node) || {};
-		if (main_udp_node_cfg.type === 'wireguard') {
-			push(config.endpoints, generate_endpoint(main_udp_node_cfg));
-			config.endpoints[length(config.endpoints)-1].tag = 'main-udp-out';
-		} else {
-			push(config.outbounds, generate_outbound(main_udp_node_cfg));
-			config.outbounds[length(config.outbounds)-1].tag = 'main-udp-out';
-		}
+		push_node_outbound(config, main_udp_node_cfg, 'main-udp-out');
 	}
 
 	for (let i in urltest_nodes) {
 		const urltest_node = uci.get_all(uciconfig, i) || {};
-		if (urltest_node.type === 'wireguard') {
-			push(config.endpoints, generate_endpoint(urltest_node));
-			config.endpoints[length(config.endpoints)-1].tag = 'cfg-' + i + '-out';
-		} else {
-			push(config.outbounds, generate_outbound(urltest_node));
-			config.outbounds[length(config.outbounds)-1].tag = 'cfg-' + i + '-out';
-		}
+		push_node_outbound(config, urltest_node, 'cfg-' + i + '-out');
 	}
 } else if (!isEmpty(default_outbound)) {
-	let urltest_nodes = [],
+	let group_nodes = [],
 	    routing_nodes = [];
 
 	uci.foreach(uciconfig, uciroutingnode, (cfg) => {
@@ -748,39 +854,30 @@ if (!isEmpty(main_node)) {
 				idle_timeout: strToTime(cfg.urltest_idle_timeout),
 				interrupt_exist_connections: strToBool(cfg.urltest_interrupt_exist_connections)
 			});
-			urltest_nodes = [...urltest_nodes, ...filter(cfg.urltest_nodes, (l) => !~index(urltest_nodes, l))];
+			group_nodes = [...group_nodes, ...filter(cfg.urltest_nodes, (l) => !~index(group_nodes, l))];
+		} else if (cfg.node === 'selector') {
+			push(config.outbounds, {
+				type: 'selector',
+				tag: 'cfg-' + cfg['.name'] + '-out',
+				outbounds: map(cfg.selector_nodes, get_routing_target_outbound),
+				default: get_routing_target_outbound(cfg.selector_default),
+				interrupt_exist_connections: strToBool(cfg.selector_interrupt_exist_connections)
+			});
+			group_nodes = [...group_nodes, ...filter(cfg.selector_nodes, (l) => !~index(group_nodes, l))];
 		} else {
 			const outbound = uci.get_all(uciconfig, cfg.node) || {};
-			if (outbound.type === 'wireguard') {
-				push(config.endpoints, generate_endpoint(outbound));
-				config.endpoints[length(config.endpoints)-1].bind_interface = cfg.bind_interface;
-				config.endpoints[length(config.endpoints)-1].detour = get_outbound(cfg.outbound);
-				if (cfg.domain_resolver)
-					config.endpoints[length(config.endpoints)-1].domain_resolver = {
-						server: get_resolver(cfg.domain_resolver),
-						strategy: cfg.domain_strategy
-					};
-			} else {
-				push(config.outbounds, generate_outbound(outbound));
-				config.outbounds[length(config.outbounds)-1].bind_interface = cfg.bind_interface;
-				config.outbounds[length(config.outbounds)-1].detour = get_outbound(cfg.outbound);
-				if (cfg.domain_resolver)
-					config.outbounds[length(config.outbounds)-1].domain_resolver = {
-						server: get_resolver(cfg.domain_resolver),
-						strategy: cfg.domain_strategy
-					};
-			}
+			push_node_outbound(config, outbound, 'cfg-' + cfg.node + '-out', cfg);
 			push(routing_nodes, cfg.node);
 		}
 	});
 
-	for (let i in filter(urltest_nodes, (l) => !~index(routing_nodes, l))) {
-		const urltest_node = uci.get_all(uciconfig, i) || {};
-		if (urltest_node.type === 'wireguard')
-			push(config.endpoints, generate_endpoint(urltest_node));
-		else
-			push(config.outbounds, generate_outbound(urltest_node));
-	}
+	for (let i in filter(group_nodes, (l) => !~index(routing_nodes, l)))
+		push_routing_target_outbound(config, i, routing_nodes);
+
+	uci.foreach(uciconfig, uciroutingrule, (cfg) => {
+		if (cfg.enabled === '1' && cfg.action === 'route')
+			push_routing_target_outbound(config, cfg.outbound, routing_nodes);
+	});
 }
 
 if (isEmpty(config.endpoints))
@@ -959,16 +1056,27 @@ if (!isEmpty(main_node)) {
 /* Routing rules end */
 
 /* Experimental start */
-if (routing_mode in ['bypass_mainland_china', 'custom']) {
-	config.experimental = {
-		cache_file: {
+config.experimental = {};
+
+if (routing_mode in ['bypass_mainland_china', 'custom'])
+	config.experimental.cache_file = {
 			enabled: true,
 			path: RUN_DIR + '/cache.db',
 			store_rdrc: strToBool(cache_file_store_rdrc),
 			rdrc_timeout: strToTime(cache_file_rdrc_timeout),
-		}
+		};
+
+if (strToBool(clash_api_enabled))
+	config.experimental.clash_api = {
+		external_controller: clash_api_external_controller,
+		secret: clash_api_secret,
+		default_mode: clash_api_default_mode,
+		access_control_allow_origin: clash_api_allow_origin,
+		access_control_allow_private_network: strToBool(clash_api_allow_private_network)
 	};
-}
+
+if (isEmpty(config.experimental))
+	config.experimental = null;
 /* Experimental end */
 
 system('mkdir -p ' + RUN_DIR);
