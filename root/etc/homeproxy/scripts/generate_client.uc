@@ -721,6 +721,8 @@ if (!isEmpty(main_node)) {
 
 	for (let i in urltest_nodes) {
 		const urltest_node = uci.get_all(uciconfig, i) || {};
+		if (isEmpty(urltest_node))
+			continue;
 		if (urltest_node.type === 'wireguard') {
 			push(config.endpoints, generate_endpoint(urltest_node));
 			config.endpoints[length(config.endpoints)-1].tag = 'cfg-' + i + '-out';
@@ -776,6 +778,8 @@ if (!isEmpty(main_node)) {
 
 	for (let i in filter(urltest_nodes, (l) => !~index(routing_nodes, l))) {
 		const urltest_node = uci.get_all(uciconfig, i) || {};
+		if (isEmpty(urltest_node))
+			continue;
 		if (urltest_node.type === 'wireguard')
 			push(config.endpoints, generate_endpoint(urltest_node));
 		else
