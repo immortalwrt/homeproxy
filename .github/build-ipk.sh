@@ -98,7 +98,7 @@ default_prerm' > "$TEMP_DIR/pre-deinstall"
 		--info "name:$PKG_NAME" \
 		--info "version:$PKG_VERSION" \
 		--info "description:The modern ImmortalWrt proxy platform for ARM64/AMD64" \
-		--info "arch:all" \
+		--info "arch:noarch" \
 		--info "origin:https://github.com/immortalwrt/homeproxy" \
 		--info "url:" \
 		--info "maintainer:Tianling Shen <cnsztl@immortalwrt.org>" \
