@@ -1543,6 +1543,87 @@ return view.extend({
 		/* Direct domain list end */
 		/* ACL settings end */
 
+		/* Dashboard settings start */
+		s.tab('dashboard', _('Dashboard Settings'));
+
+		o = s.taboption('dashboard', form.Flag, 'dashboard_enabled', _('Enable Dashboard'),
+			_('Enable sing-box API and dashboard.<br/><strong style="color:red">Warning: The API will be accessible to all devices on the LAN.</strong>'));
+		o.default = o.disabled;
+		o.rmempty = false;
+
+		o = s.taboption('dashboard', form.Value, 'dashboard_secret', _('Dashboard Secret'),
+			_('API authentication secret. Required for security since the API is LAN-accessible.'));
+		o.password = true;
+		o.depends('dashboard_enabled', '1');
+		o.rmempty = false;
+		o.validate = function(section_id, value) {
+			let enabled = this.section.formvalue(section_id, 'dashboard_enabled');
+			if (enabled === '1') {
+				if (!value || value.length < 6)
+					return _('Dashboard secret must be at least 6 characters.');
+			}
+			return true;
+		};
+
+		o = s.taboption('dashboard', form.Value, 'dashboard_port', _('Dashboard Port'),
+			_('The listen port for sing-box API and dashboard.'));
+		o.datatype = 'port';
+		o.placeholder = '9090';
+		o.depends('dashboard_enabled', '1');
+
+		o = s.taboption('dashboard', form.Value, 'dashboard_url', _('Dashboard URL'),
+			_('URL to download dashboard files. Leave empty to use Zashboard by default.'));
+		o.placeholder = 'https://github.com/Zephyruso/zashboard/releases/latest/download/dist-cdn.zip';
+		o.depends('dashboard_enabled', '1');
+
+		o = s.taboption('dashboard', form.ListValue, 'dashboard_detour', _('Download outbound'),
+			_('Outbound used to download dashboard files.'));
+		o.load = function(section_id) {
+			delete this.keylist;
+			delete this.vallist;
+
+			this.value('direct-out', _('Direct'));
+			let routing_mode = uci.get('homeproxy', 'config', 'routing_mode');
+			if (routing_mode !== 'custom') {
+				let main_node = uci.get('homeproxy', 'config', 'main_node');
+				if (main_node && main_node !== 'nil')
+					this.value('main-out', _('Main node (proxy)'));
+			} else {
+				uci.sections(data[0], 'routing_node', (res) => {
+					if (res.enabled === '1')
+						this.value(res['.name'], res.label);
+				});
+			}
+
+			return this.super('load', section_id);
+		};
+		o.default = 'direct-out';
+		o.depends('dashboard_enabled', '1');
+
+		o = s.taboption('dashboard', form.DummyValue, '_dashboard_open', _('Open Dashboard'));
+		o.depends('dashboard_enabled', '1');
+		o.rawhtml = true;
+		o.cfgvalue = function(section_id) {
+			let port = uci.get('homeproxy', 'config', 'dashboard_port') || '9090';
+			let host = window.location.hostname;
+			let url = 'http://' + host + ':' + port + '/ui/';
+			return E('div', {}, [
+				E('button', {
+					'class': 'btn cbi-button cbi-button-action',
+					'click': function() {
+						window.open(url, '_blank');
+					}
+				}, [ _('Open Dashboard') ]),
+				E('div', { 'style': 'margin-top:8px; color:#888; font-size:90%' }, [
+					E('div', {}, _('Dashboard URL: %s').format(url)),
+					E('div', { 'style': 'margin-top:4px' },
+						_('If the dashboard asks for connection settings, fill in: Host = <code>%s</code>, Port = <code>%s</code>, Secret = your configured secret above.').format(host, port)
+					)
+				])
+			]);
+		};
+		/* Dashboard settings end */
+
 		return m.render();
 	}
 });

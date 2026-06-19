@@ -3049,3 +3049,57 @@ msgstr ""
 #: htdocs/luci-static/resources/homeproxy.js:328
 msgid "valid uuid"
 msgstr ""
+
+msgid "Dashboard Settings"
+msgstr ""
+
+msgid "Enable Dashboard"
+msgstr ""
+
+msgid "Enable sing-box API and dashboard.<br/><strong style=\"color:red\">Warning: The API will be accessible to all devices on the LAN.</strong>"
+msgstr ""
+
+msgid "Open Dashboard"
+msgstr ""
+
+msgid "Dashboard Secret"
+msgstr ""
+
+msgid "API authentication secret. Required for security since the API is LAN-accessible."
+msgstr ""
+
+msgid "Dashboard secret must be at least 6 characters."
+msgstr ""
+
+msgid "Dashboard Port"
+msgstr ""
+
+msgid "The listen port for sing-box API and dashboard."
+msgstr ""
+
+msgid "Dashboard URL"
+msgstr ""
+
+msgid "URL to download dashboard files. Leave empty to use Zashboard by default."
+msgstr ""
+
+msgid "Download outbound"
+msgstr ""
+
+msgid "Outbound used to download dashboard files."
+msgstr ""
+
+msgid "Main node (proxy)"
+msgstr ""
+
+msgid "Dashboard"
+msgstr ""
+
+msgid "Zashboard"
+msgstr ""
+
+msgid "Dashboard URL: %s"
+msgstr ""
+
+msgid "If the dashboard asks for connection settings, fill in: Host = <code>%s</code>, Port = <code>%s</code>, Secret = your configured secret above."
+msgstr ""

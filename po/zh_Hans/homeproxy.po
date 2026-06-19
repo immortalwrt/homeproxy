@@ -3119,3 +3119,57 @@ msgstr "有效端口值"
 #: htdocs/luci-static/resources/homeproxy.js:328
 msgid "valid uuid"
 msgstr "有效 uuid"
+
+msgid "Dashboard Settings"
+msgstr "面板设置"
+
+msgid "Enable Dashboard"
+msgstr "启用面板"
+
+msgid "Enable sing-box API and dashboard.<br/><strong style=\"color:red\">Warning: The API will be accessible to all devices on the LAN.</strong>"
+msgstr "启用 sing-box API 和面板。<br/><strong style=\"color:red\">警告：API 将对局域网内所有设备开放访问。</strong>"
+
+msgid "Open Dashboard"
+msgstr "打开面板"
+
+msgid "Dashboard Secret"
+msgstr "面板密钥"
+
+msgid "API authentication secret. Required for security since the API is LAN-accessible."
+msgstr "API 认证密钥。由于 API 可被局域网访问，必须设置此密钥以确保安全。"
+
+msgid "Dashboard secret must be at least 6 characters."
+msgstr "面板密钥长度不能少于 6 位。"
+
+msgid "Dashboard Port"
+msgstr "面板端口"
+
+msgid "The listen port for sing-box API and dashboard."
+msgstr "sing-box API 和面板的监听端口。"
+
+msgid "Dashboard URL"
+msgstr "面板下载地址"
+
+msgid "URL to download dashboard files. Leave empty to use Zashboard by default."
+msgstr "面板文件的下载地址。留空则默认使用 Zashboard。"
+
+msgid "Download outbound"
+msgstr "下载出站"
+
+msgid "Outbound used to download dashboard files."
+msgstr "用于下载面板文件的出站节点。"
+
+msgid "Main node (proxy)"
+msgstr "主节点（代理）"
+
+msgid "Dashboard"
+msgstr "面板"
+
+msgid "Zashboard"
+msgstr "Zashboard"
+
+msgid "Dashboard URL: %s"
+msgstr "面板地址：%s"
+
+msgid "If the dashboard asks for connection settings, fill in: Host = <code>%s</code>, Port = <code>%s</code>, Secret = your configured secret above."
+msgstr "若面板要求填写连接设置，请填入：Host（主机）= <code>%s</code>，Port（端口）= <code>%s</code>，Secret（密钥）= 上方配置的面板密钥。"

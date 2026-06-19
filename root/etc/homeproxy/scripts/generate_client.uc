@@ -52,6 +52,12 @@ const dns_port = uci.get(uciconfig, uciinfra, 'dns_port') || '5333';
 
 const ntp_server = uci.get(uciconfig, uciinfra, 'ntp_server') || 'time.apple.com';
 
+const dashboard_enabled = uci.get(uciconfig, ucimain, 'dashboard_enabled') || '0';
+const dashboard_port = uci.get(uciconfig, ucimain, 'dashboard_port') || '9090';
+const dashboard_secret = uci.get(uciconfig, ucimain, 'dashboard_secret');
+const dashboard_url = uci.get(uciconfig, ucimain, 'dashboard_url');
+const dashboard_detour = uci.get(uciconfig, ucimain, 'dashboard_detour');
+
 const ipv6_support = uci.get(uciconfig, ucimain, 'ipv6_support') || '0';
 
 let main_node, main_udp_node, dedicated_udp_node, default_outbound, default_outbound_dns,
@@ -967,6 +973,28 @@ if (routing_mode in ['bypass_mainland_china', 'custom']) {
 			store_rdrc: strToBool(cache_file_store_rdrc),
 			rdrc_timeout: strToTime(cache_file_rdrc_timeout),
 		}
+	};
+}
+
+if (dashboard_enabled === '1') {
+	if (!config.experimental)
+		config.experimental = {};
+
+	let download_detour = 'direct-out';
+	if (!isEmpty(dashboard_detour)) {
+		if (dashboard_detour in ['direct-out', 'main-out'])
+			download_detour = dashboard_detour;
+		else
+			download_detour = get_outbound(dashboard_detour);
+	}
+
+	config.experimental.clash_api = {
+		external_controller: '0.0.0.0:' + dashboard_port,
+		secret: !isEmpty(dashboard_secret) ? dashboard_secret : null,
+		external_ui: RUN_DIR + '/ui',
+		external_ui_download_url: !isEmpty(dashboard_url) ? dashboard_url :
+			'https://github.com/Zephyruso/zashboard/releases/latest/download/dist-cdn.zip',
+		external_ui_download_detour: download_detour,
 	};
 }
 /* Experimental end */
