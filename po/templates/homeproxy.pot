@@ -2958,6 +2958,9 @@ msgstr ""
 msgid "passed"
 msgstr ""
 
+msgid "passed (%dms)"
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/server.js:791
 msgid "private key"
 msgstr ""
