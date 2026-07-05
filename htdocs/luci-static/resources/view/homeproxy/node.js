@@ -1200,12 +1200,12 @@ return view.extend({
 		let features = data[1];
 
 		/* Cache subscription information, it will be called multiple times */
-		let subinfo = [];
+		let subinfo = {};
 		for (let suburl of (uci.get(data[0], 'subscription', 'subscription_url') || [])) {
 			const url = new URL(suburl);
 			const urlhash = hp.calcStringMD5(suburl.replace(/#.*$/, ''));
 			const title = url.hash ? decodeURIComponent(url.hash.slice(1)) : url.hostname;
-			subinfo.push({ 'hash': urlhash, 'title': title });
+			subinfo[urlhash] = title;
 		}
 
 		m = new form.Map('homeproxy', _('Edit nodes'));
@@ -1219,11 +1219,7 @@ return view.extend({
 		ss = renderNodeSettings(o.subsection, data, features, main_node, routing_mode);
 		ss.addremove = true;
 		ss.filter = function(section_id) {
-			for (let info of subinfo)
-				if (info.hash === uci.get(data[0], section_id, 'grouphash'))
-					return false;
-
-			return true;
+			return !subinfo[uci.get(data[0], section_id, 'grouphash')];
 		}
 		/* Import subscription links start */
 		/* Thanks to luci-app-shadowsocks-libev */
@@ -1318,12 +1314,17 @@ return view.extend({
 		/* User nodes end */
 
 		/* Subscription nodes start */
-		for (const info of subinfo) {
-			s.tab('sub_' + info.hash, _('Sub (%s)').format(info.title));
-			o = s.taboption('sub_' + info.hash, form.SectionValue, '_sub_' + info.hash, form.GridSection, 'node');
+		if (Object.keys(subinfo).length > 0) {
+			s.tab('sub_node', _('Sub (%s)').format(_('Subscriptions')));
+			o = s.taboption('sub_node', form.SectionValue, '_sub_node', form.GridSection, 'node');
 			ss = renderNodeSettings(o.subsection, data, features, main_node, routing_mode);
 			ss.filter = function(section_id) {
-				return (uci.get(data[0], section_id, 'grouphash') === info.hash);
+				return !!subinfo[uci.get(data[0], section_id, 'grouphash')];
+			}
+			ss.sectiontitle = function(section_id) {
+				let label = hp.loadDefaultLabel(data[0], section_id);
+				let grouphash = uci.get(data[0], section_id, 'grouphash');
+				return subinfo[grouphash] ? '%s / %s'.format(subinfo[grouphash], label) : label;
 			}
 		}
 		/* Subscription nodes end */
