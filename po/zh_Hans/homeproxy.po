@@ -3027,6 +3027,9 @@ msgstr "packet addr (v2ray-core v5+)"
 msgid "passed"
 msgstr "通过"
 
+msgid "passed (%dms)"
+msgstr "通过（%dms）"
+
 #: htdocs/luci-static/resources/view/homeproxy/server.js:791
 msgid "private key"
 msgstr "私钥"
