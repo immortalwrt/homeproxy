@@ -1492,12 +1492,15 @@ return view.extend({
 			}, {});
 		}
 		so.write = function(_section_id, value) {
+			uci.set('homeproxy', 'control', 'proxy_domain_list_checksum', hp.calcStringMD5(value || ''));
 			return callWriteDomainList('proxy_list', value);
 		}
 		so.remove = function(/* ... */) {
 			let routing_mode = this.section.formvalue('config', 'routing_mode');
-			if (routing_mode !== 'custom')
+			if (routing_mode !== 'custom') {
+				uci.set('homeproxy', 'control', 'proxy_domain_list_checksum', hp.calcStringMD5(''));
 				return callWriteDomainList('proxy_list', '');
+			}
 			return true;
 		}
 		so.validate = function(section_id, value) {
@@ -1524,12 +1527,15 @@ return view.extend({
 			}, {});
 		}
 		so.write = function(_section_id, value) {
+			uci.set('homeproxy', 'control', 'direct_domain_list_checksum', hp.calcStringMD5(value || ''));
 			return callWriteDomainList('direct_list', value);
 		}
 		so.remove = function(/* ... */) {
 			let routing_mode = this.section.formvalue('config', 'routing_mode');
-			if (routing_mode !== 'custom')
+			if (routing_mode !== 'custom') {
+				uci.set('homeproxy', 'control', 'direct_domain_list_checksum', hp.calcStringMD5(''));
 				return callWriteDomainList('direct_list', '');
+			}
 			return true;
 		}
 		so.validate = function(section_id, value) {
