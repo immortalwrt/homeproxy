@@ -10,6 +10,7 @@
 'require poll';
 'require rpc';
 'require uci';
+'require ui';
 'require validation';
 'require view';
 
@@ -35,6 +36,12 @@ const callWriteDomainList = rpc.declare({
 	object: 'luci.homeproxy',
 	method: 'acllist_write',
 	params: ['type', 'content'],
+	expect: { '': {} }
+});
+
+const callServiceReload = rpc.declare({
+	object: 'luci.homeproxy',
+	method: 'service_reload',
 	expect: { '': {} }
 });
 
@@ -156,6 +163,24 @@ return view.extend({
 		o.default = 'nil';
 		o.depends({'routing_mode': /^((?!custom).)+$/, 'proxy_mode': /^((?!redirect$).)+$/});
 		o.rmempty = false;
+		o.renderWidget = function(section_id, option_index, cfgvalue) {
+			const widget = form.ListValue.prototype.renderWidget.call(this, section_id, option_index, cfgvalue);
+			const container = E('div', { 'style': 'display:flex;flex-direction:column;gap:6px;align-items:flex-start;' }, [
+				widget,
+				E('button', {
+					'class': 'btn cbi-button cbi-button-action',
+					'click': ui.createHandlerFn(this, () => {
+						return L.resolveDefault(callServiceReload(), {}).then((res) => {
+							if (res && res.status === 0)
+								ui.addNotification(null, E('p', {}, _('Service reloaded.')));
+							else
+								ui.addNotification(null, E('p', {}, _('Failed to reload service.')));
+						});
+					})
+				}, [ _('Reload') ])
+			]);
+			return container;
+		}
 
 		o = s.taboption('routing', hp.CBIStaticList, 'main_udp_urltest_nodes', _('URLTest nodes'),
 			_('List of nodes to test.'));

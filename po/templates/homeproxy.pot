@@ -843,6 +843,10 @@ msgstr ""
 msgid "Failed to generate %s, error: %s."
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/client.js:177
+msgid "Failed to reload service."
+msgstr ""
+
 #: htdocs/luci-static/resources/homeproxy.js:261
 msgid "Failed to upload %s, error: %s."
 msgstr ""
@@ -1972,6 +1976,10 @@ msgstr ""
 msgid "Reject"
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/client.js:180
+msgid "Reload"
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1336
 msgid "Remote"
 msgstr ""
@@ -2145,6 +2153,10 @@ msgstr ""
 
 #: root/usr/share/luci/menu.d/luci-app-homeproxy.json:38
 msgid "Service Status"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:175
+msgid "Service reloaded."
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1175

@@ -866,6 +866,10 @@ msgstr "附加记录"
 msgid "Failed to generate %s, error: %s."
 msgstr "生成 %s 失败，错误：%s。"
 
+#: htdocs/luci-static/resources/view/homeproxy/client.js:177
+msgid "Failed to reload service."
+msgstr "服务重载失败。"
+
 #: htdocs/luci-static/resources/homeproxy.js:261
 msgid "Failed to upload %s, error: %s."
 msgstr "上传 %s 失败，错误：%s。"
@@ -2003,6 +2007,10 @@ msgstr "区域 ID"
 msgid "Reject"
 msgstr "拒绝"
 
+#: htdocs/luci-static/resources/view/homeproxy/client.js:180
+msgid "Reload"
+msgstr "重载"
+
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1336
 msgid "Remote"
 msgstr "远程"
@@ -2177,6 +2185,10 @@ msgstr "服务器设置"
 #: root/usr/share/luci/menu.d/luci-app-homeproxy.json:38
 msgid "Service Status"
 msgstr "服务状态"
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:175
+msgid "Service reloaded."
+msgstr "服务已重载。"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1175
 msgid "Set domain strategy for this query."
