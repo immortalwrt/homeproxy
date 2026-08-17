@@ -833,6 +833,14 @@ if (!isEmpty(main_node)) {
 			outbound: 'main-udp-out'
 		});
 
+	/* Proxy list */
+	if (length(proxy_domain_list))
+		push(config.route.rules, {
+			rule_set: 'proxy-domain',
+			action: 'route',
+			outbound: 'main-out'
+		});
+
 	config.route.final = 'main-out';
 
 	/* Rule set */
