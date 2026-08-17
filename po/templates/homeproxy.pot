@@ -1748,7 +1748,7 @@ msgid "Port"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:276
-msgid "Port %s alrealy exists!"
+msgid "Port %s already exists!"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:582
