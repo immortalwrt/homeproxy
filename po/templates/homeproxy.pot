@@ -1,6 +1,11 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
+#: htdocs/luci-static/resources/view/homeproxy/node.js:48
+#: htdocs/luci-static/resources/view/homeproxy/node.js:592
+msgid "%d ms"
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/status.js:206
 msgid "%s log"
 msgstr ""
@@ -35,6 +40,10 @@ msgstr ""
 msgid "API token"
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/node.js:58
+msgid "A node latency test is already running."
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:670
 msgid "Accept any if empty."
 msgstr ""
@@ -58,6 +67,10 @@ msgstr ""
 #: htdocs/luci-static/resources/view/homeproxy/client.js:669
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1146
 msgid "Action"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:513
+msgid "Actions"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1056
@@ -228,6 +241,12 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1336
 msgid "Auto update subscriptions and geodata."
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:124
+#: htdocs/luci-static/resources/view/homeproxy/client.js:153
+#: htdocs/luci-static/resources/view/homeproxy/client.js:421
+msgid "Automatic selection (URLTest)"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:702
@@ -687,6 +706,10 @@ msgstr ""
 msgid "ECH key"
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/node.js:517
+msgid "Edit"
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/client.js:798
 #: htdocs/luci-static/resources/view/homeproxy/client.js:908
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1194
@@ -841,6 +864,11 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:86
 msgid "Failed to generate %s, error: %s."
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:48
+#: htdocs/luci-static/resources/view/homeproxy/node.js:593
+msgid "Failed"
 msgstr ""
 
 #: htdocs/luci-static/resources/homeproxy.js:261
@@ -1243,6 +1271,10 @@ msgstr ""
 msgid "Label"
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/node.js:585
+msgid "Latency"
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:743
 #: htdocs/luci-static/resources/view/homeproxy/server.js:392
 msgid ""
@@ -1590,6 +1622,10 @@ msgstr ""
 #: htdocs/luci-static/resources/view/homeproxy/node.js:789
 #: htdocs/luci-static/resources/view/homeproxy/server.js:415
 msgid "No additional encryption support: It's basically duplicate encryption."
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:54
+msgid "No node available."
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1412
@@ -2401,6 +2437,15 @@ msgstr ""
 msgid "Test URL"
 msgstr ""
 
+#: htdocs/luci-static/resources/view/homeproxy/node.js:521
+#: htdocs/luci-static/resources/view/homeproxy/node.js:525
+msgid "Test"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:113
+msgid "Test current list"
+msgstr ""
+
 #: htdocs/luci-static/resources/view/homeproxy/client.js:138
 #: htdocs/luci-static/resources/view/homeproxy/client.js:167
 #: htdocs/luci-static/resources/view/homeproxy/client.js:530
@@ -2415,6 +2460,23 @@ msgstr ""
 #: htdocs/luci-static/resources/view/homeproxy/client.js:173
 #: htdocs/luci-static/resources/view/homeproxy/client.js:546
 msgid "Test tolerance"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:79
+#: htdocs/luci-static/resources/view/homeproxy/node.js:97
+msgid "Testing %d/%d"
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:47
+#: htdocs/luci-static/resources/view/homeproxy/node.js:591
+msgid "Testing..."
+msgstr ""
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:118
+msgid ""
+"Tests each node by requesting Google connectivity check through that node. "
+"The result includes the node connection, protocol handshake, and outbound "
+"network latency."
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:628
@@ -2706,12 +2768,6 @@ msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:722
 msgid "UDP timeout"
-msgstr ""
-
-#: htdocs/luci-static/resources/view/homeproxy/client.js:124
-#: htdocs/luci-static/resources/view/homeproxy/client.js:153
-#: htdocs/luci-static/resources/view/homeproxy/client.js:421
-msgid "URLTest"
 msgstr ""
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:131
