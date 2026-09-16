@@ -7,12 +7,129 @@
 'use strict';
 'require form';
 'require fs';
+'require rpc';
 'require uci';
 'require ui';
 'require view';
 
 'require homeproxy as hp';
 'require tools.widgets as widgets';
+
+const callNodeLatencyTest = rpc.declare({
+	object: 'luci.homeproxy',
+	method: 'node_latency_test',
+	params: [ 'nodes' ],
+	expect: { '': {} }
+});
+
+const latencyState = {};
+let latencyTestRunning = false;
+
+function latencyColor(state, delay) {
+	if (state === 'failed' || (state === 'ok' && delay > 2000))
+		return '#d32f2f';
+	if (state === 'ok' && delay > 500)
+		return '#b77900';
+	if (state === 'ok')
+		return '#188038';
+
+	return '';
+}
+
+function updateLatency(section_id, state, delay) {
+	latencyState[section_id] = { state, delay };
+
+	document.querySelectorAll('[data-homeproxy-node-latency]').forEach((view) => {
+		if (view.getAttribute('data-homeproxy-node-latency') !== section_id)
+			return;
+
+		view.style.color = latencyColor(state, delay);
+		view.textContent = (state === 'testing') ? _('Testing...') :
+			((state === 'ok') ? _('%d ms').format(delay) : ((state === 'failed') ? _('Failed') : '-'));
+	});
+}
+
+async function runLatencyTests(node_ids, button, show_progress) {
+	if (!node_ids.length) {
+		ui.addNotification(null, E('p', _('No node available.')));
+		return;
+	}
+	if (latencyTestRunning) {
+		ui.addNotification(null, E('p', _('A node latency test is already running.')));
+		return;
+	}
+
+	const rendered_order = Array.from(document.querySelectorAll('[data-homeproxy-node-latency]'))
+		.map((view) => view.getAttribute('data-homeproxy-node-latency'));
+	node_ids.sort((a, b) => rendered_order.indexOf(a) - rendered_order.indexOf(b));
+
+	const original_text = button?.textContent;
+	if (button)
+		button.disabled = true;
+	latencyTestRunning = true;
+
+	for (let node_id of node_ids)
+		updateLatency(node_id, 'testing');
+
+	let completed = 0;
+	try {
+		for (let i = 0; i < node_ids.length; i += 3) {
+			const batch = node_ids.slice(i, i + 3);
+			if (button && show_progress)
+				button.textContent = _('Testing %d/%d').format(completed, node_ids.length);
+
+			let response;
+			try {
+				response = await callNodeLatencyTest(batch);
+			} catch (e) {
+				response = { result: false };
+			}
+
+			for (let node_id of batch) {
+				const result = response?.nodes?.[node_id];
+				if (response?.result && result?.delay > 0)
+					updateLatency(node_id, 'ok', result.delay);
+				else
+					updateLatency(node_id, 'failed');
+			}
+			completed += batch.length;
+			if (button && show_progress)
+				button.textContent = _('Testing %d/%d').format(completed, node_ids.length);
+
+			await new Promise((resolve) => window.requestAnimationFrame(resolve));
+		}
+	} finally {
+		latencyTestRunning = false;
+		if (button) {
+			button.disabled = false;
+			button.textContent = original_text;
+		}
+	}
+}
+
+function addLatencyListButton(section, tab, option, getNodeIds) {
+	const o = section.taboption(tab, form.Button, option, '');
+	o.inputstyle = 'action';
+	o.inputtitle = _('Test current list');
+	o.onclick = function(ev) {
+		return runLatencyTests(getNodeIds(), ev.currentTarget, true);
+	};
+	o.renderWidget = function() {
+		const help = _('Tests each node by requesting Google connectivity check through that node. The result includes the node connection, protocol handshake, and outbound network latency.');
+		return E('div', {
+			'style': 'display:flex;align-items:center;justify-content:flex-end;gap:.5em;width:100%'
+		}, [
+			form.Button.prototype.renderWidget.apply(this, arguments),
+			E('span', {
+				'aria-label': help,
+				'role': 'img',
+				'tabindex': '0',
+				'title': help,
+				'style': 'display:inline-flex;align-items:center;justify-content:center;width:1.35em;height:1.35em;border:1px solid currentColor;border-radius:50%;cursor:help;font-weight:bold'
+			}, [ '?' ])
+		]);
+	};
+}
 
 function allowInsecureConfirm(ev, _section_id, value) {
 	if (value === '1' && !confirm(_('Are you sure to allow insecure?')))
@@ -393,8 +510,23 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	s.rowcolors = true;
 	s.sortable = true;
 	s.nodescriptions = true;
+	s.actionstitle = _('Actions');
 	s.modaltitle = L.bind(hp.loadModalTitle, this, _('Node'), _('Add a node'), data[0]);
 	s.sectiontitle = L.bind(hp.loadDefaultLabel, this, data[0]);
+	s.renderRowActions = function(section_id) {
+		const td = this.super('renderRowActions', [ section_id, _('Edit') ]);
+		const button = E('button', {
+			'class': 'btn cbi-button cbi-button-action',
+			'style': 'width:4em;min-width:4em;white-space:nowrap;padding-left:.5em;padding-right:.5em',
+			'title': _('Test'),
+			'click': ui.createHandlerFn(this, (sid, ev) => {
+				return runLatencyTests([ sid ], ev.currentTarget, false);
+			}, section_id)
+		}, [ _('Test') ]);
+
+		td.lastElementChild.insertBefore(button, td.lastElementChild.firstChild);
+		return td;
+	};
 
 	if (routing_mode !== 'custom') {
 		o = s.option(form.Button, '_apply', _('Apply'));
@@ -449,6 +581,22 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.datatype = 'host';
 	o.depends({'type': 'direct', '!reverse': true});
 	o.rmempty = false;
+
+	o = s.option(form.DummyValue, '_latency', _('Latency'));
+	o.default = '-';
+	o.editable = true;
+	o.modalonly = false;
+	o.renderWidget = function(section_id) {
+		const result = latencyState[section_id] || { state: 'idle' };
+		const text = (result.state === 'testing') ? _('Testing...') :
+			((result.state === 'ok') ? _('%d ms').format(result.delay) :
+			((result.state === 'failed') ? _('Failed') : '-'));
+
+		return E('span', {
+			'data-homeproxy-node-latency': section_id,
+			'style': 'color:' + latencyColor(result.state, result.delay)
+		}, [ text ]);
+	};
 
 	o = s.option(form.Value, 'port', _('Port'));
 	o.datatype = 'port';
@@ -1215,6 +1363,14 @@ return view.extend({
 		/* Node settings start */
 		/* User nodes start */
 		s.tab('node', _('Nodes'));
+		addLatencyListButton(s, 'node', '_latency_test_nodes', () => {
+			let nodes = [];
+			uci.sections(data[0], 'node', (res) => {
+				if (!subinfo.some((info) => info.hash === res.grouphash))
+					nodes.push(res['.name']);
+			});
+			return nodes;
+		});
 		o = s.taboption('node', form.SectionValue, '_node', form.GridSection, 'node');
 		ss = renderNodeSettings(o.subsection, data, features, main_node, routing_mode);
 		ss.addremove = true;
@@ -1320,6 +1476,14 @@ return view.extend({
 		/* Subscription nodes start */
 		for (const info of subinfo) {
 			s.tab('sub_' + info.hash, _('Sub (%s)').format(info.title));
+			addLatencyListButton(s, 'sub_' + info.hash, '_latency_test_' + info.hash, () => {
+				let nodes = [];
+				uci.sections(data[0], 'node', (res) => {
+					if (res.grouphash === info.hash)
+						nodes.push(res['.name']);
+				});
+				return nodes;
+			});
 			o = s.taboption('sub_' + info.hash, form.SectionValue, '_sub_' + info.hash, form.GridSection, 'node');
 			ss = renderNodeSettings(o.subsection, data, features, main_node, routing_mode);
 			ss.filter = function(section_id) {

@@ -8,6 +8,7 @@
 'use strict';
 
 import { access, error, lstat, popen, readfile, writefile } from 'fs';
+import { cursor } from 'uci';
 
 /* Kanged from ucode/luci */
 function shellquote(s) {
@@ -20,6 +21,7 @@ function hasKernelModule(kmod) {
 
 const HP_DIR = '/etc/homeproxy';
 const RUN_DIR = '/var/run/homeproxy';
+const uci = cursor();
 
 const methods = {
 	acllist_read: {
@@ -138,6 +140,78 @@ const methods = {
 			}
 
 			return { result: (system(`/usr/bin/wget --spider -qT3 ${url} 2>"/dev/null"`, 3100) === 0) };
+		}
+	},
+
+	node_latency_test: {
+		args: { nodes: [] },
+		call: function(req) {
+			const nodes = req.args?.nodes;
+			if (type(nodes) !== 'array' || !length(nodes) || length(nodes) > 3)
+				return { result: false, error: 'between one and three nodes are required' };
+
+			let node_args = [];
+			for (let node_id in nodes) {
+				if (type(node_id) !== 'string' || !match(node_id, /^[A-Za-z0-9_]+$/))
+					return { result: false, error: 'illegal node identifier' };
+
+				const node = uci.get_all('homeproxy', node_id) || {};
+				if (node['.type'] !== 'node')
+					return { result: false, error: 'node does not exist' };
+				push(node_args, shellquote(node_id));
+			}
+
+			const lock_file = `${RUN_DIR}/node-test.lock`;
+			const test_url = 'https%3A%2F%2Fwww.gstatic.com%2Fgenerate_204';
+			const api_path = `/group/latency-test/delay?url=${test_url}&timeout=5000`;
+			const command = join('; ', [
+				`mkdir -p ${shellquote(RUN_DIR)} || { echo '{"_error":"runtime_dir"}'; exit 0; }`,
+				'exec 9>' + shellquote(lock_file),
+				'flock -n 9 || { echo \'{"_error":"busy"}\'; exit 0; }',
+				'test_id=$$',
+				`config_file=${shellquote(RUN_DIR)}/node-test-$test_id.json`,
+				`log_file=${shellquote(RUN_DIR)}/node-test-$test_id.log`,
+				`trap 'if [ -n "$test_pid" ]; then kill "$test_pid" 2>/dev/null; wait "$test_pid" 2>/dev/null; fi; rm -f "$config_file" "$log_file"' EXIT`,
+				`${HP_DIR}/scripts/generate_client.uc latency-test "$test_id" ${join(' ', node_args)} >/dev/null 2>&1 || { echo '{"_error":"generate"}'; exit 0; }`,
+				`/usr/bin/sing-box check -c "$config_file" >/dev/null 2>&1 || { echo '{"_error":"invalid_config"}'; exit 0; }`,
+				': >"$log_file"',
+				'/usr/bin/sing-box run --disable-color -c "$config_file" >/dev/null 2>&1 & test_pid=$!',
+				'count=0',
+				'port=',
+				`while [ "$count" -lt 5 ]; do kill -0 "$test_pid" 2>/dev/null || break; port=$(sed -n 's/.*restful api listening at 127\\.0\\.0\\.1:\\([0-9][0-9]*\\).*/\\1/p' "$log_file" | tail -n 1); [ -n "$port" ] && break; count=$((count + 1)); sleep 1; done`,
+				`[ -n "$port" ] || { echo '{"_error":"controller_start"}'; exit 0; }`,
+				'result=$(/usr/bin/wget -qO- -T 8 "http://127.0.0.1:${port}' + api_path + '") && printf \'%s\' "$result" || echo \'{"_error":"request_failed"}\''
+			]);
+
+			let output = '';
+			const fd = popen('/bin/sh -c ' + shellquote(command) + ' 2>&1', 'r');
+			if (!fd)
+				return { result: false, error: 'unable to start latency test' };
+
+			output = fd.read('all') || '';
+			const exit_code = fd.close();
+			if (exit_code !== 0 || !length(trim(output)))
+				return { result: false, error: 'latency test failed' };
+
+			let response;
+			try {
+				response = json(trim(output));
+			} catch (e) {
+				return { result: false, error: 'invalid latency test response' };
+			}
+
+			if (type(response) !== 'object')
+				return { result: false, error: 'invalid latency test response' };
+			if (response._error)
+				return { result: false, error: response._error };
+
+			let result = {};
+			for (let node_id in nodes) {
+				const delay = int(response['latency-' + node_id]);
+				result[node_id] = (delay > 0) ? { delay } : { error: 'timeout' };
+			}
+
+			return { result: true, nodes: result };
 		}
 	},
 

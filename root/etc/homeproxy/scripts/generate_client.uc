@@ -396,6 +396,100 @@ function get_ruleset(cfg) {
 }
 /* Config helper end */
 
+function generate_latency_test() {
+	const test_id = ARGV[1];
+	const node_ids = slice(ARGV, 2);
+
+	if (!match(test_id, /^[0-9]+$/))
+		die('Invalid latency test identifier.\n');
+	if (!length(node_ids) || length(node_ids) > 3)
+		die('A latency test requires between one and three nodes.\n');
+
+	const config_file = RUN_DIR + '/node-test-' + test_id + '.json';
+	const log_file = RUN_DIR + '/node-test-' + test_id + '.log';
+
+	let test_config = {
+		log: {
+			disabled: false,
+			level: 'info',
+			output: log_file,
+			timestamp: true
+		},
+		dns: {
+			servers: [
+				{
+					type: 'udp',
+					tag: 'default-dns',
+					server: wan_dns,
+					detour: 'direct-out'
+				}
+			],
+			final: 'default-dns',
+			strategy: (ipv6_support !== '1') ? 'ipv4_only' : null
+		},
+		endpoints: [],
+		inbounds: [],
+		outbounds: [
+			{
+				type: 'direct',
+				tag: 'direct-out',
+				routing_mark: strToInt(self_mark)
+			}
+		],
+		route: {
+			auto_detect_interface: true,
+			default_domain_resolver: {
+				action: 'route',
+				server: 'default-dns',
+				strategy: (ipv6_support !== '1') ? 'prefer_ipv4' : null
+			},
+			final: 'direct-out'
+		},
+		experimental: {
+			clash_api: {
+				external_controller: '127.0.0.1:0'
+			}
+		}
+	};
+
+	let test_tags = [];
+	for (let node_id in node_ids) {
+		if (!match(node_id, /^[A-Za-z0-9_]+$/))
+			die('Invalid latency test node identifier.\n');
+
+		const node = uci.get_all(uciconfig, node_id) || {};
+		if (node['.type'] !== ucinode)
+			die('Latency test node does not exist.\n');
+
+		const tag = 'latency-' + node_id;
+		if (node.type === 'wireguard') {
+			push(test_config.endpoints, generate_endpoint(node));
+			test_config.endpoints[length(test_config.endpoints) - 1].tag = tag;
+		} else {
+			push(test_config.outbounds, generate_outbound(node));
+			test_config.outbounds[length(test_config.outbounds) - 1].tag = tag;
+		}
+		push(test_tags, tag);
+	}
+
+	push(test_config.outbounds, {
+		type: 'selector',
+		tag: 'latency-test',
+		outbounds: test_tags
+	});
+
+	if (!length(test_config.endpoints))
+		test_config.endpoints = null;
+
+	system('mkdir -p ' + RUN_DIR);
+	writefile(config_file, sprintf('%.J\n', removeBlankAttrs(test_config)));
+}
+
+if (ARGV[0] === 'latency-test') {
+	generate_latency_test();
+	exit(0);
+}
+
 const config = {};
 
 /* Log */
