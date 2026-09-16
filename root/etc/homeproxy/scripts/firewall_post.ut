@@ -221,6 +221,18 @@ set homeproxy_wan_proxy_addr_v6 {
 }
 {% endif /* ipv6_support */ %}
 
+{# UU route addresses #}
+set homeproxy_wan_uu_tun163 {
+	type ipv4_addr
+	flags interval
+	auto-merge
+}
+set homeproxy_wan_uu_tun164 {
+	type ipv4_addr
+	flags interval
+	auto-merge
+}
+
 set homeproxy_wan_direct_addr_v4 {
 	type ipv4_addr
 	flags interval
@@ -333,6 +345,9 @@ chain homeproxy_redirect {
 	ether saddr {{ array_to_nftarr(control_info.lan_global_proxy_mac_addrs) }} counter goto homeproxy_redirect_proxy_port
 	{% endif /* lan_global_proxy_mac_addrs */ %}
 	{% endif /* routing_mode */ %}
+
+	ip daddr @homeproxy_wan_uu_tun163 counter return
+	ip daddr @homeproxy_wan_uu_tun164 counter return
 
 	ip daddr @homeproxy_wan_direct_addr_v4 counter return
 	{% if (ipv6_support === '1'): %}
@@ -455,6 +470,9 @@ chain homeproxy_mangle_prerouting {
 	{% endif /* lan_global_proxy_mac_addrs */ %}
 	{% endif /* routing_mode */ %}
 
+	ip daddr @homeproxy_wan_uu_tun163 counter return
+	ip daddr @homeproxy_wan_uu_tun164 counter return
+
 	ip daddr @homeproxy_wan_direct_addr_v4 counter return
 	{% if (ipv6_support === '1'): %}
 	ip6 daddr @homeproxy_wan_direct_addr_v6 counter return
@@ -506,6 +524,9 @@ chain homeproxy_mangle_output {
 	{% if (ipv6_support === '1'): %}
 	ip6 daddr @homeproxy_local_addr_v6 counter return
 	{% endif %}
+
+	ip daddr @homeproxy_wan_uu_tun163 counter return
+	ip daddr @homeproxy_wan_uu_tun164 counter return
 
 	ip daddr @homeproxy_wan_direct_addr_v4 counter return
 	{% if (ipv6_support === '1'): %}

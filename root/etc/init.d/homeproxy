@@ -250,6 +250,14 @@ start_service() {
 	[ "$outbound_node" = "nil" ] || utpl -S "$HP_DIR/scripts/firewall_post.ut" > "$RUN_DIR/fw4_post.nft"
 	fw4 reload >"/dev/null" 2>&1
 
+	# uu-route-monitor
+	if [ -x "/usr/bin/ip" ]; then
+		procd_open_instance "uu-route-monitor"
+		procd_set_param command "$HP_DIR/scripts/uu_route_monitor.sh"
+		procd_set_param respawn
+		procd_close_instance
+	fi
+
 	log "sing-box $(sing-box version -n) started."
 }
 
@@ -294,6 +302,7 @@ stop_service() {
 		 "homeproxy_gfw_list_v4" "homeproxy_gfw_list_v6" \
 		 "homeproxy_mainland_addr_v4" "homeproxy_mainland_addr_v6" \
 		 "homeproxy_wan_proxy_addr_v4" "homeproxy_wan_proxy_addr_v6" \
+		 "homeproxy_wan_uu_tun163" "homeproxy_wan_uu_tun164" \
 		 "homeproxy_wan_direct_addr_v4" "homeproxy_wan_direct_addr_v6" \
 		 "homeproxy_routing_port"; do
 		nft flush set inet fw4 "$i"
