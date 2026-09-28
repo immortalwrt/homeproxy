@@ -80,9 +80,10 @@ start_service() {
 		echo -e "conf-dir=$DNSMASQ_DIR" > "$DNSMASQ_DIR/../dnsmasq-homeproxy.conf"
 		case "$routing_mode" in
 		"bypass_mainland_china"|"custom"|"global")
-			cat <<-EOF >> "$DNSMASQ_DIR/redirect-dns.conf"
+			cat <<-EOF > "$DNSMASQ_DIR/redirect-dns.conf"
 				no-poll
 				no-resolv
+				resolv-file=
 				server=127.0.0.1#$dns_port
 			EOF
 			;;

@@ -84,7 +84,7 @@ if (routing_mode !== 'custom') {
 	if (proxy_domain_list)
 		proxy_domain_list = split(proxy_domain_list, /[\r\n]/);
 
-	sniff_override = uci.get(uciconfig, uciinfra, 'sniff_override') || '1';
+	sniff_override = uci.get(uciconfig, ucimain, 'sniff_override') ?? uci.get(uciconfig, uciinfra, 'sniff_override') ?? '1';
 } else {
 	/* DNS settings */
 	dns_default_strategy = uci.get(uciconfig, ucidnssetting, 'default_strategy');
@@ -100,7 +100,7 @@ if (routing_mode !== 'custom') {
 	default_outbound = uci.get(uciconfig, uciroutingsetting, 'default_outbound') || 'nil';
 	default_outbound_dns = uci.get(uciconfig, uciroutingsetting, 'default_outbound_dns') || 'default-dns';
 	domain_strategy = uci.get(uciconfig, uciroutingsetting, 'domain_strategy');
-	sniff_override = uci.get(uciconfig, uciroutingsetting, 'sniff_override');
+	sniff_override = uci.get(uciconfig, uciroutingsetting, 'sniff_override') ?? uci.get(uciconfig, ucimain, 'sniff_override') ?? '1';
 }
 
 const proxy_mode = uci.get(uciconfig, ucimain, 'proxy_mode') || 'redirect_tproxy',
@@ -394,6 +394,16 @@ function get_ruleset(cfg) {
 		push(rules, isEmpty(i) ? null : 'cfg-' + i + '-rule');
 	return rules;
 }
+
+function generate_sniff_rules() {
+	/* 'sniff' was an inbound field and has to be requested by a route rule
+	 * since sb 1.14. It inspects connection protocol/domain metadata for rule matching. */
+	return [{
+		action: 'sniff',
+		timeout: '300ms',
+		override_destination: strToBool(sniff_override)
+	}];
+}
 /* Config helper end */
 
 const config = {};
@@ -434,8 +444,7 @@ config.dns = {
 	rules: [],
 	strategy: dns_default_strategy,
 	disable_cache: strToBool(dns_disable_cache),
-	disable_expire: strToBool(dns_disable_cache_expire),
-	independent_cache: strToBool(dns_independent_cache),
+	/* 'disable_expire' was removed, 'independent_cache' is deprecated in sb 1.14 */
 	client_subnet: dns_client_subnet
 };
 
@@ -570,7 +579,9 @@ if (!isEmpty(main_node)) {
 			outbound: get_outbound(cfg.outbound),
 			action: cfg.action,
 			server: get_resolver(cfg.server),
-			strategy: cfg.domain_strategy,
+			/* the legacy 'strategy' DNS rule action option is no longer usable
+			 * together with sb 1.14 rule items such as 'ip_version' */
+			strategy: (cfg.ip_version || cfg.query_type) ? null : cfg.domain_strategy,
 			disable_cache: strToBool(cfg.dns_disable_cache),
 			rewrite_ttl: strToInt(cfg.rewrite_ttl),
 			client_subnet: cfg.client_subnet,
@@ -586,7 +597,10 @@ if (!isEmpty(main_node)) {
 	if (isEmpty(config.dns.rules))
 		config.dns.rules = null;
 
-	config.dns.final = get_resolver(dns_default_server);
+	let final_server = get_resolver(dns_default_server);
+	if (final_server === 'system-dns' || isEmpty(final_server))
+		final_server = 'default-dns';
+	config.dns.final = final_server;
 }
 /* DNS end */
 
@@ -606,8 +620,6 @@ push(config.inbounds, {
 	listen: '::',
 	listen_port: int(mixed_port),
 	udp_timeout: strToTime(udp_timeout),
-	sniff: true,
-	sniff_override_destination: strToBool(sniff_override),
 	set_system_proxy: false
 });
 
@@ -617,9 +629,7 @@ if (match(proxy_mode, /redirect/))
 		tag: 'redirect-in',
 
 		listen: '::',
-		listen_port: int(redirect_port),
-		sniff: true,
-		sniff_override_destination: strToBool(sniff_override)
+		listen_port: int(redirect_port)
 	});
 if (match(proxy_mode, /tproxy/))
 	push(config.inbounds, {
@@ -629,9 +639,7 @@ if (match(proxy_mode, /tproxy/))
 		listen: '::',
 		listen_port: int(tproxy_port),
 		network: 'udp',
-		udp_timeout: strToTime(udp_timeout),
-		sniff: true,
-		sniff_override_destination: strToBool(sniff_override)
+		udp_timeout: strToTime(udp_timeout)
 	});
 if (match(proxy_mode, /tun/))
 	push(config.inbounds, {
@@ -644,9 +652,7 @@ if (match(proxy_mode, /tun/))
 		auto_route: false,
 		endpoint_independent_nat: strToBool(endpoint_independent_nat),
 		udp_timeout: strToTime(udp_timeout),
-		stack: tcpip_stack,
-		sniff: true,
-		sniff_override_destination: strToBool(sniff_override)
+		stack: tcpip_stack
 	});
 /* Inbound end */
 
@@ -812,10 +818,12 @@ config.route = {
 if (!isEmpty(main_node)) {
 	/* Avoid DNS loop */
 	config.route.default_domain_resolver = {
-		action: 'route',
 		server: (routing_mode === 'bypass_mainland_china') ? 'china-dns' : 'default-dns',
 		strategy: (ipv6_support !== '1') ? 'prefer_ipv4' : null
 	};
+
+	/* Sniffing is no longer an inbound option since sb 1.14 */
+	map(generate_sniff_rules(), (rule) => push(config.route.rules, rule));
 
 	/* Direct list */
 	if (length(direct_domain_list))
@@ -887,10 +895,20 @@ if (!isEmpty(main_node)) {
 	if (isEmpty(config.route.rule_set))
 		config.route.rule_set = null;
 } else if (!isEmpty(default_outbound)) {
+	let default_resolver = get_resolver(default_outbound_dns);
+	if (default_resolver === 'system-dns' || isEmpty(default_resolver)) {
+		let final_dns = get_resolver(dns_default_server);
+		if (final_dns && final_dns !== 'system-dns')
+			default_resolver = final_dns;
+		else
+			default_resolver = 'default-dns';
+	}
 	config.route.default_domain_resolver = {
-		action: 'resolve',
-		server: get_resolver(default_outbound_dns)
+		server: default_resolver
 	};
+
+	/* Sniffing is no longer an inbound option since sb 1.14 */
+	map(generate_sniff_rules(), (rule) => push(config.route.rules, rule));
 
 	if (domain_strategy)
 		push(config.route.rules, {

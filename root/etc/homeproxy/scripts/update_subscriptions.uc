@@ -74,7 +74,7 @@ const sing_features = ubus.call('luci.homeproxy', 'singbox_get_features', {}) ||
 /* Log */
 system(`mkdir -p ${RUN_DIR}`);
 function log(...args) {
-	const logfile = open(`${RUN_DIR}/homeproxy.log`, 'a');
+	const logfile = open(RUN_DIR + '/homeproxy.log', 'a');
 	logfile.write(`${getTime()} [SUBSCRIBE] ${join(' ', args)}\n`);
 	logfile.close();
 }

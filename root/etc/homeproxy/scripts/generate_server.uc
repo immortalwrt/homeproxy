@@ -37,10 +37,41 @@ config.log = {
 };
 
 config.inbounds = [];
+config.certificate_providers = [];
 
 uci.foreach(uciconfig, uciserver, (cfg) => {
 	if (cfg.enabled !== '1')
 		return;
+
+	/* Inline ACME options in TLS are deprecated in sb 1.14 and will be removed
+	 * in 1.16, request the certificate through a certificate provider. */
+	if (cfg.tls === '1' && cfg.tls_acme === '1') {
+		push(config.certificate_providers, {
+			type: 'acme',
+			tag: 'cfg-' + cfg['.name'] + '-acme',
+			/* uci stores a single value, sing-box expects a list */
+			domain: type(cfg.tls_acme_domain) === 'array' ? cfg.tls_acme_domain : [cfg.tls_acme_domain],
+			data_directory: HP_DIR + '/certs',
+			default_server_name: cfg.tls_acme_dsn,
+			email: cfg.tls_acme_email,
+			provider: cfg.tls_acme_provider,
+			disable_http_challenge: strToBool(cfg.tls_acme_dhc),
+			disable_tls_alpn_challenge: strToBool(cfg.tls_acme_dtac),
+			alternative_http_port: strToInt(cfg.tls_acme_ahp),
+			alternative_tls_port: strToInt(cfg.tls_acme_atp),
+			external_account: (cfg.tls_acme_external_account === '1') ? {
+				key_id: cfg.tls_acme_ea_keyid,
+				mac_key: cfg.tls_acme_ea_mackey
+			} : null,
+			dns01_challenge: (cfg.tls_dns01_challenge === '1') ? {
+				provider: cfg.tls_dns01_provider,
+				access_key_id: cfg.tls_dns01_ali_akid,
+				access_key_secret: cfg.tls_dns01_ali_aksec,
+				region_id: cfg.tls_dns01_ali_rid,
+				api_token: cfg.tls_dns01_cf_api_token
+			} : null
+		});
+	}
 
 	push(config.inbounds, {
 		type: cfg.type,
@@ -122,28 +153,7 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 			cipher_suites: cfg.tls_cipher_suites,
 			certificate_path: cfg.tls_cert_path,
 			key_path: cfg.tls_key_path,
-			acme: (cfg.tls_acme === '1') ? {
-				domain: cfg.tls_acme_domain,
-				data_directory: HP_DIR + '/certs',
-				default_server_name: cfg.tls_acme_dsn,
-				email: cfg.tls_acme_email,
-				provider: cfg.tls_acme_provider,
-				disable_http_challenge: strToBool(cfg.tls_acme_dhc),
-				disable_tls_alpn_challenge: (cfg.tls_acme_dtac),
-				alternative_http_port: strToInt(cfg.tls_acme_ahp),
-				alternative_tls_port: strToInt(cfg.tls_acme_atp),
-				external_account: (cfg.tls_acme_external_account === '1') ? {
-					key_id: cfg.tls_acme_ea_keyid,
-					mac_key: cfg.tls_acme_ea_mackey
-				} : null,
-				dns01_challenge: (cfg.tls_dns01_challenge === '1') ? {
-					provider: cfg.tls_dns01_provider,
-					access_key_id: cfg.tls_dns01_ali_akid,
-					access_key_secret: cfg.tls_dns01_ali_aksec,
-					region_id: cfg.tls_dns01_ali_rid,
-					api_token: cfg.tls_dns01_cf_api_token
-				} : null
-			} : null,
+			certificate_provider: (cfg.tls_acme === '1') ? 'cfg-' + cfg['.name'] + '-acme' : null,
 			ech: (cfg.tls_ech_key) ? {
 				enabled: true,
 				key: split(cfg.tls_ech_key, '\n'),
@@ -180,6 +190,9 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 
 if (length(config.inbounds) === 0)
 	exit(1);
+
+if (isEmpty(config.certificate_providers))
+	config.certificate_providers = null;
 
 system('mkdir -p ' + RUN_DIR);
 writefile(RUN_DIR + '/sing-box-s.json', sprintf('%.J\n', removeBlankAttrs(config)));

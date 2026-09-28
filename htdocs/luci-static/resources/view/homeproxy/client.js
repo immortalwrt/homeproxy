@@ -298,6 +298,12 @@ return view.extend({
 		o.default = o.enabled;
 		o.rmempty = false;
 
+		o = s.taboption('routing', form.Flag, 'sniff_override', _('Override destination'),
+			_('Override the connection destination address with the sniffed domain.'));
+		o.default = o.enabled;
+		o.depends({'routing_mode': 'custom', '!reverse': true});
+		o.rmempty = false;
+
 		/* Custom routing settings start */
 		/* Routing settings start */
 		o = s.taboption('routing', form.SectionValue, '_routing', form.NamedSection, 'routing', 'homeproxy');
