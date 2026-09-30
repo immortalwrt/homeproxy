@@ -99,6 +99,20 @@ function parse_uri(uri) {
 				shadowsocks_plugin: uri.plugin,
 				shadowsocks_plugin_opts: uri.plugin_opts
 			};
+		} else if (uri.type === 'snell') {
+			config = {
+				label: uri.name || uri.tag || uri.remarks,
+				type: 'snell',
+				address: uri.server,
+				port: uri.server_port || uri.port,
+				password: uri.psk || uri.password,
+				snell_version: uri.version ? '' + uri.version : '4',
+				snell_obfs_mode: uri.obfs_mode || uri.obfs?.mode || uri['obfs-opts']?.mode || null,
+				snell_obfs_host: uri.obfs_host || uri.obfs?.host || uri['obfs-opts']?.host || null,
+				snell_mode: uri.mode || null,
+				snell_userkey: uri.userkey || null,
+				snell_reuse: (uri.reuse === true || uri.reuse === '1' || uri.reuse === 'true') ? '1' : '0'
+			};
 		}
 	} else if (type(uri) === 'string') {
 		uri = split(trim(uri), '://');
@@ -257,6 +271,40 @@ function parse_uri(uri) {
 				password: ss_userinfo[1],
 				shadowsocks_plugin: ss_plugin,
 				shadowsocks_plugin_opts: ss_plugin_opts
+			};
+
+			break;
+		case 'snell':
+			/* "Lovely" Shadowrocket format */
+			const snell_suri = split(uri[1], '#');
+			let snell_slabel = '';
+			if (length(snell_suri) <= 2) {
+				if (length(snell_suri) === 2)
+					snell_slabel = '#' + urlencode(snell_suri[1]);
+				const snell_decoded = decodeBase64Str(snell_suri[0]);
+				if (snell_decoded && (match(snell_decoded, /@/) || match(snell_decoded, /:/)))
+					uri[1] = snell_decoded + snell_slabel;
+			}
+
+			url = parseURL('http://' + uri[1]) || {};
+			params = url.searchParams || {};
+
+			let snell_psk = params.psk;
+			if (!snell_psk && url.username)
+				snell_psk = urldecode(url.username + (url.password ? (':' + url.password) : ''));
+
+			config = {
+				label: url.hash ? urldecode(url.hash) : null,
+				type: 'snell',
+				address: url.hostname,
+				port: url.port,
+				password: snell_psk,
+				snell_version: params.version || '4',
+				snell_obfs_mode: params.obfs || params.obfs_mode || null,
+				snell_obfs_host: params['obfs-host'] || params.obfs_host || params.host || null,
+				snell_mode: params.mode || null,
+				snell_userkey: params.userkey || null,
+				snell_reuse: (params.reuse in ['1', 'true']) ? '1' : '0'
 			};
 
 			break;

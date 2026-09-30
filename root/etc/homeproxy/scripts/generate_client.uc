@@ -229,7 +229,8 @@ function generate_outbound(node) {
 
 		username: (node.type !== 'ssh') ? node.username : null,
 		user: (node.type === 'ssh') ? node.username : null,
-		password: node.password,
+		password: (node.type !== 'snell') ? node.password : null,
+		psk: (node.type === 'snell') ? node.password : null,
 
 		/* Direct */
 		override_address: node.override_address,
@@ -256,8 +257,14 @@ function generate_outbound(node) {
 		method: node.shadowsocks_encrypt_method,
 		plugin: node.shadowsocks_plugin,
 		plugin_opts: node.shadowsocks_plugin_opts,
-		/* ShadowTLS / Socks */
-		version: (node.type === 'shadowtls') ? strToInt(node.shadowtls_version) : ((node.type === 'socks') ? node.socks_version : null),
+		/* ShadowTLS / Socks / Snell */
+		version: (node.type in ['shadowtls', 'snell']) ? strToInt(node.type === 'snell' ? (node.snell_version || 4) : node.shadowtls_version) : ((node.type === 'socks') ? node.socks_version : null),
+		/* Snell */
+		userkey: (node.type === 'snell') ? node.snell_userkey : null,
+		reuse: (node.type === 'snell') ? strToBool(node.snell_reuse) : null,
+		obfs_mode: (node.type === 'snell' && (node.snell_version === '4' || isEmpty(node.snell_version))) ? node.snell_obfs_mode : null,
+		obfs_host: (node.type === 'snell' && (node.snell_version === '4' || isEmpty(node.snell_version)) && node.snell_obfs_mode === 'http') ? node.snell_obfs_host : null,
+		mode: (node.type === 'snell' && node.snell_version === '6') ? node.snell_mode : null,
 		/* SSH */
 		client_version: node.ssh_client_version,
 		host_key: node.ssh_host_key,
