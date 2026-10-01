@@ -787,7 +787,8 @@ config.route = {
 		}
 	],
 	rule_set: [],
-	auto_detect_interface: isEmpty(default_interface) ? true : null,
+	/* Marked sockets bypass interception and must follow system routes, including VPNs. */
+	auto_detect_interface: (isEmpty(default_interface) && isEmpty(self_mark)) ? true : null,
 	default_interface: default_interface
 };
 
