@@ -55,8 +55,8 @@ const ntp_server = uci.get(uciconfig, uciinfra, 'ntp_server') || 'time.apple.com
 const ipv6_support = uci.get(uciconfig, ucimain, 'ipv6_support') || '0';
 
 let main_node, main_udp_node, dedicated_udp_node, default_outbound, default_outbound_dns,
-    domain_strategy, sniff_override, dns_server, china_dns_server, dns_default_strategy,
-    dns_default_server, dns_disable_cache, dns_disable_cache_expire, dns_independent_cache,
+    domain_strategy, dns_server, china_dns_server, dns_default_strategy,
+    dns_default_server, dns_disable_cache,
     dns_client_subnet, cache_file_store_rdrc, cache_file_rdrc_timeout, direct_domain_list,
     proxy_domain_list;
 
@@ -83,15 +83,11 @@ if (routing_mode !== 'custom') {
 	proxy_domain_list = trim(readfile(HP_DIR + '/resources/proxy_list.txt'));
 	if (proxy_domain_list)
 		proxy_domain_list = split(proxy_domain_list, /[\r\n]/);
-
-	sniff_override = uci.get(uciconfig, uciinfra, 'sniff_override') || '1';
 } else {
 	/* DNS settings */
 	dns_default_strategy = uci.get(uciconfig, ucidnssetting, 'default_strategy');
 	dns_default_server = uci.get(uciconfig, ucidnssetting, 'default_server');
 	dns_disable_cache = uci.get(uciconfig, ucidnssetting, 'disable_cache');
-	dns_disable_cache_expire = uci.get(uciconfig, ucidnssetting, 'disable_cache_expire');
-	dns_independent_cache = uci.get(uciconfig, ucidnssetting, 'independent_cache');
 	dns_client_subnet = uci.get(uciconfig, ucidnssetting, 'client_subnet');
 	cache_file_store_rdrc = uci.get(uciconfig, ucidnssetting, 'cache_file_store_rdrc'),
 	cache_file_rdrc_timeout = uci.get(uciconfig, ucidnssetting, 'cache_file_rdrc_timeout');
@@ -100,7 +96,6 @@ if (routing_mode !== 'custom') {
 	default_outbound = uci.get(uciconfig, uciroutingsetting, 'default_outbound') || 'nil';
 	default_outbound_dns = uci.get(uciconfig, uciroutingsetting, 'default_outbound_dns') || 'default-dns';
 	domain_strategy = uci.get(uciconfig, uciroutingsetting, 'domain_strategy');
-	sniff_override = uci.get(uciconfig, uciroutingsetting, 'sniff_override');
 }
 
 const proxy_mode = uci.get(uciconfig, ucimain, 'proxy_mode') || 'redirect_tproxy',
@@ -434,8 +429,6 @@ config.dns = {
 	rules: [],
 	strategy: dns_default_strategy,
 	disable_cache: strToBool(dns_disable_cache),
-	disable_expire: strToBool(dns_disable_cache_expire),
-	independent_cache: strToBool(dns_independent_cache),
 	client_subnet: dns_client_subnet
 };
 
@@ -606,8 +599,6 @@ push(config.inbounds, {
 	listen: '::',
 	listen_port: int(mixed_port),
 	udp_timeout: strToTime(udp_timeout),
-	sniff: true,
-	sniff_override_destination: strToBool(sniff_override),
 	set_system_proxy: false
 });
 
@@ -617,9 +608,7 @@ if (match(proxy_mode, /redirect/))
 		tag: 'redirect-in',
 
 		listen: '::',
-		listen_port: int(redirect_port),
-		sniff: true,
-		sniff_override_destination: strToBool(sniff_override)
+		listen_port: int(redirect_port)
 	});
 if (match(proxy_mode, /tproxy/))
 	push(config.inbounds, {
@@ -629,9 +618,7 @@ if (match(proxy_mode, /tproxy/))
 		listen: '::',
 		listen_port: int(tproxy_port),
 		network: 'udp',
-		udp_timeout: strToTime(udp_timeout),
-		sniff: true,
-		sniff_override_destination: strToBool(sniff_override)
+		udp_timeout: strToTime(udp_timeout)
 	});
 if (match(proxy_mode, /tun/))
 	push(config.inbounds, {
@@ -644,9 +631,7 @@ if (match(proxy_mode, /tun/))
 		auto_route: false,
 		endpoint_independent_nat: strToBool(endpoint_independent_nat),
 		udp_timeout: strToTime(udp_timeout),
-		stack: tcpip_stack,
-		sniff: true,
-		sniff_override_destination: strToBool(sniff_override)
+		stack: tcpip_stack
 	});
 /* Inbound end */
 
@@ -795,16 +780,15 @@ config.route = {
 		{
 			inbound: 'dns-in',
 			action: 'hijack-dns'
+		},
+		{
+			action: 'sniff',
+			timeout: '300ms'
 		}
-		/*
-		 * leave for sing-box 1.13.0
-		 * {
-		 * 	action: 'sniff'
-		 * }
-		 */
 	],
 	rule_set: [],
-	auto_detect_interface: isEmpty(default_interface) ? true : null,
+	/* Marked sockets bypass interception and must follow system routes, including VPNs. */
+	auto_detect_interface: (isEmpty(default_interface) && isEmpty(self_mark)) ? true : null,
 	default_interface: default_interface
 };
 
@@ -812,7 +796,6 @@ config.route = {
 if (!isEmpty(main_node)) {
 	/* Avoid DNS loop */
 	config.route.default_domain_resolver = {
-		action: 'route',
 		server: (routing_mode === 'bypass_mainland_china') ? 'china-dns' : 'default-dns',
 		strategy: (ipv6_support !== '1') ? 'prefer_ipv4' : null
 	};
@@ -888,7 +871,6 @@ if (!isEmpty(main_node)) {
 		config.route.rule_set = null;
 } else if (!isEmpty(default_outbound)) {
 	config.route.default_domain_resolver = {
-		action: 'resolve',
 		server: get_resolver(default_outbound_dns)
 	};
 
