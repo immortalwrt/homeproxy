@@ -195,6 +195,41 @@ function parseShareLink(uri, features) {
 			}
 
 			break;
+		case 'snell':
+			try {
+				/* "Lovely" Shadowrocket format */
+				let suri = uri[1].split('#'), slabel = '';
+				if (suri.length <= 2) {
+					if (suri.length === 2)
+						slabel = '#' + suri[1];
+					let decoded = hp.decodeBase64Str(suri[0]);
+					if (decoded && (decoded.includes('@') || decoded.includes(':')))
+						uri[1] = decoded + slabel;
+				}
+			} catch(e) { }
+
+			url = new URL('http://' + uri[1]);
+			params = url.searchParams;
+
+			let snell_psk = params.get('psk');
+			if (!snell_psk && url.username)
+				snell_psk = decodeURIComponent(url.username + (url.password ? (':' + url.password) : ''));
+
+			config = {
+				label: url.hash ? decodeURIComponent(url.hash.slice(1)) : null,
+				type: 'snell',
+				address: url.hostname,
+				port: url.port || '80',
+				password: snell_psk,
+				snell_version: params.get('version') || '4',
+				snell_obfs_mode: params.get('obfs') || params.get('obfs_mode') || '',
+				snell_obfs_host: params.get('obfs-host') || params.get('obfs_host') || params.get('host') || '',
+				snell_mode: params.get('mode') || '',
+				snell_userkey: params.get('userkey') || '',
+				snell_reuse: (['1', 'true'].includes(params.get('reuse'))) ? '1' : '0'
+			};
+
+			break;
 		case 'trojan':
 			/* https://p4gefau1t.github.io/trojan-go/developer/url/ */
 			url = new URL('http://' + uri[1]);
@@ -434,6 +469,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	}
 	o.value('shadowsocks', _('Shadowsocks'));
 	o.value('shadowtls', _('ShadowTLS'));
+	o.value('snell', _('Snell'));
 	o.value('socks', _('Socks'));
 	o.value('ssh', _('SSH'));
 	o.value('trojan', _('Trojan'));
@@ -467,6 +503,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.depends('type', 'http');
 	o.depends('type', 'hysteria2');
 	o.depends('type', 'shadowsocks');
+	o.depends('type', 'snell');
 	o.depends('type', 'ssh');
 	o.depends('type', 'trojan');
 	o.depends('type', 'tuic');
@@ -476,7 +513,7 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.validate = function(section_id, value) {
 		if (section_id) {
 			let type = this.section.formvalue(section_id, 'type');
-			let required_type = [ 'anytls', 'shadowsocks', 'shadowtls', 'trojan' ];
+			let required_type = [ 'anytls', 'shadowsocks', 'shadowtls', 'snell', 'trojan' ];
 
 			if (required_type.includes(type)) {
 				if (type === 'shadowsocks') {
@@ -486,6 +523,11 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 				}
 				if (!value)
 					return _('Expecting: %s').format(_('non-empty value'));
+				if (type === 'snell') {
+					let version = this.section.formvalue(section_id, 'snell_version');
+					if (version === '6' && (value.length < 12 || value.length > 255))
+						return _('Snell v6 PSK must be between 12 and 255 characters.');
+				}
 			}
 		}
 
@@ -649,6 +691,48 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o.depends('type', 'shadowtls');
 	o.rmempty = false;
 	o.modalonly = true;
+
+	/* Snell config start */
+	o = s.option(form.ListValue, 'snell_version', _('Snell version'));
+	o.value('4', _('v4'));
+	o.value('6', _('v6'));
+	o.default = '4';
+	o.depends('type', 'snell');
+	o.rmempty = false;
+	o.modalonly = true;
+
+	o = s.option(form.ListValue, 'snell_obfs_mode', _('Obfuscate mode'));
+	o.value('', _('Disable'));
+	o.value('http', _('HTTP'));
+	o.value('tls', _('TLS'));
+	o.depends({'type': 'snell', 'snell_version': '4'});
+	o.modalonly = true;
+
+	o = s.option(form.Value, 'snell_obfs_host', _('Obfuscate host'));
+	o.placeholder = 'bing.com';
+	o.depends({'type': 'snell', 'snell_version': '4', 'snell_obfs_mode': 'http'});
+	o.depends({'type': 'snell', 'snell_version': '4', 'snell_obfs_mode': 'tls'});
+	o.modalonly = true;
+
+	o = s.option(form.ListValue, 'snell_mode', _('Traffic shaping mode'));
+	o.value('', _('Default'));
+	o.value('unshaped', _('Unshaped'));
+	o.value('unsafe-raw', _('Unsafe raw'));
+	o.depends({'type': 'snell', 'snell_version': '6'});
+	o.modalonly = true;
+
+	o = s.option(form.Value, 'snell_userkey', _('User key'),
+		_('The user key, used to authenticate against a multi-user server.'));
+	o.password = true;
+	o.depends('type', 'snell');
+	o.modalonly = true;
+
+	o = s.option(form.Flag, 'snell_reuse', _('Connection reuse'),
+		_('Enable connection reuse (the Snell v2 CONNECT command).'));
+	o.default = '0';
+	o.depends('type', 'snell');
+	o.modalonly = true;
+	/* Snell config end */
 
 	/* Socks config */
 	o = s.option(form.ListValue, 'socks_version', _('Socks version'));
@@ -1230,7 +1314,7 @@ return view.extend({
 		ss.handleLinkImport = function() {
 			let textarea = new ui.Textarea();
 			ui.showModal(_('Import share links'), [
-				E('p', _('Support Hysteria, Shadowsocks, Trojan, v2rayN (VMess), and XTLS (VLESS) online configuration delivery standard.')),
+				E('p', _('Support Hysteria, Shadowsocks, Snell, Trojan, v2rayN (VMess), and XTLS (VLESS) online configuration delivery standard.')),
 				textarea.render(),
 				E('div', { class: 'right' }, [
 					E('button', {
@@ -1347,7 +1431,7 @@ return view.extend({
 		o.rmempty = false;
 
 		o = s.taboption('subscription', form.DynamicList, 'subscription_url', _('Subscription URL-s'),
-			_('Support Hysteria, Shadowsocks, Trojan, v2rayN (VMess), and XTLS (VLESS) online configuration delivery standard.'));
+			_('Support Hysteria, Shadowsocks, Snell, Trojan, v2rayN (VMess), and XTLS (VLESS) online configuration delivery standard.'));
 		o.validate = function(section_id, value) {
 			if (section_id && value) {
 				try {

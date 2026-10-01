@@ -37,10 +37,41 @@ config.log = {
 };
 
 config.inbounds = [];
+config.certificate_providers = [];
 
 uci.foreach(uciconfig, uciserver, (cfg) => {
 	if (cfg.enabled !== '1')
 		return;
+
+	/* Inline ACME options in TLS are deprecated in sb 1.14 and will be removed
+	 * in 1.16, request the certificate through a certificate provider. */
+	if (cfg.tls === '1' && cfg.tls_acme === '1') {
+		push(config.certificate_providers, {
+			type: 'acme',
+			tag: 'cfg-' + cfg['.name'] + '-acme',
+			/* uci stores a single value, sing-box expects a list */
+			domain: type(cfg.tls_acme_domain) === 'array' ? cfg.tls_acme_domain : [cfg.tls_acme_domain],
+			data_directory: HP_DIR + '/certs',
+			default_server_name: cfg.tls_acme_dsn,
+			email: cfg.tls_acme_email,
+			provider: cfg.tls_acme_provider,
+			disable_http_challenge: strToBool(cfg.tls_acme_dhc),
+			disable_tls_alpn_challenge: strToBool(cfg.tls_acme_dtac),
+			alternative_http_port: strToInt(cfg.tls_acme_ahp),
+			alternative_tls_port: strToInt(cfg.tls_acme_atp),
+			external_account: (cfg.tls_acme_external_account === '1') ? {
+				key_id: cfg.tls_acme_ea_keyid,
+				mac_key: cfg.tls_acme_ea_mackey
+			} : null,
+			dns01_challenge: (cfg.tls_dns01_challenge === '1') ? {
+				provider: cfg.tls_dns01_provider,
+				access_key_id: cfg.tls_dns01_ali_akid,
+				access_key_secret: cfg.tls_dns01_ali_aksec,
+				region_id: cfg.tls_dns01_ali_rid,
+				api_token: cfg.tls_dns01_cf_api_token
+			} : null
+		});
+	}
 
 	push(config.inbounds, {
 		type: cfg.type,
@@ -54,7 +85,13 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 		tcp_multi_path: strToBool(cfg.tcp_multi_path),
 		udp_fragment: strToBool(cfg.udp_fragment),
 		udp_timeout: strToTime(cfg.udp_timeout),
-		network: cfg.network,
+		network: (cfg.type === 'snell') ? null : cfg.network,
+
+		/* Snell */
+		version: (cfg.type === 'snell') ? strToInt(cfg.snell_version || 5) : null,
+		psk: (cfg.type === 'snell') ? cfg.password : null,
+		obfs_mode: (cfg.type === 'snell' && (cfg.snell_version === '5' || isEmpty(cfg.snell_version))) ? cfg.snell_obfs_mode : null,
+		mode: (cfg.type === 'snell' && cfg.snell_version === '6') ? cfg.snell_mode : null,
 
 		/* AnyTLS */
 		padding_scheme: cfg.anytls_padding_scheme,
@@ -83,8 +120,19 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 		zero_rtt_handshake: strToBool(cfg.tuic_enable_zero_rtt),
 		heartbeat: strToTime(cfg.tuic_heartbeat),
 
-		/* AnyTLS / HTTP / Hysteria (2) / Mixed / Socks / Trojan / Tuic / VLESS / VMess */
-		users: (cfg.type !== 'shadowsocks') ? [
+		/* AnyTLS / HTTP / Hysteria (2) / Mixed / Snell / Socks / Trojan / Tuic / VLESS / VMess */
+		users: (cfg.type === 'snell') ? (() => {
+			if (isEmpty(cfg.snell_users)) return null;
+			let user_list = [];
+			for (let u in (type(cfg.snell_users) === 'array' ? cfg.snell_users : [cfg.snell_users])) {
+				if (isEmpty(u)) continue;
+				let parts = split(u, ':');
+				let key = length(parts) > 1 ? join(':', slice(parts, 1)) : u;
+				if (isEmpty(key)) continue;
+				push(user_list, length(parts) > 1 ? { name: parts[0], userkey: key } : { userkey: key });
+			}
+			return length(user_list) > 0 ? user_list : null;
+		})() : (cfg.type !== 'shadowsocks') ? [
 			{
 				name: !(cfg.type in ['http', 'mixed', 'naive', 'socks']) ? 'cfg-' + cfg['.name'] + '-server' : null,
 				username: cfg.username,
@@ -122,28 +170,7 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 			cipher_suites: cfg.tls_cipher_suites,
 			certificate_path: cfg.tls_cert_path,
 			key_path: cfg.tls_key_path,
-			acme: (cfg.tls_acme === '1') ? {
-				domain: cfg.tls_acme_domain,
-				data_directory: HP_DIR + '/certs',
-				default_server_name: cfg.tls_acme_dsn,
-				email: cfg.tls_acme_email,
-				provider: cfg.tls_acme_provider,
-				disable_http_challenge: strToBool(cfg.tls_acme_dhc),
-				disable_tls_alpn_challenge: (cfg.tls_acme_dtac),
-				alternative_http_port: strToInt(cfg.tls_acme_ahp),
-				alternative_tls_port: strToInt(cfg.tls_acme_atp),
-				external_account: (cfg.tls_acme_external_account === '1') ? {
-					key_id: cfg.tls_acme_ea_keyid,
-					mac_key: cfg.tls_acme_ea_mackey
-				} : null,
-				dns01_challenge: (cfg.tls_dns01_challenge === '1') ? {
-					provider: cfg.tls_dns01_provider,
-					access_key_id: cfg.tls_dns01_ali_akid,
-					access_key_secret: cfg.tls_dns01_ali_aksec,
-					region_id: cfg.tls_dns01_ali_rid,
-					api_token: cfg.tls_dns01_cf_api_token
-				} : null
-			} : null,
+			certificate_provider: (cfg.tls_acme === '1') ? 'cfg-' + cfg['.name'] + '-acme' : null,
 			ech: (cfg.tls_ech_key) ? {
 				enabled: true,
 				key: split(cfg.tls_ech_key, '\n'),
@@ -180,6 +207,9 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 
 if (length(config.inbounds) === 0)
 	exit(1);
+
+if (isEmpty(config.certificate_providers))
+	config.certificate_providers = null;
 
 system('mkdir -p ' + RUN_DIR);
 writefile(RUN_DIR + '/sing-box-s.json', sprintf('%.J\n', removeBlankAttrs(config)));

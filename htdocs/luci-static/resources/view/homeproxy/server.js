@@ -182,6 +182,7 @@ return view.extend({
 		}
 		o.value('mixed', _('Mixed'));
 		o.value('shadowsocks', _('Shadowsocks'));
+		o.value('snell', _('Snell'));
 		o.value('socks', _('Socks'));
 		o.value('trojan', _('Trojan'));
 		if (features.with_quic)
@@ -213,12 +214,13 @@ return view.extend({
 		o.depends({'type': /^(http|mixed|naive|socks)$/, 'username': /[\s\S]/});
 		o.depends('type', 'hysteria2');
 		o.depends('type', 'shadowsocks');
+		o.depends('type', 'snell');
 		o.depends('type', 'trojan');
 		o.depends('type', 'tuic');
 		o.validate = function(section_id, value) {
 			if (section_id) {
 				let type = this.section.formvalue(section_id, 'type');
-				let required_type = [ 'anytls', 'http', 'mixed', 'naive', 'socks', 'shadowsocks', 'trojan' ];
+				let required_type = [ 'anytls', 'http', 'mixed', 'naive', 'socks', 'shadowsocks', 'snell', 'trojan' ];
 
 				if (required_type.includes(type)) {
 					if (type === 'shadowsocks') {
@@ -233,6 +235,12 @@ return view.extend({
 
 					if (!value)
 						return _('Expecting: %s').format(_('non-empty value'));
+
+					if (type === 'snell') {
+						let version = this.section.formvalue(section_id, 'snell_version');
+						if (version === '6' && (value.length < 12 || value.length > 255))
+							return _('Snell v6 PSK must be between 12 and 255 characters.');
+					}
 				}
 			}
 
@@ -341,6 +349,35 @@ return view.extend({
 		o.default = 'aes-128-gcm';
 		o.depends('type', 'shadowsocks');
 		o.modalonly = true;
+
+		/* Snell config start */
+		o = s.option(form.ListValue, 'snell_version', _('Snell version'));
+		o.value('5', _('v5'));
+		o.value('6', _('v6'));
+		o.default = '5';
+		o.depends('type', 'snell');
+		o.rmempty = false;
+		o.modalonly = true;
+
+		o = s.option(form.ListValue, 'snell_obfs_mode', _('Obfuscate mode'));
+		o.value('', _('Disable'));
+		o.value('http', _('HTTP'));
+		o.value('tls', _('TLS'));
+		o.depends({'type': 'snell', 'snell_version': '5'});
+		o.modalonly = true;
+
+		o = s.option(form.ListValue, 'snell_mode', _('Traffic shaping mode'));
+		o.value('', _('Default'));
+		o.value('unshaped', _('Unshaped'));
+		o.value('unsafe-raw', _('Unsafe raw'));
+		o.depends({'type': 'snell', 'snell_version': '6'});
+		o.modalonly = true;
+
+		o = s.option(form.DynamicList, 'snell_users', _('User keys'),
+			_('User keys for multi-user authentication. Format: <code>userkey</code> or <code>name:userkey</code>.'));
+		o.depends('type', 'snell');
+		o.modalonly = true;
+		/* Snell config end */
 
 		/* Tuic config start */
 		o = s.option(CBIGenValue, 'uuid', _('UUID'));
