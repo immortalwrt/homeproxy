@@ -85,7 +85,13 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 		tcp_multi_path: strToBool(cfg.tcp_multi_path),
 		udp_fragment: strToBool(cfg.udp_fragment),
 		udp_timeout: strToTime(cfg.udp_timeout),
-		network: cfg.network,
+		network: (cfg.type === 'snell') ? null : cfg.network,
+
+		/* Snell */
+		version: (cfg.type === 'snell') ? strToInt(cfg.snell_version || 5) : null,
+		psk: (cfg.type === 'snell') ? cfg.password : null,
+		obfs_mode: (cfg.type === 'snell' && (cfg.snell_version === '5' || isEmpty(cfg.snell_version))) ? cfg.snell_obfs_mode : null,
+		mode: (cfg.type === 'snell' && cfg.snell_version === '6') ? cfg.snell_mode : null,
 
 		/* AnyTLS */
 		padding_scheme: cfg.anytls_padding_scheme,
@@ -114,8 +120,19 @@ uci.foreach(uciconfig, uciserver, (cfg) => {
 		zero_rtt_handshake: strToBool(cfg.tuic_enable_zero_rtt),
 		heartbeat: strToTime(cfg.tuic_heartbeat),
 
-		/* AnyTLS / HTTP / Hysteria (2) / Mixed / Socks / Trojan / Tuic / VLESS / VMess */
-		users: (cfg.type !== 'shadowsocks') ? [
+		/* AnyTLS / HTTP / Hysteria (2) / Mixed / Snell / Socks / Trojan / Tuic / VLESS / VMess */
+		users: (cfg.type === 'snell') ? (() => {
+			if (isEmpty(cfg.snell_users)) return null;
+			let user_list = [];
+			for (let u in (type(cfg.snell_users) === 'array' ? cfg.snell_users : [cfg.snell_users])) {
+				if (isEmpty(u)) continue;
+				let parts = split(u, ':');
+				let key = length(parts) > 1 ? join(':', slice(parts, 1)) : u;
+				if (isEmpty(key)) continue;
+				push(user_list, length(parts) > 1 ? { name: parts[0], userkey: key } : { userkey: key });
+			}
+			return length(user_list) > 0 ? user_list : null;
+		})() : (cfg.type !== 'shadowsocks') ? [
 			{
 				name: !(cfg.type in ['http', 'mixed', 'naive', 'socks']) ? 'cfg-' + cfg['.name'] + '-server' : null,
 				username: cfg.username,

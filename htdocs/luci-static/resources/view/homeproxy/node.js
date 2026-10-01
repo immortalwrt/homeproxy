@@ -704,12 +704,14 @@ function renderNodeSettings(section, data, features, main_node, routing_mode) {
 	o = s.option(form.ListValue, 'snell_obfs_mode', _('Obfuscate mode'));
 	o.value('', _('Disable'));
 	o.value('http', _('HTTP'));
+	o.value('tls', _('TLS'));
 	o.depends({'type': 'snell', 'snell_version': '4'});
 	o.modalonly = true;
 
 	o = s.option(form.Value, 'snell_obfs_host', _('Obfuscate host'));
 	o.placeholder = 'bing.com';
 	o.depends({'type': 'snell', 'snell_version': '4', 'snell_obfs_mode': 'http'});
+	o.depends({'type': 'snell', 'snell_version': '4', 'snell_obfs_mode': 'tls'});
 	o.modalonly = true;
 
 	o = s.option(form.ListValue, 'snell_mode', _('Traffic shaping mode'));
