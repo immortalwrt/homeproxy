@@ -121,7 +121,7 @@ return view.extend({
 
 		o = s.taboption('routing', form.ListValue, 'main_node', _('Main node'));
 		o.value('nil', _('Disable'));
-		o.value('urltest', _('URLTest'));
+		o.value('urltest', _('Automatic selection (URLTest)'));
 		for (let i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
 		o.default = 'nil';
@@ -150,7 +150,7 @@ return view.extend({
 		o = s.taboption('routing', form.ListValue, 'main_udp_node', _('Main UDP node'));
 		o.value('nil', _('Disable'));
 		o.value('same', _('Same as main node'));
-		o.value('urltest', _('URLTest'));
+		o.value('urltest', _('Automatic selection (URLTest)'));
 		for (let i in proxy_nodes)
 			o.value(i, proxy_nodes[i]);
 		o.default = 'nil';
@@ -418,7 +418,7 @@ return view.extend({
 
 		so = ss.option(form.ListValue, 'node', _('Node'),
 			_('Outbound node'));
-		so.value('urltest', _('URLTest'));
+		so.value('urltest', _('Automatic selection (URLTest)'));
 		for (let i in proxy_nodes)
 			so.value(i, proxy_nodes[i]);
 		so.validate = L.bind(hp.validateUniqueValue, this, data[0], 'routing_node', 'node');

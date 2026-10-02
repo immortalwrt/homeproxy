@@ -8,6 +8,11 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: htdocs/luci-static/resources/view/homeproxy/node.js:48
+#: htdocs/luci-static/resources/view/homeproxy/node.js:592
+msgid "%d ms"
+msgstr "%d 毫秒"
+
 #: htdocs/luci-static/resources/view/homeproxy/status.js:206
 msgid "%s log"
 msgstr "%s 日志"
@@ -44,6 +49,10 @@ msgstr "<strong>上传文件前请先保存配置！</strong>"
 msgid "API token"
 msgstr "API 令牌"
 
+#: htdocs/luci-static/resources/view/homeproxy/node.js:58
+msgid "A node latency test is already running."
+msgstr "节点延迟测试正在运行。"
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:670
 msgid "Accept any if empty."
 msgstr "留空则不校验。"
@@ -67,6 +76,10 @@ msgstr "访问密钥"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:669
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1146
 msgid "Action"
+msgstr "操作"
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:513
+msgid "Actions"
 msgstr "操作"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1056
@@ -240,6 +253,12 @@ msgstr "自动更新"
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1336
 msgid "Auto update subscriptions and geodata."
 msgstr "自动更新订阅和地理数据。"
+
+#: htdocs/luci-static/resources/view/homeproxy/client.js:124
+#: htdocs/luci-static/resources/view/homeproxy/client.js:153
+#: htdocs/luci-static/resources/view/homeproxy/client.js:421
+msgid "Automatic selection (URLTest)"
+msgstr "自动选择（URLTest）"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:702
 msgid "BBR"
@@ -708,6 +727,10 @@ msgstr "ECH 配置路径"
 msgid "ECH key"
 msgstr "ECH 密钥"
 
+#: htdocs/luci-static/resources/view/homeproxy/node.js:517
+msgid "Edit"
+msgstr "编辑"
+
 #: htdocs/luci-static/resources/view/homeproxy/client.js:798
 #: htdocs/luci-static/resources/view/homeproxy/client.js:908
 #: htdocs/luci-static/resources/view/homeproxy/client.js:1194
@@ -865,6 +888,11 @@ msgstr "附加记录"
 #: htdocs/luci-static/resources/view/homeproxy/server.js:86
 msgid "Failed to generate %s, error: %s."
 msgstr "生成 %s 失败，错误：%s。"
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:48
+#: htdocs/luci-static/resources/view/homeproxy/node.js:593
+msgid "Failed"
+msgstr "失败"
 
 #: htdocs/luci-static/resources/homeproxy.js:261
 msgid "Failed to upload %s, error: %s."
@@ -1270,6 +1298,10 @@ msgstr "LAN IP 策略"
 msgid "Label"
 msgstr "标签"
 
+#: htdocs/luci-static/resources/view/homeproxy/node.js:585
+msgid "Latency"
+msgstr "延迟"
+
 #: htdocs/luci-static/resources/view/homeproxy/node.js:743
 #: htdocs/luci-static/resources/view/homeproxy/server.js:392
 msgid ""
@@ -1622,6 +1654,10 @@ msgstr "无 TCP 传输层，纯 HTTP 已合并到 HTTP 传输层。"
 #: htdocs/luci-static/resources/view/homeproxy/server.js:415
 msgid "No additional encryption support: It's basically duplicate encryption."
 msgstr "无额外加密支持：它基本上是重复加密。"
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:54
+msgid "No node available."
+msgstr "没有可用的节点。"
 
 #: htdocs/luci-static/resources/view/homeproxy/node.js:1412
 msgid "No subscription available"
@@ -2447,6 +2483,15 @@ msgstr "腾讯公共 DNS（119.29.29.29）"
 msgid "Test URL"
 msgstr "测试 URL"
 
+#: htdocs/luci-static/resources/view/homeproxy/node.js:521
+#: htdocs/luci-static/resources/view/homeproxy/node.js:525
+msgid "Test"
+msgstr "测速"
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:113
+msgid "Test current list"
+msgstr "测试当前列表"
+
 #: htdocs/luci-static/resources/view/homeproxy/client.js:138
 #: htdocs/luci-static/resources/view/homeproxy/client.js:167
 #: htdocs/luci-static/resources/view/homeproxy/client.js:530
@@ -2462,6 +2507,25 @@ msgstr "测试间隔时间必须小于或等于空闲超时时间。"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:546
 msgid "Test tolerance"
 msgstr "测试容差"
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:79
+#: htdocs/luci-static/resources/view/homeproxy/node.js:97
+msgid "Testing %d/%d"
+msgstr "正在测试 %d/%d"
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:47
+#: htdocs/luci-static/resources/view/homeproxy/node.js:591
+msgid "Testing..."
+msgstr "正在测试..."
+
+#: htdocs/luci-static/resources/view/homeproxy/node.js:118
+msgid ""
+"Tests each node by requesting Google connectivity check through that node. "
+"The result includes the node connection, protocol handshake, and outbound "
+"network latency."
+msgstr ""
+"通过每个节点请求 Google 连通性检测地址，结果包含节点连接、协议握手和节点出口网络"
+"延迟。"
 
 #: htdocs/luci-static/resources/view/homeproxy/server.js:628
 msgid "The ACME CA provider to use."
@@ -2776,12 +2840,6 @@ msgstr "UDP 中继模式"
 #: htdocs/luci-static/resources/view/homeproxy/client.js:722
 msgid "UDP timeout"
 msgstr "UDP 超时"
-
-#: htdocs/luci-static/resources/view/homeproxy/client.js:124
-#: htdocs/luci-static/resources/view/homeproxy/client.js:153
-#: htdocs/luci-static/resources/view/homeproxy/client.js:421
-msgid "URLTest"
-msgstr "URLTest"
 
 #: htdocs/luci-static/resources/view/homeproxy/client.js:131
 #: htdocs/luci-static/resources/view/homeproxy/client.js:160
