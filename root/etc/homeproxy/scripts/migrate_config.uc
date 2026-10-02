@@ -101,6 +101,10 @@ if (default_dns_server === 'block-dns') {
 	uci.set(uciconfig, ucidns, 'default_server', 'default-dns');
 }
 
+/* independent_cache was deprecated in sb 1.14 */
+if (!isEmpty(uci.get(uciconfig, ucidns, 'independent_cache')))
+	uci.delete(uciconfig, ucidns, 'independent_cache');
+
 const dns_server_migration = {};
 /* DNS servers options */
 uci.foreach(uciconfig, ucidnsserver, (cfg) => {
