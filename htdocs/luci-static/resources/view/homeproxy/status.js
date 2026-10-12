@@ -47,7 +47,7 @@ function getConnStat(o, site) {
                                         let ele = o.default.firstElementChild.nextElementSibling;
 					if (ret.result) {
 						ele.style.setProperty('color', 'green');
-                                                ele.innerHTML = _('passed');
+						ele.innerHTML = ret.elapsed ? _('passed (%dms)').format(ret.elapsed) : _('passed');
 					} else {
 						ele.style.setProperty('color', 'red');
                                                 ele.innerHTML = _('failed');
