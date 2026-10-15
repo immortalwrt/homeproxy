@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Probe once at installation/first boot instead of blocking the first LuCI visit.
+ucode -e 'import { getSingBoxFeatures } from "/etc/homeproxy/scripts/singbox_features.uc"; getSingBoxFeatures();'
+
+exit 0
