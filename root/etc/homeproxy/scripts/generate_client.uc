@@ -787,8 +787,8 @@ config.route = {
 		}
 	],
 	rule_set: [],
-	auto_detect_interface: isEmpty(default_interface) ? true : null,
-	default_interface: default_interface
+	auto_detect_interface: (default_interface === "auto") ? true : null,
+	default_interface: (default_interface !== "auto") ? default_interface : null
 };
 
 /* Routing rules */
