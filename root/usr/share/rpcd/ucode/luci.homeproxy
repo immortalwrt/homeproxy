@@ -137,7 +137,12 @@ const methods = {
 				break;
 			}
 
-			return { result: (system(`/usr/bin/wget --spider -qT3 ${url} 2>"/dev/null"`, 3100) === 0) };
+			let start = clock(true);
+			let ret = system(`/usr/bin/wget --spider -qT3 ${url} 2>"/dev/null"`, 3100);
+			let end = clock(true);
+			let elapsed = (end[0] - start[0]) * 1000 + int((end[1] - start[1]) / 1000000);
+
+			return { result: (ret === 0), elapsed: elapsed };
 		}
 	},
 
