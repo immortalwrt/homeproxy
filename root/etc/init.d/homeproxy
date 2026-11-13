@@ -104,6 +104,12 @@ start_service() {
 			sed -r -e '/^\s*$/d' -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#homeproxy_wan_proxy_addr_v4$wan_nftset_v6/g" \
 				"$HP_DIR/resources/proxy_list.txt" > "$DNSMASQ_DIR/proxy_list.conf"
 		fi
+		if [ "$routing_mode" != "custom" ] && [ -s "$HP_DIR/resources/direct_list.txt" ]; then
+			local wan_nftset_v6
+			[ "$ipv6_support" -eq "0" ] || wan_nftset_v6=",6#inet#fw4#homeproxy_wan_direct_addr_v6"
+			sed -r -e '/^\s*$/d' -e "s/(.*)/server=\/\1\/127.0.0.1#$dns_port\nnftset=\/\1\\/4#inet#fw4#homeproxy_wan_direct_addr_v4$wan_nftset_v6/g" \
+				"$HP_DIR/resources/direct_list.txt" > "$DNSMASQ_DIR/direct_list.conf"
+		fi
 		/etc/init.d/dnsmasq restart >"/dev/null" 2>&1
 
 		# Setup routing table
