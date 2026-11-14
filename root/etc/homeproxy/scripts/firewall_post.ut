@@ -465,14 +465,14 @@ chain homeproxy_mangle_prerouting {
 	{% if (ipv6_support === '1'): %}
 	ip6 daddr != @homeproxy_gfw_list_v6 counter return
 	{% endif /* ipv6_support */ %}
-	udp dport { 80, 443 } counter reject comment "!{{ cfgname }}: Fuck you QUIC"
+	udp dport { 80, 443 } counter drop comment "!{{ cfgname }}: block quic"
 	{% elif (routing_mode === 'bypass_mainland_china' || bypass_cn_traffic === '1'): %}
 	ip daddr @homeproxy_mainland_addr_v4 counter return
 	{% if (ipv6_support === '1'): %}
 	ip6 daddr @homeproxy_mainland_addr_v6 counter return
 	{% endif /* ipv6_support */ %}
 	{% if (routing_mode !== 'custom'): %}
-	udp dport { 80, 443 } counter reject comment "!{{ cfgname }}: Fuck you QUIC"
+	udp dport { 80, 443 } counter drop comment "!{{ cfgname }}: block quic"
 	{% endif /* routing_mode */ %}
 	{% elif (routing_mode === 'proxy_mainland_china'): %}
 	ip daddr != @homeproxy_mainland_addr_v4 counter return
@@ -626,14 +626,14 @@ chain homeproxy_mangle_tun {
 	{% if (ipv6_support === '1'): %}
 	ip6 daddr != @homeproxy_gfw_list_v6 counter return
 	{% endif /* ipv6_support */ %}
-	udp dport { 80, 443 } counter reject comment "!{{ cfgname }}: Fuck you QUIC"
+	udp dport { 80, 443 } counter drop comment "!{{ cfgname }}: block quic"
 	{% elif (routing_mode === 'bypass_mainland_china' || bypass_cn_traffic === '1'): %}
 	ip daddr @homeproxy_mainland_addr_v4 counter return
 	{% if (ipv6_support === '1'): %}
 	ip6 daddr @homeproxy_mainland_addr_v6 counter return
 	{% endif /* ipv6_support */ %}
 	{% if (routing_mode !== 'custom'): %}
-	udp dport { 80, 443 } counter reject comment "!{{ cfgname }}: Fuck you QUIC"
+	udp dport { 80, 443 } counter drop comment "!{{ cfgname }}: block quic"
 	{% endif /* routing_mode */ %}
 	{% elif (routing_mode === 'proxy_mainland_china'): %}
 	ip daddr != @homeproxy_mainland_addr_v4 counter return
